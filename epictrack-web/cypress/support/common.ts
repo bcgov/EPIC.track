@@ -1,8 +1,13 @@
 import { Staff } from "models/staff";
-import Sinon from "cypress/types/sinon";
 import { faker } from "@faker-js/faker";
 import { Project } from "models/project";
 import { Type } from "models/type";
+import { CalendarEvent, EventPosition, EventsGridModel, EventTemplateVisibility } from "models/event";
+import { EVENT_TYPE } from "components/workPlan/phase/type";
+import dayjs from "dayjs";
+import { EVENT_STATUS } from "models/taskEvent";
+import { WorkplanContextProps } from "components/workPlan/WorkPlanContext";
+import { defaultSearchOptions } from "components/myUpdates/myIssues/MyIssuesContext";
 
 export const mockStaffs: Staff[] = [
   {
@@ -43,6 +48,102 @@ export const mockStaffs: Staff[] = [
   },
   // Add more mock Staff objects as needed
 ];
+
+export const generateMockEvent = (overrides?: Partial<EventsGridModel>): EventsGridModel => {
+  const startOfMonth = dayjs().startOf("month").toDate();
+  const endOfMonth = dayjs().endOf("month").toDate();
+
+  const start = faker.date.between({ from: startOfMonth, to: endOfMonth });
+  const end = faker.date.between({ 
+    from: dayjs(start).add(1, "day").toDate(), 
+    to: dayjs(start).add(5, "day").toDate() 
+  });
+  const number_of_days = dayjs(end).diff(dayjs(start), "day") + 1;
+
+  return {
+    id: faker.number.int(),
+    name: faker.lorem.words(3),
+    start_date: start.toISOString(),
+    end_date: end.toISOString(),
+    event_configuration_id: faker.number.int(),
+    event_configuration: { 
+      id: faker.number.int(),
+      name: faker.lorem.words(3),
+      event_category_id: faker.number.int(),
+      event_type_id: faker.number.int(),
+      multiple_days: true,
+      event_position: EventPosition.INTERMEDIATE,
+      visibilty_mode: EventTemplateVisibility.MANDATORY,
+      work_phase_id: faker.number.int(),
+    },
+    is_active: true,
+    type: faker.helpers.arrayElement([EVENT_TYPE.TASK, EVENT_TYPE.MILESTONE]),
+    is_complete: faker.datatype.boolean(),
+    long_description: faker.lorem.paragraph(),
+    number_of_days,
+    outcome_id: faker.string.uuid(),
+    short_description: faker.lorem.words(2),
+    assignees: [],
+    responsibility: faker.name.jobTitle(),
+    notes: faker.lorem.sentence(),
+    status: EVENT_STATUS.INPROGRESS,
+    visibility: EventTemplateVisibility.MANDATORY,
+    phase_name: faker.lorem.words(3),
+    ...overrides,
+  };
+};
+
+export const mockEventsGrid: CalendarEvent[] = [
+  {
+    event: generateMockEvent({
+      type: EVENT_TYPE.TASK,
+      phase_name: "Phase A",
+    }),
+    phase_name: "Phase A",
+    phase_id: faker.number.int(),
+    work_name: faker.commerce.productName(),
+    work_id: faker.number.int(),
+  },
+  {
+    event: generateMockEvent({
+      type: EVENT_TYPE.MILESTONE,
+      phase_name: "Phase B",
+    }),
+    phase_name: "Phase B",
+    phase_id: faker.number.int(),
+    work_name: faker.commerce.productName(),
+    work_id: faker.number.int(),
+  },
+];
+
+export const mockCalendarEvents =
+[
+  {
+    "event": {
+      "id": 1,
+      "name": "Kickoff Meeting",
+      "anticipated_date": "2025-09-15T09:00:00Z",
+      "actual_date": "2025-09-15T10:00:00Z",
+    },
+    "phase_name": "Initiation",
+    "phase_id": 11,
+    "work_name": "Project Alpha",
+    "work_id": 101
+  },
+  {
+    "event": {
+      "id": 2,
+      "name": "Draft Report Due",
+      "anticipated_date": "2025-09-20T00:00:00Z",
+      "actual_date": "2025-09-20T23:59:59Z",
+    },
+    "phase_name": "Reporting",
+    "phase_id": 12,
+    "work_name": "Project Beta",
+    "work_id": 102
+  }
+]
+
 
 export function createMockMasterContext(defaultItem: any, _data?: any) {
   return {
@@ -87,53 +188,105 @@ export const generateMockProject = (() => {
   return (): Project => {
     projectCounter += 1;
     return {
-      id: faker.datatype.number() + projectCounter,
+      id: faker.number.int() + projectCounter,
       name: `${faker.commerce.productName()} ${projectCounter}`,
       sub_type: {
-        id: faker.datatype.number() + projectCounter,
+        id: faker.number.int() + projectCounter,
         name: `${faker.commerce.productMaterial()} ${projectCounter}`,
-        type: { sort_order: faker.datatype.number() } as Type,
+        type: { sort_order: faker.number.int() } as Type,
       },
       type: {
-        id: faker.datatype.number() + projectCounter,
+        id: faker.number.int() + projectCounter,
         name: `${faker.commerce.product()} ${projectCounter}`,
-        sort_order: faker.datatype.number(),
+        sort_order: faker.number.int(),
       },
       is_active: faker.datatype.boolean(),
       description: `${faker.lorem.paragraph()} ${projectCounter}`,
-      region_id_env: faker.datatype.number() + projectCounter,
-      region_id_flnro: faker.datatype.number() + projectCounter,
-      proponent_id: faker.datatype.number() + projectCounter,
+      region_id_env: faker.number.int() + projectCounter,
+      region_id_flnro: faker.number.int() + projectCounter,
+      proponent_id: faker.number.int() + projectCounter,
       proponent: {
-        id: faker.datatype.number() + projectCounter,
+        id: faker.number.int() + projectCounter,
         name: `${faker.company.name()} ${projectCounter}`,
         is_active: false,
       },
       ea_certificate: `${faker.system.fileName()} ${projectCounter}`,
       abbreviation: `${faker.lorem.word()} ${projectCounter}`,
-      epic_guid: `${faker.datatype.uuid()} ${projectCounter}`,
+      epic_guid: `${faker.string.uuid()} ${projectCounter}`,
       latitude: `${faker.address.latitude().toString()} ${projectCounter}`,
       longitude: `${faker.address.longitude().toString()} ${projectCounter}`,
-      capital_investment: faker.datatype.number() + projectCounter,
+      capital_investment: faker.number.int() + projectCounter,
       address: `${faker.address.streetAddress()} ${projectCounter}`,
       is_project_closed: faker.datatype.boolean(),
       region_env: {
-        id: faker.datatype.number() + projectCounter,
+        id: faker.number.int() + projectCounter,
         name: `${faker.address.state()} ${projectCounter}`,
         entity: "",
       },
       region_flnro: {
-        id: faker.datatype.number() + projectCounter,
+        id: faker.number.int() + projectCounter,
         name: `${faker.address.state()} ${projectCounter}`,
         entity: "",
       },
-      fte_positions_construction: faker.datatype.number() + projectCounter,
-      fte_positions_operation: faker.datatype.number() + projectCounter,
+      fte_positions_construction: faker.number.int() + projectCounter,
+      fte_positions_operation: faker.number.int() + projectCounter,
     };
   };
 })();
 
 export type CypressStubFunction =
-  | Cypress.Agent<Sinon.SinonStub>
+  | Cypress.Agent<sinon.SinonStub>
   | (() => void)
   | undefined;
+ 
+export const makeWorkplanContextStub = (
+    overrides: Partial<WorkplanContextProps> = {}
+  ): WorkplanContextProps => ({
+    firstNations: [],
+    getWorkById: cy.stub().resolves(),
+    getWorkStatuses: cy.stub().resolves(),
+    getWorkPhases: cy.stub().resolves(),
+    issues: [],
+    loadData: cy.stub().resolves(),
+    loading: false,
+    loadIssues: cy.stub().resolves(),
+    isActiveTeamMember: true,
+    issueStalenessSetting: undefined,
+    selectedStaff: undefined,
+    selectedWorkPhase: undefined,
+    setFirstNations: cy.stub(),
+    setIssues: cy.stub(),
+    setSelectedStaff: cy.stub(),
+    setSelectedWorkPhase: cy.stub(),
+    setStatuses: cy.stub(),
+    setTeam: cy.stub(),
+    setWork: cy.stub(),
+    setWorkPhases: cy.stub(),
+    statuses: [],
+    statusStalenessSetting: undefined,
+    team: [],
+    work: undefined,
+    workPhases: [],
+    ...overrides,
+  });
+
+export const issuesContextValue={
+    ...defaultSearchOptions,
+    issues: [],
+    loadingIssues: false,
+    lazyLoadMoreIssues: () => {},
+    totalIssues: 0,
+    searchOptions: defaultSearchOptions,
+    setSearchOptions: () => {},
+    loadingMoreIssues: false,
+    setLoadingMoreIssues: () => {},
+    issueStalenessSettings: undefined,
+    sortOrder: "desc",
+    setSortOrder: () => {},
+    refetchIssues: () => {},
+    userWorkIds: [],
+    isIssueDialogOpen: false,
+    showIssueDialog: () => {},
+    hideIssueDialog: () => {},
+    selectedIssue: null,
+    }

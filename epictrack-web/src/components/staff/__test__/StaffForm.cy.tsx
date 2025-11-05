@@ -45,12 +45,12 @@ const endpoints: Endpoint[] = [
   },
 ];
 
-const staff1 = mockStaffs[0];
-
 describe("StaffForm", () => {
   beforeEach(() => {
     setupIntercepts(endpoints);
-    cy.mount(<StaffForm staff={staff1} saveStaff={cy.stub()} />);
+    cy.mount(
+      <StaffForm fetchStaff={cy.stub()} staff={null} saveStaff={cy.stub()} />,
+    );
   });
 
   it("renders the form", () => {

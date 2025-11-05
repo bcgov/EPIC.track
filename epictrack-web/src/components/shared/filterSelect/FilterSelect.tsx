@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Select from "react-select";
 import Menu from "./components/Menu";
 import Option from "./components/Option";
@@ -11,45 +11,29 @@ import { MET_Header_Font_Weight_Regular } from "../../../styles/constants";
 import { useTheme } from "@mui/material";
 
 const INPUT_SIZE = "0.875rem";
+
 const FilterSelect = (props: SelectProps) => {
   const theme = useTheme();
   const { name, isMulti, defaultValue } = props;
   const standardDefault = isMulti ? [] : "";
-  const [options, setOptions] = React.useState<OptionType[]>([]);
-  const [selectedOptions, setSelectedOptions] = React.useState<any>();
-  const [selectValue, setSelectValue] = React.useState<any>(
-    defaultValue ?? standardDefault
+  const [options, setOptions] = useState<OptionType[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<any>();
+  const [selectValue, setSelectValue] = useState<any>(
+    defaultValue ?? standardDefault,
   );
   const menuRef = useRef<HTMLDivElement | null>(null);
-  const [menuIsOpen, setMenuIsOpen] = React.useState<boolean>(
-    !!props.menuIsOpen
-  );
-  const [menuStyle, setMenuStyle] = React.useState<any>({}); // eslint-disable-line
-  const [overflowRight, setOverflowRight] = React.useState<number>(0);
-  const selectRef = React.useRef<any | null>(null);
+  const [menuIsOpen, setMenuIsOpen] = useState<boolean>(!!props.menuIsOpen);
+  const [menuStyle, setMenuStyle] = useState<any>({}); // eslint-disable-line
+  const [overflowRight, setOverflowRight] = useState<number>(0);
+  const selectRef = useRef<any | null>(null);
 
-  const selectAllOption = React.useMemo(
+  const selectAllOption = useMemo(
     () => ({
       label: "Select All",
       value: "<SELECT_ALL>",
     }),
-    []
+    [],
   );
-
-  useEffect(() => {
-    if (menuIsOpen) {
-      requestAnimationFrame(() => {
-        const documentWidth = document.documentElement.clientWidth;
-        const scrollWidth = document.documentElement.scrollWidth;
-        const overflowRight = Math.max(scrollWidth - documentWidth, 1);
-        setOverflowRight(overflowRight);
-      });
-      updateSelectedOptions();
-      adjustDropdownPosition();
-    } else {
-      setOverflowRight(0);
-    }
-  }, [menuIsOpen, overflowRight]);
 
   const isSelectAllSelected = () =>
     selectedOptions.includes(selectAllOption.value);
@@ -80,8 +64,8 @@ const FilterSelect = (props: SelectProps) => {
       if (isOptionSelected(option)) {
         setSelectedOptions(
           selectedOptions.filter(
-            (o: string) => o !== option.value && o !== selectAllOption.value
-          )
+            (o: string) => o !== option.value && o !== selectAllOption.value,
+          ),
         );
       } else {
         let value = [...selectedOptions, option.value];
@@ -95,7 +79,7 @@ const FilterSelect = (props: SelectProps) => {
     if (props.filterAppliedCallback) {
       const options = isMulti
         ? (selectedOptions as string[]).filter(
-            (p) => p !== selectAllOption.value
+            (p) => p !== selectAllOption.value,
           )
         : selectedOptions;
       props.filterAppliedCallback(options);
@@ -105,12 +89,12 @@ const FilterSelect = (props: SelectProps) => {
     }
     if (isMulti) {
       const value = options.filter((o: OptionType) =>
-        selectedOptions.includes(o.value)
+        selectedOptions.includes(o.value),
       );
       setSelectValue(value);
     } else {
       const value = options.find(
-        (o: OptionType) => o.value === selectedOptions
+        (o: OptionType) => o.value === selectedOptions,
       );
       setSelectValue(value);
     }
@@ -137,7 +121,7 @@ const FilterSelect = (props: SelectProps) => {
   };
 
   // Adjust dropdown position based on overflow
-  const adjustDropdownPosition = () => {
+  const adjustDropdownPosition = useCallback(() => {
     if (menuRef?.current) {
       if (overflowRight > 0) {
         setMenuStyle({
@@ -147,21 +131,41 @@ const FilterSelect = (props: SelectProps) => {
         setMenuStyle({});
       }
     }
-  };
+  }, [overflowRight]);
 
   // Function to update selected options
-  const updateSelectedOptions = () => {
+  const updateSelectedOptions = useCallback(() => {
     const currentValues = isMulti
       ? selectValue.map((v: OptionType) => v.value)
       : selectValue.value;
     setSelectedOptions(currentValues);
-  };
+  }, [isMulti, selectValue]);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if (menuIsOpen) {
+      requestAnimationFrame(() => {
+        const documentWidth = document.documentElement.clientWidth;
+        const scrollWidth = document.documentElement.scrollWidth;
+        const overflowRight = Math.max(scrollWidth - documentWidth, 1);
+        setOverflowRight(overflowRight);
+      });
+      updateSelectedOptions();
+      adjustDropdownPosition();
+    } else {
+      setOverflowRight(0);
+    }
+  }, [
+    adjustDropdownPosition,
+    menuIsOpen,
+    overflowRight,
+    updateSelectedOptions,
+  ]);
+
+  useEffect(() => {
     let filterOptions = props.options as OptionType[];
     if (isMulti) filterOptions = [selectAllOption, ...filterOptions];
     setOptions(filterOptions);
-  }, [props.options]);
+  }, [isMulti, props.options, selectValue, selectAllOption]);
 
   const isSearchable = () => {
     if (props.isSearchable !== undefined) return props.isSearchable;
@@ -173,7 +177,7 @@ const FilterSelect = (props: SelectProps) => {
     return !selectValue;
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (
       props.value !== undefined &&
       selectValue !== undefined &&
@@ -181,7 +185,7 @@ const FilterSelect = (props: SelectProps) => {
     ) {
       setSelectValue(props.value);
     }
-  }, [props.value]);
+  }, [props.value, selectValue]);
 
   return (
     <div ref={menuRef}>
@@ -280,6 +284,8 @@ const FilterSelect = (props: SelectProps) => {
             ...base,
             fontWeight: "400",
             fontSize: INPUT_SIZE,
+            padding: 0,
+            margin: 0,
           }),
         }}
         isClearable={false}

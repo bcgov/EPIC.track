@@ -4,7 +4,7 @@ import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
-import TableFilter from "components/shared/filterSelect/TableFilter";
+import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetAllWorksQuery } from "services/rtkQuery/workInsights";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
@@ -15,17 +15,31 @@ import { IconProps } from "components/icons/type";
 import { dateUtils } from "utils";
 import { MONTH_DAY_YEAR } from "constants/application-constant";
 import WorkState from "components/workPlan/WorkState";
+import { useInsightsContext } from "components/insights/InsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const WorkList = () => {
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 15,
   });
-  const { data, error, isLoading } = useGetAllWorksQuery();
+  const { columnFilters, setColumnFilters } = useTableFilterContext();
+  const { isUserInsights, staffId } = useInsightsContext();
 
-  const works = data || [];
+  const queryArg = useMemo(() => {
+    return {
+      is_active: true,
+      ...(isUserInsights && staffId ? { staffId } : {}),
+    };
+  }, [isUserInsights, staffId]);
+
+  const { data, error, isLoading } = useGetAllWorksQuery(queryArg, {
+    refetchOnMountOrArgChange: true,
+  });
+
+  const works = useMemo(() => data || [], [data]);
 
   useEffect(() => {
     setPagination((prev) => ({
@@ -41,10 +55,23 @@ const WorkList = () => {
           works
             .map((work) => work?.work_state || "")
             .filter((type) => type)
-            .sort()
-        )
+            .sort(),
+        ),
       ),
-    [works]
+    [works],
+  );
+
+  const workTypes = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          works
+            .map((work) => work?.work_type?.name || "")
+            .filter((type) => type)
+            .sort(),
+        ),
+      ),
+    [works],
   );
 
   const projects = useMemo(
@@ -54,33 +81,20 @@ const WorkList = () => {
           works
             .map((work) => work?.project?.name || "")
             .filter((project) => project)
-            .sort()
-        )
+            .sort(),
+        ),
       ),
-    [works]
-  );
-
-  const phases = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          works
-            .map((work) => work?.current_work_phase?.name || "")
-            .filter((phase) => phase)
-            .sort()
-        )
-      ),
-    [works]
+    [works],
   );
 
   const started_years = useMemo(
     () =>
       Array.from(
         new Set(
-          works.map((work) => dateUtils.formatDate(work?.start_date, "YYYY"))
-        )
+          works.map((work) => dateUtils.formatDate(work?.start_date, "YYYY")),
+        ),
       ).sort((a, b) => parseInt(b) - parseInt(a)),
-    [works]
+    [works],
   );
 
   const closed_years = useMemo(
@@ -89,17 +103,20 @@ const WorkList = () => {
         new Set(
           works
             .map((work) =>
-              dateUtils.formatDate(work?.work_decision_date as string, "YYYY")
+              dateUtils.formatDate(work?.work_decision_date as string, "YYYY"),
             )
-            .filter((year) => year !== "Invalid date")
-        )
+            .filter((year) => year !== "Invalid date"),
+        ),
       ).sort((a, b) => parseInt(b) - parseInt(a)),
-    [works]
+    [works],
   );
 
   useEffect(() => {
     if (error) {
-      showNotification("Error fetching works", { type: "error" });
+      showNotification("Error fetching Works", {
+        duration: 3000,
+        type: "error",
+      });
     }
   }, [error]);
 
@@ -114,7 +131,6 @@ const WorkList = () => {
             to={`/work-plan?work_id=${row.original.id}`}
             enableTooltip
             tooltip={row.original.title}
-            titleText={row.original.title}
           >
             {renderedCellValue}
           </ETGridTitle>
@@ -153,12 +169,38 @@ const WorkList = () => {
         },
       },
       {
+        accessorKey: "work_type.name",
+        header: "Work type",
+        filterVariant: "multi-select",
+        filterSelectOptions: workTypes,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (!filterValue.length || filterValue.length > workTypes.length) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
+      },
+      {
         accessorKey: "start_date",
         header: "Started",
         Cell: ({ row, renderedCellValue }) => {
           return dateUtils.formatDate(
             renderedCellValue?.toString() || "",
-            MONTH_DAY_YEAR
+            MONTH_DAY_YEAR,
           );
         },
         filterVariant: "multi-select",
@@ -195,7 +237,7 @@ const WorkList = () => {
           return renderedCellValue
             ? dateUtils.formatDate(
                 renderedCellValue?.toString() || "",
-                MONTH_DAY_YEAR
+                MONTH_DAY_YEAR,
               )
             : "";
         },
@@ -265,7 +307,7 @@ const WorkList = () => {
         },
       },
     ],
-    [projects, phases, workStates, started_years, closed_years]
+    [projects, workStates, workTypes, started_years, closed_years],
   );
   return (
     <MasterTrackTable
@@ -279,11 +321,15 @@ const WorkList = () => {
           },
         ],
       }}
+      loading={isLoading}
+      onColumnFiltersChange={setColumnFilters}
       state={{
         isLoading: isLoading,
         showGlobalFilter: true,
         pagination: pagination,
+        columnFilters,
       }}
+      renderResultCount
       renderTopToolbarCustomActions={({ table }) => (
         <Box
           sx={{

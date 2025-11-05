@@ -1,26 +1,27 @@
-import React from "react";
+import InsightAccordion from "components/insights/InsightsAccordion";
 import { Grid } from "@mui/material";
-import { InsightsAccordionCollapsableDetails } from "components/insights/InsightsAccordion";
+import WorkList from "./charts/workListing";
 import WorkByType from "./charts/WorkByType";
 import AssessmentByPhase from "./charts/AssessmentByPhase";
-import WorkList from "./charts/workListing";
 
-const General = () => {
-  return (
+const WorkAccordion = () => (
+  <InsightAccordion
+    tab="Work"
+    title="General Insights"
+    showMoreLabel={true}
+    showMoreContent={<WorkList />}
+    defaultExpanded={true}
+    data-cy="general-work-accordion"
+  >
     <Grid container spacing={2}>
-      <Grid item xs={6}>
+      <Grid className="chart-item" item xs={6}>
         <WorkByType />
       </Grid>
-      <Grid item xs={6}>
+      <Grid className="chart-item" item xs={6}>
         <AssessmentByPhase />
       </Grid>
-      <Grid item xs={12}>
-        <InsightsAccordionCollapsableDetails>
-          <WorkList />
-        </InsightsAccordionCollapsableDetails>
-      </Grid>
     </Grid>
-  );
-};
+  </InsightAccordion>
+);
 
-export default General;
+export default WorkAccordion;

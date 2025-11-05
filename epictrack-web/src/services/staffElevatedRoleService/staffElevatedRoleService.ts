@@ -10,7 +10,7 @@ class StaffElevatedRoleService implements ServiceBase {
       Endpoints.StaffsElevatedRoles.STAFF_ELEVATED_ROLES,
       {
         is_active,
-      }
+      },
     );
   }
 
@@ -19,48 +19,48 @@ class StaffElevatedRoleService implements ServiceBase {
       Endpoints.StaffsElevatedRoles.STAFF_ELEVATED_ROLES + `/${id}`,
       {
         is_active,
-      }
+      },
     );
   }
 
   async getActiveStaffElevatedRoleByStaffId(staff_id: string) {
     return await http.GetRequest<StaffElevatedRole[]>(
       Endpoints.StaffsElevatedRoles.STAFF_ELEVATED_ROLES +
-        `?staff_id=${staff_id}`
+        `?staff_id=${staff_id}`,
     );
   }
 
   async getAllStaffElevatedRoleByStaffId(staff_id: string) {
     return await http.GetRequest<StaffElevatedRole[]>(
       Endpoints.StaffsElevatedRoles.STAFF_ELEVATED_ROLES +
-        `?staff_id=${staff_id}&is_active=false`
+        `?staff_id=${staff_id}&is_active=false`,
     );
   }
 
   async create(data: MasterBase) {
     return await http.PostRequest(
       Endpoints.StaffsElevatedRoles.STAFF_ELEVATED_ROLES,
-      JSON.stringify(data)
+      JSON.stringify(data),
     );
   }
 
   async update(data: MasterBase, id: number) {
     return await http.PutRequest(
       Endpoints.StaffsElevatedRoles.STAFF_ELEVATED_ROLES + `/${id}`,
-      JSON.stringify(data)
+      JSON.stringify(data),
     );
   }
 
   async delete(id: string) {
     return await http.DeleteRequest(
-      Endpoints.StaffsElevatedRoles.STAFF_ELEVATED_ROLES + `/${id}`
+      Endpoints.StaffsElevatedRoles.STAFF_ELEVATED_ROLES + `/${id}`,
     );
   }
 
   async getStaffElevatedRoleByElevatedRoleId(role_id: string) {
     return await http.GetRequest<StaffElevatedRole[]>(
       Endpoints.StaffsElevatedRoles.STAFF_ELEVATED_ROLES +
-        `?elevated_role_id=${role_id}`
+        `?elevated_role_id=${role_id}`,
     );
   }
 }

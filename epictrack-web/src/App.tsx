@@ -16,11 +16,11 @@ import AppHelpButton from "components/AppHelpButton";
 export function App() {
   const dispatch = useAppDispatch();
   const isLoggedIn = useAppSelector(
-    (state) => state.user?.authentication.authenticated
+    (state) => state.user?.authentication.authenticated,
   );
 
   const isMediumScreen = useMediaQuery((theme: Theme) =>
-    theme.breakpoints.up("md")
+    theme.breakpoints.up("md"),
   );
   const uiState = useAppSelector((state) => state.uiState);
   const drawerWidth = isMediumScreen ? uiState.drawerWidth : 0;

@@ -19,7 +19,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import NextPageTemplate, Paragraph, Table, TableStyle
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.platypus.frames import Frame
-from sqlalchemy import INTEGER, and_, func, or_
+from sqlalchemy import and_, case, func, INTEGER, or_
 from sqlalchemy.dialects.postgresql import DATERANGE
 from sqlalchemy.orm import aliased
 
@@ -38,6 +38,8 @@ from api.services.staff import StaffService
 from api.services.work_phase import WorkPhaseService
 from api.utils.color_utils import color_with_opacity
 from api.utils.constants import CANADA_TIMEZONE
+from api.utils.work_phases import FIRST_WORK_PHASES
+
 
 from .report_factory import ReportFactory
 from flask import current_app
@@ -110,19 +112,24 @@ class EAResourceForeCastReport(ReportFactory):
                     "width": 0.057,
                 },
                 {"data_key": "ea_act", "label": "EA ACT", "width": 0.03},
-                {"data_key": "iaac", "label": "IAAC", "width": 0.0395},
+                {"data_key": "iaac", "label": "IAAC", "width": 0.0405},
                 {"data_key": "sector(sub)", "label": "TYPE (SUB)", "width": 0.038},
                 {"data_key": "env_region", "label": "MOE REGION", "width": 0.041},
                 {"data_key": "nrs_region", "label": "NRS REGION", "width": 0.041},
             ],
             "EAO RESOURCING": [
                 {"data_key": "responsible_epd", "label": "EPD LEAD", "width": 0.040},
-                {"data_key": "eao_team", "label": "TEAM", "width": 0.028},
+                {"data_key": "eao_team", "label": "TEAM", "width": 0.031},
                 {"data_key": "work_lead", "label": "PROJECT LEAD", "width": 0.045},
+                {
+                    "data_key": "coleads",
+                    "label": "CO-LEADS",
+                    "width": 0.050,
+                },
                 {
                     "data_key": "work_team_members",
                     "label": "WORK TEAM MEMBERS",
-                    "width": 0.072,
+                    "width": 0.070,
                 },
             ],
             "QUARTERS": [],
@@ -130,7 +137,7 @@ class EAResourceForeCastReport(ReportFactory):
                 {
                     "data_key": "referral_timing",
                     "label": "Expected Referral Date",
-                    "width": 0.0705,
+                    "width": 0.068,
                 }
             ],
         }
@@ -148,6 +155,14 @@ class EAResourceForeCastReport(ReportFactory):
         cell_keys = []
         cell_widths = []
         cell_index = 0
+
+        total_proportion = 0
+        for section_heading, cells in self.report_cells.items():
+            if section_heading == "QUARTERS":
+                total_proportion += 0.15
+            else:
+                total_proportion += sum(cell["width"] for cell in cells)
+
         for section_heading, cells in self.report_cells.items():
             filtered_cells = []
             if section_heading == "QUARTERS":
@@ -157,7 +172,7 @@ class EAResourceForeCastReport(ReportFactory):
                     c_widths,
                     s_styles,
                 ) = self._get_quarter_section_meta_data(
-                    report_date, cell_index, available_width
+                    report_date, cell_index, available_width, total_proportion  # pass it
                 )
                 section_headings.extend(s_headings)
                 cell_headings.extend(c_headings)
@@ -177,22 +192,27 @@ class EAResourceForeCastReport(ReportFactory):
             for cell in filtered_cells:
                 cell_headings.append(cell["label"])
                 cell_keys.append(cell["data_key"])
-                cell_widths.append(available_width * cell["width"])
+                cell_widths.append(available_width * cell["width"] / total_proportion)
             cell_index += len(filtered_cells)
         headers = [section_headings, cell_headings]
         return headers, cell_keys, styles, cell_widths
 
-    def _fetch_data(self, report_date: datetime):
+    def _fetch_data(self, report_date: datetime, include_first_phase: bool):
         """Find and return works that are started before end date and did not end before report date"""
+        report_date = report_date.astimezone(CANADA_TIMEZONE)
         current_app.logger.info(f"Report Date: {report_date}")
         env_region = aliased(Region)
         nrs_region = aliased(Region)
+        sh_project_name = aliased(SpecialField)
         less_than_end_date_query = self._get_less_than_end_date_query()
         current_app.logger.info(f"Less than end date query: {less_than_end_date_query}")
         greater_than_report_date_query = self._get_greater_than_report_date_query(
             report_date
         )
         current_app.logger.info(f"Greater than report date query: {greater_than_report_date_query}")
+        work_phase_filters = [WorkPhase.id == Work.current_work_phase_id]
+        if not include_first_phase:
+            work_phase_filters.append(WorkPhase.name.notin_(FIRST_WORK_PHASES))
         works = (
             Project.query.filter(
                 Project.is_project_closed.is_(False),
@@ -213,7 +233,7 @@ class EAResourceForeCastReport(ReportFactory):
                     Work.is_deleted.is_(False),
                 ),
             )
-            .join(WorkPhase, WorkPhase.id == Work.current_work_phase_id)
+            .join(WorkPhase, and_(*work_phase_filters))
             .join(PhaseCode, PhaseCode.id == WorkPhase.phase_id)
             .join(WorkType, Work.work_type_id == WorkType.id)
             .join(EAAct, Work.ea_act_id == EAAct.id)
@@ -223,9 +243,15 @@ class EAResourceForeCastReport(ReportFactory):
             )
             .join(SubType, Project.sub_type_id == SubType.id)
             .join(Type, Project.type_id == Type.id)
-            # TODO: Make sure to add the region_id_env and region_id_flnro to the Project model
             .join(env_region, env_region.id == Project.region_id_env)
             .join(nrs_region, nrs_region.id == Project.region_id_flnro)
+            # special history project name
+            .outerjoin(sh_project_name, and_(
+                sh_project_name.entity_id == Project.id,
+                sh_project_name.entity == EntityEnum.PROJECT.value,
+                sh_project_name.time_range.contains(report_date),
+                sh_project_name.field_name == "name"
+            ))
             .join(
                 less_than_end_date_query, Work.id == less_than_end_date_query.c.work_id
             )
@@ -234,7 +260,15 @@ class EAResourceForeCastReport(ReportFactory):
                 Work.id == greater_than_report_date_query.c.work_id,
             )
             .add_columns(
-                Work.title.label("work_title"),
+                case(
+                    (
+                        func.coalesce(Work.simple_title, "") != "",
+                        func.concat(func.coalesce(sh_project_name.field_value, Project.name), " - ", WorkType.name, " - ", Work.simple_title),
+                    ),
+                    else_=func.concat(func.coalesce(sh_project_name.field_value, Project.name), " - ", WorkType.name)
+                ).label(
+                    "work_title"
+                ),
                 Project.capital_investment.label("capital_investment"),
                 WorkType.name.label("ea_type"),
                 WorkType.report_title.label("ea_type_label"),
@@ -353,6 +387,14 @@ class EAResourceForeCastReport(ReportFactory):
             )
         return work_data
 
+    def _format_long_region(self, work_data):
+        """Format the region. If region name is long and has a hyphen, split it into two lines"""
+        if work_data.get("env_region", None) and len(work_data["env_region"]) > 12:
+            work_data["env_region"] = work_data["env_region"].replace("-", "-\n")
+        if work_data.get("nrs_region", None) and len(work_data["nrs_region"]) > 12:
+            work_data["nrs_region"] = work_data["nrs_region"].replace("-", "-\n")
+        return work_data
+
     def _format_ea_type(self, work_data):
         """Format the capital investment"""
         if work_data.get("project_phase", None) == 'Pre-EA (EAC Assessment)':
@@ -367,22 +409,24 @@ class EAResourceForeCastReport(ReportFactory):
         data = self._filter_data(data)
         for values in data:
             work_data = values[0]
-            staffs, responsible_epd, work_lead = self._get_work_team_members(work_data["work_id"])
+            staffs, coleads, responsible_epd, work_lead = self._get_work_team_members(work_data["work_id"])
             work_data["responsible_epd"] = responsible_epd
             work_data["work_lead"] = work_lead
             work_data["work_team_members"] = ", ".join(staffs)
+            work_data["coleads"] = ", ".join(coleads)
             work_data = self._format_capital_investment(work_data)
             work_data = self._handle_months(work_data)
+            work_data = self._format_long_region(work_data)
             work_data = self._format_ea_type(work_data)
             if report_title:
                 work_data["report_title"] = report_title
             response.append(work_data)
         return response
 
-    def generate_report(self, report_date, return_type):
+    def generate_report(self, report_date, return_type, include_first_phase):
         """Generates a report and returns it"""
         self._set_month_labels(report_date)
-        works = self._fetch_data(report_date)
+        works = self._fetch_data(report_date, include_first_phase)
         work_ids = set((work.work_id for work in works))
         current_app.logger.debug(f"Work IDs: {work_ids}")
         works = super()._format_data(works)
@@ -465,7 +509,7 @@ class EAResourceForeCastReport(ReportFactory):
             results[work_id] = work_data
         return results
 
-    def _filter_start_events(self, events: [Event]) -> [Event]:
+    def _filter_start_events(self, events: list[Event]) -> list[Event]:
         """Filter the start events of each phase per work"""
         start_events = [
             {
@@ -565,6 +609,9 @@ class EAResourceForeCastReport(ReportFactory):
         order_cancellations = self._sort_data_by_work_type(
             data, WorkTypeEnum.EAC_ORDER_CANCELLATION.value
         )
+        material_alterations = self._sort_data_by_work_type(
+            data, WorkTypeEnum.MATERIAL_ALTERATION.value
+        )
         others = self._sort_data_by_work_type(data, WorkTypeEnum.OTHER.value)
 
         sorted_data = (
@@ -580,7 +627,7 @@ class EAResourceForeCastReport(ReportFactory):
             + extensions
             + substantial_start_decisions
         )
-        sorted_data += order_suspensions + order_cancellations + others
+        sorted_data += order_suspensions + order_cancellations + material_alterations + others
         return sorted_data
 
     def _fetch_second_phases(self, events, work_ids) -> List[WorkPhase]:
@@ -638,7 +685,7 @@ class EAResourceForeCastReport(ReportFactory):
             sorted_data = sorted(sorted_data, key=lambda k: k["work_title"])
         return sorted_data
 
-    def _get_events(self, work_ids: [int]) -> List[Event]:
+    def _get_events(self, work_ids: list[int]) -> List[Event]:
         """Returns the start event of each of the work phases for the works"""
         return (
             Event.query.filter(
@@ -732,6 +779,7 @@ class EAResourceForeCastReport(ReportFactory):
     def _get_work_team_members(self, work_id) -> Tuple[List[str], str]:
         """Fetch and return team members by work id"""
         staffs = []
+        coleads = []
         responsible_epd = ""
         work_lead = ""
         work_team_members = (
@@ -765,9 +813,11 @@ class EAResourceForeCastReport(ReportFactory):
             last_name = work_team_member.last_name
             if work_team_member.role_id in [RoleEnum.OFFICER_ANALYST.value, RoleEnum.OTHER.value]:
                 staffs.append({"first_name": first_name, "last_name": last_name})
+            elif work_team_member.role_id == RoleEnum.TEAM_CO_LEAD.value:
+                coleads.append(f"{first_name} {last_name}")
         staffs = sorted(staffs, key=lambda x: x["last_name"])
         staffs = [f"{x['first_name']} {x['last_name']}" for x in staffs]
-        return staffs, responsible_epd, work_lead
+        return staffs, coleads, responsible_epd, work_lead
 
     def _get_styles(self) -> Tuple[dict, dict]:
         """Returns basic styles needed for the PDF report."""
@@ -953,7 +1003,11 @@ class EAResourceForeCastReport(ReportFactory):
         return add_default_info
 
     def _get_quarter_section_meta_data(
-        self, report_date: datetime, cell_index: int, available_width: int
+        self,
+        report_date: datetime,
+        cell_index: int,
+        available_width: int,
+        total_proportion: float,
     ):
         report_start_date = report_date.date().replace(day=1)
         report_start_date = self._add_months(report_start_date, 1, False)
@@ -985,8 +1039,8 @@ class EAResourceForeCastReport(ReportFactory):
             )
         )
         cell_headings = self.month_labels
-        cell_widths.extend([0.051 * available_width] * 3)
-        cell_widths.extend([0.058 * available_width])
+        cell_widths.extend([0.055 * available_width / total_proportion] * 3)
+        cell_widths.extend([0.058 * available_width / total_proportion])
         return section_headings, cell_headings, cell_widths, styles
 
     def _get_other_section_meta_data(self, section_heading, cells, cell_index):

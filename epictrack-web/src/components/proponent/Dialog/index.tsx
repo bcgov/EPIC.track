@@ -75,6 +75,7 @@ export const ProponentDialog = ({
       saveButtonProps={{ disabled: disableSave }}
     >
       <ProponentForm
+        fetchProponent={fetchProponent}
         proponent={proponent}
         saveProponent={saveProponent}
         setDisableDialogSave={setDisableSave}

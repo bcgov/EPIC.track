@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { WorkplanContext } from "../WorkPlanContext";
-import issueService from "../../../services/issueService";
+import { issueService } from "../../../services/issueService";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { WorkIssue, WorkIssueUpdate } from "../../../models/Issue";
 import { CloneForm, CreateIssueForm, EditIssueForm } from "./types";
@@ -91,15 +97,19 @@ export const initialIssueContextValue = {
 };
 
 export const IssuesContext = createContext<IssuesContextProps>(
-  initialIssueContextValue
+  initialIssueContextValue,
 );
 
 export const LASTEST_ISSUE_UPDATE_INDEX = 0;
 
 export const IssuesProvider = ({
   children,
+  workId: propWorkId = null,
+  refetchIssues,
 }: {
   children: JSX.Element | JSX.Element[];
+  workId?: string | null;
+  refetchIssues?: () => void;
 }) => {
   const [createIssueFormIsOpen, setCreateIssueFormIsOpen] = useState(false);
   const [editIsssueFormIsOpen, setEditIssueFormIsOpen] = useState(false);
@@ -112,23 +122,23 @@ export const IssuesProvider = ({
 
   const [issueToEdit, setIssueToEdit] = useState<WorkIssue | null>(null);
   const [updateToEdit, setUpdateToEdit] = useState<WorkIssueUpdate | null>(
-    null
+    null,
   );
 
   const [updateToClone, setUpdateToClone] = useState<WorkIssueUpdate | null>(
-    null
+    null,
   );
 
   const [issueToApproveId, setIssueToApproveId] = useState<number | null>(null);
 
   const { issues, loadIssues } = useContext(WorkplanContext);
   const query = useSearchParams<IssueContainerRouteParams>();
-  const workId = query.get("work_id");
+  const workId = propWorkId ?? query.get("work_id");
 
-  const handleLoadIssues = async () => {
-    await loadIssues();
+  const handleLoadIssues = useCallback(async () => {
+    await loadIssues?.();
     setIsIssuesLoading(false);
-  };
+  }, [loadIssues]);
 
   useEffect(() => {
     if (!issues?.length) {
@@ -136,7 +146,7 @@ export const IssuesProvider = ({
     } else {
       setIsIssuesLoading(false);
     }
-  }, []);
+  }, [handleLoadIssues, issues?.length, setIsIssuesLoading]);
 
   const addIssue = async (issueForm: CreateIssueForm) => {
     if (!workId) return;
@@ -179,6 +189,7 @@ export const IssuesProvider = ({
         is_resolved,
       };
       await issueService.editIssue(workId, String(issueToEdit.id), request);
+      refetchIssues?.();
       handleLoadIssues();
     } catch (error) {
       console.error("editIssue error:", error);
@@ -203,8 +214,9 @@ export const IssuesProvider = ({
         workId,
         String(updateToEdit.work_issue_id),
         String(updateToEdit.id),
-        request
+        request,
       );
+      refetchIssues?.();
       handleLoadIssues();
     } catch (error) {
       const message = getErrorMessage(error);
@@ -222,8 +234,9 @@ export const IssuesProvider = ({
       await issueService.approve(
         workId,
         String(issueId),
-        String(issueUpdateId)
+        String(issueUpdateId),
       );
+      refetchIssues?.();
       handleLoadIssues();
     } catch (error) {
       const message = getErrorMessage(error);
@@ -242,6 +255,7 @@ export const IssuesProvider = ({
         description: cloneForm.description,
         posted_date: cloneForm.posted_date,
       });
+      refetchIssues?.();
       handleLoadIssues();
     } catch (error) {
       const message = getErrorMessage(error);
@@ -252,7 +266,8 @@ export const IssuesProvider = ({
     }
   };
 
-  useRouterLocationStateForHelpPage(() => WORKPLAN_TAB.ISSUES.label, []);
+  const issueLabelCallback = useCallback(() => WORKPLAN_TAB.ISSUES.label, []);
+  useRouterLocationStateForHelpPage(issueLabelCallback);
 
   return (
     <IssuesContext.Provider

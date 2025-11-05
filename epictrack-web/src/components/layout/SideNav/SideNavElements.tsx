@@ -11,6 +11,22 @@ export const Routes: RouteType[] = [
     isAuthenticated: false,
   },
   {
+    name: "My Updates",
+    icon: "CategoryIcon",
+    path: "/updates",
+    group: "Group1",
+    allowedRoles: [],
+    isAuthenticated: false,
+  },
+  {
+    name: "My Calendar",
+    icon: "PendingActions",
+    path: "/my-calendar",
+    group: "Group1",
+    allowedRoles: [],
+    isAuthenticated: false,
+  },
+  {
     name: "My Tasks",
     icon: "CheckListIcon",
     path: "/my-tasks",
@@ -47,12 +63,6 @@ export const Routes: RouteType[] = [
       {
         name: "30-60-90",
         path: "/reports/30-60-90",
-        allowedRoles: [],
-        isAuthenticated: false,
-      },
-      {
-        name: "Event Calendar",
-        path: "/reports/event-calendar",
         allowedRoles: [],
         isAuthenticated: false,
       },
@@ -101,12 +111,6 @@ export const Routes: RouteType[] = [
       {
         name: "Projects",
         path: "/list-management/projects",
-        allowedRoles: [],
-        isAuthenticated: false,
-      },
-      {
-        name: "Work Staff",
-        path: "/list-management/work-staff",
         allowedRoles: [],
         isAuthenticated: false,
       },

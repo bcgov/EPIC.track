@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 export function useCachedState<StateType>(
   storageKey: string,
-  defaultValue: StateType
+  defaultValue: StateType,
 ): [StateType, React.Dispatch<React.SetStateAction<StateType>>] {
   const [state, setState] = useState<StateType>(() => {
     try {
@@ -22,7 +22,7 @@ export function useCachedState<StateType>(
     } else {
       sessionStorage.removeItem(storageKey);
     }
-  }, [state]);
+  }, [state, storageKey]);
 
   return [state, setState];
 }

@@ -43,9 +43,9 @@ const ETTab = ({ label, identifier, icon, ...props }: ETTabProps) => {
       <Tab
         disableRipple={true}
         sx={{
-          ...props.sx,
           flexDirection: "row",
           gap: "0.5rem",
+          ...props.sx,
         }}
         label={
           <>

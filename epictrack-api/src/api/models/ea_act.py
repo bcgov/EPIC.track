@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to EA Acts."""
 
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Integer, String
 
 from .code_table import CodeTableVersioned
 from .db import db
@@ -24,5 +24,6 @@ class EAAct(db.Model, CodeTableVersioned):
 
     __tablename__ = 'ea_acts'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent TRACK-532
     sort_order = Column(Integer, nullable=False)
+    name = Column(String)

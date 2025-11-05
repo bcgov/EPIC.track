@@ -1,4 +1,11 @@
-import { useState, useContext, useRef, useEffect, useMemo } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -11,8 +18,9 @@ import ControlledSelectV2 from "../../shared/controlledInputComponents/Controlle
 import { Palette } from "../../../styles/theme";
 import { Staff } from "../../../models/staff";
 import { WorkplanContext } from "../WorkPlanContext";
-import workService from "../../../services/workService/workService";
-import taskEventService, {
+import { workService } from "../../../services/workService/workService";
+import {
+  taskEventService,
   TaskEventMutationRequest,
 } from "../../../services/taskEventService/taskEventService";
 import { showNotification } from "../../shared/notificationProvider";
@@ -26,7 +34,7 @@ import { getErrorMessage } from "../../../utils/axiosUtils";
 import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
 import TrackDatePicker from "../../shared/DatePicker";
 import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
-import responsibilityService from "services/responsibilityService/responsibilityService";
+import { responsibilityService } from "services/responsibilityService/responsibilityService";
 
 const schema = yup.object().shape({
   name: yup
@@ -52,21 +60,28 @@ type TaskEventForm = {
 interface TaskFormProps {
   onSave: () => void;
   taskEvent?: TaskEvent;
+  work_id?: number;
+  phase_id?: number;
 }
 const TaskForm = ({
   onSave = () => {
     return;
   },
   taskEvent,
+  work_id,
+  phase_id,
 }: TaskFormProps) => {
   const [assignees, setAssignees] = useState<Staff[]>([]);
   const [responsibilities, setResponsibilities] = useState<ListType[]>([]);
   const [notes, setNotes] = useState(taskEvent?.notes || "");
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const endDateRef = useRef();
-  const ctx = useContext(WorkplanContext);
   const { handleHighlightRows } = useContext(EventContext);
-  const initialNotes = useMemo(() => taskEvent?.notes, [taskEvent?.id]);
+  const initialNotes = useMemo(() => taskEvent?.notes, [taskEvent?.notes]);
+
+  const ctx = useContext(WorkplanContext);
+  const effectiveWorkId = work_id ?? ctx.work?.id;
+  const effectivePhaseId = phase_id ?? ctx.selectedWorkPhase?.work_phase.id;
 
   const defaultValues: TaskEventForm = {
     name: taskEvent?.name || "",
@@ -83,6 +98,19 @@ const TaskForm = ({
     mode: "onBlur",
   });
 
+  const { reset } = methods;
+
+  useEffect(() => {
+    reset({
+      name: taskEvent?.name || "",
+      start_date: taskEvent?.start_date || dayjs().format(),
+      status: taskEvent?.status || "",
+      number_of_days: taskEvent?.number_of_days || 0,
+      responsibility_ids: taskEvent?.responsibility_ids || [],
+      assignee_ids: taskEvent?.assignee_ids || [],
+    });
+  }, [taskEvent, reset]);
+
   const {
     register,
     handleSubmit,
@@ -91,31 +119,34 @@ const TaskForm = ({
     watch,
   } = methods;
 
-  useEffect(() => {
-    getResponsibilites();
-  }, []);
-
-  useEffect(() => {
-    getWorkTeamMembers();
-  }, [ctx.work?.id]);
-
-  const getResponsibilites = async () => {
+  const getResponsibilites = useCallback(async () => {
     const responsibilities = await responsibilityService.getResponsibilities();
     if (responsibilities.status === 200) {
       const result = responsibilities.data as ListType[];
       setResponsibilities(result);
     }
-  };
-  const getWorkTeamMembers = async () => {
+  }, []);
+
+  const getWorkTeamMembers = useCallback(async () => {
+    if (!effectiveWorkId) return;
     const assigneeResult = await workService.getWorkTeamMembers(
-      Number(ctx.work?.id),
-      true
+      Number(effectiveWorkId),
+      true,
     );
     if (assigneeResult.status === 200) {
       const staff: any = (assigneeResult.data as any[]).map((p) => p.staff);
       setAssignees(staff);
     }
-  };
+  }, [effectiveWorkId]);
+
+  useEffect(() => {
+    getResponsibilites();
+  }, [getResponsibilites]);
+
+  useEffect(() => {
+    getWorkTeamMembers();
+  }, [effectiveWorkId, getWorkTeamMembers]);
+
   const statuses = useMemo(() => statusOptions, []);
 
   const createTask = async (data: TaskEventMutationRequest) => {
@@ -137,7 +168,7 @@ const TaskForm = ({
 
     const updateResult = await taskEventService.update(
       data,
-      Number(taskEvent?.id)
+      Number(taskEvent?.id),
     );
     showNotification("Task details updated", {
       type: "success",
@@ -162,7 +193,7 @@ const TaskForm = ({
     try {
       const dataToSave = {
         ...data,
-        work_phase_id: Number(ctx.selectedWorkPhase?.work_phase.id),
+        work_phase_id: Number(effectivePhaseId),
         start_date: Moment(data.start_date).format(),
         number_of_days:
           data.number_of_days.toString() === "" ? 0 : data.number_of_days,
@@ -182,10 +213,13 @@ const TaskForm = ({
   const number_of_days = watch("number_of_days");
   const startDate = watch("start_date");
 
-  const handleNDaysChange = (days: number) => {
-    const endDate = dayjs(dateUtils.add(startDate, days, "days").toString());
-    setEndDate(endDate);
-  };
+  const handleNDaysChange = useCallback(
+    (days: number) => {
+      const endDate = dayjs(dateUtils.add(startDate, days, "days").toString());
+      setEndDate(endDate);
+    },
+    [startDate],
+  );
 
   const handleEndDateChange = (newEndDate: Dayjs | null) => {
     if (!newEndDate) {
@@ -199,7 +233,7 @@ const TaskForm = ({
 
   useEffect(() => {
     handleNDaysChange(Number(number_of_days));
-  }, [startDate]);
+  }, [handleNDaysChange, number_of_days, startDate]);
 
   return (
     <>
@@ -227,19 +261,11 @@ const TaskForm = ({
           >
             <Grid item xs={12}>
               <ETFormLabel required>Title</ETFormLabel>
-              <ControlledTextField
-                name="name"
-                placeholder="Title"
-                defaultValue={taskEvent?.name}
-                fullWidth
-              />
+              <ControlledTextField name="name" placeholder="Title" fullWidth />
             </Grid>
             <Grid item xs={4}>
               <ETFormLabel>Start Date</ETFormLabel>
-              <ControlledDatePicker
-                name="start_date"
-                defaultValue={Moment(taskEvent?.start_date).format()}
-              />
+              <ControlledDatePicker name="start_date" />
             </Grid>
             <Grid item xs={4}>
               <ETFormLabel>Number of Days</ETFormLabel>
@@ -285,7 +311,6 @@ const TaskForm = ({
               <ControlledSelectV2
                 placeholder="Select your progress"
                 helperText={errors?.status?.message?.toString()}
-                defaultValue={taskEvent?.status}
                 options={statuses || []}
                 getOptionValue={(o: any) => o?.value.toString()}
                 getOptionLabel={(o: any) => o.label}
@@ -310,7 +335,6 @@ const TaskForm = ({
                 isMulti={true}
                 closeMenuOnSelect={false}
                 hideSelectedOptions={false}
-                defaultValue={taskEvent?.assignee_ids?.map((p) => p.toString())}
                 options={assignees || []}
                 getOptionValue={(o: Staff) => o?.id.toString()}
                 getOptionLabel={(o: Staff) => o.full_name}
@@ -323,9 +347,6 @@ const TaskForm = ({
                 isMulti
                 closeMenuOnSelect={false}
                 hideSelectedOptions={false}
-                defaultValue={taskEvent?.responsibility_ids?.map((p) =>
-                  p.toString()
-                )}
                 options={responsibilities || []}
                 getOptionValue={(o: ListType) => o?.id.toString()}
                 getOptionLabel={(o: ListType) => o.name}

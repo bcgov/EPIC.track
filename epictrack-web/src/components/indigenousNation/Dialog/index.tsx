@@ -24,7 +24,7 @@ export const FirstNationDialog = ({
     if (!firstNationId) return;
     try {
       const response = await indigenousNationService.getById(
-        String(firstNationId)
+        String(firstNationId),
       );
       setFirstNation(response.data);
     } catch (error) {

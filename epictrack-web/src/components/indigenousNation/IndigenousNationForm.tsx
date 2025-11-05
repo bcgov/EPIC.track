@@ -8,7 +8,7 @@ import { ListType } from "models/code";
 import { Staff } from "../../models/staff";
 import { PIPOrgType } from "../../models/pipOrgType";
 import staffService from "../../services/staffService/staffService";
-import pipOrgTypeService from "services/pipOrgTypeService";
+import { pipOrgTypeService } from "services/pipOrgTypeService";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
 import { FirstNation, defaultFirstNation } from "../../models/firstNation";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
@@ -33,12 +33,12 @@ const schema = yup.object().shape({
           const validateINationsResult =
             await indigenousNationService.checkIndigenousNationExists(
               value,
-              parent["id"]
+              parent["id"],
             );
           return !(validateINationsResult.data as any)["exists"] as boolean;
         }
         return true;
-      }
+      },
     ),
   relationship_holder_id: yup.number().nullable(),
   pip_org_type_id: yup.number().nullable(),

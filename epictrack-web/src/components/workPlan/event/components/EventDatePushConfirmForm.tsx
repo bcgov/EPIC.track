@@ -6,15 +6,18 @@ import { Grid } from "@mui/material";
 import { ETSubhead } from "../../../shared";
 import ControlledRadioGroup from "../../../shared/controlledInputComponents/ControlledRadioGroup";
 import { yupResolver } from "@hookform/resolvers/yup";
+
 const schema = yup.object().shape({
   option: yup
     .number()
     .typeError("Please choose one option")
     .required("Please choose one option"),
 });
+
 interface EventDatePushConfirmationProps {
   onSave: (option: number) => void;
 }
+
 const EventDatePushConfirmForm = ({
   onSave,
 }: EventDatePushConfirmationProps) => {
@@ -25,13 +28,12 @@ const EventDatePushConfirmForm = ({
     },
     mode: "onBlur",
   });
-  const {
-    handleSubmit,
-    formState: { errors },
-  } = methods;
+  const { handleSubmit } = methods;
+
   const onSubmitHandler = (submittedData: any) => {
     onSave(submittedData.option);
   };
+
   const options = useMemo<RadioOptions[]>(
     () => [
       {
@@ -43,8 +45,9 @@ const EventDatePushConfirmForm = ({
         value: 1,
       },
     ],
-    []
+    [],
   );
+
   return (
     <FormProvider {...methods}>
       <Grid

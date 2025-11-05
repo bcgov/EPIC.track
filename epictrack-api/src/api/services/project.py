@@ -30,13 +30,16 @@ from api.models.proponent import Proponent
 from api.models.region import Region
 from api.models.project_state import ProjectState
 from api.models.special_field import EntityEnum, SpecialField, FieldTypeEnum
+from api.models.staff_work_role import StaffWorkRole
 from api.models.sub_types import SubType
 from api.models.types import Type
 from api.models.work import Work
 from api.models.work_type import WorkType
 from api.schemas.types import TypeSchema
+from api.services import authorisation
 from api.services.special_field import SpecialFieldService
 from api.utils.enums import ProjectCodeMethod
+from api.utils.roles import Role as KeycloakRole
 from api.utils.token_info import TokenInfo
 
 
@@ -55,13 +58,27 @@ class ProjectService:
         raise ResourceNotFoundError(f"Project with id '{project_id}' not found.")
 
     @classmethod
-    def find_all(cls, with_works=False, is_active=None):
-        """Find all projects"""
-        return Project.find_all_projects(with_works, is_active)
+    def find_all(cls, with_works=False, is_active=None, staff_id=None):
+        """Find all projects, optionally filtered by staff_id."""
+        projects_query = db.session.query(Project)
+
+        if with_works:
+            projects_query = projects_query.filter(Project.works.any())
+        if is_active is not None:
+            projects_query = projects_query.filter(Project.is_active.is_(is_active))
+        projects_query = projects_query.filter(Project.is_deleted.is_(False))
+
+        if staff_id:
+            projects_query = projects_query.join(Work, Work.project_id == Project.id) \
+                                           .join(StaffWorkRole, StaffWorkRole.work_id == Work.id) \
+                                           .filter(StaffWorkRole.staff_id == staff_id)
+
+        return projects_query.all()
 
     @classmethod
     def create_project(cls, payload: dict):
         """Create a new project."""
+        cls._check_auth(one_of_roles=[KeycloakRole.CREATE])
         exists = cls.check_existence(payload["name"])
         if exists:
             raise ResourceExistsError("Project with same name exists")
@@ -69,13 +86,14 @@ class ProjectService:
         project.project_state_id = ProjectStateEnum.PRE_WORK.value
         current_app.logger.info(f"Project obj {dir(project)}")
         project.flush()
-        cls.create_project_special_fields(project)
+        cls._create_project_special_fields(project)
         project.save()
         return project
 
     @classmethod
     def update_project(cls, project_id: int, payload: dict):
         """Update existing project."""
+        cls._check_auth(one_of_roles=[KeycloakRole.EDIT])
         exists = cls.check_existence(payload["name"], project_id)
         if exists:
             raise ResourceExistsError("Project with same name exists")
@@ -88,6 +106,7 @@ class ProjectService:
     @classmethod
     def delete_project(cls, project_id: int):
         """Delete project by id."""
+        cls._check_auth(one_of_roles=[KeycloakRole.DELETE, KeycloakRole.EXTENDED_EDIT])
         project = Project.find_by_id(project_id)
         project.is_deleted = True
         project.save()
@@ -176,6 +195,7 @@ class ProjectService:
     @classmethod
     def import_projects(cls, file: IO):  # pylint: disable=too-many-locals
         """Import proponents"""
+        cls._check_auth(one_of_roles=[KeycloakRole.CREATE])
         data = cls._read_excel(file)
         proponent_names = set(data["proponent_id"].to_list())
         type_names = set(data["type_id"].to_list())
@@ -433,7 +453,7 @@ class ProjectService:
         return data[~data["name"].isin(to_update)]
 
     @classmethod
-    def create_project_special_fields(
+    def _create_project_special_fields(
         cls, project
     ):
         """Create the special fields for the project when a project is created"""
@@ -470,3 +490,8 @@ class ProjectService:
         SpecialFieldService.create_special_field_entry(
           project_state_special_field_data, commit=False
         )
+
+    @classmethod
+    def _check_auth(cls, one_of_roles):
+        """Check if user has one of the given roles"""
+        authorisation.check_auth(one_of_roles=one_of_roles)

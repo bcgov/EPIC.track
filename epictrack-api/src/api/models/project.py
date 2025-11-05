@@ -70,13 +70,20 @@ class Project(BaseModelVersioned):
     abbreviation = Column(String(10), nullable=True, unique=True)
     eac_signed = Column(Date(), nullable=True)
     eac_expires = Column(Date(), nullable=True)
-    project_state_id = Column(ForeignKey("project_states.id", name="projects_project_state_id_project_state_fk"))
-    sub_type = relationship("SubType", foreign_keys=[sub_type_id], lazy="select")
+    project_state_id = Column(ForeignKey(
+        "project_states.id", name="projects_project_state_id_project_state_fk"))
+    sub_type = relationship("SubType", foreign_keys=[
+                            sub_type_id], lazy="select")
     type = relationship("Type", foreign_keys=[type_id], lazy="select")
-    proponent = relationship("Proponent", foreign_keys=[proponent_id], lazy="select")
-    region_env = relationship("Region", foreign_keys=[region_id_env], lazy="select")
-    region_flnro = relationship("Region", foreign_keys=[region_id_flnro], lazy="select")
+    proponent = relationship("Proponent", foreign_keys=[
+                             proponent_id], lazy="select")
+    region_env = relationship("Region", foreign_keys=[
+                              region_id_env], lazy="select")
+    region_flnro = relationship("Region", foreign_keys=[
+                                region_id_flnro], lazy="select")
     works = relationship('Work', lazy='dynamic')
+    project_state = relationship("ProjectState", foreign_keys=[
+                                 project_state_id], lazy="select")
 
     @classmethod
     def find_all_projects(cls, with_works=False, is_active=None):
@@ -92,7 +99,8 @@ class Project(BaseModelVersioned):
     def check_existence(cls, name, project_id=None):
         """Checks if a project exists with given name"""
         query = Project.query.filter(
-            func.lower(Project.name) == func.lower(name), Project.is_deleted.is_(False)
+            func.lower(Project.name) == func.lower(
+                name), Project.is_deleted.is_(False)
         )
         if project_id:
             query = query.filter(Project.id != project_id)

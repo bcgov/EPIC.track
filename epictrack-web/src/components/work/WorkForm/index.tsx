@@ -11,14 +11,14 @@ import { Ministry } from "models/ministry";
 import { POSITION_ENUM } from "models/position";
 import { Project } from "models/project";
 import { Staff } from "models/staff";
-import eaActService from "services/eaActService";
+import { eaActService } from "services/eaActService";
 import EAOTeamService from "services/eao_team";
-import federalInvolvementService from "services/federalInvolvementService";
-import ministryService from "services/ministryService";
-import projectService from "services/projectService/projectService";
+import { federalInvolvementService } from "services/federalInvolvementService";
+import { ministryService } from "services/ministryService";
+import { projectService } from "services/projectService/projectService";
 import staffService from "services/staffService/staffService";
-import substitutionActService from "services/substitutionActService";
-import workService from "services/workService/workService";
+import { substitutionActService } from "services/substitutionActService";
+import { workService } from "services/workService/workService";
 import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
 import { hasPermission } from "../../shared/restricted";
 import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
@@ -62,7 +62,7 @@ const schema = yup.object<Work>().shape({
         if (value) {
           const validateWorkResult = await workService.checkWorkExists(
             value,
-            parent["id"]
+            parent["id"],
           );
           return validateWorkResult.data
             ? (!(validateWorkResult.data as any)["exists"] as boolean)
@@ -71,7 +71,7 @@ const schema = yup.object<Work>().shape({
         return true;
       },
     }),
-  simple_title: yup.string(),
+  simple_title: yup.string().default(""),
   substitution_act_id: yup.number().required("Federal Act is required"),
   eao_team_id: yup.number().required("EAO team is required"),
   responsible_epd_id: yup.number().required("Responsible EPD is required"),
@@ -99,10 +99,11 @@ export default function WorkForm({
   const [projects, setProjects] = useState<ListType[]>([]);
   const [ministries, setMinistries] = useState<ListType[]>([]);
   const [federalInvolvements, setFederalInvolvements] = useState<ListType[]>(
-    []
+    [],
   );
   const [substitutionActs, setSubstitutionActs] = useState<ListType[]>([]);
   const [teams, setTeams] = useState<ListType[]>([]);
+  const [relevantStaff, setRelevantStaff] = useState<Staff[]>([]);
   const [epds, setEPDs] = useState<Staff[]>([]);
   const [leads, setLeads] = useState<Staff[]>([]);
   const [decisionMakers, setDecisionMakers] = useState<Staff[]>([]);
@@ -164,10 +165,10 @@ export default function WorkForm({
 
   useEffect(() => {
     const noneFederalInvolvement = federalInvolvements.find(
-      ({ name }) => name === "None"
+      ({ name }) => name === "None",
     );
     const noneSubstitutionAct = substitutionActs.find(
-      ({ name }) => name === "None"
+      ({ name }) => name === "None",
     );
 
     if (
@@ -178,36 +179,58 @@ export default function WorkForm({
     }
   }, [federalInvolvementId, setValue, substitutionActs, federalInvolvements]);
 
-  const staffByRoles = useMemo(
-    () =>
-      new Map<POSITION_ENUM, (staff: Staff[]) => void>([
-        [POSITION_ENUM.PROJECT_ASSESSMENT_DIRECTOR, setLeads],
-        [
-          POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR,
-          (staff) => {
-            setLeads(staff);
-            setEPDs(staff);
-          },
-        ],
-        [POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER, setDecisionMakers],
-        [POSITION_ENUM.ADM, setDecisionMakers],
-        [POSITION_ENUM.MINISTER, setDecisionMakers],
-      ]),
-    []
-  );
-
-  const getStaffByPosition = useCallback(
-    async (position: POSITION_ENUM) => {
-      const staffResult = await staffService.getStaffByPosition(
-        position.toString()
+  // Fetch only relevant staff
+  useEffect(() => {
+    const fetchRelevantStaff = async () => {
+      const positions = [
+        POSITION_ENUM.PROJECT_ASSESSMENT_DIRECTOR,
+        POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR,
+        POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER,
+        POSITION_ENUM.ADM,
+        POSITION_ENUM.MINISTER,
+      ];
+      const staffResult = await staffService.getAllStaffByPosition(
+        positions.join(","),
       );
       if (staffResult.status === 200) {
-        const data = sort(staffResult.data as never[], "full_name");
-        staffByRoles.get(position)?.(data);
+        const data = sort(staffResult.data as Staff[], "full_name");
+        setRelevantStaff(data);
       }
-    },
-    [staffByRoles]
-  );
+    };
+
+    fetchRelevantStaff();
+  }, []);
+
+  const staffBuckets = useMemo(() => {
+    const epds: Staff[] = [];
+    const leads: Staff[] = [];
+    const decisionMakers: Staff[] = [];
+
+    relevantStaff.forEach((staff) => {
+      switch (staff.position?.id) {
+        case POSITION_ENUM.PROJECT_ASSESSMENT_DIRECTOR:
+          leads.push(staff);
+          break;
+        case POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR:
+          leads.push(staff);
+          epds.push(staff);
+          break;
+        case POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER:
+        case POSITION_ENUM.ADM:
+        case POSITION_ENUM.MINISTER:
+          decisionMakers.push(staff);
+          break;
+      }
+    });
+
+    return { leads, epds, decisionMakers };
+  }, [relevantStaff]);
+
+  useEffect(() => {
+    setLeads(staffBuckets.leads);
+    setEPDs(staffBuckets.epds);
+    setDecisionMakers(staffBuckets.decisionMakers);
+  }, [staffBuckets]);
 
   const getProjects = async () => {
     const projectResult = await projectService.getAll("list_type");
@@ -275,10 +298,6 @@ export default function WorkForm({
   useEffect(() => {
     const fetchStaff = async () => {
       try {
-        const staffPromises = Array.from(staffByRoles.keys()).map((key) =>
-          getStaffByPosition(key as POSITION_ENUM)
-        );
-
         const otherPromises = [
           getEAActs(),
           getEAOTeams(),
@@ -288,15 +307,14 @@ export default function WorkForm({
           getSubstitutionActs(),
           getWorkTypes(),
         ];
-
-        await Promise.all([...staffPromises, ...otherPromises]);
+        await Promise.all([...otherPromises]);
       } catch (error) {
         console.error("Error fetching staff and other data:", error);
       }
     };
 
     fetchStaff();
-  }, [getStaffByPosition, staffByRoles]);
+  }, []);
 
   const onSubmitHandler = async (data: any) => {
     data.start_date = Moment(data.start_date).format();
@@ -309,7 +327,7 @@ export default function WorkForm({
     let prefix = "";
     if (projectId) {
       const project = projects.find(
-        (project) => project.id === Number(projectId)
+        (project) => project.id === Number(projectId),
       );
       prefix += `${project?.name}${titleSeparator}`;
     }

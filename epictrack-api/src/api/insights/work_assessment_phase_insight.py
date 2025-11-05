@@ -8,38 +8,46 @@ from api.models import db
 from api.models.phase_code import PhaseCode
 from api.models.work import Work
 from api.models.work_phase import WorkPhase
+from api.models.work_type import WorkType
+from api.models.project import Project
 from api.models.work_type import WorkTypeEnum
+from api.insights.insights_table_filters import build_insights_filters
+from api.utils.helpers import filter_query_by_staff
 
 
 # pylint: disable=not-callable
 class AssessmentWorksByPhaseInsightGenerator:
     """Insight generator for assessment works grouped by phase"""
 
-    def generate_partition_query(self):
+    def generate_partition_query(self, filters: List = None, staff_id: int = None):
         """Generates the group by subquery."""
-        partition_query = (
-            db.session.query(
-                WorkPhase.phase_id,
-                func.count()
-                .over(order_by=WorkPhase.phase_id, partition_by=WorkPhase.phase_id)
-                .label("count"),
-            )
-            .join(Work, Work.id == WorkPhase.work_id)
-            .filter(
-                Work.is_active.is_(True),
-                Work.is_deleted.is_(False),
-                Work.is_completed.is_(False),
-                Work.work_type_id == WorkTypeEnum.ASSESSMENT.value,
-                WorkPhase.id == Work.current_work_phase_id
-            )
-            .distinct(WorkPhase.phase_id)
-            .subquery()
+        filter_exprs = build_insights_filters(filters, "works") if filters else []
+        query = db.session.query(
+            WorkPhase.phase_id,
+            func.count(func.distinct(Work.id)).label("count"),
         )
-        return partition_query
+        # Join necessary tables for filters
+        if filters:
+            query = query.join(Work, Work.id == WorkPhase.work_id)
+            query = query.join(WorkType, Work.work_type_id == WorkType.id)
+            query = query.join(Project, Work.project_id == Project.id)
+        if staff_id:
+            query = filter_query_by_staff(query, staff_id)
 
-    def fetch_data(self) -> List[dict]:
+        query = query.filter(
+            Work.is_active.is_(True),
+            Work.is_deleted.is_(False),
+            Work.is_completed.is_(False),
+            Work.work_type_id == WorkTypeEnum.ASSESSMENT.value,
+            WorkPhase.id == Work.current_work_phase_id,
+            *filter_exprs if filter_exprs else [],
+        )
+        query = query.group_by(WorkPhase.phase_id)
+        return query.subquery()
+
+    def fetch_data(self, filters: List = None, staff_id: int = None) -> List[dict]:
         """Fetch data from db"""
-        partition_query = self.generate_partition_query()
+        partition_query = self.generate_partition_query(filters, staff_id)
 
         assessment_insights = (
             db.session.query(PhaseCode)

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Divider, Grid } from "@mui/material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
@@ -11,7 +11,7 @@ import { Type } from "../../../models/type";
 import { SubType } from "../../../models/subtype";
 import subTypeService from "../../../services/subTypeService";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
-import projectService from "../../../services/projectService/projectService";
+import { projectService } from "../../../services/projectService/projectService";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
 
@@ -22,7 +22,7 @@ import { ROLES } from "../../../constants/application-constant";
 import { ListType } from "models/code";
 import RegionService from "services/regionService";
 import { REGIONS } from "../../../components/shared/constants";
-import typeService from "services/typeService";
+import { typeService } from "services/typeService";
 import proponentService from "services/proponentService/proponentService";
 import { useAppSelector } from "hooks";
 import { sort } from "utils";
@@ -40,7 +40,7 @@ const schema = yup.object().shape({
         if (value) {
           const validateProjectResult = await projectService.checkProjectExists(
             value,
-            parent["id"]
+            parent["id"],
           );
           return !(validateProjectResult.data as any)["exists"] as boolean;
         }
@@ -65,6 +65,8 @@ const schema = yup.object().shape({
     .min(-180, "Longitude must be greater than or equal to -180")
     .max(180, "Longitude must be less than or equal to 180"),
   abbreviation: yup.string(),
+  region_id_env: yup.string().required("ENV Region is required"),
+  region_id_flnro: yup.string().required("NRS Region is required"),
 });
 
 type ProjectFormProps = {
@@ -80,17 +82,16 @@ export default function ProjectForm({
   saveProject,
   setDisableDialogSave,
 }: ProjectFormProps) {
-  const [envRegions, setEnvRegions] = React.useState<ListType[]>();
-  const [nrsRegions, setNRSRegions] = React.useState<ListType[]>();
-  const [subTypes, setSubTypes] = React.useState<SubType[]>([]);
-  const [types, setTypes] = React.useState<ListType[]>([]);
-  const [proponents, setProponents] = React.useState<Proponent[]>();
+  const [envRegions, setEnvRegions] = useState<ListType[]>();
+  const [nrsRegions, setNRSRegions] = useState<ListType[]>();
+  const [subTypes, setSubTypes] = useState<SubType[]>([]);
+  const [types, setTypes] = useState<ListType[]>([]);
+  const [proponents, setProponents] = useState<Proponent[]>();
 
   const [isProponentFieldLocked, setIsProponentFieldLocked] =
-    React.useState<boolean>(false);
+    useState<boolean>(false);
 
-  const [isNameFieldLocked, setIsNameFieldLocked] =
-    React.useState<boolean>(false);
+  const [isNameFieldLocked, setIsNameFieldLocked] = useState<boolean>(false);
 
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = roles.includes(ROLES.EDIT);
@@ -99,11 +100,11 @@ export default function ProjectForm({
   const shouldDisableFormField =
     (!canEdit && Boolean(project?.name)) || isSpecialFieldLocked;
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (setDisableDialogSave) {
       setDisableDialogSave(isSpecialFieldLocked);
     }
-  }, [isSpecialFieldLocked]);
+  }, [isSpecialFieldLocked, setDisableDialogSave]);
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -125,33 +126,26 @@ export default function ProjectForm({
 
   useEffect(() => {
     reset(project ?? defaultProject);
-  }, [project]);
+  }, [project, reset]);
 
   const formValues = useWatch({ control });
 
-  const getSubTypesByType = async () => {
+  const getSubTypesByType = useCallback(async () => {
     const subTypeResult = await subTypeService.getSubTypeByType(
-      formValues.type_id
+      formValues.type_id,
     );
     if (subTypeResult.status === 200) {
       setSubTypes(subTypeResult.data as SubType[]);
-      // The subtype select box wasn't resetting when type changes
-      if (formValues.sub_type_id !== project?.sub_type_id) {
-        reset({
-          ...formValues,
-          sub_type_id: undefined,
-        });
-      }
     }
-  };
+  }, [formValues]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (formValues.type_id) {
       getSubTypesByType();
     }
-  }, [formValues.type_id, project]);
+  }, [getSubTypesByType, formValues.type_id, project]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getRegions();
     getTypes();
     getProponents();
@@ -170,7 +164,7 @@ export default function ProjectForm({
 
     try {
       const response = await projectService.createProjectAbbreviation(
-        formValues.name
+        formValues.name,
       );
       const generatedAbbreviation = response.data as string;
       resetField("abbreviation");
@@ -349,11 +343,10 @@ export default function ProjectForm({
           />
         </Grid>
         <Grid item xs={6}>
-          <ETFormLabel>ENV Region</ETFormLabel>
+          <ETFormLabel required>ENV Region</ETFormLabel>
           <ControlledSelectV2
             placeholder="Select"
             key={`env_select_${formValues.region_id_env}`}
-            helperText={errors?.region_id_env?.message?.toString()}
             defaultValue={project?.region_id_env}
             options={envRegions || []}
             getOptionValue={(o: Region) => o?.id?.toString()}
@@ -363,11 +356,10 @@ export default function ProjectForm({
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={6}>
-          <ETFormLabel>NRS Region</ETFormLabel>
+          <ETFormLabel required>NRS Region</ETFormLabel>
           <ControlledSelectV2
             placeholder="Select"
             key={`nrs_select_${formValues.region_id_flnro}`}
-            helperText={errors?.region_id_flnro?.message?.toString()}
             defaultValue={project?.region_id_flnro}
             options={nrsRegions || []}
             getOptionValue={(o: Region) => o?.id?.toString()}
@@ -428,7 +420,6 @@ export default function ProjectForm({
           <ETFormLabel>Certificate Number</ETFormLabel>
           <ControlledTextField
             name="ea_certificate"
-            helperText
             fullWidth
             disabled={shouldDisableFormField}
           />
@@ -442,7 +433,7 @@ export default function ProjectForm({
           >
             <ControlledTextField
               name={"abbreviation"}
-              helperText
+              helperText={errors?.abbreviation?.message?.toString()}
               fullWidth
               placeholder="EDRMS retrieval code"
               inputEffects={(e) => e.target.value.toUpperCase()}

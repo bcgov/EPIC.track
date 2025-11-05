@@ -1,17 +1,24 @@
-import { Dispatch, SetStateAction, createContext, useContext } from "react";
-import React from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  createContext,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import TrackDialog from "../../shared/TrackDialog";
 import StatusForm from "./StatusForm";
 import { Status } from "../../../models/status";
 import { showNotification } from "../../shared/notificationProvider";
-import statusService from "../../../services/statusService/statusService";
+import { statusService } from "../../../services/statusService/statusService";
 import { useSearchParams } from "../../../hooks/useSearchParams";
-import { WorkplanContext } from "../WorkPlanContext";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
 import { WORKPLAN_TAB } from "../constants";
 
 interface StatusContextProps {
+  openStatusForm: (status?: Status, clone?: boolean) => void;
+  openApproveStatusDialog: (status: Status) => void;
   setShowStatusForm: Dispatch<SetStateAction<boolean>>;
   status?: Status | null;
   setStatus: Dispatch<SetStateAction<Status | undefined>>;
@@ -22,6 +29,7 @@ interface StatusContextProps {
   setIsCloning: Dispatch<SetStateAction<boolean>>;
   workId: string | null;
   isCloning: boolean;
+  headingCaption?: string;
 }
 
 interface StatusContainerRouteParams extends URLSearchParams {
@@ -39,23 +47,46 @@ export const StatusContext = createContext<StatusContextProps>({
   setIsCloning: () => ({}),
   isCloning: false,
   workId: null,
+  openStatusForm: function (status?: Status, clone?: boolean): void {
+    throw new Error("Function not implemented.");
+  },
+  openApproveStatusDialog: function (status: Status): void {
+    throw new Error("Function not implemented.");
+  },
 });
 
 export const StatusProvider = ({
   children,
+  workId: propWorkId = null,
+  refetchStatuses,
+  headingCaption = "",
 }: {
   children: JSX.Element | JSX.Element[];
+  workId?: string | null;
+  refetchStatuses?: () => void;
+  headingCaption?: string;
 }) => {
-  const [showStatusForm, setShowStatusForm] = React.useState<boolean>(false);
+  const [showStatusForm, setShowStatusForm] = useState<boolean>(false);
   const [showApproveStatusDialog, setShowApproveStatusDialog] =
-    React.useState<boolean>(false);
-  const [isCloning, setIsCloning] = React.useState<boolean>(false);
-  const [status, setStatus] = React.useState<Status>();
-  const [selectedHistoryIndex, setSelectedHistoryIndex] =
-    React.useState<number>(0);
+    useState<boolean>(false);
+  const [isCloning, setIsCloning] = useState<boolean>(false);
+  const [status, setStatus] = useState<Status>();
+  const [selectedHistoryIndex, setSelectedHistoryIndex] = useState<number>(0);
+
   const query = useSearchParams<StatusContainerRouteParams>();
-  const workId = React.useMemo(() => query.get("work_id"), [query]);
-  const { getWorkStatuses, setStatuses } = useContext(WorkplanContext);
+  const urlWorkId = useMemo(() => query.get("work_id"), [query]);
+  const workId = propWorkId ?? urlWorkId;
+
+  const openStatusForm = (s?: Status, clone: boolean = false) => {
+    setStatus(s);
+    setIsCloning(clone);
+    setShowStatusForm(true);
+  };
+
+  const openApproveStatusDialog = (s: Status) => {
+    setStatus(s);
+    setShowApproveStatusDialog(true);
+  };
 
   const onDialogClose = () => {
     setShowStatusForm(false);
@@ -97,8 +128,8 @@ export const StatusProvider = ({
         createStatus(data, callback);
       }
       setIsCloning(false);
-      getWorkStatuses();
       setShowStatusForm(false);
+      refetchStatuses?.();
     } catch (e) {
       const message = getErrorMessage(e);
       showNotification(message, {
@@ -107,7 +138,7 @@ export const StatusProvider = ({
     }
   };
 
-  const closeApproveDialog = React.useCallback(() => {
+  const closeApproveDialog = useCallback(() => {
     setShowApproveStatusDialog(false);
   }, []);
 
@@ -119,7 +150,7 @@ export const StatusProvider = ({
         type: "success",
       });
       setStatus(undefined);
-      getWorkStatuses();
+      refetchStatuses?.();
     } catch (e) {
       const message = getErrorMessage(e);
       showNotification(message, {
@@ -128,11 +159,14 @@ export const StatusProvider = ({
     }
   };
 
-  useRouterLocationStateForHelpPage(() => WORKPLAN_TAB.STATUS.label, []);
+  const statusLabelCallback = useCallback(() => WORKPLAN_TAB.STATUS.label, []);
+  useRouterLocationStateForHelpPage(statusLabelCallback);
 
   return (
     <StatusContext.Provider
       value={{
+        openStatusForm,
+        openApproveStatusDialog,
         setSelectedHistoryIndex,
         selectedHistoryIndex,
         isCloning,
@@ -148,7 +182,8 @@ export const StatusProvider = ({
       {children}
       <TrackDialog
         open={showStatusForm}
-        dialogTitle="Add Status"
+        dialogTitle={status?.id && !isCloning ? "Edit Status" : "Add Status"}
+        subHeading={headingCaption}
         disableEscapeKeyDown
         fullWidth
         maxWidth="sm"
@@ -165,12 +200,12 @@ export const StatusProvider = ({
         dialogContentText="Once approved, this status will be automatically added to the Report."
         okButtonText="Approve"
         cancelButtonText="Cancel"
+        subHeading={headingCaption}
         isActionsRequired
         onCancel={closeApproveDialog}
         onOk={() => {
-          setStatuses([]); // Status history was not being updated so manually doing this
           approveStatus();
-          getWorkStatuses(); // Status history was not being updated so manually doing this
+          refetchStatuses?.();
         }}
       />
     </StatusContext.Provider>

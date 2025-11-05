@@ -12,14 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Work status."""
-from datetime import datetime
-from typing import Dict
+from datetime import datetime, timezone
+from typing import Dict, Optional
 
 from api.exceptions import BadRequestError, ResourceNotFoundError
+from api.models.dashboard_search_options import StatusDashboardSearchOptions
+from api.models.pagination_options import PaginationOptions
 from api.models import WorkStatus as WorkStatusModel
+from api.models import Work
 from api.utils import TokenInfo
 from api.utils.roles import Membership
 from api.services import authorisation
+from api.schemas.response import WorkStatusResponseSchema
 from api.utils.roles import Role as KeycloakRole
 
 
@@ -38,6 +42,73 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
         """Find all status related to a work"""
         results = WorkStatusModel.find_by_params({"work_id": work_id, "id": status_id})
         return results[0] if results else None
+
+    @classmethod
+    def fetch_status_for_all_works(
+            cls,
+            pagination_options: PaginationOptions,
+            search_options: StatusDashboardSearchOptions):
+        """Fetch all latest work statuses for all works."""
+        works, _ = Work.fetch_all_works_by_work_status(None, search_options)
+        work_ids = [work.id for work in works]
+
+        work_statuses = WorkStatusModel.list_latest_status_for_work_ids(work_ids)
+        approved_status_histories = WorkStatusModel.list_statuses_for_work_ids(work_ids)
+
+        schema = WorkStatusResponseSchema()
+
+        filtered = []
+        for work in works:
+            status = work_statuses.get(work.id)
+            if (
+                search_options.is_approved
+                and (not status or str(status.is_approved).lower() not in search_options.is_approved)
+            ):
+                continue
+            if search_options.staleness and status:
+                status_staleness = schema.get_staleness(status)
+                if status_staleness not in search_options.staleness:
+                    continue
+
+            filtered.append((work, status))
+
+        # Apply pagination to filtered results
+        if pagination_options.sort_key:
+            sort_key = pagination_options.sort_key
+            reverse = pagination_options.sort_order == "desc"
+            filtered.sort(
+                key=lambda item: getattr(item[1], sort_key, None) if item[1] else datetime.min.replace(tzinfo=timezone.utc),
+                reverse=reverse
+            )
+        total = len(filtered)
+        page = pagination_options.page or 1
+        size = pagination_options.size or total
+        start = (page - 1) * size
+        end = start + size
+        paginated_filtered = filtered[start:end]
+
+        serialized = []
+        for work, status in paginated_filtered:
+            history = approved_status_histories.get(work.id, [])
+            serialized.append(cls._serialize_status(work, status, history))
+
+        return {"items": serialized, "total": total}
+
+    @staticmethod
+    def _serialize_status(work: Work, status: Optional[WorkStatusModel], status_history: Optional[list[WorkStatusModel]]) -> Dict:
+        """Serialize the status info for a single work."""
+        return {
+            "work_id": work.id,
+            "work_name": work.title,
+            "project_name": work.project.name if work.project else None,
+            "work_type": work.work_type.name if work.work_type else None,
+            "project_is_active": work.project.is_active if work.project else None,
+            "work_is_active": work.is_active,
+            "status": WorkStatusResponseSchema(many=False).dump(status) if status else None,
+            "status_history": WorkStatusResponseSchema(many=True).dump(
+                status_history if status_history else []
+            ),
+        }
 
     @classmethod
     def _check_update_date_validity(cls, work_id, update_data, status_update_id=None):

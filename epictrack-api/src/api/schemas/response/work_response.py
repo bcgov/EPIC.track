@@ -1,8 +1,10 @@
 """Work model schema"""
+from datetime import datetime, timezone
 from flask_marshmallow import Schema
 from marshmallow import EXCLUDE, fields, pre_dump
 
-from api.models import Staff, Work, WorkIssues, WorkIssueUpdates, WorkPhase, WorkStatus
+from api.models import db, Staff, Work, WorkIssues, WorkIssueUpdates, WorkPhase, WorkStatus
+from api.models.staleness_settings import StalenessSettings, StalenessTypeEnum
 from api.schemas import PositionSchema, RoleSchema
 from api.schemas.base import AutoSchemaBase
 from api.schemas.ea_act import EAActSchema
@@ -15,6 +17,8 @@ from api.schemas.response.staff_response import StaffResponseSchema
 from api.schemas.staff import StaffSchema
 from api.schemas.substitution_act import SubstitutionActSchema
 from api.schemas.work_type import WorkTypeSchema
+from api.schemas.response.phase_overage_responsibility_response import PhaseOverageResponsibilityResponseSchema
+from api.utils.enums import StalenessEnum
 
 
 class WorkPhaseResponseSchema(
@@ -101,7 +105,7 @@ class WorkResponseSchema(
         return obj.anticipated_referral_date if obj.anticipated_referral_date else None
 
 
-class WorkStaffRoleReponseSchema(
+class WorkStaffRoleResponseSchema(
     AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Schema for allocated staff for work"""
@@ -151,8 +155,13 @@ class WorkResourceResponseSchema(
     eao_team = fields.Nested(EAOTeamSchema, dump_only=True)
     responsible_epd = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     work_lead = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
-    staff = fields.Nested(WorkStaffRoleReponseSchema(many=True), dump_default=[])
+    staff = fields.Nested(WorkStaffRoleResponseSchema(many=True), dump_default=[])
     title = fields.Str()
+    work_state = fields.Method("get_work_state")
+
+    def get_work_state(self, obj: Work) -> str:
+        """Return the work state"""
+        return obj.work_state.value if obj.work_state else None
 
 
 class WorkPhaseByIdResponseSchema(Schema):
@@ -161,12 +170,25 @@ class WorkPhaseByIdResponseSchema(Schema):
     work_phase = fields.Nested(WorkPhaseResponseSchema, dump_only=True)
 
 
+class WorkPhaseEndEventResponseSchema(
+    Schema
+):
+    """Workphase END event model schema class"""
+
+    name = fields.Str(required=True, metadata={"description": "Name of the end milestone event"})
+    actual_date = fields.DateTime(allow_none=True, metadata={"description": "Actual date of the event"})
+    anticipated_date = fields.DateTime(allow_none=True, metadata={"description": "Anticipated date of the event"})
+
+
 class WorkPhaseAdditionalInfoResponseSchema(Schema):
     """Schema for additional work phase details"""
 
     work_phase = fields.Nested(WorkPhaseResponseSchema, dump_only=True)
     total_number_of_days = fields.Number(
         metadata={"description": "Total number of days in the phase"}, required=True
+    )
+    end_milestone = fields.Nested(
+        WorkPhaseEndEventResponseSchema, dump_only=True, metadata={"description": "End milestone of the phase"}
     )
     current_milestone = fields.Str(metadata={"description": "Current milestone in the phase"})
     next_milestone = fields.Str(metadata={"description": "Next milestone in the phase"})
@@ -180,6 +202,13 @@ class WorkPhaseAdditionalInfoResponseSchema(Schema):
     is_last_phase = fields.Number(metadata={"description": "Indicate if this the last phase of the work"})
     days_left = fields.Number(
         metadata={"description": "Number of days left in the phase"}
+    )
+    days_taken = fields.Number(
+        metadata={"description": "Number of days taken in the phase"}
+    )
+    overage_responsibility = fields.Nested(
+        PhaseOverageResponsibilityResponseSchema(many=True),
+        metadata={"description": "Responsibility for any overage in the phase"}
     )
 
 
@@ -206,6 +235,24 @@ class WorkStatusResponseSchema(
         include_fk = True
         unknown = EXCLUDE
 
+    staleness = fields.Method("get_staleness", dump_only=True)
+
+    def get_staleness(self, obj: WorkStatus) -> str:
+        """Return the staleness of the work status"""
+        if not obj:
+            return None
+        staleness_settings = db.session.query(StalenessSettings).filter_by(is_active=True, staleness_type=StalenessTypeEnum.STATUS).one_or_none()
+        warning_length = getattr(staleness_settings, "warning_length", 5) or 5
+        staleness_length = getattr(staleness_settings, "staleness_length", 10) or 10
+        if obj.posted_date:
+            days_since_update = (datetime.now(timezone.utc) - obj.posted_date).days
+            if days_since_update >= staleness_length:
+                return StalenessEnum.CRITICAL.value
+            if days_since_update >= warning_length:
+                return StalenessEnum.WARN.value
+            return StalenessEnum.GOOD.value
+        return StalenessEnum.CRITICAL.value
+
 
 class WorkIssueUpdatesResponseSchema(
     AutoSchemaBase
@@ -218,6 +265,24 @@ class WorkIssueUpdatesResponseSchema(
         model = WorkIssueUpdates
         include_fk = True
         unknown = EXCLUDE
+
+    staleness = fields.Method("get_staleness", dump_only=True)
+
+    def get_staleness(self, obj: WorkIssueUpdates) -> str:
+        """Return the staleness of the work issue update"""
+        if not obj:
+            return None
+        staleness_settings = db.session.query(StalenessSettings).filter_by(is_active=True, staleness_type=StalenessTypeEnum.ISSUES).one_or_none()
+        warning_length = getattr(staleness_settings, "warning_length", 5) or 5
+        staleness_length = getattr(staleness_settings, "staleness_length", 10) or 10
+        if obj.posted_date:
+            days_since_update = (datetime.now(timezone.utc) - obj.posted_date).days
+            if days_since_update >= staleness_length:
+                return StalenessEnum.CRITICAL.value
+            if days_since_update >= warning_length:
+                return StalenessEnum.WARN.value
+            return StalenessEnum.GOOD.value
+        return StalenessEnum.CRITICAL.value
 
 
 class WorkIssuesResponseSchema(

@@ -17,6 +17,7 @@ from http import HTTPStatus
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
 
+from api.models.dashboard_search_options import EventCalendarSearchOptions
 from api.schemas import request as req
 from api.schemas import response as res
 from api.services.event import EventService
@@ -58,6 +59,32 @@ class Events(Resource):
         request_json["actual_date"] = get_start_of_day(request_json.get("actual_date"))
         event_response = EventService.create_event(request_json, work_phase_id, args.get("push_events"))
         return res.EventResponseSchema().dump(event_response), HTTPStatus.CREATED
+
+
+@cors_preflight("GET")
+@API.route("/calendar", methods=["GET", "OPTIONS"])
+class CalendarEvents(Resource):
+    """Endpoint resource for calendar events"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get():
+        """Get calendar events."""
+        args = request.args
+        search_options = EventCalendarSearchOptions(
+            event_types=args.getlist('event_types[]'),
+            project_types=list(map(int, args.getlist('project_types[]'))),
+            regions=list(map(int, args.getlist('regions[]'))),
+            staff_id=args.get('staff_id', None, int),
+            teams=list(map(int, args.getlist('teams[]'))),
+            work_ids=list(map(int, args.getlist('work_ids[]'))),
+            work_types=list(map(int, args.getlist('work_types[]'))),
+            year=args.get('year', None, int),
+        )
+        events = EventService.find_all_calendar_events(search_options)
+        return jsonify(events), HTTPStatus.OK
 
 
 @cors_preflight("GET, PUT, DELETE")

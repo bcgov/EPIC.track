@@ -9,6 +9,7 @@ export interface MultiDaysInputProps {
   onChangeDay: () => void;
   isFormFieldsLocked: boolean;
 }
+
 const MultiDaysInput = ({
   endDateRef,
   numberOfDaysRef,
@@ -19,9 +20,11 @@ const MultiDaysInput = ({
     register,
     formState: { errors },
   } = useFormContext();
+
   React.useEffect(() => {
     onChangeDay();
-  }, []);
+  }, [onChangeDay]);
+
   return (
     <>
       <Grid item xs={6}>

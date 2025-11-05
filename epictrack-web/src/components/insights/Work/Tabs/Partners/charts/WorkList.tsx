@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
-import TableFilter from "components/shared/filterSelect/TableFilter";
+import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksWithNationsQuery } from "services/rtkQuery/workInsights";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
@@ -13,17 +13,31 @@ import { sort } from "utils";
 import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
+import { useInsightsContext } from "components/insights/InsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
+const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
 const WorkList = () => {
-  const [pagination, setPagination] = React.useState({
+  const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 15,
   });
-  const { data, error, isLoading } = useGetWorksWithNationsQuery();
+  const { columnFilters, setColumnFilters } = useTableFilterContext();
+  const { isUserInsights, staffId } = useInsightsContext();
 
-  const works = data || [];
+  const queryArg = useMemo(() => {
+    return {
+      is_active: true,
+      ...(isUserInsights && staffId ? { staffId } : {}),
+    };
+  }, [isUserInsights, staffId]);
+
+  const { data, error, isLoading } = useGetWorksWithNationsQuery(queryArg, {
+    refetchOnMountOrArgChange: true,
+  });
+
+  const works = useMemo(() => data || [], [data]);
 
   useEffect(() => {
     setPagination((prev) => ({
@@ -34,7 +48,10 @@ const WorkList = () => {
 
   useEffect(() => {
     if (error) {
-      showNotification("Error fetching works", { type: "error" });
+      showNotification("Error fetching Works", {
+        duration: 3000,
+        type: "error",
+      });
     }
   }, [error]);
 
@@ -45,11 +62,11 @@ const WorkList = () => {
           .sort(
             (a, b) =>
               Number(a?.federal_involvement?.sort_order) -
-              Number(b?.federal_involvement?.sort_order)
+              Number(b?.federal_involvement?.sort_order),
           )
           .filter((p) => p.federal_involvement)
-          .map((w) => w?.federal_involvement?.name)
-      )
+          .map((w) => w?.federal_involvement?.name),
+      ),
     );
   }, [works]);
 
@@ -59,8 +76,8 @@ const WorkList = () => {
         [...works]
           .sort((a, b) => a.ministry?.sort_order - b.ministry?.sort_order)
           .filter((w) => w.ministry)
-          .map((w) => w.ministry.name)
-      )
+          .map((w) => w.ministry.name),
+      ),
     );
     return ministry;
   }, [works]);
@@ -72,14 +89,14 @@ const WorkList = () => {
       new Set(
         sort([...nations], "name")
           .map((nation) => nation?.name ?? "")
-          .filter((nation) => nation)
-      )
+          .filter((nation) => nation),
+      ),
     );
 
     return uniqueNations;
   }, [works]);
 
-  const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
+  const columns = useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
         accessorKey: "title",
@@ -91,7 +108,6 @@ const WorkList = () => {
           <ETGridTitle
             to={`/work-plan?work_id=${row.original.id}`}
             enableTooltip
-            titleText={row.original.title}
             tooltip={row.original.title}
           >
             {renderedCellValue}
@@ -126,7 +142,7 @@ const WorkList = () => {
           const value: string = row.getValue(id) || "";
 
           return filterValues.some((filerValue: string) =>
-            value.includes(filerValue)
+            value.includes(filerValue),
           );
         },
       },
@@ -198,12 +214,12 @@ const WorkList = () => {
             row.original.indigenous_works?.map((work) => work.name) || [];
 
           return filterValues.some((filterValue: string) =>
-            workIndigenousNations.includes(filterValue)
+            workIndigenousNations.includes(filterValue),
           );
         },
       },
     ],
-    [ministries, works]
+    [federalInvolvements, indigenousNations, ministries],
   );
   return (
     <MasterTrackTable
@@ -217,11 +233,15 @@ const WorkList = () => {
           },
         ],
       }}
+      loading={isLoading}
+      onColumnFiltersChange={setColumnFilters}
       state={{
         isLoading: isLoading,
         showGlobalFilter: true,
         pagination: pagination,
+        columnFilters,
       }}
+      renderResultCount
       renderTopToolbarCustomActions={({ table }) => (
         <Box
           sx={{

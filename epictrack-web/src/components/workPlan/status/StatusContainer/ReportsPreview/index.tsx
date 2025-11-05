@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Grid, Stack } from "@mui/material";
 import { ThirtySixtyNinety } from "./ThirtySixtyNinety";
 import { ReferralSchedule } from "./ReferralSchedule";
@@ -13,13 +13,13 @@ const TAB = {
 };
 
 export const ReportsPreview = () => {
-  const { loading, loadIssues, issues } = React.useContext(WorkplanContext);
-  const [loadingPreview, setLoadingPreview] = React.useState(true);
-  const [selectedTabIndex, setSelectedTabIndex] = React.useState(
-    TAB.THIRTY_SIXTY_NINETY
+  const { loading, loadIssues, issues } = useContext(WorkplanContext);
+  const [loadingPreview, setLoadingPreview] = useState(true);
+  const [selectedTabIndex, setSelectedTabIndex] = useState(
+    TAB.THIRTY_SIXTY_NINETY,
   );
 
-  const handleLoadIssues = async () => {
+  const handleLoadIssues = useCallback(async () => {
     if (issues.length > 0) {
       setLoadingPreview(false);
       return;
@@ -27,11 +27,11 @@ export const ReportsPreview = () => {
 
     await loadIssues();
     setLoadingPreview(false);
-  };
+  }, [issues.length, loadIssues]);
 
   useEffect(() => {
     handleLoadIssues();
-  }, []);
+  }, [handleLoadIssues]);
 
   if (loading || loadingPreview) {
     return <PreviewSkeleton />;

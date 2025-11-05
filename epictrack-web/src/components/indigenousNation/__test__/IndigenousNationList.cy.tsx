@@ -66,7 +66,7 @@ describe("IndigenousNationList", () => {
     cy.mount(
       <Router>
         <IndigenousNationList />
-      </Router>
+      </Router>,
     );
     cy.wait("@getFirstNations");
   });
@@ -86,18 +86,18 @@ describe("IndigenousNationList", () => {
   it("should filter the First Nation list based on the relationship holder input", () => {
     testTableFiltering(
       "Relationship Holder",
-      firstNation1.relationship_holder?.full_name as Staff["full_name"]
+      firstNation1.relationship_holder?.full_name as Staff["full_name"],
     );
     cy.get("table")
       .contains(
         "tr",
-        firstNation1.relationship_holder?.full_name as Staff["full_name"]
+        firstNation1.relationship_holder?.full_name as Staff["full_name"],
       )
       .should("be.visible");
     cy.get("table")
       .contains(
         "tr",
-        firstNation2.relationship_holder?.full_name as Staff["full_name"]
+        firstNation2.relationship_holder?.full_name as Staff["full_name"],
       )
       .should("not.exist");
   });

@@ -1,52 +1,130 @@
-import { useContext, useEffect, useMemo, useState } from "react";
-import PhaseAccordion from "./PhaseAccordion";
-import { Box, FormControlLabel, Grid } from "@mui/material";
-import { WorkplanContext } from "../WorkPlanContext";
-import { ETCaption1, ETHeading4 } from "../../shared";
-import { CustomSwitch } from "../../shared/CustomSwitch";
-import { Palette } from "../../../styles/theme";
-import { WorkPhaseAdditionalInfo } from "../../../models/work";
+import {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { Box, FormControl, FormControlLabel, Grid } from "@mui/material";
 import { When } from "react-if";
 import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
+import { useCachedState } from "hooks/useCachedFilters";
+import { CustomSwitch } from "components/shared/CustomSwitch";
+import { ETCaption1, ETHeading4 } from "components/shared";
+import { IconProps } from "components/icons/type";
+import { OptionType } from "components/shared/filterSelect/type";
+import Icons from "components/icons";
+import TrackSelect from "components/shared/TrackSelect";
+import WarningBox from "components/shared/warningBox";
+import { Palette } from "../../../styles/theme";
+import { WorkPhaseAdditionalInfo } from "../../../models/work";
+import { WorkplanContext } from "../WorkPlanContext";
+import PhaseAccordion from "./PhaseAccordion";
+
+const CalendarIcon: FC<IconProps> = Icons["CalendarIcon"];
+
+const dateStyleOptions = [
+  { value: "ACTUAL", label: "Actual" },
+  { value: "ACTUAL_AND_ANTICIPATED", label: "Actual + Anticipated" },
+];
 
 const PhaseContainer = () => {
   const ctx = useContext(WorkplanContext);
-  const [expandedPhase, setExpandedPhase] = useState<number | null>(
-    ctx.selectedWorkPhase?.work_phase.id ?? null
+  const WORKPLAN_EXPANDED_PHASE_CACHE_KEY = `workplan-work-id-${ctx.work?.id}-expanded-phase`;
+  const [cachedExpandedPhase, setCachedExpandedPhase] = useCachedState<
+    number | null
+  >(
+    WORKPLAN_EXPANDED_PHASE_CACHE_KEY,
+    ctx.selectedWorkPhase?.work_phase.id ?? null,
   );
   const [showCompletedPhases, setShowCompletedPhases] = useState<boolean>(true);
+  const [showCompletedActual, setShowCompletedActual] = useState<boolean>(true);
+  const [showCompletedAnticipated, setShowCompletedAnticipated] =
+    useState<boolean>(false);
 
   const currentAndFuturePhases: WorkPhaseAdditionalInfo[] = useMemo(
     () => ctx.workPhases.filter((p) => !p.work_phase.is_completed),
-    [ctx.workPhases]
+    [ctx.workPhases],
   );
   const completedPhases: WorkPhaseAdditionalInfo[] = useMemo(
     () => ctx.workPhases.filter((p) => p.work_phase.is_completed),
-    [ctx.workPhases]
+    [ctx.workPhases],
   );
 
+  const overduePhases: WorkPhaseAdditionalInfo[] = useMemo(
+    () =>
+      ctx.workPhases.filter(
+        (p) =>
+          p.work_phase.is_completed &&
+          p.work_phase.legislated &&
+          p.total_number_of_days - p.days_taken < 0,
+      ),
+    [ctx.workPhases],
+  );
+
+  const daysOverdue = useMemo(() => {
+    const overdue = overduePhases.reduce(
+      (sum, p) => sum + (p.total_number_of_days - p.days_taken),
+      0,
+    );
+    const finalPhase = ctx.workPhases.find((phase) => phase.is_last_phase);
+    const finalRemaining = finalPhase
+      ? finalPhase.total_number_of_days - finalPhase.days_taken
+      : 0;
+    return Math.abs(overdue) - finalRemaining;
+  }, [ctx.workPhases, overduePhases]);
+
   const handleExpand = (phaseId: number) => {
-    setExpandedPhase(expandedPhase === phaseId ? null : phaseId);
+    setCachedExpandedPhase(cachedExpandedPhase === phaseId ? null : phaseId);
   };
 
   useEffect(() => {
     if (
+      !cachedExpandedPhase &&
       ctx.work?.current_work_phase_id &&
       ctx.workPhases.length > 0 &&
       !ctx.selectedWorkPhase
     ) {
       const phase = ctx.workPhases.find(
         (workPhase) =>
-          workPhase.work_phase.id === ctx.work?.current_work_phase_id
+          workPhase.work_phase.id === ctx.work?.current_work_phase_id,
       );
       ctx.setSelectedWorkPhase(phase);
-      setExpandedPhase(phase?.work_phase.id ?? null);
+      setCachedExpandedPhase(phase?.work_phase.id ?? null);
     }
-  }, [ctx.workPhases, ctx.work]);
+  }, [cachedExpandedPhase, ctx, setCachedExpandedPhase]);
 
-  useRouterLocationStateForHelpPage(() => {
+  useEffect(() => {
+    if (ctx.selectedWorkPhase) {
+      setCachedExpandedPhase(ctx.selectedWorkPhase.work_phase.id);
+    }
+  }, [ctx.selectedWorkPhase, setCachedExpandedPhase]);
+
+  const callback = useCallback(() => {
     return ctx.work?.work_type?.name ?? undefined;
-  }, [ctx.work?.work_type_id]);
+  }, [ctx.work?.work_type?.name]);
+
+  useRouterLocationStateForHelpPage(callback);
+
+  const formatDateStyleOptionLabel = (
+    option: any,
+    { context }: { context: "menu" | "value" },
+  ) => {
+    return (
+      <ETCaption1
+        sx={{ textTransform: "uppercase" }}
+        color={Palette.neutral.dark}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {context === "value" && <CalendarIcon />}
+          {context === "value"
+            ? `Phase Date View: ${option.label}`
+            : option.label}
+        </Box>
+      </ETCaption1>
+    );
+  };
 
   if (ctx.workPhases.length === 0) {
     return (
@@ -74,18 +152,56 @@ const PhaseContainer = () => {
                 defaultChecked={showCompletedPhases}
               />
             }
-            label="Completed Phases"
+            label={
+              <ETCaption1
+                sx={{
+                  color: Palette.neutral.dark,
+                }}
+              >
+                COMPLETED PHASES
+              </ETCaption1>
+            }
           />
+          <></>
+          {showCompletedPhases && (
+            <FormControl sx={{ minWidth: 220 }}>
+              <TrackSelect
+                options={dateStyleOptions}
+                value={
+                  showCompletedAnticipated
+                    ? dateStyleOptions.find(
+                        (option) => option.value === "ACTUAL_AND_ANTICIPATED",
+                      )
+                    : dateStyleOptions[0]
+                }
+                onChange={(selectedOption) => {
+                  const option = selectedOption as OptionType;
+                  if (option.value === "ACTUAL") {
+                    setShowCompletedActual(true);
+                    setShowCompletedAnticipated(false);
+                  } else {
+                    setShowCompletedActual(true);
+                    setShowCompletedAnticipated(true);
+                  }
+                }}
+                isClearable={false}
+                isSearchable={false}
+                formatOptionLabel={formatDateStyleOptionLabel}
+              />
+            </FormControl>
+          )}
         </Grid>
       </When>
       <When condition={showCompletedPhases}>
         {completedPhases.map((phase) => (
-          <Grid item xs={12}>
+          <Grid item xs={12} key={`completed-phase-${phase.work_phase.id}`}>
             <PhaseAccordion
               key={`phase-accordion-${phase.work_phase.id}`}
-              expanded={expandedPhase === phase.work_phase.id}
+              expanded={cachedExpandedPhase === phase.work_phase.id}
               onExpandHandler={() => handleExpand(phase.work_phase.id)}
               phase={phase}
+              showAnticipated={showCompletedAnticipated}
+              showActual={showCompletedActual}
             />
           </Grid>
         ))}
@@ -97,20 +213,48 @@ const PhaseContainer = () => {
               color: Palette.neutral.dark,
             }}
           >
-            CURRENT AND FUTURE PHASES
+            CURRENT + FUTURE PHASES
           </ETCaption1>
         </Grid>
       </When>
       {currentAndFuturePhases.map((phase) => (
-        <Grid item xs={12}>
+        <Grid item xs={12} key={`current-phase-${phase.work_phase.id}`}>
           <PhaseAccordion
             key={`phase-accordion-${phase.work_phase.id}`}
-            expanded={expandedPhase === phase.work_phase.id}
+            expanded={cachedExpandedPhase === phase.work_phase.id}
             onExpandHandler={() => handleExpand(phase.work_phase.id)}
             phase={phase}
+            showAnticipated={true}
+            showActual={false}
+            isCurrentPhase={
+              ctx.work?.current_work_phase_id === phase.work_phase.id
+            }
           />
         </Grid>
       ))}
+      {!!overduePhases.length && daysOverdue > 0 && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            padding: "1rem",
+          }}
+        >
+          <WarningBox
+            title={`You've exceeded the legislated timeline in phase${
+              overduePhases.length > 1 ? "s" : ""
+            }: ${overduePhases.map((p) => p.work_phase.name).join(", ")}.`}
+            subTitle={
+              <>
+                You must add an <b>Extension Milestone</b> of{" "}
+                <b>{daysOverdue} days</b> to complete this Work.
+              </>
+            }
+            isTitleBold={true}
+          />
+        </Box>
+      )}
     </Grid>
   );
 };

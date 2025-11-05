@@ -1,28 +1,39 @@
-import { Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
+import { useInsightsContext } from "components/insights/InsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 import { getChartColor } from "components/insights/utils";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import { WorkByYear } from "models/insights";
 import { Tooltip, BarChart, Bar, XAxis, YAxis, Cell } from "recharts";
 import { useGetWorksByYearOpenedQuery } from "services/rtkQuery/workInsights";
 
 const WorksCreatedEachYear = () => {
+  const { columnFilters } = useTableFilterContext();
+  const { isUserInsights, staffId } = useInsightsContext();
+
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByYearOpenedQuery();
+  } = useGetWorksByYearOpenedQuery(
+    {
+      columnFilters,
+      staffId: isUserInsights ? staffId : undefined,
+    },
+    { skip: columnFilters.length === 0 },
+  );
 
-  if (isChartLoading || !chartData) {
-    return <BarChartSkeleton />;
+  if (error) {
+    showNotification("Could not load Works created each year", {
+      duration: 3000,
+      type: "error",
+    });
   }
 
-  // TODO: handle error
-  if (error) {
-    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
-    return <div>Error</div>;
+  if (isChartLoading || !chartData) {
+    return <BarChartSkeleton loading={isChartLoading} />;
   }
 
   const formatData = (data: WorkByYear[]) => {
@@ -43,29 +54,36 @@ const WorksCreatedEachYear = () => {
           <ETCaption1 bold>WORKS CREATED BY YEAR</ETCaption1>
         </Grid>
         <Grid item xs={12}>
-          <ETCaption3>The number of works created each year</ETCaption3>
+          <ETCaption3>The number of Works created each year</ETCaption3>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <BarChart
-            layout="vertical"
-            width={350}
-            height={chartData.length * 30 + 100}
-            data={formatData(chartData)}
-          >
-            <XAxis allowDecimals={false} type={"number"} />
-            <YAxis
-              dataKey={"name"}
-              type={"category"}
-              width={40}
-              tick={{ fontSize: 12 }}
-            />
-            <Bar dataKey="value">
-              {formatData(chartData).map((entry, index: number) => (
-                <Cell key={`cell-${entry.id}`} fill={getChartColor(index)} />
-              ))}
-            </Bar>
-            <Tooltip />
-          </BarChart>
+          <Box style={{ width: "100%", height: "300px", overflowY: "scroll" }}>
+            {chartData.length > 0 && (
+              <BarChart
+                layout="vertical"
+                width={350}
+                height={chartData.length * 30 + 100}
+                data={formatData(chartData)}
+              >
+                <XAxis allowDecimals={false} type={"number"} />
+                <YAxis
+                  dataKey={"name"}
+                  type={"category"}
+                  width={40}
+                  tick={{ fontSize: 12 }}
+                />
+                <Bar dataKey="value">
+                  {formatData(chartData).map((entry, index: number) => (
+                    <Cell
+                      key={`cell-${entry.id}`}
+                      fill={getChartColor(index)}
+                    />
+                  ))}
+                </Bar>
+                <Tooltip />
+              </BarChart>
+            )}
+          </Box>
         </Grid>
       </Grid>
     </GrayBox>

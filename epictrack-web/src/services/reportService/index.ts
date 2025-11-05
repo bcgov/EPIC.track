@@ -4,7 +4,7 @@ import http from "../../apiManager/http-request-handler";
 const fetchReportData = async (reportType: string, reportParams: any) => {
   return await http.PostRequest(
     Endpoints.Reports.GET_REPORT + `/${reportType}`,
-    reportParams
+    reportParams,
   );
 };
 const downloadPDF = async (reportType: string, reportParams: any) => {
@@ -14,7 +14,7 @@ const downloadPDF = async (reportType: string, reportParams: any) => {
     {},
     {
       responseType: "blob",
-    }
+    },
   );
 };
 

@@ -55,3 +55,18 @@ class WorkIssues(BaseModelVersioned):
             cls.start_date.desc()
         )
         return query.all()
+
+    @classmethod
+    def list_all_issues_for_work_ids(cls, work_ids: list[int]) -> dict[int, list[WorkIssues]]:
+        """Fetch all issues for multiple works."""
+        issues = (
+            WorkIssues
+            .query
+            .filter(
+                cls.work_id.in_(work_ids),
+                cls.is_deleted.is_(False)
+            )
+            .order_by(cls.work_id, cls.start_date.desc())
+            .all()
+        )
+        return issues

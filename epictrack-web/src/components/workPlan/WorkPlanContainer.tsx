@@ -21,11 +21,13 @@ import { IconProps } from "../icons/type";
 import { WORKPLAN_TAB } from "./constants";
 import { StalenessEnum } from "constants/application-constant";
 import { issueListMaxStaleness } from "./utils";
+import Calendar from "components/calendar";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 const ExclamationSmallIcon: React.FC<IconProps> = Icons["ExclamationSmallIcon"];
 const tabPanel: SxProps = {
   paddingTop: "2rem",
+  height: "100%",
 };
 const WorkPlanContainer = () => {
   const location = useLocation();
@@ -37,7 +39,7 @@ const WorkPlanContainer = () => {
   const ctx = useContext(WorkplanContext);
 
   const activeStaff = ctx.team.filter(
-    (staffWorkRole) => staffWorkRole.is_active
+    (staffWorkRole) => staffWorkRole.is_active,
   );
 
   const handleTabSelected = (_event: React.SyntheticEvent, index: number) => {
@@ -50,13 +52,13 @@ const WorkPlanContainer = () => {
       : calculateStatusStaleness(
           ctx.statuses.find((status) => status.is_approved),
           ctx.statusStalenessSetting?.staleness_length,
-          ctx.statusStalenessSetting?.warning_length
+          ctx.statusStalenessSetting?.warning_length,
         );
 
   const highestStaleness = issueListMaxStaleness(
     ctx.issues,
     ctx.issueStalenessSetting?.staleness_length,
-    ctx.issueStalenessSetting?.warning_length
+    ctx.issueStalenessSetting?.warning_length,
   );
 
   const iconStyles = React.useMemo(() => {
@@ -112,6 +114,12 @@ const WorkPlanContainer = () => {
                 label={WORKPLAN_TAB.WORKPLAN.label}
               />
               <ETTab
+                sx={{
+                  paddingLeft: 0,
+                }}
+                label={WORKPLAN_TAB.CALENDAR.label}
+              />
+              <ETTab
                 label={WORKPLAN_TAB.STATUS.label}
                 icon={
                   (statusStaleness === StalenessEnum.CRITICAL ||
@@ -149,6 +157,27 @@ const WorkPlanContainer = () => {
           >
             <PhaseContainer />
           </TabPanel>
+          <TabPanel
+            index={WORKPLAN_TAB.CALENDAR.index}
+            value={selectedTabIndex}
+            sx={{
+              ...tabPanel,
+            }}
+          >
+            <Calendar
+              initialSearchOptions={{
+                regions: [],
+                work_types: [],
+                project_types: [],
+                event_types: ["include_tasks:true"],
+                work_ids: ctx.work?.id ? [ctx.work?.id] : [],
+                staff_id: null,
+                year: new Date().getFullYear(),
+                teams: [],
+              }}
+            />
+          </TabPanel>
+
           <TabPanel
             index={WORKPLAN_TAB.STATUS.index}
             value={selectedTabIndex}

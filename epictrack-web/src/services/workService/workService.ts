@@ -7,6 +7,7 @@ import { WorkFirstNation } from "../../models/firstNation";
 import { Work, WorkPhase } from "../../models/work";
 import { WorkType } from "../../models/workType";
 import { AxiosResponse } from "axios";
+import { WorkResource } from "models/workResource";
 interface WorkPhaseResponse {
   work_phase: WorkPhase;
 }
@@ -22,7 +23,7 @@ class WorkService implements ServiceBase {
   async update(data: MasterBase, id: string) {
     return await http.PutRequest(
       Endpoints.Works.WORKS + `/${id}`,
-      JSON.stringify(data)
+      JSON.stringify(data),
     );
   }
 
@@ -38,7 +39,13 @@ class WorkService implements ServiceBase {
     const encodedTitle = encodeURIComponent(title);
     return await http.GetRequest(
       Endpoints.Works.WORKS +
-        `/exists?title=${encodedTitle}${id ? "&work_id=" + id : ""}`
+        `/exists?title=${encodedTitle}${id ? "&work_id=" + id : ""}`,
+    );
+  }
+
+  async getWorkIdsByStaff(staffId: number) {
+    return await http.GetRequest<Number[]>(
+      Endpoints.Works.WORKS_BY_STAFF.replace(":staff_id", staffId.toString()),
     );
   }
 
@@ -49,7 +56,7 @@ class WorkService implements ServiceBase {
   async getWorkTeamMembers(workId: number, isActive: any = undefined) {
     let query = `${Endpoints.Works.WORK_TEAM_MEMBERS.replace(
       ":work_id",
-      workId.toString()
+      workId.toString(),
     )}`;
     if (isActive !== undefined) {
       query += `?is_active=${isActive}`;
@@ -60,7 +67,7 @@ class WorkService implements ServiceBase {
   async updateWorkStaff(data: StaffWorkRole, workStaffId: number) {
     const query = `${Endpoints.Works.WORK_TEAM_MEMBER.replace(
       ":work_staff_id",
-      workStaffId.toString()
+      workStaffId.toString(),
     )}`;
     return await http.PutRequest(query, JSON.stringify(data));
   }
@@ -68,7 +75,7 @@ class WorkService implements ServiceBase {
   async createWorkStaff(data: StaffWorkRole, workId: number) {
     const query = `${Endpoints.Works.WORK_TEAM_MEMBERS.replace(
       ":work_id",
-      workId.toString()
+      workId.toString(),
     )}`;
 
     return await http.PostRequest(query, JSON.stringify(data));
@@ -78,24 +85,24 @@ class WorkService implements ServiceBase {
     workId: number,
     staffId: number,
     roleId: number,
-    workStaffId?: number
+    workStaffId?: number,
   ) {
     const query = `${Endpoints.Works.WORK_TEAM_MEMBERS.replace(
       ":work_id",
-      workId.toString()
+      workId.toString(),
     )}`;
     return await http.GetRequest(
       query +
         `/exists?staff_id=${staffId}&role_id=${roleId}${
           workStaffId ? "&work_staff_id=" + workStaffId : ""
-        }`
+        }`,
     );
   }
 
   async getWorkTeamMember(workStaffId: number) {
     const query = `${Endpoints.Works.WORK_TEAM_MEMBER.replace(
       ":work_staff_id",
-      workStaffId.toString()
+      workStaffId.toString(),
     )}`;
     return await http.GetRequest(query);
   }
@@ -108,11 +115,10 @@ class WorkService implements ServiceBase {
     try {
       const endpoint = Endpoints.Works.GET_WORK_PHASE_BY_ID.replace(
         ":work_phase_id",
-        workPhaseId.toString()
+        workPhaseId.toString(),
       );
-      const result: AxiosResponse<WorkPhaseResponse> = await http.GetRequest(
-        endpoint
-      );
+      const result: AxiosResponse<WorkPhaseResponse> =
+        await http.GetRequest(endpoint);
 
       if (!result.data || !result.data.work_phase) {
         console.error(`No work phase found with ID: ${workPhaseId}`);
@@ -126,6 +132,17 @@ class WorkService implements ServiceBase {
     }
   }
 
+  async getWorkPhaseAdditionalInfo(
+    workId: number,
+    phaseId: number,
+  ): Promise<any> {
+    const query = `${Endpoints.Works.WORK_PHASE_ADDITIONAL_INFO.replace(
+      ":work_id",
+      workId.toString(),
+    ).replace(":phase_id", phaseId.toString())}`;
+    return await http.GetRequest(query);
+  }
+
   async downloadWorkplan(workPhaseId: number) {
     return await http.PostRequest(
       Endpoints.Works.DOWNLOAD_WORK_PLAN + `?work_phase_id=${workPhaseId}`,
@@ -133,22 +150,30 @@ class WorkService implements ServiceBase {
       {},
       {
         responseType: "blob",
-      }
+      },
     );
   }
 
   async checkTemplateUploadStatus(workPhaseId: number) {
     const url = Endpoints.Works.CHECK_TEMPLATE_UPLOAD_STATUS.replace(
       ":work_phase_id",
-      workPhaseId.toString()
+      workPhaseId.toString(),
     );
     return await http.GetRequest(url);
+  }
+
+  async savePhaseResponsibilityNotes(workPhaseId: number, notes: string) {
+    const url = Endpoints.Works.WORK_PHASE_RESPONSIBILITY_NOTES.replace(
+      ":work_phase_id",
+      workPhaseId.toString(),
+    );
+    return await http.PatchRequest(url, { notes });
   }
 
   async saveFirstNationNotes(workId: number, notes: string) {
     const url = Endpoints.Works.WORK_FIRST_NATION_NOTES.replace(
       ":work_id",
-      workId.toString()
+      workId.toString(),
     );
     return await http.PatchRequest(url, { notes });
   }
@@ -156,7 +181,7 @@ class WorkService implements ServiceBase {
   async saveNotes(workId: number, notes: string, note_type: string) {
     const url = Endpoints.Works.WORK_NOTES.replace(
       ":work_id",
-      workId.toString()
+      workId.toString(),
     );
     return await http.PatchRequest<Work>(url, { notes, note_type });
   }
@@ -164,7 +189,7 @@ class WorkService implements ServiceBase {
   async getWorkFirstNations(workId: number) {
     const url = Endpoints.Works.WORK_FIRST_NATIONS.replace(
       ":work_id",
-      workId.toString()
+      workId.toString(),
     );
     return await http.GetRequest(url);
   }
@@ -172,7 +197,7 @@ class WorkService implements ServiceBase {
   async getWorkFirstNation(workNationId: number) {
     const query = `${Endpoints.Works.WORK_FIRST_NATION.replace(
       ":work_first_nation_id",
-      workNationId.toString()
+      workNationId.toString(),
     )}`;
     return await http.GetRequest(query);
   }
@@ -180,7 +205,7 @@ class WorkService implements ServiceBase {
   async updateFirstNation(data: WorkFirstNation, workNationId: number) {
     const query = `${Endpoints.Works.WORK_FIRST_NATION.replace(
       ":work_first_nation_id",
-      workNationId.toString()
+      workNationId.toString(),
     )}`;
     return await http.PutRequest(query, JSON.stringify(data));
   }
@@ -188,7 +213,7 @@ class WorkService implements ServiceBase {
   async createFirstNation(data: WorkFirstNation, workId: number) {
     const query = `${Endpoints.Works.WORK_FIRST_NATIONS.replace(
       ":work_id",
-      workId.toString()
+      workId.toString(),
     )}`;
 
     return await http.PostRequest(query, JSON.stringify(data));
@@ -197,7 +222,7 @@ class WorkService implements ServiceBase {
   async importFirstNations(workId: number, data: any) {
     const query = `${Endpoints.Works.WORK_IMPORT_FIRST_NATIONS.replace(
       ":work_id",
-      workId.toString()
+      workId.toString(),
     )}`;
 
     return await http.PostRequest(query, JSON.stringify(data));
@@ -207,23 +232,23 @@ class WorkService implements ServiceBase {
     return await http.PostRequest(
       Endpoints.Works.DOWNLOAD_WORK_FIRST_NATIONS.replace(
         ":work_id",
-        workId.toString()
+        workId.toString(),
       ),
       {},
       {},
       {
         responseType: "blob",
-      }
+      },
     );
   }
   async checkWorkNationExists(
     workId: number,
     indigenous_nation_id: number,
-    work_indigenous_nation_id: number | undefined
+    work_indigenous_nation_id: number | undefined,
   ) {
     const query = `${Endpoints.Works.WORK_FIRST_NATIONS.replace(
       ":work_id",
-      workId.toString()
+      workId.toString(),
     )}`;
     return await http.GetRequest(query + "/exists", {
       indigenous_nation_id,
@@ -234,5 +259,37 @@ class WorkService implements ServiceBase {
   async getWorkTypes() {
     return await http.GetRequest<WorkType[]>(Endpoints.WorkTypes.GET_ALL);
   }
+
+  async getWorkResources(workId: number) {
+    const query = `${Endpoints.WorkResources.GET_WORK_RESOURCES_BY_WORK.replace(
+      ":work_id",
+      workId.toString(),
+    )}`;
+    return await http.GetRequest<WorkResource[]>(query);
+  }
+
+  async deleteWorkResource(workResourceId: number) {
+    const query = `${Endpoints.WorkResources.WORK_RESOURCE_BY_ID.replace(
+      ":work_resource_id",
+      workResourceId.toString(),
+    )}`;
+    return await http.DeleteRequest(query);
+  }
+
+  async updateWorkResource(workResourceId: number, data: any) {
+    const query = `${Endpoints.WorkResources.WORK_RESOURCE_BY_ID.replace(
+      ":work_resource_id",
+      workResourceId.toString(),
+    )}`;
+    return await http.PutRequest(query, JSON.stringify(data));
+  }
+
+  async createWorkResource(workId: number, data: any) {
+    const query = `${Endpoints.WorkResources.GET_WORK_RESOURCES_BY_WORK.replace(
+      ":work_id",
+      workId.toString(),
+    )}`;
+    return await http.PostRequest(query, JSON.stringify(data));
+  }
 }
-export default new WorkService();
+export const workService = new WorkService();

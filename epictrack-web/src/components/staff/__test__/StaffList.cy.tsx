@@ -56,13 +56,12 @@ describe("StaffList", () => {
         <Router>
           <StaffList />
         </Router>
-      </SnackbarProvider>
+      </SnackbarProvider>,
     );
   });
 
   it("should display the staff list", () => {
-    // Select the table container
-    cy.get(".MuiInputBase-root");
+    cy.get("table").should("exist").and("be.visible");
   });
 
   it("should filter the staff list based on the staff name input", () => {

@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import {
@@ -13,15 +12,25 @@ import { getChartColor } from "components/insights/utils";
 import { WorkByFederalInvolvement } from "models/insights";
 import { useGetWorksByFederalInvolvementQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
+import { useInsightsContext } from "components/insights/InsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const WorkByFederalInvolvementChart = () => {
+  const { isUserInsights, staffId } = useInsightsContext();
+
+  const { columnFilters } = useTableFilterContext();
   const {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByFederalInvolvementQuery();
+  } = useGetWorksByFederalInvolvementQuery(
+    {
+      columnFilters,
+      staffId: isUserInsights ? staffId : undefined,
+    },
+    { skip: columnFilters.length === 0 },
+  );
 
   const formatData = (data?: WorkByFederalInvolvement[]) => {
     if (!data) return [];
@@ -34,13 +43,15 @@ const WorkByFederalInvolvementChart = () => {
     });
   };
 
-  if (isChartLoading) {
-    return <PieChartSkeleton />;
+  if (error) {
+    showNotification("Could not load Works by Federal Involvement data", {
+      duration: 3000,
+      type: "error",
+    });
   }
 
-  if (error) {
-    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
-    return <div>Error</div>;
+  if (isChartLoading || error) {
+    return <PieChartSkeleton loading={isChartLoading} />;
   }
 
   const chartData = formatData(data);

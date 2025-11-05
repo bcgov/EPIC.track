@@ -1,4 +1,3 @@
-import React from "react";
 import { MultiValueProps } from "react-select";
 import { Box } from "@mui/material";
 import { Palette } from "../../../../styles/theme";
@@ -13,7 +12,6 @@ const MultiValue = (props: MultiValueProps) => {
           sx={{
             display: "flex",
             height: "2.25rem",
-            // padding: "0px 12px",
             alignItems: "center",
             alignSelf: "stretch",
             borderRadius: "4px",
@@ -38,11 +36,6 @@ const MultiValue = (props: MultiValueProps) => {
                 })`}
           </ETCaption2>
         </Box>
-      )}
-      {props.index === 0 && !filterProps?.selectedOptions && (
-        <ETCaption2 color={Palette.neutral.light}>
-          {props.selectProps.placeholder}
-        </ETCaption2>
       )}
     </>
   );

@@ -1,9 +1,9 @@
-// worksApi.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { AppConfig } from "config";
 import { prepareHeaders } from "./util";
 import { ProjectBySubtype, ProjectByType } from "models/insights";
 import { Project } from "models/project";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 export const projectInsightsApi = createApi({
   tagTypes: [
@@ -18,8 +18,20 @@ export const projectInsightsApi = createApi({
     prepareHeaders,
   }),
   endpoints: (builder) => ({
-    getProjects: builder.query<Project[], boolean | void>({
-      query: (is_active = true) => `projects?is_active=${is_active}`,
+    getProjects: builder.query<
+      Project[],
+      { is_active?: boolean; staffId?: number } | void
+    >({
+      query: (
+        args: { is_active?: boolean; staffId?: number } = { is_active: true },
+      ) => {
+        const { is_active = true, staffId } = args;
+        let url = `projects?is_active=${is_active}`;
+        if (staffId !== undefined) {
+          url += `&staff_id=${staffId}`;
+        }
+        return url;
+      },
       providesTags: (result) =>
         result
           ? [
@@ -31,8 +43,19 @@ export const projectInsightsApi = createApi({
             ]
           : [{ type: "Projects", id: "LIST" }],
     }),
-    getProjectByType: builder.query<ProjectByType[], void>({
-      query: () => `insights/projects?group_by=type`,
+    getProjectByType: builder.query<
+      ProjectByType[],
+      { columnFilters?: ColumnFilter[]; staffId?: number }
+    >({
+      query: ({ columnFilters, staffId }) => ({
+        url: `insights/projects`,
+        method: "POST",
+        body: {
+          group_by: "type",
+          filters: columnFilters ?? [],
+          ...(staffId !== undefined && { staff_id: staffId }),
+        },
+      }),
       providesTags: (result) =>
         result
           ? [
@@ -44,11 +67,25 @@ export const projectInsightsApi = createApi({
             ]
           : [{ type: "ProjectsByType", id: "LIST" }],
     }),
-    getProjectBySubType: builder.query<ProjectBySubtype[], number>({
-      query: (type_id: number) =>
-        `insights/projects?group_by=subtype${
-          type_id ? `&type_id=${type_id}` : ""
-        }`,
+    getProjectBySubType: builder.query<
+      ProjectBySubtype[],
+      { columnFilters?: ColumnFilter[]; staffId?: number }
+    >({
+      query: ({
+        columnFilters,
+        staffId,
+      }: {
+        columnFilters?: ColumnFilter[];
+        staffId?: number;
+      }) => ({
+        url: `insights/projects`,
+        method: "POST",
+        body: {
+          group_by: "subtype",
+          filters: columnFilters ?? [],
+          ...(staffId !== undefined && { staff_id: staffId }),
+        },
+      }),
       providesTags: (result) =>
         result
           ? [

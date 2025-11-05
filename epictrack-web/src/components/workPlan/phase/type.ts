@@ -4,6 +4,9 @@ export interface PhaseAccordionProps {
   phase: WorkPhaseAdditionalInfo;
   expanded: boolean;
   onExpandHandler: (expand: boolean) => void;
+  showAnticipated: boolean;
+  showActual: boolean;
+  isCurrentPhase?: boolean;
 }
 
 export enum EVENT_TYPE {

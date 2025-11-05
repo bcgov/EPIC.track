@@ -38,7 +38,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from api.models import db
-from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
+from api.models.dashboard_search_options import EventCalendarSearchOptions, IssuesDashboardSearchOptions, StatusDashboardSearchOptions, WorkplanDashboardSearchOptions
 from api.models.event_configuration import EventConfiguration
 from api.models.event_type import EventTypeEnum
 from api.models.event import Event
@@ -164,6 +164,7 @@ class Work(BaseModelVersioned):
                 and_(
                     Event.event_configuration_id == EventConfiguration.id,
                     EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                    Event.is_active.is_(True),
                 ),
             )
             .filter(
@@ -204,7 +205,10 @@ class Work(BaseModelVersioned):
         """Fetch all active works."""
         query = cls.query.filter_by(is_deleted=False)
         query = cls.filter_by_search_criteria(query, search_filters)
-        query = query.order_by(Work.start_date.desc())
+        if pagination_options and pagination_options.sort_order == "asc":
+            query = query.order_by(Work.start_date.asc())
+        else:
+            query = query.order_by(Work.start_date.desc())
 
         no_pagination_options = not pagination_options or not pagination_options.page or not pagination_options.size
         if no_pagination_options:
@@ -234,6 +238,114 @@ class Work(BaseModelVersioned):
         query = cls._filter_by_env_regions(query, search_filters.regions)
 
         query = cls._filter_by_work_states(query, search_filters.work_states)
+
+        return query
+
+    @classmethod
+    def fetch_all_works_by_work_status(
+        cls,
+        pagination_options: PaginationOptions,
+        search_filters: StatusDashboardSearchOptions = None
+    ) -> Tuple[List[Work], int]:
+        """Fetch all active works."""
+        query = cls.query.filter_by(is_deleted=False)
+        query = cls.filter_by_status_search_criteria(query, search_filters)
+        query = query.order_by(Work.start_date.desc())
+
+        no_pagination_options = not pagination_options or not pagination_options.page or not pagination_options.size
+        if no_pagination_options:
+            items = query.all()
+            return items, len(items)
+
+        page = query.paginate(page=pagination_options.page, per_page=pagination_options.size)
+
+        return page.items, page.total
+
+    @classmethod
+    def fetch_all_works_by_work_issues(
+        cls,
+        pagination_options: PaginationOptions,
+        search_filters: IssuesDashboardSearchOptions = None
+    ) -> Tuple[List[Work], int]:
+        """Fetch all works."""
+        query = cls.query.filter_by(is_deleted=False)
+        query = cls.filter_by_issues_search_criteria(query, search_filters)
+        query = query.order_by(Work.start_date.desc())
+
+        no_pagination_options = not pagination_options or not pagination_options.page or not pagination_options.size
+        if no_pagination_options:
+            items = query.all()
+            return items, len(items)
+
+        page = query.paginate(page=pagination_options.page, per_page=pagination_options.size)
+
+        return page.items, page.total
+
+    @classmethod
+    def fetch_all_works_by_calendar_search_criteria(
+        cls,
+        search_filters: EventCalendarSearchOptions = None
+    ) -> Tuple[List[Work], int]:
+        """Fetch all active works."""
+        query = cls.query.filter_by(is_deleted=False)
+        query = cls.filter_by_calendar_search_criteria(query, search_filters)
+        query = query.order_by(Work.start_date.desc())
+
+        items = query.all()
+        return items, len(items)
+
+    @classmethod
+    def filter_by_calendar_search_criteria(cls, query, search_filters: EventCalendarSearchOptions):
+        """Filter by calendar search criteria."""
+        if not search_filters:
+            return query
+
+        query = cls._filter_by_staff_id(query, search_filters.staff_id)
+        query = cls._filter_by_work_type(query, search_filters.work_types)
+        query = cls._filter_by_project_type(query, search_filters.project_types)
+        query = cls._filter_by_eao_team(query, search_filters.teams)
+        query = cls._filter_by_env_regions(query, search_filters.regions)
+        query = cls._filter_by_work_ids(query, search_filters.work_ids)
+
+        return query
+
+    @classmethod
+    def filter_by_issues_search_criteria(cls, query, search_filters: IssuesDashboardSearchOptions):
+        """Filter by issues search criteria."""
+        if not search_filters:
+            return query
+
+        query = cls._filter_by_staff_id(query, search_filters.staff_id)
+
+        query = cls._filter_by_search_text(query, search_filters.text)
+
+        query = cls._filter_by_eao_team(query, search_filters.teams)
+
+        query = cls._filter_by_work_type(query, search_filters.work_types)
+
+        query = cls._filter_by_env_regions(query, search_filters.regions)
+
+        return query
+
+    @classmethod
+    def filter_by_status_search_criteria(cls, query, search_filters: StatusDashboardSearchOptions):
+        """Filter statuses by search criteria."""
+        if not search_filters:
+            return query
+
+        query = cls._filter_by_staff_id(query, search_filters.staff_id)
+
+        query = cls._filter_by_search_text(query, search_filters.text)
+
+        query = cls._filter_by_project_is_active(query, search_filters.project_status)
+
+        query = cls._filter_by_work_is_active(query, search_filters.work_status)
+
+        query = cls._filter_by_eao_team(query, search_filters.teams)
+
+        query = cls._filter_by_work_type(query, search_filters.work_types)
+
+        query = cls._filter_by_env_regions(query, search_filters.regions)
 
         return query
 
@@ -274,10 +386,29 @@ class Work(BaseModelVersioned):
         return query
 
     @classmethod
+    def _filter_by_work_ids(cls, query, work_ids):
+        if work_ids:
+            query = query.filter(Work.id.in_(work_ids))
+        return query
+
+    @classmethod
     def _filter_by_project_type(cls, query, project_type_ids):
         if project_type_ids:
             subquery = exists().where(and_(Work.project_id == Project.id, Project.type_id.in_(project_type_ids)))
             query = query.filter(subquery)
+        return query
+
+    @classmethod
+    def _filter_by_project_is_active(cls, query, project_is_active):
+        if project_is_active:
+            subquery = exists().where(and_(Work.project_id == Project.id, Project.is_active.in_(project_is_active)))
+            query = query.filter(subquery)
+        return query
+
+    @classmethod
+    def _filter_by_work_is_active(cls, query, work_is_active):
+        if work_is_active:
+            query = query.filter(Work.is_active.in_(work_is_active))
         return query
 
     @classmethod

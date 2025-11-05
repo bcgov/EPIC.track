@@ -1,6 +1,11 @@
 import Keycloak from "keycloak-js";
 import { Action, AnyAction, Dispatch } from "redux";
-import { userToken, userAuthentication, userDetails } from "./userSlice";
+import {
+  userToken,
+  userAuthentication,
+  userDetails,
+  userAuthorization,
+} from "./userSlice";
 import { AppConfig } from "../../config";
 import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
@@ -84,7 +89,9 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
         staffProfile = staffResult.data as Staff;
       }
     } catch (e) {
-      console.log(e);
+      if ((e as any).response?.status === 404) {
+        console.log("Staff profile not found for current user.");
+      } else console.log(e);
     }
     const realmAccessRoles =
       KeycloakData.tokenParsed?.realm_access?.roles ?? [];
@@ -102,8 +109,15 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
       staffProfile?.id ?? 0,
       staffProfile?.phone ?? "",
       staffProfile?.position?.name ?? "",
-      roles
+      roles,
     );
+    const isAuthorized = userDetail.groups.some(
+      (group) =>
+        group.startsWith("TRACK/") &&
+        group !== "TRACK" &&
+        group !== "TRACK/NO_ROLE",
+    );
+    dispatch(userAuthorization(isAuthorized));
     dispatch(userDetails(userDetail));
     dispatch(userToken(KeycloakData.token));
     dispatch(userAuthentication(Boolean(KeycloakData.authenticated)));
@@ -135,17 +149,17 @@ const getGroups = async () => {
 
 const updateUserGroup = async (
   userId: string,
-  updateUserGroup: UserGroupUpdate
+  updateUserGroup: UserGroupUpdate,
 ) => {
   return await http.PutRequest(
     Endpoints.Users.UPDATE_USER_GROUPS.replace(":userId", userId),
-    JSON.stringify(updateUserGroup)
+    JSON.stringify(updateUserGroup),
   );
 };
 const updateLastActiveTime = async (userId: number) => {
   try {
     await http.PatchRequest(
-      `${Endpoints.Staffs.STAFFS}/${userId}/last_active_at`
+      `${Endpoints.Staffs.STAFFS}/${userId}/last_active_at`,
     );
   } catch (error) {
     console.error("Error updating last active time:", error);

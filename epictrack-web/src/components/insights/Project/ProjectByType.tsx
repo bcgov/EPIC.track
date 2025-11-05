@@ -1,4 +1,4 @@
-import React from "react";
+import { useMemo } from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import {
@@ -13,23 +13,36 @@ import { getChartColor } from "components/insights/utils";
 import { useGetProjectByTypeQuery } from "services/rtkQuery/projectInsights";
 import { ProjectByType } from "models/insights";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
+import { useTableFilterContext } from "../TableFilterContext";
+import { useInsightsContext } from "components/insights/InsightsContext";
 
 const ProjectByTypeChart = () => {
+  const { columnFilters } = useTableFilterContext();
+  const { isUserInsights, staffId } = useInsightsContext();
+
+  const queryArgs = useMemo(
+    () => ({
+      columnFilters,
+      staffId: isUserInsights ? staffId : undefined,
+    }),
+    [columnFilters, isUserInsights, staffId],
+  );
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetProjectByTypeQuery();
+  } = useGetProjectByTypeQuery(queryArgs, { skip: columnFilters.length === 0 });
 
   if (isChartLoading || !chartData) {
-    return <PieChartSkeleton />;
+    return <PieChartSkeleton loading={isChartLoading} />;
   }
 
-  // TODO: handle error
   if (error) {
-    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
+    showNotification("Could not load Project By Type data", {
+      duration: 3000,
+      type: "error",
+    });
     return <div>Error</div>;
   }
 
@@ -79,7 +92,7 @@ const ProjectByTypeChart = () => {
                 iconSize={16}
                 wrapperStyle={{
                   fontSize: "16px",
-                  maxWidth: "200px", // Add this line to limit the width of the legend
+                  maxWidth: "220px",
                   overflow: "hidden",
                 }}
               />

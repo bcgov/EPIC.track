@@ -20,22 +20,27 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import NextPageTemplate, Paragraph, Table, TableStyle
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.platypus.frames import Frame
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, BooleanClauseList, Exists, func, or_, select
 from sqlalchemy.dialects.postgresql import INTERVAL
+from sqlalchemy.orm import aliased
 
 from api.models import Event, Project, Work, WorkStatus, WorkType, db
 from api.models.event_category import EventCategoryEnum
 from api.models.event_configuration import EventConfiguration
 from api.models.event_type import EventTypeEnum
-from api.models.special_field import EntityEnum
+from api.models.phase_code import PhaseVisibilityEnum
+from api.models.special_field import EntityEnum, SpecialField
 from api.models.staleness_settings import StalenessSettings, StalenessTypeEnum
 from api.models.work import WorkStateEnum
 from api.models.work_issues import WorkIssues
 from api.models.work_issue_updates import WorkIssueUpdates
+from api.models.work_phase import WorkPhase
+from api.models.work_type import WorkTypeEnum
 from api.services.special_field import SpecialFieldService
 from api.services.work_issues import WorkIssuesService
 from api.schemas import response as res
 from api.utils.constants import CANADA_TIMEZONE
+from api.utils.work_phases import FIRST_WORK_PHASES
 from api.utils.enums import StalenessEnum
 from api.utils.util import process_data
 from api.utils.draftjs_extractor import draftjs_extractor
@@ -123,13 +128,15 @@ class ThirtySixtyNinetyReport(ReportFactory):
             .all()
         )
 
-    def _fetch_data(self, report_date):
+    def _fetch_data(self, report_date, include_first_phase):
         """Fetches the relevant data for EA 30-60-90 Report"""
+        report_date = report_date.astimezone(CANADA_TIMEZONE)
         max_date = report_date + timedelta(days=93)
         next_pecp_query = self._get_next_pcp_query(report_date, max_date)
-        valid_event_ids = self._get_valid_event_ids(report_date)
+        valid_event_ids = self._get_valid_event_ids(report_date, include_first_phase)
         work_issue_work_ids = self._get_valid_work_issue_work_ids(report_date)
         latest_status_updates = self._get_latest_status_update_query()
+        sh_project_name = aliased(SpecialField)
 
         results_qry = (
             Work.query.filter(
@@ -140,6 +147,13 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 ),
             )
             .join(Project, Work.project)
+            # special history project name
+            .outerjoin(sh_project_name, and_(
+                sh_project_name.entity_id == Work.project_id,
+                sh_project_name.entity == EntityEnum.PROJECT.value,
+                sh_project_name.time_range.contains(report_date),
+                sh_project_name.field_name == "name"
+            ))
             .join(WorkType, Work.work_type)
             .outerjoin(
                 Event,
@@ -150,7 +164,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
             .outerjoin(EventConfiguration, EventConfiguration.id == Event.event_configuration_id)
             .outerjoin(latest_status_updates, latest_status_updates.c.work_id == Work.id)
             .outerjoin(next_pecp_query, next_pecp_query.c.work_id == Work.id)
-            .outerjoin(WorkStatus)
+            .outerjoin(WorkStatus, WorkStatus.work_id == Work.id)
             .filter(
                 or_(
                     # Include Works with valid work issues
@@ -163,7 +177,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 )
             )
             .add_columns(
-                Project.name.label("project_name"),
+                func.coalesce(sh_project_name.field_value, Project.name).label("project_name"),
                 WorkType.report_title.label("work_report_title"),
                 (
                     Event.anticipated_date
@@ -202,43 +216,41 @@ class ThirtySixtyNinetyReport(ReportFactory):
         4. Retrieving and applying project-specific history to the earliest event in each interval.
         """
         data = super()._format_data(data)
-        # Get work issues for work first event
         data = self._update_work_issues(data)
         data = self._resolve_multiple_events(data)
         data = self._format_notes(data)
-        response = {
-            "30": [],
-            "60": [],
-            "90": [],
-        }
+        # Initialize response buckets and get first events for project history lookup
+        response = {"30": [], "60": [], "90": []}
         works = [group["items"][0] for group in data]
         project_special_history = self._get_project_special_history(works)
+
+        # Interval cutoffs in days
+        intervals = [
+            (30, "30"),
+            (60, "60"),
+            (93, "90")
+        ]
+
         for group in data:
             first_event = group["items"][0]
-            first_event_date = first_event["event_date"]
-            if first_event_date <= (self.report_date + timedelta(days=30)):
-                special_history = self._get_project_special_history_id(
-                    first_event["project_id"], project_special_history[30], first_event_date
-                )
-                if special_history:
-                    first_event["project_name"] = special_history.field_value
-                response["30"].append(group)
-            elif first_event_date <= (self.report_date + timedelta(days=60)):
-                special_history = self._get_project_special_history_id(
-                    first_event["project_id"], project_special_history[60], first_event_date
-                )
-                if special_history:
-                    first_event["project_name"] = special_history.field_value
-                response["60"].append(group)
-            elif first_event_date <= (self.report_date + timedelta(days=93)):
-                special_history = self._get_project_special_history_id(
-                    first_event["project_id"], project_special_history[90], first_event_date
-                )
-                if special_history:
-                    first_event["project_name"] = special_history.field_value
-                response["90"].append(group)
-        for _, value in response.items():
-            value.sort(key=lambda work: work["items"][0]["event_date"])
+            event_date = first_event["event_date"]
+
+            for cutoff, label in intervals:
+                if event_date <= self.report_date + timedelta(days=cutoff):
+                    special_history = self._get_project_special_history_id(
+                        first_event["project_id"],
+                        project_special_history[int(label)],
+                        event_date
+                    )
+                    if special_history:
+                        first_event["project_name"] = special_history.field_value
+                    response[label].append(group)
+                    break  # Stop after the first matching bucket
+
+        # Sort each group by event date
+        for groups in response.values():
+            groups.sort(key=lambda work: work["items"][0]["event_date"])
+
         return response
 
     def _update_work_issues(self, data) -> List[WorkIssues]:
@@ -286,17 +298,17 @@ class ThirtySixtyNinetyReport(ReportFactory):
         return data
 
     def generate_report(
-        self, report_date: datetime, return_type
+        self, report_date: datetime, return_type, include_first_phase
     ):  # pylint: disable=too-many-locals
         """Generates a report and returns it"""
         self.report_date = report_date.astimezone(utc)
-        data = self._fetch_data(report_date + timedelta(days=-3))
+        data = self._fetch_data(report_date + timedelta(days=-3), include_first_phase)
         data = self._format_data(data)
         data = self._update_staleness(data, report_date)
         if return_type == "json" or not data:
             return process_data(data, return_type)
         pdf_stream = BytesIO()
-        current_directory = path.dirname(path.abspath(__file__))  # TODO CJK: refactor to pull out style setup
+        current_directory = path.dirname(path.abspath(__file__))  # TODO CJK: refactor to pull out style setup TRACK-527
         font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Regular_2f.ttf")
         bold_font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Bold_2f.ttf")
         pdfmetrics.registerFont(TTFont('BCSans', font_path))
@@ -422,102 +434,120 @@ class ThirtySixtyNinetyReport(ReportFactory):
             .join(WorkIssueUpdates.work_issue)
             .filter(
                 WorkIssueUpdates.is_approved.is_(True),
+                WorkIssueUpdates.posted_date.isnot(None),
                 WorkIssueUpdates.posted_date.between(start_date.date(), end_date.date()),
                 WorkIssues.work_id.in_(self.high_profile_work_issue_work_ids)
             )
         )
-        return work_ids
+        return [wid for (wid,) in work_ids.distinct().all()] or [-1]
 
-    def _get_valid_event_ids(self, report_date):
-        """Find and return set of valid decision or high priority event ids"""
-        start_date = report_date + timedelta(days=-3)
-        end_date = report_date + timedelta(days=93)
-        # Subquery to get referral events that have an anticipated date, but no actual (eg. Referral has not yet been made)
-        referral_exists_subquery = (
-            db.session.query(Event.id)
-            .filter(
-                Event.work_id == Work.id,
-                Event.event_configuration.has(event_type_id=EventTypeEnum.REFERRAL.value),
-                # Event.anticipated_date.isnot(None),
-                Event.actual_date.is_(None)
-            )
-            .correlate(Work)
-            .exists()
+    def _get_work_type_specific_events(self) -> BooleanClauseList:
+        """Returns an OR caluse for work type specific events"""
+        return or_(
+            and_(
+                Work.work_type_id == WorkTypeEnum.PROJECT_NOTIFICATION.value,
+                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
+                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                EventConfiguration.name == "Project Notification Report referred to Decision Maker",
+            ),
+            and_(
+                Work.work_type_id == WorkTypeEnum.MINISTERS_DESIGNATION.value,
+                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
+                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                EventConfiguration.name != "Minister's Designation Report referred to Decision Maker",
+            ),
+            and_(
+                Work.work_type_id == WorkTypeEnum.EXEMPTION_ORDER.value,
+                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
+                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                EventConfiguration.name != "Exemption Request Package Referred to Minister",
+            ),
+            and_(
+                Work.work_type_id == WorkTypeEnum.ASSESSMENT.value,
+                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
+                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                EventConfiguration.name.in_(["EAC Referral Package sent to Ministers", "Termination Package Referred to Minister"])
+            ),
+            and_(
+                Work.work_type_id == WorkTypeEnum.AMENDMENT.value,
+                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
+                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                EventConfiguration.name == "Amendment Decision Package Referred to Decision Maker"
+            ),
         )
+
+    def _get_referral_exists_subquery(self) -> Exists:
+        """Subquery to get referral events that have an anticipated date, but no actual (eg. Referral has not yet been made)"""
+        return db.session.query(Event.id).filter(
+            Event.work_id == Work.id,
+            Event.event_configuration.has(event_type_id=EventTypeEnum.REFERRAL.value),
+            Event.actual_date.is_(None)
+        ).correlate(Work).exists()
+
+    def _get_valid_event_ids(self, report_date, include_first_phase) -> List[int]:
+        """Find and return set of valid event ids"""
+        start_date = report_date - timedelta(days=3)
+        end_date = report_date + timedelta(days=93)
+
+        referral_exists_subquery = self._get_referral_exists_subquery()
+
+        minister_decision_late = and_(
+            EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
+            Event.actual_date.is_(None),
+            Event.anticipated_date.isnot(None),
+            Event.anticipated_date < start_date.date(),
+        )
+
+        decision_pending_referral_made = and_(
+            EventConfiguration.event_type_id == EventCategoryEnum.DECISION.value,
+            Event.actual_date.is_(None),
+            Event.anticipated_date.isnot(None),
+            Event.anticipated_date.between(
+                (report_date - timedelta(days=1600)).date(),
+                end_date.date()
+            ),
+            ~referral_exists_subquery,
+        )
+
+        # High profile or milestone events
+        relevant_events = and_(
+            func.coalesce(Event.actual_date, Event.anticipated_date).isnot(None),
+            func.coalesce(Event.actual_date, Event.anticipated_date).between(
+                start_date.date(), end_date.date()
+            ),
+            or_(
+                Event.event_configuration_id.in_(self.decision_configuration_ids),
+                and_(
+                    Work.is_high_priority.is_(True),
+                    EventConfiguration.event_category_id == EventCategoryEnum.PCP.value,
+                    EventConfiguration.event_type_id == EventTypeEnum.COMMENT_PERIOD.value
+                ),
+                and_(
+                    Work.is_high_priority.is_(True),
+                    Event.high_priority.is_(True),
+                    EventConfiguration.event_category_id.not_in([EventCategoryEnum.CALENDAR.value, EventCategoryEnum.FINANCE.value])
+                ),
+                self._get_work_type_specific_events()
+            )
+        )
+
+        work_phase_filters = [EventConfiguration.work_phase_id == WorkPhase.id, WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value]
+        if not include_first_phase:
+            work_phase_filters.append(WorkPhase.name.notin_(FIRST_WORK_PHASES))
+
         valid_events = (
             db.session.query(Event.id)
             .join(EventConfiguration, Event.event_configuration)
             .join(Work, Event.work)
-            .filter(
-                or_(
-                    and_(
-                        # Keep Minister's decision with no actual date if anticipated date indicates it should have been made
-                        EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
-                        Event.actual_date.is_(None),
-                        Event.anticipated_date < start_date.date()
-                    ),
-                    and_(
-                        # Keep decisions with no actual date if date has passed and referral was already made
-                        EventConfiguration.event_type_id == EventCategoryEnum.DECISION.value,
-                        Event.actual_date.is_(None),
-                        Event.anticipated_date.between(
-                            (report_date + timedelta(days=-1600)).date(),
-                            end_date.date()
-                        ),
-                        ~referral_exists_subquery,  # Exclude decisions if an anticipated referral exists
-                    ),
-                    and_(
-                        func.coalesce(Event.actual_date, Event.anticipated_date).between(
-                            start_date.date(), end_date.date()
-                        ),
-                        or_(
-                            Event.event_configuration_id.in_(self.decision_configuration_ids), # Decision events
-                            and_( # High profile work with pcp
-                                Work.is_high_priority.is_(True),
-                                EventConfiguration.event_category_id == EventCategoryEnum.PCP.value,
-                                EventConfiguration.event_type_id == EventTypeEnum.COMMENT_PERIOD.value
-                            ),
-                            and_( # High profile events
-                                Work.is_high_priority.is_(True),
-                                Event.high_priority.is_(True),
-                                EventConfiguration.event_category_id.not_in([EventCategoryEnum.CALENDAR.value, EventCategoryEnum.FINANCE.value])
-                            ),
-                            and_(
-                                Work.work_type_id == 1, # Project Notification
-                                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                                EventConfiguration.name == "Project Notification Report referred to Decision Maker",
-                            ),
-                            and_(
-                                Work.work_type_id == 2, # Minister's Designation
-                                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                                EventConfiguration.name != "Minister's Designation Report referred to Decision Maker",
-                            ),
-                            and_(
-                                Work.work_type_id == 5, # Exemption Order
-                                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                                EventConfiguration.name != "Exemption Request Package Referred to Minister",
-                            ),
-                            and_(
-                                Work.work_type_id == 6, # Assessment
-                                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                                EventConfiguration.name.in_(["EAC Referral Package sent to Ministers", "Termination Package Referred to Minister"])
-                            ),
-                            and_(
-                                Work.work_type_id == 7, # Ammendment
-                                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                                EventConfiguration.name == "Amendment Decision Package Referred to Decision Maker"
-                            ),
-                        ),
-                    )
-                )
-            )
+            .join(WorkPhase, and_(*work_phase_filters))
+            .filter(or_(
+                minister_decision_late,
+                decision_pending_referral_made,
+                relevant_events
+            ))
         )
-        return valid_events
+
+        return [e.id for e in valid_events.all()] or [-1]
 
     def _format_table_data_events(self, events, style):
         """Generates styled paragraphs for all events relating to the same work"""

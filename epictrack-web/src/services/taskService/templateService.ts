@@ -10,44 +10,44 @@ class TemplateService {
   getTemplatesByParams = async (
     eaActId: number,
     workTypeId: number,
-    phaseId: number
+    phaseId: number,
   ) => {
     return await http.GetRequest(
-      `${Endpoints.Templates.TEMPLATES}?work_type_id=${workTypeId}&ea_act_id=${eaActId}&phase_id=${phaseId}`
+      `${Endpoints.Templates.TEMPLATES}?work_type_id=${workTypeId}&ea_act_id=${eaActId}&phase_id=${phaseId}`,
     );
   };
 
   getTemplate = async (templateId: number) => {
     return await http.GetRequest(
-      Endpoints.Templates.TEMPLATES + `/${templateId}`
+      Endpoints.Templates.TEMPLATES + `/${templateId}`,
     );
   };
 
   getTemplateTasks = async (templateId: number) => {
     return await http.GetRequest(
-      Endpoints.Templates.TEMPLATES + `/${templateId}/tasks`
+      Endpoints.Templates.TEMPLATES + `/${templateId}/tasks`,
     );
   };
 
   createTemplate = async (data: Template) => {
     return await http.MultipartFormPostRequest(
       Endpoints.Templates.TEMPLATES,
-      data
+      data,
     );
   };
 
   patchTemplate = async (templateId: number, data: TemplateApprove) => {
     return await http.PatchRequest(
       Endpoints.Templates.TEMPLATES + `/${templateId}`,
-      data
+      data,
     );
   };
 
   deleteTemplate = async (templateId?: number) => {
     return await http.DeleteRequest(
-      Endpoints.Templates.TEMPLATES + `/${templateId}`
+      Endpoints.Templates.TEMPLATES + `/${templateId}`,
     );
   };
 }
 
-export default new TemplateService();
+export const templateService = new TemplateService();

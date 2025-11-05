@@ -8,20 +8,17 @@ import {
   useState,
 } from "react";
 import { useSearchParams } from "../../hooks/useSearchParams";
-import workService from "../../services/workService/workService";
+import { workService } from "../../services/workService/workService";
 import { Work, WorkPhaseAdditionalInfo } from "../../models/work";
 import { StaffWorkRole } from "../../models/staff";
-import {
-  ACTIVE_STATUS,
-  COMMON_ERROR_MESSAGE,
-} from "../../constants/application-constant";
+import { ACTIVE_STATUS } from "../../constants/application-constant";
 import { showNotification } from "../shared/notificationProvider";
 import { WorkFirstNation } from "../../models/firstNation";
 import { Status } from "../../models/status";
 import { WorkIssue } from "../../models/Issue";
 import { StalenessSettings } from "models/settings";
-import statusService from "../../services/statusService/statusService";
-import issueService from "../../services/issueService";
+import { statusService } from "../../services/statusService/statusService";
+import { issueService } from "../../services/issueService";
 import { useAppSelector } from "hooks";
 import stalenessSettingsService from "services/stalenessSettingsService";
 
@@ -29,6 +26,7 @@ export interface WorkplanContextProps {
   firstNations: WorkFirstNation[];
   getWorkById: () => Promise<void>;
   getWorkStatuses: () => Promise<void>;
+  getWorkPhases: () => Promise<void>;
   issues: WorkIssue[];
   loadData: () => Promise<void>;
   loading: boolean;
@@ -61,6 +59,7 @@ export const initialWorkPlanContext: WorkplanContextProps = {
   firstNations: [],
   getWorkById: () => new Promise((resolve) => resolve),
   getWorkStatuses: () => new Promise((resolve) => resolve),
+  getWorkPhases: () => new Promise((resolve) => resolve),
   issues: [],
   loadData: () => new Promise((resolve) => resolve),
   loading: true,
@@ -85,7 +84,7 @@ export const initialWorkPlanContext: WorkplanContextProps = {
 };
 
 export const WorkplanContext = createContext<WorkplanContextProps>(
-  initialWorkPlanContext
+  initialWorkPlanContext,
 );
 
 export const WorkplanProvider = ({
@@ -114,7 +113,7 @@ export const WorkplanProvider = ({
   const getIssues = useCallback(async () => {
     if (!workId) return;
     try {
-      const response = await issueService.getAll(workId);
+      const response = await issueService.getAllByWorkId(workId);
       setIssues(response.data);
     } catch (error) {
       console.error("Failed to load Workplan issues", error);
@@ -124,7 +123,7 @@ export const WorkplanProvider = ({
 
   const isActiveTeamMember = useMemo(() => {
     return team?.some(
-      (member) => member.staff.email === email && member.is_active
+      (member) => member.staff.email === email && member.is_active,
     );
   }, [team, email]);
 
@@ -146,14 +145,14 @@ export const WorkplanProvider = ({
   const getWorkFirstNations = useCallback(async () => {
     if (workId) {
       const firstNationResult = await workService.getWorkFirstNations(
-        Number(workId)
+        Number(workId),
       );
       if (firstNationResult.status === 200) {
         const firstNations = (firstNationResult.data as WorkFirstNation[]).map(
           (p) => ({
             ...p,
             status: p.is_active ? ACTIVE_STATUS.ACTIVE : ACTIVE_STATUS.INACTIVE,
-          })
+          }),
         );
         setFirstNations(firstNations);
       }
@@ -162,7 +161,7 @@ export const WorkplanProvider = ({
 
   const getWorkStatuses = useCallback(async () => {
     if (workId) {
-      const statusResult = await statusService.getAll(Number(workId));
+      const statusResult = await statusService.getAllbyWorkId(Number(workId));
       if (statusResult.status === 200) {
         setStatuses(statusResult.data);
       }
@@ -181,7 +180,10 @@ export const WorkplanProvider = ({
         setTeam(team);
       }
     } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
+      showNotification("Could not load Team Members", {
+        duration: 3000,
+        type: "error",
+      });
     }
   }, [workId]);
 
@@ -204,16 +206,22 @@ export const WorkplanProvider = ({
   const loadData = useCallback(async () => {
     if (!workId) return;
     try {
-      await getWorkById();
-      await getWorkTeamMembers();
-      await getWorkPhases();
-      await getWorkFirstNations();
-      await getWorkStatuses();
-      await getStalenessSettings();
-      await getIssues();
+      await Promise.all([
+        getWorkById(),
+        getWorkTeamMembers(),
+        getWorkPhases(),
+        getWorkFirstNations(),
+        getWorkStatuses(),
+        getStalenessSettings(),
+        getIssues(),
+      ]);
       setLoading(false);
     } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
+      console.error(e);
+      showNotification("Failed to load some Workplan information", {
+        type: "error",
+        duration: 3000,
+      });
     } finally {
       setLoading(false);
     }
@@ -238,6 +246,7 @@ export const WorkplanProvider = ({
         firstNations,
         getWorkById,
         getWorkStatuses,
+        getWorkPhases,
         issues,
         loadData,
         loading,

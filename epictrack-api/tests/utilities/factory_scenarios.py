@@ -15,6 +15,7 @@
 
 Test Utility for creating test scenarios.
 """
+from datetime import timezone
 from enum import Enum
 
 from faker import Faker
@@ -142,8 +143,8 @@ class TestIssues(Enum):
     issue2 = {
         "title": fake.word(),
         "description": fake.sentence(),
-        "start_date": fake.date_time_this_decade(tzinfo=None).isoformat(),
-        "expected_resolution_date": fake.date_time_between(start_date='now', end_date='+10d', tzinfo=None).isoformat(),
+        "start_date": fake.date_time_this_decade(tzinfo=timezone.utc).isoformat(),
+        "expected_resolution_date": fake.date_time_between(start_date='now', end_date='+10d', tzinfo=timezone.utc).isoformat(),
         "is_active": True,
         "is_high_priority": True,
         "updates": [fake.sentence()]
@@ -202,6 +203,7 @@ class TestJwtClaims(dict, Enum):
                 'staff',
                 'create',
                 'edit',
+                'delete',
                 'extended_edit'
 
             ]
@@ -395,4 +397,18 @@ class TestStaffElevatedRole(Enum):
         "staff_id": 234,
         "elevated_role_id": TestElevatedRoleEnum.MANAGE_FIRST_NATIONS.value,
         "is_active": False
+    }
+
+
+class TestWorkResourceInfo(Enum):
+    """Test scenarios of Work Resource creation."""
+
+    work_resource1 = {
+        "title": fake.word(),
+        "link": fake.word()
+    }
+
+    work_resource2 = {
+        "title": fake.word(),
+        "link": fake.word()
     }

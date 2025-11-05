@@ -154,6 +154,16 @@ class WorkIdPhaseIdPathParameterSchema(RequestPathParameterSchema):
     )
 
 
+class WorkPhaseNotesBodySchema(RequestBodyParameterSchema):
+    """Work phase notes body parameter schema"""
+
+    notes = fields.Str(
+        metadata={"notes": "Work phase overage responsibility notes"},
+        validate=validate.Length(min=0),
+        required=True,
+    )
+
+
 class WorkFirstNationNotesBodySchema(RequestBodyParameterSchema):
     """Work first nation notes body parameter schema"""
 
@@ -304,4 +314,26 @@ class WorkQueryParameterSchema(RequestQueryParameterSchema):
 
     include_indigenous_nations = fields.Bool(
         metadata={"description": "Indicate if the result should have indigenous nations"}
+    )
+
+    staff_id = fields.Int(
+        metadata={"description": "Staff ID to filter by (optional)"},
+        required=False,
+        missing=None
+    )
+
+
+class WorkPhaseQueryParameterSchema(RequestQueryParameterSchema):
+    """Work Phase Query parameters"""
+
+    legislated = fields.Bool(
+        metadata={"description": "query legislated or non-legislated ones"},
+        default=None,
+        allow_none=True
+    )
+
+    staff_id = fields.Int(
+        metadata={"description": "The staff_id to filter by"},
+        required=False,
+        missing=None
     )

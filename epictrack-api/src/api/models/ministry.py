@@ -25,7 +25,7 @@ class Ministry(db.Model, CodeTableVersioned):
 
     __tablename__ = 'ministries'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent TRACK-532
     name = Column(String())
     abbreviation = Column(String())
     minister_id = Column(ForeignKey('staffs.id'), nullable=True)

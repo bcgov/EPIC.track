@@ -51,13 +51,13 @@ describe("IssueAccordion", () => {
     cy.get(".MuiAccordionSummary-root").should(
       "have.attr",
       "aria-expanded",
-      "true"
+      "true",
     );
     cy.get(".MuiAccordionSummary-root").click();
     cy.get(".MuiAccordionSummary-root").should(
       "have.attr",
       "aria-expanded",
-      "false"
+      "false",
     );
   });
 });

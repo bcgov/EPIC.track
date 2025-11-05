@@ -1,5 +1,4 @@
 """Disable work start date action handler"""
-
 from datetime import timedelta
 from typing import List
 from operator import attrgetter
@@ -24,7 +23,7 @@ class AddPhase(ActionFactory):
     def run(self, source_event: Event, params) -> None:
         """Adds a new phase based on params"""
         # Importing here to avoid circular imports
-        from api.services.work import WorkService
+        from api.services.work import WorkService, WorkStateEnum
         from api.services.work_phase import WorkPhaseService
 
         number_of_phases = len(params)
@@ -47,8 +46,8 @@ class AddPhase(ActionFactory):
             work_phase_data.update(
                 {
                     "work_id": source_event.work.id,
-                    "start_date": f"{phase_start_date}",
-                    "end_date": end_date,
+                    "start_date": phase_start_date.isoformat(),
+                    "end_date": end_date.isoformat(),
                     "sort_order": sort_order,
                 }
             )
@@ -61,6 +60,7 @@ class AddPhase(ActionFactory):
             work_phase = WorkService.create_events_by_template(
                 work_phase_data, event_templates_for_the_phase_json
             )
+            db.session.flush()
             sort_order = sort_order + 1
             phase_start_date = end_date + timedelta(days=1)
         # update the current work phase
@@ -70,6 +70,8 @@ class AddPhase(ActionFactory):
 
         work = Work.find_by_id(source_event.work_id)
         work.current_work_phase_id = current_work_phase.id
+        if not current_work_phase.is_completed:
+            work.work_state = WorkStateEnum.IN_PROGRESS.value
         work.update(work.as_dict(recursive=False), commit=False)
 
         if work_phase:

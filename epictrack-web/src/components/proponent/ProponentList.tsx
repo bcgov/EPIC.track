@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Avatar, Box, Button, Grid, Stack, Typography } from "@mui/material";
+import { Avatar, Button, Grid, Stack, Typography } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { ETCaption2, ETGridTitle, ETPageContainer } from "components/shared";
 import { ETChip } from "components/shared/chip/ETChip";
-import TableFilter from "components/shared/filterSelect/TableFilter";
 import { Staff } from "../../models/staff";
 import { Proponent } from "../../models/proponent";
 import staffService from "../../services/staffService/staffService";
@@ -21,13 +20,14 @@ import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import UserMenu from "components/shared/userMenu/UserMenu";
 import { Palette } from "styles/theme";
 import { ProponentDialog } from "./Dialog";
+import { getStatusFilter } from "components/shared/filterSelect/utils";
 
 const proponentsListColumnFiltersCacheKey = "proponents-listing-column-filters";
 
 const ProponentList = () => {
   const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
     proponentsListColumnFiltersCacheKey,
-    []
+    [],
   );
   const [loadingProponents, setLoadingProponents] = useState(true);
   const [proponentId, setProponentId] = useState<number>();
@@ -36,7 +36,7 @@ const ProponentList = () => {
   const [staffs, setStaffs] = useState<Staff[]>([]);
   const [relationshipHolder, setRelationshipHolder] = useState<Staff>();
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<null | HTMLElement>(
-    null
+    null,
   );
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
@@ -59,7 +59,7 @@ const ProponentList = () => {
 
   const handleOpenUserMenu = (
     event: React.MouseEvent<HTMLElement>,
-    staff: Staff
+    staff: Staff,
   ) => {
     setRelationshipHolder(staff);
     setUserMenuAnchorEl(event.currentTarget);
@@ -76,7 +76,7 @@ const ProponentList = () => {
     proponents,
     "is_active",
     (value) => (value ? "Active" : "Inactive"),
-    (value) => value
+    (value) => value,
   );
 
   const columns = useMemo<MRT_ColumnDef<Proponent>[]>(
@@ -103,7 +103,7 @@ const ProponentList = () => {
         filterFn: searchFilter,
       },
       {
-        accessorKey: "relationship_holder.full_name",
+        accessorFn: (row) => row.relationship_holder?.full_name ?? "",
         header: "Relationship Holder",
         filterSelectOptions: staffs.map((s) => s.full_name),
         Cell: ({ row }) => {
@@ -154,31 +154,8 @@ const ProponentList = () => {
         filterVariant: "multi-select",
         filterSelectOptions: statusesOptions,
         size: 60,
-        Filter: ({ header, column }) => {
-          return (
-            <Box sx={{ width: "100px" }}>
-              <TableFilter
-                isMulti
-                header={header}
-                column={column}
-                variant="inline"
-                name="statusFilter"
-              />
-            </Box>
-          );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > statusesOptions.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id);
-
-          return filterValue.includes(value);
-        },
+        Filter: getStatusFilter<Proponent>,
+        filterFn: "multiSelectFilter",
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && <ETChip active label="Active" />}
@@ -187,7 +164,7 @@ const ProponentList = () => {
         ),
       },
     ],
-    [canEdit, handleCloseUserMenu, staffs, statusesOptions]
+    [canEdit, handleCloseUserMenu, staffs, statusesOptions],
   );
 
   const getStaffs = async () => {
@@ -226,12 +203,13 @@ const ProponentList = () => {
                 desc: false,
               },
             ],
-            columnFilters,
           }}
           state={{
             isLoading: loadingProponents,
             showGlobalFilter: true,
+            columnFilters,
           }}
+          loading={loadingProponents}
           tableName={"proponent-listing"}
           enableExport
           renderTopToolbarCustomActions={({ table }) => (
@@ -251,6 +229,7 @@ const ProponentList = () => {
             </Restricted>
           )}
           onCacheFilters={handleCacheFilters}
+          renderResultCount
         />
       </Grid>
       <UserMenu

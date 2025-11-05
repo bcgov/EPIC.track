@@ -10,12 +10,12 @@ import { ListType } from "../../../models/code";
 import { showNotification } from "../../shared/notificationProvider";
 import staffService from "../../../services/staffService/staffService";
 import { sort } from "../../../utils";
-import workService from "../../../services/workService/workService";
+import { workService } from "../../../services/workService/workService";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import { WorkplanContext } from "../WorkPlanContext";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
-import roleService from "services/roleService";
+import { roleService } from "services/roleService";
 import { unEditableTeamMembers } from "./constants";
 
 interface TeamFormProps {
@@ -38,7 +38,7 @@ const schema = yup.object().shape({
             parent["work_id"],
             Number(value),
             parent["role_id"],
-            parent["id"]
+            parent["id"],
           );
           return !(validateWorkStaff.data as any)["exists"] as boolean;
         }
@@ -54,6 +54,20 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
   const phoneRef = React.useRef(null);
   const ctx = React.useContext(WorkplanContext);
   const staffWorkRole = ctx.selectedStaff;
+  const { setSelectedStaff } = ctx;
+
+  const methods = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: staffWorkRole,
+    mode: "onBlur",
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = methods;
 
   React.useEffect(() => {
     getAllStaff();
@@ -66,33 +80,33 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
       work_id: ctx.work?.id,
       is_active: true,
     });
-  }, [ctx.work?.id]);
+  }, [ctx.work?.id, staffWorkRole, reset]);
 
   React.useEffect(() => {
+    const getTeamMember = async () => {
+      try {
+        const result = await workService.getWorkTeamMember(Number(workStaffId));
+        if (result.status === 200) {
+          const staff = result.data as StaffWorkRole;
+          setSelectedStaff(staff);
+        }
+      } catch (e) {
+        showNotification(COMMON_ERROR_MESSAGE, {
+          type: "error",
+        });
+      }
+    };
+
     if (workStaffId) {
       getTeamMember();
     }
-  }, [workStaffId]);
+  }, [setSelectedStaff, workStaffId]);
 
   React.useEffect(() => {
     if (staffWorkRole) {
       reset(staffWorkRole);
     }
-  }, [staffWorkRole]);
-
-  const getTeamMember = async () => {
-    try {
-      const result = await workService.getWorkTeamMember(Number(workStaffId));
-      if (result.status === 200) {
-        const staff = result.data as StaffWorkRole;
-        ctx.setSelectedStaff(staff);
-      }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
+  }, [reset, staffWorkRole]);
 
   const getAllStaff = async () => {
     try {
@@ -114,7 +128,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
       if (result.status === 200) {
         const roles = result.data as ListType[];
         const filteredRoles = roles.filter(
-          (role) => !unEditableTeamMembers.includes(role.id)
+          (role) => !unEditableTeamMembers.includes(role.id),
         );
         setRoles(sort(filteredRoles, "name"));
       }
@@ -124,18 +138,6 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
       });
     }
   };
-  const methods = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: staffWorkRole,
-    mode: "onBlur",
-  });
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = methods;
 
   const saveTeamMember = (data: StaffWorkRole) => {
     if (workStaffId) {

@@ -65,7 +65,7 @@ describe("GeneralSettings", () => {
         <Router>
           <GeneraSettings />
         </Router>
-      </SnackbarProvider>
+      </SnackbarProvider>,
     );
     cy.wait(["@getAllStalenessSettings"]);
   });
@@ -74,13 +74,13 @@ describe("GeneralSettings", () => {
     cy.get("table")
       .contains(
         "tr",
-        StalenessSettingTypeNames[StalenessSettingTypeEnum.ISSUES]
+        StalenessSettingTypeNames[StalenessSettingTypeEnum.ISSUES],
       )
       .should("be.visible");
     cy.get("table")
       .contains(
         "tr",
-        StalenessSettingTypeNames[StalenessSettingTypeEnum.STATUS]
+        StalenessSettingTypeNames[StalenessSettingTypeEnum.STATUS],
       )
       .should("be.visible");
   });

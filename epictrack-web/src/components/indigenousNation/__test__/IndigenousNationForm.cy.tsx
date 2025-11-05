@@ -1,41 +1,44 @@
 import IndigenousNationForm from "../IndigenousNationForm";
 import { mockStaffs } from "../../../../cypress/support/common";
-import { Method } from "cypress/types/net-stubbing";
 import { AppConfig } from "config";
-import { Endpoint, setupIntercepts } from "../../../../cypress/support/utils";
+import {
+  HttpMethod,
+  Endpoint,
+  setupIntercepts,
+} from "../../../../cypress/support/utils";
 
 const endpoints: Endpoint[] = [
   {
     name: "getActiveStaffsOptions",
-    method: "OPTIONS" as Method,
+    method: "OPTIONS" as HttpMethod,
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
   },
   {
     name: "getPIPTypeOptions",
-    method: "OPTIONS" as Method,
+    method: "OPTIONS" as HttpMethod,
     url: `${AppConfig.apiUrl}codes/pip_org_types`,
   },
 
   {
     name: "getFirstNationsOptions",
-    method: "OPTIONS" as Method,
+    method: "OPTIONS" as HttpMethod,
     url: `${AppConfig.apiUrl}first_nations`,
   },
   {
     name: "getActiveStaffs",
-    method: "GET" as Method,
+    method: "GET" as HttpMethod,
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
     response: { body: mockStaffs },
   },
   {
     name: "getPIPType",
-    method: "GET" as Method,
+    method: "GET" as HttpMethod,
     url: `${AppConfig.apiUrl}pip-org-types`,
     response: { body: [] },
   },
   {
     name: "getFirstNations",
-    method: "GET" as Method,
+    method: "GET" as HttpMethod,
     url: `${AppConfig.apiUrl}first_nations`,
     response: { body: [] },
   },
@@ -46,7 +49,7 @@ describe("IndigenousNationForm", () => {
     setupIntercepts(endpoints);
 
     cy.mount(
-      <IndigenousNationForm firstNation={null} saveFirstNation={cy.stub()} />
+      <IndigenousNationForm firstNation={null} saveFirstNation={cy.stub()} />,
     );
   });
 

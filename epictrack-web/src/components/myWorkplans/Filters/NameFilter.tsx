@@ -6,31 +6,37 @@ import {
   MenuItem,
   TextField,
 } from "@mui/material";
-import {
-  MyWorkplansContext,
-  WorkPlanSearchOptions,
-} from "../MyWorkPlanContext";
-import projectService from "../../../services/projectService/projectService";
+import { MyWorkplansContext } from "../MyWorkPlanContext";
+import { projectService } from "../../../services/projectService/projectService";
 import { PROJECT_RETURN_TYPE } from "../../../services/projectService/constants";
 import { ListType } from "../../../models/code";
 import SearchIcon from "../../../assets/images/search.svg";
 import { highlightText } from "../../../utils/MatchingTextHighlight";
 
 const SEARCH_TEXT_THRESHOLD = 1;
-export const NameFilter = () => {
-  const { setSearchOptions, searchOptions } = useContext(MyWorkplansContext);
+
+interface NameFilterProps {
+  searchOptions?: any;
+  setSearchOptions?: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export const NameFilter = ({
+  searchOptions: propSearchOptions,
+  setSearchOptions: propSetSearchOptions,
+}: NameFilterProps) => {
+  const context = useContext(MyWorkplansContext);
+  const searchOptions = propSearchOptions ?? context.searchOptions;
+  const setSearchOptions = propSetSearchOptions ?? context.setSearchOptions;
+
   const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState<string[]>([]);
   const [searchText, setSearchText] = useState<string>(searchOptions.text);
 
   const handleSearchOptions = (searchText: string) => {
-    setSearchOptions(
-      (prev: WorkPlanSearchOptions) =>
-        ({
-          ...prev,
-          text: searchText,
-        } as WorkPlanSearchOptions)
-    );
+    setSearchOptions((prev) => ({
+      ...prev,
+      text: searchText as string,
+    }));
   };
 
   // Fetch project names from the backend when searchText changes
@@ -41,7 +47,7 @@ export const NameFilter = () => {
         const with_works = true;
         const response = (await projectService.getAll(
           PROJECT_RETURN_TYPE.LIST_TYPE,
-          with_works
+          with_works,
         )) as { data: ListType[] };
 
         const projectNames = response.data.map((project) => project.name);

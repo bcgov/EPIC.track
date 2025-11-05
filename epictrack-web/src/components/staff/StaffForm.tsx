@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
-import { Grid } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
+import { Grid } from "@mui/material";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../shared/index";
-import { Staff, defaultStaff } from "../../models/staff";
-import { ListType } from "../../models/code";
-import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
-import staffService from "../../services/staffService/staffService";
-import ControlledTextField from "../shared/controlledInputComponents/ControlledTextField";
-import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
+import { Staff, defaultStaff } from "models/staff";
+import { ListType } from "models/code";
 import { ControlledMaskTextField } from "../shared/maskTextField";
-import positionService from "../../services/positionService";
+import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
+import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
+import ControlledTextField from "../shared/controlledInputComponents/ControlledTextField";
+import { positionService } from "services/positionService";
+import staffService from "services/staffService/staffService";
+import { ROLES } from "constants/application-constant";
+import { StaffPositionSpecialField } from "./StaffPositionSpecialField";
+import { useAppSelector } from "hooks";
 
 const schema = yup.object().shape({
   email: yup
@@ -27,7 +30,7 @@ const schema = yup.object().shape({
           if (value) {
             const result = await staffService.validateEmail(
               value,
-              parent["id"]
+              parent["id"],
             );
             if (result.status === 200) {
               return !(result.data as never)["exists"];
@@ -47,12 +50,26 @@ const schema = yup.object().shape({
 });
 
 type StaffFormProps = {
-  staff: Staff | null;
+  fetchStaff: () => void;
   saveStaff: (data: any) => void;
+  setDisableDialogSave?: (value: boolean) => void;
+  staff: Staff | null;
 };
 
-export default function StaffForm({ staff, saveStaff }: StaffFormProps) {
+export default function StaffForm({
+  fetchStaff,
+  saveStaff,
+  setDisableDialogSave,
+  staff,
+}: StaffFormProps) {
   const [positions, setPositions] = useState<ListType[]>([]);
+  const [isPositionFieldLocked, setIsPositionFieldLocked] = useState(true);
+
+  const { roles } = useAppSelector((state) => state.user.userDetail);
+  const canEdit = roles.includes(ROLES.EDIT);
+  const shouldDisableSpecialField = Boolean(staff?.id);
+  const shouldDisableFormField =
+    (!canEdit && Boolean(staff?.id)) || !isPositionFieldLocked;
 
   const methods = useForm<Staff>({
     resolver: yupResolver(schema),
@@ -61,7 +78,6 @@ export default function StaffForm({ staff, saveStaff }: StaffFormProps) {
   });
 
   const {
-    register,
     handleSubmit,
     formState: { errors },
     reset,
@@ -70,6 +86,12 @@ export default function StaffForm({ staff, saveStaff }: StaffFormProps) {
   useEffect(() => {
     reset(staff ?? defaultStaff);
   }, [reset, staff]);
+
+  useEffect(() => {
+    if (setDisableDialogSave) {
+      setDisableDialogSave(!isPositionFieldLocked);
+    }
+  }, [setDisableDialogSave, isPositionFieldLocked]);
 
   const getPositions = async () => {
     const positionResult = await positionService.getAll();
@@ -93,38 +115,65 @@ export default function StaffForm({ staff, saveStaff }: StaffFormProps) {
       >
         <Grid item xs={6}>
           <ETFormLabel>First Name</ETFormLabel>
-          <ControlledTextField name="first_name" fullWidth />
+          <ControlledTextField
+            disabled={shouldDisableFormField}
+            fullWidth
+            name="first_name"
+          />
         </Grid>
         <Grid item xs={6}>
           <ETFormLabel>Last Name</ETFormLabel>
-          <ControlledTextField name="last_name" fullWidth />
+          <ControlledTextField
+            disabled={shouldDisableFormField}
+            fullWidth
+            name="last_name"
+          />
         </Grid>
         <Grid item xs={6}>
           <ETFormLabel>Email</ETFormLabel>
-          <ControlledTextField name="email" fullWidth />
+          <ControlledTextField
+            disabled={shouldDisableFormField}
+            name="email"
+            fullWidth
+          />
         </Grid>
         <Grid item xs={6}>
           <ETFormLabel>Phone</ETFormLabel>
           <ControlledMaskTextField
-            name="phone"
+            disabled={shouldDisableFormField}
             fullWidth
-            placeholder="(xxx) xxx-xxxx"
             mask="(#00) 000-0000"
+            name="phone"
+            placeholder="(xxx) xxx-xxxx"
           />
         </Grid>
         <Grid item xs={12}>
-          <ETFormLabel>Position</ETFormLabel>
-          <ControlledSelectV2
-            helperText={errors?.position_id?.message?.toString()}
-            getOptionValue={(o: ListType) => o?.id?.toString()}
-            getOptionLabel={(o: ListType) => o?.name}
-            defaultValue={staff?.position_id}
+          <StaffPositionSpecialField
+            disabled={!canEdit}
+            id={staff?.id}
+            onLockClick={() => setIsPositionFieldLocked((prev) => !prev)}
+            onSave={fetchStaff}
+            open={!isPositionFieldLocked}
             options={positions}
-            {...register("position_id")}
-          />
+          >
+            <ControlledSelectV2
+              defaultValue={staff?.position_id}
+              disabled={shouldDisableSpecialField}
+              fullWidth
+              getOptionLabel={(o: ListType) => o.name}
+              getOptionValue={(o: ListType) => o?.id?.toString()}
+              helperText={errors?.position_id?.message?.toString()}
+              options={positions || []}
+              placeholder="Select"
+              name="position_id"
+            />
+          </StaffPositionSpecialField>
         </Grid>
         <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
-          <ControlledSwitch name="is_active" />
+          <ControlledSwitch
+            disabled={shouldDisableFormField}
+            name="is_active"
+          />
           <ETFormLabel id="active">Active</ETFormLabel>
         </Grid>
       </Grid>

@@ -1,5 +1,5 @@
-import React, { useContext, useMemo, useRef } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Grid } from "@mui/material";
@@ -20,58 +20,53 @@ const schema = yup.object().shape({
 const CHARACTER_LIMIT = 1000;
 
 const StatusForm = () => {
-  const [description, setDescription] = React.useState<string>("");
   const startDateRef = useRef();
   const { status: statusToEdit, onSave, isCloning } = useContext(StatusContext);
   const { getWorkStatuses, statuses } = useContext(WorkplanContext);
 
-  const getPostedDateMin = () => {
-    if (statuses.length === 0) {
-      return dayjs(EARLIEST_WORK_DATE);
-    }
-    const sortedStatuses = [...statuses].sort((statusA, statusB) =>
-      // sort descending by posted_date
-      dayjs(statusB.posted_date).diff(dayjs(statusA.posted_date))
+  const getPostedDateMin = useCallback(() => {
+    if (statuses.length === 0) return dayjs(EARLIEST_WORK_DATE);
+
+    const sortedStatuses = [...statuses].sort((a, b) =>
+      dayjs(b.posted_date).diff(dayjs(a.posted_date)),
     );
-    if (isCloning || !statusToEdit) {
-      return dayjs(sortedStatuses[0].posted_date);
-    }
+
+    if (isCloning || !statusToEdit) return dayjs(sortedStatuses[0].posted_date);
 
     const previousStatus = sortedStatuses.find(
-      (status) =>
-        status.id !== statusToEdit.id &&
-        dayjs(status.posted_date) < dayjs(statusToEdit.posted_date)
+      (s) =>
+        s.id !== statusToEdit.id &&
+        dayjs(s.posted_date) < dayjs(statusToEdit.posted_date),
     );
 
     return dayjs(previousStatus?.posted_date || EARLIEST_WORK_DATE);
-  };
+  }, [isCloning, statusToEdit, statuses]);
 
-  const postedDateMin = useMemo(
-    () => getPostedDateMin(),
-    [statuses, statusToEdit, isCloning]
-  );
+  const postedDateMin = useMemo(() => getPostedDateMin(), [getPostedDateMin]);
   const postedDateMax = dayjs(new Date()).add(7, "day");
 
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: statusToEdit ?? {},
+    defaultValues: {
+      posted_date: statusToEdit?.posted_date ?? "",
+      description: statusToEdit?.description ?? "",
+    },
     mode: "onBlur",
   });
 
-  const { handleSubmit, reset } = methods;
+  const { handleSubmit, reset, control } = methods;
 
-  React.useEffect(() => {
+  const description = useWatch({ control, name: "description" });
+
+  useEffect(() => {
     if (statusToEdit) {
-      setDescription(statusToEdit?.description);
-      if (isCloning) {
-        reset({ posted_date: Moment().format() });
-      }
+      const values = {
+        posted_date: isCloning ? Moment().format() : statusToEdit.posted_date,
+        description: statusToEdit.description,
+      };
+      reset(values);
     }
-  }, []);
-
-  const handleDescriptionChange = (event: any) => {
-    setDescription(event.target.value);
-  };
+  }, [isCloning, reset, statusToEdit]);
 
   const onSubmitHandler = async (data: any) => {
     onSave(data, () => {
@@ -83,13 +78,11 @@ const StatusForm = () => {
   return (
     <FormProvider {...methods}>
       <Grid
-        component={"form"}
+        component="form"
         id="status-form"
         spacing={2}
         container
-        sx={{
-          width: "100%",
-        }}
+        sx={{ width: "100%" }}
         onSubmit={handleSubmit(onSubmitHandler)}
       >
         <Grid item xs={5}>
@@ -107,7 +100,7 @@ const StatusForm = () => {
         </Grid>
         <Grid item xs={12}>
           <ETFormLabelWithCharacterLimit
-            characterCount={description.length}
+            characterCount={description?.length ?? 0}
             maxCharacterLength={CHARACTER_LIMIT}
             required
           >
@@ -116,7 +109,6 @@ const StatusForm = () => {
           <ControlledTextField
             name="description"
             multiline
-            onChange={handleDescriptionChange}
             fullWidth
             minRows={4}
             inputProps={{

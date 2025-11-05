@@ -70,7 +70,7 @@ describe("<IssueAccordion />", () => {
     cy.mount(
       <ContextWrapper>
         <IssueAccordion issue={mockIssueOne} />
-      </ContextWrapper>
+      </ContextWrapper>,
     );
 
     // Assert that the issue details are hidden to start
@@ -113,7 +113,7 @@ describe("<IssueAccordion />", () => {
     cy.mount(
       <ContextWrapper>
         <IssueAccordion issue={mockIssueOne} />
-      </ContextWrapper>
+      </ContextWrapper>,
     );
 
     // Click to expand accordion
@@ -151,7 +151,7 @@ describe("<IssueAccordion />", () => {
     cy.mount(
       <ContextWrapper>
         <IssueAccordion issue={mockIssueOne} />
-      </ContextWrapper>
+      </ContextWrapper>,
     );
 
     // Click to expand accordion
@@ -201,7 +201,7 @@ describe("<IssueAccordion />", () => {
     cy.mount(
       <ContextWrapper>
         <IssueAccordion issue={mockIssueOne} />
-      </ContextWrapper>
+      </ContextWrapper>,
     );
 
     // Click to expand accordion

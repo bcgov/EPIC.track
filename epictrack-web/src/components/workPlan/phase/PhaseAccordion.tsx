@@ -1,22 +1,45 @@
-import { Box, Grid, SxProps, Tooltip } from "@mui/material";
-import { FC, ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import {
+  FC,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { When } from "react-if";
+import { Box, Button, Grid, IconButton, SxProps, Tooltip } from "@mui/material";
 import Moment from "moment";
-import ETAccordion from "../../shared/accordion/Accordion";
-import { PhaseAccordionProps } from "./type";
-import ETAccordionSummary from "../../shared/accordion/components/AccordionSummary";
 import { ETCaption1, ETParagraph } from "../../shared";
-import { Palette } from "../../../styles/theme";
+import ETAccordion from "../../shared/accordion/Accordion";
+import ETAccordionSummary from "../../shared/accordion/components/AccordionSummary";
 import ETAccordionDetails from "../../shared/accordion/components/AccordionDetails";
+import BorderLinearProgress from "../../shared/progress/Progress";
 import EventGrid from "../event";
 import { WorkplanContext } from "../WorkPlanContext";
-import BorderLinearProgress from "../../shared/progress/Progress";
 import Icons from "../../icons/index";
 import { IconProps } from "../../icons/type";
-import { When } from "react-if";
-import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
+import { Palette } from "../../../styles/theme";
+import { MONTH_DAY_YEAR, ROLES } from "../../../constants/application-constant";
+import { PhaseAccordionProps } from "./type";
+import phaseOverageResponsibilityService from "services/phaseOverageResponsibilityService";
+import { showNotification } from "components/shared/notificationProvider";
+import {
+  OverageResponsibilityEnum,
+  OverageResponsibilityLookup,
+  PhaseOverageResponsibility,
+} from "models/phaseOverageResponsibilities";
+import OverageResponsibilityForm from "./overageResponsibility/OverageResponsibilityForm";
+import TrackDialog from "components/shared/TrackDialog";
+import { Restricted } from "components/shared/restricted";
+import { useUserHasRole } from "../utils";
+import { workService } from "services/workService/workService";
+
+const GoToIcon: FC<IconProps> = Icons["GoToIcon"];
 const ExpandIcon: FC<IconProps> = Icons["ExpandIcon"];
 const PauseIcon: FC<IconProps> = Icons["PauseIcon"];
 const IndicatorIcon: FC<IconProps> = Icons["IndicatorIcon"];
+const EditIcon: FC<IconProps> = Icons["PencilEditIcon"];
 
 const summaryContentStyle: SxProps = {
   minHeight: "1.5rem",
@@ -62,7 +85,6 @@ const SummaryItem = (props: SummaryItemProps) => {
         >
           <ETParagraph
             bold={props.isTitleBold}
-            enableEllipsis={true}
             sx={{
               ...summaryContentStyle,
               color: `${Palette.neutral.dark}`,
@@ -80,13 +102,34 @@ const PhaseAccordion = ({
   phase,
   expanded,
   onExpandHandler,
+  showAnticipated,
+  showActual,
+  isCurrentPhase,
 }: PhaseAccordionProps) => {
-  const { selectedWorkPhase, setSelectedWorkPhase } =
+  const [overageResponsibilities, setOverageResponsibilities] = useState<
+    PhaseOverageResponsibility[]
+  >([]);
+  const [daysTakenText, setDaysTakenText] = useState<string>("");
+  const [open, setOpen] = useState<boolean>(false);
+  const { getWorkPhases, selectedWorkPhase, setSelectedWorkPhase, work } =
     useContext(WorkplanContext);
+
+  const userHasRole = useUserHasRole();
+
+  const isCompleted = phase.work_phase.is_completed;
+  const isLegislated = phase.work_phase.legislated;
+  const responsibilitiesText = overageResponsibilities
+    ?.map((r) => r.responsibility)
+    .join(", ");
+  const progressText = isCompleted
+    ? `${isLegislated ? "Legislated " : ""}Phase Completed`
+    : `Upcoming ${isLegislated ? "Legislated " : ""}Phase`;
+  const daysAhead = phase.total_number_of_days - phase.days_taken;
+  const hasOverage = daysAhead < 0;
 
   const isSelectedPhase = useMemo<boolean>(
     () => phase.work_phase.id === selectedWorkPhase?.work_phase.id,
-    [phase, selectedWorkPhase]
+    [phase, selectedWorkPhase],
   );
 
   useEffect(() => {
@@ -95,12 +138,108 @@ const PhaseAccordion = ({
     }
   }, [expanded, phase, setSelectedWorkPhase]);
 
-  const getPhaseOverdueColour = (daysLeft: number, isLegislated: boolean) => {
-    if (daysLeft >= 0) return Palette.neutral.dark;
-    if (isLegislated) {
-      return Palette.error.dark;
+  const getPhaseDaysTaken = useCallback(() => {
+    if (isCompleted) {
+      if (daysAhead > 0) {
+        setDaysTakenText(
+          `(${Math.abs(daysAhead)} day${daysAhead !== 1 ? "s" : ""} early)`,
+        );
+      } else if (daysAhead < 0) {
+        setDaysTakenText(
+          `(${Math.abs(daysAhead)} day${daysAhead !== 1 ? "s" : ""} over)`,
+        );
+      }
     } else {
-      return Palette.purple;
+      if (daysAhead < 0) {
+        setDaysTakenText(
+          `(${Math.abs(daysAhead)} day${daysAhead !== 1 ? "s" : ""} over)`,
+        );
+      }
+    }
+  }, [daysAhead, isCompleted]);
+
+  useEffect(() => {
+    getPhaseDaysTaken();
+  }, [getPhaseDaysTaken]);
+
+  const getPhaseOverageResponsibilities = useCallback(async () => {
+    try {
+      const overageResponsibilityData =
+        await phaseOverageResponsibilityService.getAllByPhaseId(
+          phase.work_phase.id.toString(),
+        );
+      setOverageResponsibilities(overageResponsibilityData.data);
+    } catch (error) {
+      showNotification("Could not load phase overage responsibilities.", {
+        duration: 3000,
+        type: "error",
+      });
+    }
+  }, [phase.work_phase.id]);
+
+  useEffect(() => {
+    if (phase.milestone_progress !== 0 || isCurrentPhase) {
+      getPhaseOverageResponsibilities();
+    }
+  }, [
+    getPhaseOverageResponsibilities,
+    isCurrentPhase,
+    phase.milestone_progress,
+  ]);
+
+  const getPhaseOverdueColour = (
+    isLegislated: boolean,
+    isCompleted: boolean,
+  ) => {
+    if (!isLegislated) return Palette.neutral.dark;
+    if (daysAhead > 0 && isCompleted) return Palette.success.dark;
+    if (daysAhead < 0) return Palette.error.dark;
+    else return Palette.neutral.dark;
+  };
+
+  const handleSaveOverageResponsibility = async (
+    data: any,
+    onSuccess: () => void,
+  ) => {
+    try {
+      if (!selectedWorkPhase) return;
+      // 1. Patch notes on the phase
+      await workService.savePhaseResponsibilityNotes(
+        selectedWorkPhase.work_phase.id,
+        data.notes,
+      );
+      const existingRes: PhaseOverageResponsibility[] =
+        overageResponsibilities || [];
+      const next: OverageResponsibilityEnum[] = data.responsibility || [];
+      const existingValues = existingRes.map((er) => er.responsibility);
+      const toAdd = next.filter((r) => !existingValues.includes(r));
+      const toRemove = existingRes.filter(
+        (er) => !next.includes(er.responsibility),
+      );
+      // 2. Add new responsibilities
+      for (const r of toAdd) {
+        await phaseOverageResponsibilityService.create({
+          work_phase_id: selectedWorkPhase.work_phase.id,
+          responsibility: OverageResponsibilityLookup[r],
+          work_id: work?.id,
+        });
+      }
+      // 3. Remove responsibilities
+      for (const er of toRemove) {
+        await phaseOverageResponsibilityService.delete(String(er.id), {
+          work_id: work?.id,
+        });
+      }
+      onSuccess();
+      getWorkPhases();
+      getPhaseOverageResponsibilities();
+      setOpen(false);
+    } catch (e) {
+      showNotification(`Could not save Overage Responsibility. Error: ${e}.`, {
+        duration: 3000,
+        type: "error",
+      });
+      console.error(e);
     }
   };
 
@@ -130,7 +269,7 @@ const PhaseAccordion = ({
                 pb: "1rem",
               }}
             >
-              <Grid item xs={3}>
+              <Grid item xs={2.8}>
                 <SummaryItem
                   title="Phase"
                   content={phase.work_phase.name}
@@ -141,22 +280,40 @@ const PhaseAccordion = ({
                   }}
                 />
               </Grid>
-              <Grid item xs={2}>
+              <Grid item xs={1}>
                 <SummaryItem
                   title="Start date"
                   content={Moment(phase.work_phase.start_date).format(
-                    MONTH_DAY_YEAR
+                    MONTH_DAY_YEAR,
                   )}
                   isTitleBold={isSelectedPhase}
                 />
               </Grid>
-              <Grid item xs={2}>
+              {showAnticipated && (
+                <Grid item xs={1.2}>
+                  <SummaryItem
+                    title="Anticipated End"
+                    content={Moment(
+                      phase.end_milestone?.anticipated_date,
+                    ).format(MONTH_DAY_YEAR)}
+                    isTitleBold={isSelectedPhase}
+                  />
+                </Grid>
+              )}
+              {showActual && (
+                <Grid item xs={1}>
+                  <SummaryItem
+                    title="Actual End"
+                    content={Moment(phase.end_milestone?.actual_date).format(
+                      MONTH_DAY_YEAR,
+                    )}
+                    isTitleBold={isSelectedPhase}
+                  />
+                </Grid>
+              )}
+              <Grid item xs={showActual ? 1.4 : 1.2}>
                 <SummaryItem
-                  title={
-                    phase.work_phase.is_completed
-                      ? "Total"
-                      : "Days left / Total"
-                  }
+                  title={"Days"}
                   children={
                     <Box
                       sx={{
@@ -169,23 +326,15 @@ const PhaseAccordion = ({
                         sx={{
                           ...summaryContentStyle,
                           color: getPhaseOverdueColour(
-                            phase.days_left,
-                            phase.work_phase.legislated
+                            isLegislated,
+                            isCompleted,
                           ),
                         }}
                       >
-                        {phase.work_phase.is_completed && (
-                          <>{phase.days_left < 0 ? 0 : phase.days_left}</>
-                        )}
-                        {!phase.work_phase.is_completed && (
-                          <>
-                            {phase.days_left < 0 ? 0 : phase.days_left} /{" "}
-                            {phase.total_number_of_days.toString()}
-                            {phase.days_left < 0
-                              ? ` (${Math.abs(phase.days_left)} over)`
-                              : ""}
-                          </>
-                        )}
+                        <>
+                          {phase.days_taken} / {phase.total_number_of_days}
+                          {isLegislated && <> {daysTakenText}</>}
+                        </>
                       </ETParagraph>
                       <When condition={phase.days_left < 0}>
                         <Box
@@ -210,28 +359,163 @@ const PhaseAccordion = ({
                   isTitleBold={isSelectedPhase}
                 />
               </Grid>
-              <Grid item xs={1}></Grid>
-              <Grid item xs={2}>
-                <SummaryItem
-                  title="Next milestone"
-                  enableTooltip={true}
-                  content={phase.next_milestone}
-                  isTitleBold={isSelectedPhase}
-                />
-              </Grid>
-              <Grid item xs={2}>
-                <SummaryItem title="Milestone progress">
-                  <BorderLinearProgress
-                    variant="determinate"
-                    value={phase.milestone_progress}
-                    sx={{ marginTop: "10px" }}
-                  />
-                </SummaryItem>
-              </Grid>
+
+              {hasOverage && (
+                <Grid item xs={1.6}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: "0.5rem",
+                      flexDirection: "column",
+                      minHeight: "48px",
+                    }}
+                  >
+                    <ETCaption1
+                      sx={{
+                        textTransform: "uppercase",
+                        color: `${Palette.neutral.main}`,
+                        letterSpacing: "0.39px !important",
+                      }}
+                    >
+                      Overage Responsibility
+                      {hasOverage && isLegislated && (
+                        <span style={{ color: "red", marginLeft: "2px" }}>
+                          *
+                        </span>
+                      )}
+                    </ETCaption1>
+                    {overageResponsibilities?.length > 0 ? (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        <Tooltip
+                          title={responsibilitiesText}
+                          sx={{ width: "100%" }}
+                        >
+                          <ETParagraph
+                            bold={isSelectedPhase}
+                            sx={{
+                              ...summaryContentStyle,
+                              display: "-webkit-box",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "normal",
+                              WebkitLineClamp: 1,
+                              WebkitBoxOrient: "vertical",
+                            }}
+                          >
+                            {responsibilitiesText}
+                          </ETParagraph>
+                        </Tooltip>
+                        <Restricted
+                          allowed={[ROLES.EXTENDED_EDIT]}
+                          errorProps={{ disabled: true }}
+                          exception={userHasRole}
+                        >
+                          <IconButton
+                            color="primary"
+                            onClick={(event) => {
+                              setSelectedWorkPhase(phase);
+                              setOpen(true);
+                              event?.stopPropagation();
+                            }}
+                            sx={{
+                              padding: 0.275,
+                              color: "primary.main",
+                              "&:disabled": {
+                                color: Palette.neutral.main,
+                              },
+                            }}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Restricted>
+                      </Box>
+                    ) : (
+                      <Restricted
+                        allowed={[ROLES.EXTENDED_EDIT]}
+                        errorProps={{ disabled: true }}
+                        exception={userHasRole}
+                      >
+                        <Button
+                          variant="text"
+                          endIcon={<GoToIcon />}
+                          sx={{
+                            backgroundColor: "inherit",
+                            borderColor: "transparent",
+                            color: "primary.main",
+                            "&:disabled": {
+                              color: Palette.neutral.main,
+                            },
+                            height: "fit-content",
+                            justifyContent: "flex-start",
+                            minWidth: "auto",
+                            padding: 0,
+                            textAlign: "start",
+                            width: "fit-content",
+                          }}
+                          onClick={(event) => {
+                            setSelectedWorkPhase(phase);
+                            setOpen(true);
+                            event?.stopPropagation();
+                          }}
+                        >
+                          select option(s)
+                        </Button>
+                      </Restricted>
+                    )}
+                  </Box>
+                </Grid>
+              )}
+              {!hasOverage && <Grid item xs={1.6}></Grid>}
+              {!showActual && isCurrentPhase && <Grid item xs={0.7}></Grid>}
+              {!showActual && !isCurrentPhase && <Grid item xs={1.3}></Grid>}
+              {!showAnticipated && <Grid item xs={1.3}></Grid>}
+              {isCurrentPhase && (
+                <>
+                  <Grid item xs={1.7}>
+                    <SummaryItem
+                      title="Next milestone"
+                      enableTooltip={true}
+                      content={phase.next_milestone}
+                      isTitleBold={isSelectedPhase}
+                    />
+                  </Grid>
+                  <Grid item xs={1.8}>
+                    <SummaryItem title="Progress">
+                      <BorderLinearProgress
+                        variant="determinate"
+                        value={phase.milestone_progress}
+                        sx={{ marginTop: "10px" }}
+                      />
+                    </SummaryItem>
+                  </Grid>
+                </>
+              )}
+              {!isCurrentPhase && (
+                <>
+                  <Grid item xs={1.1}></Grid>
+                  <Grid item xs={1.8}>
+                    <SummaryItem title="Progress">
+                      <ETParagraph
+                        bold={isSelectedPhase}
+                        sx={{
+                          ...summaryContentStyle,
+                        }}
+                      >
+                        {progressText}
+                      </ETParagraph>
+                    </SummaryItem>
+                  </Grid>
+                </>
+              )}
             </Grid>
           </ETAccordionSummary>
           <ETAccordionDetails
-            expanded={expanded}
             sx={{
               pt: "24px",
             }}
@@ -240,6 +524,27 @@ const PhaseAccordion = ({
           </ETAccordionDetails>
         </ETAccordion>
       </Box>
+      <TrackDialog
+        dialogTitle="Overage Responsibility"
+        disableEscapeKeyDown
+        formId="overage-responsibility-form"
+        fullWidth
+        subHeading={phase.work_phase.name}
+        isActionsRequired
+        maxWidth="sm"
+        okButtonText="Save"
+        onCancel={() => setOpen(false)}
+        open={open}
+      >
+        <OverageResponsibilityForm
+          onSave={handleSaveOverageResponsibility}
+          daysTakenText={daysTakenText}
+          overageResponsibilities={overageResponsibilities ?? []}
+          daysAhead={daysAhead}
+          isLegislated={isLegislated}
+          hasOverage={hasOverage}
+        />
+      </TrackDialog>
     </>
   );
 };

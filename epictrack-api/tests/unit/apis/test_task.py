@@ -22,10 +22,10 @@ from urllib.parse import urljoin
 from werkzeug.datastructures import FileStorage
 
 from api.utils.constants import CANADA_TIMEZONE
-from tests.utilities.factory_scenarios import TestTaskEnum, TestTaskTemplateEnum
+from tests.utilities.factory_scenarios import TestTaskEnum, TestTaskTemplateEnum, TestJwtClaims
 from tests.utilities.factory_utils import (
-    factory_staff_model, factory_staff_work_role_model, factory_task_model, factory_work_model,
-    factory_work_phase_model)
+    factory_auth_header, factory_staff_model, factory_staff_work_role_model, factory_task_model,
+    factory_work_model, factory_work_phase_model)
 
 
 API_BASE_URL = "/api/v1/"
@@ -101,7 +101,7 @@ def test_bulk_update_tasks(client, auth_header):
     assert response.status_code == HTTPStatus.OK
 
 
-def test_bulk_delete_tasks(client, auth_header):
+def test_bulk_delete_tasks(client, jwt):
     """Test bulk delete tasks"""
     work = factory_work_model()
     task1 = factory_task_model(work_id=work.id)
@@ -109,15 +109,17 @@ def test_bulk_delete_tasks(client, auth_header):
     url = urljoin(API_BASE_URL, "tasks/events")
 
     query = {"task_ids": f"{task1.id},{task2.id}", "work_id": work.id}
-    response = client.delete(url, query_string=query, headers=auth_header)
+    super_user = TestJwtClaims.staff_admin_role
+    headers = factory_auth_header(jwt=jwt, claims=super_user)
+    response = client.delete(url, query_string=query, headers=headers)
     assert response.status_code == HTTPStatus.OK
 
     url = urljoin(API_BASE_URL, f"tasks/events/{task1.id}")
-    response = client.get(url, headers=auth_header)
+    response = client.get(url, headers=headers)
     assert response.status_code == HTTPStatus.NOT_FOUND
 
     url = urljoin(API_BASE_URL, f"tasks/events/{task2.id}")
-    response = client.get(url, headers=auth_header)
+    response = client.get(url, headers=headers)
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 

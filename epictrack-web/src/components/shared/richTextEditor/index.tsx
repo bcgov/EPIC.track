@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { EditorState, convertToRaw } from "draft-js";
 import { Editor } from "react-draft-wysiwyg";
 import { Box, FormControl, FormHelperText } from "@mui/material";
@@ -37,7 +37,7 @@ const RichTextEditor = ({
   error = false,
   helperText = "",
 }: RichTextEditorProps) => {
-  const getStateFromInitialValue = () => {
+  const getStateFromInitialValue = useCallback(() => {
     if (initialRawEditorState) {
       setEditorState(getEditorStateFromRaw(initialRawEditorState));
       return;
@@ -47,18 +47,18 @@ const RichTextEditor = ({
       const contentState = getEditorStateFromHtml(initialHTMLText);
       setEditorState(contentState);
     }
-  };
+  }, [initialHTMLText, initialRawEditorState]);
 
-  const [editorState, setEditorState] = React.useState(
-    getEditorStateFromRaw(initialRawEditorState)
+  const [editorState, setEditorState] = useState(
+    getEditorStateFromRaw(initialRawEditorState),
   );
-  const [focused, setFocused] = React.useState<boolean>(false);
+  const [focused, setFocused] = useState<boolean>(false);
 
   const handleChange = (newEditorState: EditorState) => {
     const plainText = newEditorState.getCurrentContent().getPlainText();
     setEditorState(newEditorState);
     const stringifiedEditorState = JSON.stringify(
-      convertToRaw(newEditorState.getCurrentContent())
+      convertToRaw(newEditorState.getCurrentContent()),
     );
     handleEditorStateChange(stringifiedEditorState);
     setRawText(plainText);
@@ -66,46 +66,45 @@ const RichTextEditor = ({
 
   useEffect(() => {
     getStateFromInitialValue();
-  }, [initialRawEditorState, initialHTMLText]);
+  }, [getStateFromInitialValue, initialRawEditorState, initialHTMLText]);
 
   return (
     <FormControl fullWidth>
       <Box style={{ borderColor: `${error ? Palette.error.main : ""}` }}>
-        <form>
-          <Editor
-            spellCheck
-            editorState={editorState}
-            onEditorStateChange={handleChange}
-            handlePastedText={() => false}
-            editorStyle={{
-              height: "485px",
-              padding: "8px 8px 8px",
-              border: `1px solid ${focused ? "#0070E0" : "rgb(224,224,224)"}`,
-              borderRadius: "4px",
-              background: "#f9f9fb",
-              marginBottom: "8px",
-              fontSize: "16px",
-            }}
-            toolbarStyle={styles.toolbar}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            toolbar={{
-              options: [
-                "inline",
-                "fontSize",
-                "list",
-                "colorPicker",
-                "link",
-                "emoji",
-                "history",
-              ],
-              inline: {
-                options: ["bold", "italic", "underline"],
-              },
-              list: { options: ["unordered", "ordered"] },
-            }}
-          />
-        </form>
+        <Editor
+          spellCheck
+          editorState={editorState}
+          onEditorStateChange={handleChange}
+          handlePastedText={() => false}
+          editorStyle={{
+            maxHeight: "485px",
+            minHeight: "200px",
+            padding: "8px 8px 8px",
+            border: `1px solid ${focused ? "#0070E0" : "rgb(224,224,224)"}`,
+            borderRadius: "4px",
+            background: "#f9f9fb",
+            marginBottom: "8px",
+            fontSize: "16px",
+          }}
+          toolbarStyle={styles.toolbar}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          toolbar={{
+            options: [
+              "inline",
+              "fontSize",
+              "list",
+              "colorPicker",
+              "link",
+              "emoji",
+              "history",
+            ],
+            inline: {
+              options: ["bold", "italic", "underline"],
+            },
+            list: { options: ["unordered", "ordered"] },
+          }}
+        />
       </Box>
       <FormHelperText error={error}>{error ? helperText : ""}</FormHelperText>
     </FormControl>

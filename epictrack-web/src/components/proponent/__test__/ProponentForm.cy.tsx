@@ -76,7 +76,7 @@ describe("ProponentForm", () => {
         proponent={null}
         saveProponent={cy.stub()}
         setDisableDialogSave={cy.stub()}
-      />
+      />,
     );
   });
 

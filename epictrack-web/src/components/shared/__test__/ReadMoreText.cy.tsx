@@ -9,7 +9,7 @@ describe("ReadMoreText", () => {
         children={longText}
         maxLength={50}
         defaultExpanded={false}
-      />
+      />,
     );
     cy.contains("Read More").should("be.visible");
   });
@@ -20,14 +20,18 @@ describe("ReadMoreText", () => {
         children={longText}
         maxLength={600}
         defaultExpanded={false}
-      />
+      />,
     );
     cy.contains("Read More").should("not.exist");
   });
 
   it('should display "Read Less" when text length exceeds maxLength and is expanded', () => {
     cy.mount(
-      <ReadMoreText children={longText} maxLength={50} defaultExpanded={true} />
+      <ReadMoreText
+        children={longText}
+        maxLength={50}
+        defaultExpanded={true}
+      />,
     );
     cy.contains("Read Less").should("be.visible");
   });
@@ -38,7 +42,7 @@ describe("ReadMoreText", () => {
         children={longText}
         maxLength={50}
         defaultExpanded={false}
-      />
+      />,
     );
     cy.contains("Read More").click();
     cy.contains("Read Less").should("be.visible");

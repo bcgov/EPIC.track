@@ -11,20 +11,36 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import dayjs from "dayjs";
 import Moment from "moment";
+import { Else, If, Then, When } from "react-if";
+import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
+import { Palette } from "../../../styles/theme";
+import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
+import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
+import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
+import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
+import RichTextEditor from "../../shared/richTextEditor";
+import TrackDialog from "../../shared/TrackDialog";
+import WarningBox from "../../shared/warningBox";
+import { showNotification } from "../../shared/notificationProvider";
+import Icons from "../../icons";
+import { IconProps } from "../../icons/type";
+import { WorkplanContext } from "../WorkPlanContext";
+import { EventContext } from "./EventContext";
 import {
   COMMON_ERROR_MESSAGE,
   MIN_WORK_START_DATE,
 } from "../../../constants/application-constant";
-import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
-import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
-import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
-import { Palette } from "../../../styles/theme";
-import { WorkplanContext } from "../WorkPlanContext";
-import { showNotification } from "../../shared/notificationProvider";
+import { EVENT_TYPE } from "../phase/type";
+import { OUTCOME_ID } from "./constants";
+import { POSITION_ENUM } from "models/position";
+import { eventService } from "services/eventService/eventService";
+import { workService } from "services/workService/workService";
+import staffService from "services/staffService/staffService";
+import { configurationService } from "services/configurationService/configurationService";
 import { getErrorMessage } from "../../../utils/axiosUtils";
-import { ListType } from "../../../models/code";
-import RichTextEditor from "../../shared/richTextEditor";
-import eventService from "../../../services/eventService/eventService";
+import { dateUtils } from "../../../utils";
+import { ListType } from "models/code";
+import { Staff } from "models/staff";
 import {
   EventCategory,
   EventPosition,
@@ -33,36 +49,25 @@ import {
   EventsGridModel,
   MilestoneEvent,
   MilestoneEventDateCheck,
-} from "../../../models/event";
-import configurationService from "../../../services/configurationService/configurationService";
-import TrackDialog from "../../shared/TrackDialog";
-import EventConfiguration from "../../../models/eventConfiguration";
-import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
+} from "models/event";
+import EventConfiguration from "models/eventConfiguration";
+import { WorkPhaseAdditionalInfo } from "../../../models/work";
 import MultiDaysInput from "./components/MultiDaysInput";
-import { dateUtils } from "../../../utils";
 import PCPInput from "./components/PCPInput";
-import Icons from "../../icons/index";
-import { IconProps } from "../../icons/type";
 import SingleDayPCPInput from "./components/SingleDayPCPInput";
 import DecisionInput from "./components/DecisionInput";
-import { POSITION_ENUM } from "../../../models/position";
-import { Else, If, Then, When } from "react-if";
 import ExtensionInput from "./components/ExtensionInput";
-import { EventContext } from "./EventContext";
-import { EVENT_TYPE } from "../phase/type";
 import ExtensionSuspensionInput from "./components/ExtensionSuspensionInput";
-import WarningBox from "../../shared/warningBox";
 import EventDatePushConfirmForm from "./components/EventDatePushConfirmForm";
-import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
-import { Staff } from "models/staff";
-import staffService from "services/staffService/staffService";
-import { OUTCOME_ID } from "./constants";
+import { Work, WorkPhase } from "models/work";
 
 interface EventFormProps {
-  onSave: () => void;
+  onSave: (remainingPhasesToComplete?: boolean) => void;
   event?: MilestoneEvent;
-  milestoneEvents: EventsGridModel[];
+  milestoneEvents?: EventsGridModel[];
   isFormFieldsLocked: boolean;
+  workPhase?: WorkPhase;
+  work?: Work;
 }
 interface NumberOfDaysChangeProps {
   numberOfDays?: number | undefined;
@@ -75,11 +80,12 @@ const EventForm = ({
     return;
   },
   event,
-  milestoneEvents,
   isFormFieldsLocked,
+  workPhase: propWorkPhase,
+  work: propWork,
 }: EventFormProps) => {
   const [configurations, setConfigurations] = useState<EventConfiguration[]>(
-    []
+    [],
   );
   const [notes, setNotes] = useState("");
   const [titleCharacterCount, setTitleCharacterCount] = useState<number>(0);
@@ -93,17 +99,28 @@ const EventForm = ({
   const [showEventPushConfirmation, setShowEventPushConfirmation] =
     useState(false);
   const [pushEvents, setPushEvents] = useState<boolean>(false);
-  const initialNotes = useMemo(() => event?.notes, [event?.id]);
+  const initialNotes = useMemo(() => event?.notes, [event?.notes]);
   const { handleHighlightRows } = useContext(EventContext);
   const [dateCheckStatus, setDateCheckStatus] =
     useState<MilestoneEventDateCheck>();
-  const [actualAdded, setActualAdded] = useState<boolean>(false);
+  const [actualAdded, setActualAdded] = useState<boolean>(
+    event?.actual_date ? true : false,
+  );
   const [anticipatedLabel, setAnticipatedLabel] = useState("Anticipated Date");
   const [actualDateLabel, setActualDateLabel] = useState("Actual Date");
   const isCreateMode = useMemo(() => !event, [event]);
   const [decisionMakers, setDecisionMakers] = useState<Staff[]>([]);
   const titleRef = useRef();
-  const { selectedWorkPhase, work, workPhases } = useContext(WorkplanContext);
+  const {
+    work: contextWork,
+    workPhases,
+    selectedWorkPhase: contextSelectedWorkPhase,
+  } = useContext(WorkplanContext);
+
+  const work = propWork ?? contextWork;
+  const selectedWorkPhase =
+    propWorkPhase ?? contextSelectedWorkPhase?.work_phase;
+
   const MISSING_RESUMPTION_ERROR =
     "No resumption milestone configuration found to resume the phase";
   const schema = useMemo(
@@ -146,93 +163,85 @@ const EventForm = ({
           otherwise: () => yup.string().nullable(),
         }),
       }),
-    [selectedConfiguration, actualAdded]
+    [selectedConfiguration, actualAdded],
   );
+
+  const [workPhaseAdditionalInfo, setWorkPhaseAdditionalInfo] =
+    useState<WorkPhaseAdditionalInfo | null>(null);
+  useEffect(() => {
+    const fetchAdditionalInfo = async () => {
+      try {
+        if (work?.id && selectedWorkPhase?.id) {
+          const result = await workService.getWorkPhaseAdditionalInfo(
+            work.id,
+            selectedWorkPhase.id,
+          );
+          if (result.status === 200) {
+            const [first] = result.data;
+            setWorkPhaseAdditionalInfo(first as WorkPhaseAdditionalInfo);
+          }
+        }
+      } catch {
+        console.error(`Failed to fetch work phase additional info`);
+      }
+    };
+    fetchAdditionalInfo();
+  }, [work?.id, selectedWorkPhase?.id]);
+
   const disableAnticipatedDate = useMemo(
     () =>
       isFormFieldsLocked ||
       Boolean(
         selectedConfiguration?.id &&
-          selectedWorkPhase?.work_phase.legislated &&
-          selectedConfiguration?.event_position === EventPosition.END
+          selectedWorkPhase?.legislated &&
+          workPhaseAdditionalInfo &&
+          workPhaseAdditionalInfo?.milestone_progress === 0 &&
+          selectedConfiguration?.event_position === EventPosition.END,
       ),
-    [selectedConfiguration, selectedWorkPhase]
+    [
+      isFormFieldsLocked,
+      selectedConfiguration,
+      workPhaseAdditionalInfo,
+      selectedWorkPhase,
+    ],
   );
+
   const pushRequired = useMemo(
     () =>
       dateCheckStatus?.subsequent_event_push_required &&
       event?.event_configuration.event_category_id !== EventCategory.EXTENSION,
-    [dateCheckStatus, event]
+    [dateCheckStatus, event],
   );
-  const isHighPriorityActive = useMemo(() => {
-    if (event) {
-      return event.high_priority;
-    }
-    if (
-      [
-        EventType.TIME_LIMIT_SUSPENSION,
-        EventType.TIME_LIMIT_RESUMPTION,
-      ].includes(Number(selectedConfiguration?.event_type_id))
-    ) {
-      return true;
-    }
-  }, [selectedConfiguration, event]);
-  /**
-   * If the event is the last decision event, then, the decision maker
-   * position id has to be selected from the decision make position id
-   * stored in Work model
-   */
-  const decisionMakerPositionIds = useMemo<number[]>(() => {
-    const lastDecisionIndex = milestoneEvents.findLastIndex(
-      (p: EventsGridModel) =>
-        p.event_configuration.event_category_id === EventCategory.DECISION
-    );
-    const currentEventIndex = milestoneEvents.findIndex(
-      (p: EventsGridModel) => p.id === event?.id
-    );
-    if (
-      selectedWorkPhase?.is_last_phase &&
-      lastDecisionIndex === currentEventIndex
-    ) {
-      if (work?.decision_maker_position_id) {
-        return [Number(work?.decision_maker_position_id)];
-      } else {
-        return [];
-      }
-    }
-    return [
-      POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR,
-      POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER,
-      POSITION_ENUM.ADM,
-      POSITION_ENUM.PROJECT_ASSESSMENT_DIRECTOR,
-    ];
-  }, [work, workPhases, selectedWorkPhase, event, milestoneEvents]);
+
   const getDecisionMakers = useCallback(async () => {
-    if (isFormFieldsLocked && work?.decision_by_id) {
-      const result = await staffService.getById(
-        String(work?.decision_by_id),
-        false
-      );
-      if (result.status === 200) {
-        setDecisionMakers([result.data as Staff]);
+    const result = await staffService.getActiveStaffByPosition(
+      [POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER, POSITION_ENUM.ADM].join(","),
+    );
+    if (result.status === 200) {
+      const decisionMakers = result.data as Staff[];
+      if (work?.responsible_epd) {
+        decisionMakers.push(work?.responsible_epd);
       }
-    } else if (
-      !decisionMakerPositionIds ||
-      decisionMakerPositionIds.length === 0
-    ) {
-      const result = await staffService.getById(String(work?.decision_by_id));
-      if (result.status === 200) {
-        setDecisionMakers([result.data as Staff]);
+      if (work?.work_lead) {
+        decisionMakers.push(work?.work_lead);
       }
-    } else {
-      const result = await staffService.getStaffByPosition(
-        decisionMakerPositionIds.join(",")
-      );
-      if (result.status === 200) {
-        setDecisionMakers(result.data as Staff[]);
+      if (work?.decision_by) {
+        decisionMakers.unshift(work?.decision_by);
       }
+      const uniqueDecisionMakers = [
+        ...Array.from(
+          new Map(
+            decisionMakers.map((decisionMaker) => [
+              decisionMaker.id,
+              decisionMaker,
+            ]),
+          ).values(),
+        ),
+      ];
+      setDecisionMakers(uniqueDecisionMakers);
     }
-  }, [decisionMakerPositionIds, work]);
+  }, [work]);
+
   useEffect(() => {
     if (
       actualAdded &&
@@ -240,32 +249,39 @@ const EventForm = ({
     ) {
       getDecisionMakers();
     }
-  }, [actualAdded, selectedConfiguration]);
+  }, [
+    actualAdded,
+    getDecisionMakers,
+    selectedConfiguration?.event_category_id,
+  ]);
+
   const showDatePushWarning = useMemo(
     () =>
       dateCheckStatus?.phase_end_push_required &&
-      selectedWorkPhase?.work_phase.legislated &&
+      selectedWorkPhase?.legislated &&
       selectedConfiguration?.event_category_id !== EventCategory.EXTENSION,
-    [dateCheckStatus, selectedWorkPhase]
+    [
+      dateCheckStatus,
+      selectedConfiguration?.event_category_id,
+      selectedWorkPhase,
+    ],
   );
+
   const isMilestoneTypeDisabled = useMemo(
-    () =>
-      !!event ||
-      isFormFieldsLocked ||
-      selectedWorkPhase?.work_phase.is_suspended,
-    [event, selectedWorkPhase?.work_phase.is_suspended]
+    () => !!event || isFormFieldsLocked || selectedWorkPhase?.is_suspended,
+    [event, isFormFieldsLocked, selectedWorkPhase?.is_suspended],
   );
+
   const isTitleDisabled = useMemo(
-    () => isFormFieldsLocked || selectedWorkPhase?.work_phase.is_suspended,
-    [isFormFieldsLocked, selectedWorkPhase?.work_phase.is_suspended]
+    () => isFormFieldsLocked || selectedWorkPhase?.is_suspended,
+    [isFormFieldsLocked, selectedWorkPhase?.is_suspended],
   );
 
   const isStartPhase = useMemo(
     () =>
-      workPhases.findIndex(
-        (p) => p.work_phase.id === selectedWorkPhase?.work_phase.id
-      ) === 0,
-    [workPhases, selectedWorkPhase]
+      workPhases.findIndex((p) => p.work_phase.id === selectedWorkPhase?.id) ===
+      0,
+    [workPhases, selectedWorkPhase],
   );
 
   const isStartEvent = useMemo(
@@ -273,13 +289,11 @@ const EventForm = ({
       event &&
       selectedConfiguration &&
       selectedConfiguration?.event_position === EventPosition.START,
-    [event, selectedConfiguration]
+    [event, selectedConfiguration],
   );
 
   const anticipatedDefaultValue = useMemo(() => {
-    return event
-      ? event.anticipated_date
-      : selectedWorkPhase?.work_phase.start_date;
+    return event ? event.anticipated_date : selectedWorkPhase?.start_date;
   }, [event, selectedWorkPhase]);
 
   const actualReferenceDate = useMemo(() => {
@@ -290,14 +304,14 @@ const EventForm = ({
       isStartEvent && isStartPhase
         ? dayjs(MIN_WORK_START_DATE)
         : dayjs(work?.start_date),
-    [work?.start_date, isStartEvent, isStartPhase]
+    [work?.start_date, isStartEvent, isStartPhase],
   );
   const actualDateMin = useMemo(
     () =>
       isStartEvent && isStartPhase
         ? dayjs(MIN_WORK_START_DATE)
-        : dayjs(selectedWorkPhase?.work_phase.start_date),
-    [selectedWorkPhase, isStartEvent, isStartPhase]
+        : dayjs(selectedWorkPhase?.start_date),
+    [selectedWorkPhase, isStartEvent, isStartPhase],
   );
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -311,7 +325,6 @@ const EventForm = ({
     unregister,
     formState: { errors },
     reset,
-    control,
     getValues,
   } = methods;
 
@@ -332,7 +345,10 @@ const EventForm = ({
   }, [selectedConfiguration]);
 
   useEffect(() => {
-    if (event) {
+    if (!event) return;
+    const current = getValues();
+    const hasChanged = JSON.stringify(current) !== JSON.stringify(event);
+    if (hasChanged) {
       reset(event);
       daysOnChangeHandler({
         anticipatedDate: !event.actual_date
@@ -344,34 +360,29 @@ const EventForm = ({
       setTitleCharacterCount(Number(event?.name.length));
       setNotes(event.notes);
     }
-  }, [
-    event,
-    numberOfDaysRef?.current,
-    endDateRef?.current,
-    anticipatedDateRef?.current,
-  ]);
+  }, [event, getValues, reset]);
 
   useEffect(() => {
     if (configurations && event) {
       const config = configurations.filter(
-        (p) => p.id == event.event_configuration_id
+        (p) => p.id === event.event_configuration_id,
       )[0];
       setSelectedConfiguration(config);
     }
-  }, [event, configurations]);
+  }, [configurations, event, setSelectedConfiguration]);
 
   /**
-   * If the phase is suspended, the, when you try to add a new event
+   * If the phase is suspended, when you try to add a new event
    * the form should be pre set with RESUMPTION milestone type
    */
   useEffect(() => {
     if (
-      selectedWorkPhase?.work_phase.is_suspended &&
+      selectedWorkPhase?.is_suspended &&
       configurations.length > 0 &&
       !event
     ) {
       const config = configurations.filter(
-        (p) => p.event_type_id == EventType.TIME_LIMIT_RESUMPTION
+        (p) => p.event_type_id === EventType.TIME_LIMIT_RESUMPTION,
       );
       if (!config || config.length === 0) {
         showNotification(MISSING_RESUMPTION_ERROR, {
@@ -385,21 +396,13 @@ const EventForm = ({
         });
       }
     }
-  }, [configurations, event]);
+  }, [configurations, event, reset, selectedWorkPhase?.is_suspended]);
 
-  useEffect(() => {
-    if (!Boolean(event)) {
-      getConfigurations();
-    } else if (event) {
-      setConfigurations([(event as MilestoneEvent).event_configuration]);
-    }
-  }, [event]);
-
-  const getConfigurations = async () => {
+  const getConfigurations = useCallback(async () => {
     try {
       const result = await configurationService.getAll(
-        Number(selectedWorkPhase?.work_phase.id),
-        [EventTemplateVisibility.OPTIONAL, EventTemplateVisibility.SUGGESTED]
+        Number(selectedWorkPhase?.id),
+        [EventTemplateVisibility.OPTIONAL, EventTemplateVisibility.SUGGESTED],
       );
       if (result.status === 200) {
         setConfigurations(result.data as any[]);
@@ -409,23 +412,31 @@ const EventForm = ({
         type: "error",
       });
     }
-  };
+  }, [selectedWorkPhase]);
+
+  useEffect(() => {
+    if (!event) {
+      getConfigurations();
+    } else {
+      setConfigurations([(event as MilestoneEvent).event_configuration]);
+    }
+  }, [event, getConfigurations]);
 
   /**
    * Check if the selected event configuration cause date to exceed the phase
    * or push subsequent events
    */
-  const eventDateCheck = async () => {
+  const eventDateCheck = useCallback(async () => {
     try {
       const result = await eventService.check_event_for_date_push(
         getValues(),
-        event?.id
+        event?.id,
       );
       if (result.status === 200) {
         setDateCheckStatus(result.data as MilestoneEventDateCheck);
       }
     } catch (e) {}
-  };
+  }, [event?.id, getValues]);
 
   /**
    * Check if it is required to show the Lock confirmation
@@ -458,8 +469,8 @@ const EventForm = ({
     async (data: MilestoneEvent, pushEventConfirmed: boolean) => {
       const createdResult = await eventService.create(
         data,
-        Number(selectedWorkPhase?.work_phase.id),
-        pushEvents || pushEventConfirmed
+        Number(selectedWorkPhase?.id),
+        pushEvents || pushEventConfirmed,
       );
       showNotification("Milestone details inserted", {
         type: "success",
@@ -473,7 +484,7 @@ const EventForm = ({
 
       return createdResult;
     },
-    [pushEvents]
+    [handleHighlightRows, pushEvents, selectedWorkPhase?.id],
   );
 
   const updateEvent = useCallback(
@@ -485,7 +496,7 @@ const EventForm = ({
       const updatedResult = await eventService.update(
         data,
         Number(event.id),
-        pushEvents || pushEventConfirmed
+        pushEvents || pushEventConfirmed,
       );
       showNotification("Milestone details updated", {
         type: "success",
@@ -498,7 +509,7 @@ const EventForm = ({
       ]);
       return updatedResult;
     },
-    [event, pushEvents]
+    [event, handleHighlightRows, pushEvents],
   );
 
   const saveEvent = useCallback(
@@ -509,12 +520,12 @@ const EventForm = ({
 
       return createEvent(data, pushEventConfirmed);
     },
-    [event, pushEvents]
+    [event, createEvent, updateEvent],
   );
   const handleSaveEvent = async (
     data?: MilestoneEvent,
     pushEventConfirmed = false,
-    confirmSaveInLocked = false
+    confirmSaveInLocked = false,
   ) => {
     pushEventConfirmed =
       pushEventConfirmed ||
@@ -534,20 +545,25 @@ const EventForm = ({
         setShowEventLockDialog(true);
       } else {
         dataToBeSubmitted.anticipated_date = Moment(
-          dataToBeSubmitted.anticipated_date
+          dataToBeSubmitted.anticipated_date,
         ).format();
         if (!!dataToBeSubmitted.actual_date) {
           dataToBeSubmitted.actual_date = Moment(
-            dataToBeSubmitted.actual_date
+            dataToBeSubmitted.actual_date,
           ).format();
         }
         await saveEvent(dataToBeSubmitted, pushEventConfirmed);
-        onSave();
+        const remainingPhasesToComplete = workPhases?.some(
+          (phase) =>
+            phase.work_phase.legislated && !phase.work_phase.is_completed,
+        );
+        onSave(remainingPhasesToComplete);
         setDateCheckStatus(undefined);
       }
     } catch (e) {
       const message = getErrorMessage(e);
       showNotification(message, {
+        duration: 3000,
         type: "error",
       });
     }
@@ -555,7 +571,7 @@ const EventForm = ({
 
   const onChangeMilestoneType = (configuration_id: number) => {
     const configuration = configurations.filter(
-      (p) => p.id === Number(configuration_id)
+      (p) => p.id === Number(configuration_id),
     )[0];
     setSelectedConfiguration(configuration);
     (titleRef?.current as any)["value"] = configuration.name;
@@ -601,17 +617,22 @@ const EventForm = ({
               params.anticipatedDate ||
               String((anticipatedDateRef?.current as any)["value"]),
             number_of_days,
-            "days"
+            "days",
           )
-          .toISOString()
+          .toISOString(),
       );
     }
     return Promise.resolve();
   };
-  const changeHandler = async (params?: NumberOfDaysChangeProps) => {
-    await daysOnChangeHandler(params);
-    eventDateCheck();
-  };
+
+  const changeHandler = useCallback(
+    async (params?: NumberOfDaysChangeProps) => {
+      await daysOnChangeHandler(params);
+      eventDateCheck();
+    },
+    [eventDateCheck],
+  );
+
   return (
     <>
       <FormProvider {...methods}>
@@ -644,7 +665,7 @@ const EventForm = ({
                 getOptionValue={(o: ListType) => o.id.toString()}
                 getOptionLabel={(o: ListType) => o.name}
                 disabled={isMilestoneTypeDisabled}
-                onHandleChange={async (configuration_id) => {
+                onHandleChange={async (configuration_id: any) => {
                   await onChangeMilestoneType(configuration_id);
                   eventDateCheck();
                 }}
@@ -713,9 +734,7 @@ const EventForm = ({
                 disabled={disableAnticipatedDate}
                 defaultValue={dayjs(anticipatedDefaultValue).format()}
                 datePickerProps={{
-                  referenceDate: dayjs(
-                    selectedWorkPhase?.work_phase.start_date
-                  ),
+                  referenceDate: dayjs(selectedWorkPhase?.start_date),
                   minDate: anticipatedMinDate,
                   onDateChange: (event: any, defaultOnChange: any) => {
                     const d = event ? event["$d"] : null;
@@ -763,13 +782,14 @@ const EventForm = ({
           </Grid>
           <Grid
             container
+            item
+            xs={12}
             columnSpacing={2}
             rowSpacing={2}
             sx={{
-              px: 1,
-              pt: 1,
-              pb: 0,
+              padding: "0.5rem 0.5rem 0 0",
               mt: 0,
+              ml: 0,
               backgroundColor: Palette.white,
               borderTop: `1px solid ${Palette.neutral.bg.dark}`,
             }}
@@ -802,7 +822,7 @@ const EventForm = ({
                 selectedConfiguration?.event_category_id ===
                   EventCategory.PCP &&
                 ![EventType.OPEN_HOUSE, EventType.VIRTUAL_OPEN_HOUSE].includes(
-                  selectedConfiguration?.event_type_id
+                  selectedConfiguration?.event_type_id,
                 )
               }
             >
@@ -862,30 +882,30 @@ const EventForm = ({
           }}
           isActionsRequired
         />
-        <TrackDialog
-          open={showEventPushConfirmation}
-          dialogTitle={"Update this Milestone only?"}
-          disableEscapeKeyDown
-          fullWidth
-          maxWidth="sm"
-          okButtonText="Save"
-          cancelButtonText="Cancel"
-          isActionsRequired
-          onCancel={() => setShowEventPushConfirmation(false)}
-          formId="confirm-form"
-        >
-          <EventDatePushConfirmForm
-            onSave={(option: number) => {
-              setPushEvents((prevState) => {
-                prevState = option === 1;
-                handleSaveEvent(undefined, prevState);
-                setShowEventPushConfirmation(false);
-                return prevState;
-              });
-            }}
-          />
-        </TrackDialog>
       </FormProvider>
+      <TrackDialog
+        open={showEventPushConfirmation}
+        dialogTitle={"Update this Milestone only?"}
+        disableEscapeKeyDown
+        fullWidth
+        maxWidth="sm"
+        okButtonText="Save"
+        cancelButtonText="Cancel"
+        isActionsRequired
+        onCancel={() => setShowEventPushConfirmation(false)}
+        formId="confirm-form"
+      >
+        <EventDatePushConfirmForm
+          onSave={(option: number) => {
+            setPushEvents((prevState) => {
+              prevState = option === 1;
+              handleSaveEvent(undefined, prevState);
+              setShowEventPushConfirmation(false);
+              return prevState;
+            });
+          }}
+        />
+      </TrackDialog>
     </>
   );
 };

@@ -54,7 +54,7 @@ const IssuesView = () => {
       const staleness = calculateStaleness(
         currentIssue,
         issueStalenessSetting?.staleness_length,
-        issueStalenessSetting?.warning_length
+        issueStalenessSetting?.warning_length,
       );
       return (
         <Grid key={`accordion-${currentIssue.id}`} item xs={12}>
@@ -73,7 +73,7 @@ const IssuesView = () => {
   const maxStaleness = issueListMaxStaleness(
     issues,
     issueStalenessSetting?.staleness_length,
-    issueStalenessSetting?.warning_length
+    issueStalenessSetting?.warning_length,
   );
 
   return (

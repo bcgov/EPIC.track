@@ -34,7 +34,7 @@ const EditIcon: FC<IconProps> = Icons["PencilEditIcon"];
 
 const GeneralSettings = () => {
   const [generalSettings, setGeneralSettings] = useState<StalenessSettings[]>(
-    []
+    [],
   );
   const [loading, setLoading] = useState(true);
 
@@ -43,7 +43,7 @@ const GeneralSettings = () => {
     try {
       const response = await stalenessSettingsService.getAll();
       const sortedData = (response.data as StalenessSettings[]).sort(
-        (a, b) => a.sort_order - b.sort_order
+        (a, b) => a.sort_order - b.sort_order,
       );
       setGeneralSettings(sortedData || []);
     } catch (error) {
@@ -130,7 +130,7 @@ const GeneralSettings = () => {
         },
       },
     ],
-    []
+    [],
   );
 
   const handleEditRowSave: MRT_TableOptions<StalenessSettings>["onEditingRowSave"] =
@@ -138,11 +138,11 @@ const GeneralSettings = () => {
       const stalenessType = row.id;
       const warningLength = parseInt(
         row.getValue("warning_length") as string,
-        10
+        10,
       );
       const stalenessLength = parseInt(
         row.getValue("staleness_length") as string,
-        10
+        10,
       );
 
       if (warningLength < 1 || stalenessLength < 1) {
@@ -155,7 +155,7 @@ const GeneralSettings = () => {
       if (stalenessLength <= warningLength) {
         showNotification(
           "Staleness threshold must be greater than warning threshold.",
-          { type: "error", duration: 3000 }
+          { type: "error", duration: 3000 },
         );
         return;
       }
@@ -182,7 +182,7 @@ const GeneralSettings = () => {
           `Updated ${
             StalenessSettingTypeNames[row.original.staleness_type]
           } thresholds.`,
-          { type: "success" }
+          { type: "success" },
         );
       } catch (error) {
         showNotification(getErrorMessage(error), { type: "error" });
@@ -201,7 +201,7 @@ const GeneralSettings = () => {
             {" "}
             Define the number of days before a status changes colours:{" "}
           </ETParagraph>
-          <ETParagraph color={Palette.neutral.dark}>
+          <ETParagraph color={Palette.neutral.dark} component="div">
             <List sx={{ pt: 0 }}>
               <ListItem sx={{ pt: 0, pb: 0, lineHeight: 1 }}>
                 <ListItemIcon sx={{ minWidth: "4px" }}>

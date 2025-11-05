@@ -9,7 +9,7 @@ import {
 export const calculateStatusStaleness = (
   lastApprovedStatus: Status | undefined,
   criticalThreshold?: number,
-  warningThreshold?: number
+  warningThreshold?: number,
 ): StalenessEnum => {
   if (!lastApprovedStatus) {
     return StalenessEnum.GOOD;
@@ -17,9 +17,9 @@ export const calculateStatusStaleness = (
 
   const daysAgo = moment();
   const NDaysAgo = dateUtils.diff(
-    daysAgo.toLocaleString(),
+    daysAgo.toISOString(),
     lastApprovedStatus?.posted_date,
-    "days"
+    "days",
   );
 
   if (

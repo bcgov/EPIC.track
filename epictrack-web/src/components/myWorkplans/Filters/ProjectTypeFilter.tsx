@@ -1,11 +1,21 @@
 import { useContext, useEffect, useMemo, useState } from "react";
-import projectService from "../../../services/projectService/projectService";
+import { projectService } from "../../../services/projectService/projectService";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import { OptionType } from "../../shared/filterSelect/type";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
 
-export const ProjectTypeFilter = () => {
-  const { setSearchOptions, searchOptions } = useContext(MyWorkplansContext);
+interface ProjectTypeFilterProps {
+  searchOptions?: any;
+  setSearchOptions?: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export const ProjectTypeFilter = ({
+  searchOptions: propSearchOptions,
+  setSearchOptions: propSetSearchOptions,
+}: ProjectTypeFilterProps) => {
+  const context = useContext(MyWorkplansContext);
+  const searchOptions = propSearchOptions ?? context.searchOptions;
+  const setSearchOptions = propSetSearchOptions ?? context.setSearchOptions;
 
   const [options, setOptions] = useState<OptionType[]>([]);
   const [loading, setLoading] = useState(false);
@@ -31,7 +41,7 @@ export const ProjectTypeFilter = () => {
 
   const value = useMemo(() => {
     return options.filter((option) =>
-      searchOptions.project_types.includes(String(option.value))
+      searchOptions.project_types.includes(String(option.value)),
     );
   }, [searchOptions.project_types, options]);
 

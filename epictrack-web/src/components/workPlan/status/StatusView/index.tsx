@@ -14,10 +14,15 @@ import { ROLES, StalenessEnum } from "constants/application-constant";
 const StatusView = () => {
   const { isActiveTeamMember, statuses, statusStalenessSetting, work } =
     useContext(WorkplanContext);
-  const { setShowStatusForm } = useContext(StatusContext);
+  const {
+    setIsCloning,
+    setShowApproveStatusDialog,
+    setShowStatusForm,
+    setStatus,
+  } = useContext(StatusContext);
 
   const { roles: currentRoles } = useAppSelector(
-    (state) => state.user.userDetail
+    (state) => state.user.userDetail,
   );
   const canAddStatus =
     isActiveTeamMember ||
@@ -36,7 +41,7 @@ const StatusView = () => {
     : calculateStatusStaleness(
         latestApprovedStatus,
         statusStalenessSetting?.staleness_length,
-        statusStalenessSetting?.warning_length
+        statusStalenessSetting?.warning_length,
       );
 
   return (
@@ -73,10 +78,30 @@ const StatusView = () => {
       {statuses.length > 0 && (
         <Grid container spacing={2}>
           <Grid item xs={6}>
-            <RecentStatus />
+            <RecentStatus
+              statuses={statuses}
+              isActiveTeamMember={isActiveTeamMember}
+              userHasRole={hasPermission({
+                roles: currentRoles,
+                allowed: [ROLES.EDIT, ROLES.CREATE],
+              })}
+              onApprove={(status) => {
+                setStatus(status);
+                setShowApproveStatusDialog(true);
+              }}
+              onClone={() => {
+                setStatus(statuses[0]);
+                setIsCloning(true);
+                setShowStatusForm(true);
+              }}
+              onEdit={(status) => {
+                setStatus(status);
+                setShowStatusForm(true);
+              }}
+            />
           </Grid>
           <Grid item xs={6}>
-            <StatusHistory />
+            <StatusHistory statuses={statuses} />
           </Grid>
         </Grid>
       )}

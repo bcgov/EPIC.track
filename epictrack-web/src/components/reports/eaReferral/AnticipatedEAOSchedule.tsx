@@ -26,12 +26,12 @@ import {
   RESULT_STATUS,
   REPORT_TYPE,
   DISPLAY_DATE_FORMAT,
-  MILESTONE_TYPES,
 } from "../../../constants/application-constant";
 import { dateUtils } from "../../../utils";
 import ReportHeader from "../shared/report-header/ReportHeader";
-import { ETPageContainer } from "../../shared";
+import { ETReportContainer } from "../../shared";
 import { staleLevel } from "utils/uiUtils";
+import { Palette } from "styles/theme";
 
 interface Group {
   group: string;
@@ -43,6 +43,8 @@ interface ReportData {
 }
 
 export default function AnticipatedEAOSchedule() {
+  const [includeFirstPhase, setIncludeFirstPhase] =
+    React.useState<boolean>(false);
   const [reports, setReports] = React.useState<Group[]>([]);
   const [showReportDateBanner, setShowReportDateBanner] =
     React.useState<boolean>(false);
@@ -57,7 +59,7 @@ export default function AnticipatedEAOSchedule() {
     const diff = dateUtils.diff(
       reportDate || "",
       new Date(2019, 11, 19).toISOString(),
-      "days"
+      "days",
     );
     setShowReportDateBanner(diff < 0 && !Number.isNaN(diff));
   }, [reportDate]);
@@ -68,6 +70,7 @@ export default function AnticipatedEAOSchedule() {
       setTypeFilter(filterTypes);
     }
   }, [reports]);
+
   const fetchReportData = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
@@ -75,7 +78,8 @@ export default function AnticipatedEAOSchedule() {
         REPORT_TYPE.EA_REFERRAL,
         {
           report_date: reportDate,
-        }
+          first_phase: includeFirstPhase,
+        },
       );
       setResultStatus(RESULT_STATUS.LOADED);
       if (reportData.status === 200) {
@@ -89,7 +93,8 @@ export default function AnticipatedEAOSchedule() {
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  }, [reportDate]);
+  }, [reportDate, includeFirstPhase]);
+
   const downloadPDFReport = React.useCallback(async () => {
     try {
       fetchReportData();
@@ -103,25 +108,26 @@ export default function AnticipatedEAOSchedule() {
         {
           report_date: reportDate,
           filters: filtersToSend,
-        }
+          first_phase: includeFirstPhase,
+        },
       );
       const url = window.URL.createObjectURL(
-        new Blob([(binaryReponse as any).data])
+        new Blob([(binaryReponse as any).data]),
       );
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute(
         "download",
         `${FILENAME_PREFIX}-${dateUtils.formatDate(
-          reportDate ? reportDate : new Date().toISOString()
-        )}.pdf`
+          reportDate ? reportDate : new Date().toISOString(),
+        )}.pdf`,
       );
       document.body.appendChild(link);
       link.click();
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  }, [reportDate, fetchReportData, selectedTypes]);
+  }, [fetchReportData, includeFirstPhase, reportDate, selectedTypes]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
@@ -154,18 +160,20 @@ export default function AnticipatedEAOSchedule() {
     );
   }
   return (
-    <ETPageContainer
+    <ETReportContainer
       direction="row"
       justifyContent="flex-start"
       alignItems="flex-start"
       container
       columnSpacing={2}
-      rowSpacing={3}
+      rowSpacing={2}
     >
       <Grid item sm={12}>
         {" "}
         <ReportHeader
           setReportDate={setReportDate}
+          setIncludeFirstPhase={setIncludeFirstPhase}
+          includeFirstPhase={includeFirstPhase}
           fetchReportData={fetchReportData}
           downloadPDFReport={downloadPDFReport}
           showReportDateBanner={showReportDateBanner}
@@ -173,16 +181,20 @@ export default function AnticipatedEAOSchedule() {
       </Grid>
       {reports && reports.length > 0 && (
         <>
-          <Grid item sm={2}>
+          <Grid
+            item
+            sm={0.95}
+            sx={{ margin: ".5rem 0 0 2.5rem ", alignContent: "center" }}
+          >
             <FormLabel>Select Type to Hide</FormLabel>
           </Grid>
-          <Grid item sm={2}>
+          <Grid item sm={1.75}>
             <Autocomplete
               sx={{
                 [`& .MuiInputBase-root`]: {
                   padding: "5px",
-                  border: "1px solid",
-                  borderColor: "black",
+                  border: "2px solid",
+                  borderColor: Palette.neutral.accent.light,
                   borderRadius: "4px",
                 },
               }}
@@ -194,7 +206,14 @@ export default function AnticipatedEAOSchedule() {
               }}
               options={typeFilter}
               renderInput={(params) => (
-                <TextField {...params} variant="standard" />
+                <TextField
+                  {...params}
+                  variant="standard"
+                  InputProps={{
+                    ...params.InputProps,
+                    disableUnderline: true,
+                  }}
+                />
               )}
             />
           </Grid>
@@ -247,7 +266,7 @@ export default function AnticipatedEAOSchedule() {
                                         {item["date_updated"]
                                           ? dateUtils.formatDate(
                                               item["date_updated"],
-                                              DISPLAY_DATE_FORMAT
+                                              DISPLAY_DATE_FORMAT,
                                             )
                                           : "Needs Status"}
                                       </b>
@@ -295,7 +314,11 @@ export default function AnticipatedEAOSchedule() {
                                         Decision to be made by
                                       </TableCell>
                                       <TableCell>
-                                        {item["decision_by"]}
+                                        {item["minister"]
+                                          ? item["decision_by"] +
+                                            ", " +
+                                            item["minister"]
+                                          : item["decision_by"]}
                                       </TableCell>
                                     </TableRow>
                                   </TableBody>
@@ -317,15 +340,12 @@ export default function AnticipatedEAOSchedule() {
                                   <TableBody>
                                     <TableRow>
                                       <TableCell>
-                                        {item["milestone_type"] ===
-                                        MILESTONE_TYPES.REFERRAL
-                                          ? "Referral Date"
-                                          : "Decision Date"}
+                                        {item["anticipated_date_label"]}
                                       </TableCell>
                                       <TableCell>
                                         {dateUtils.formatDate(
                                           item["referral_date"],
-                                          DISPLAY_DATE_FORMAT
+                                          DISPLAY_DATE_FORMAT,
                                         )}
                                       </TableCell>
                                     </TableRow>
@@ -335,7 +355,7 @@ export default function AnticipatedEAOSchedule() {
                                         {item["date_updated"]
                                           ? dateUtils.formatDate(
                                               item["date_updated"],
-                                              DISPLAY_DATE_FORMAT
+                                              DISPLAY_DATE_FORMAT,
                                             )
                                           : ""}
                                       </TableCell>
@@ -346,7 +366,7 @@ export default function AnticipatedEAOSchedule() {
                                         <TableCell>
                                           {dateUtils.formatDate(
                                             item["next_pecp_date"],
-                                            DISPLAY_DATE_FORMAT
+                                            DISPLAY_DATE_FORMAT,
                                           )}
                                         </TableCell>
                                       </TableRow>
@@ -391,7 +411,7 @@ export default function AnticipatedEAOSchedule() {
                                             );
                                           }
                                           return null;
-                                        }
+                                        },
                                       )}
                                   </TableBody>
                                 </Table>
@@ -426,6 +446,6 @@ export default function AnticipatedEAOSchedule() {
           </>
         )}
       </Grid>
-    </ETPageContainer>
+    </ETReportContainer>
   );
 }

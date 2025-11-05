@@ -41,6 +41,7 @@ from .indigenous_nation_request import (
 from .insight_request import (
     ProjectInsightRequestQueryParameterSchema,
     WorkInsightRequestQueryParameterSchema,
+    PhaseInsightRequestQueryParameterSchema,
 )
 from .outcome_configuration_request import (
     OutcomeConfigurationBodyParameterSchema,
@@ -48,6 +49,10 @@ from .outcome_configuration_request import (
 )
 from .outcome_template_request import OutcomeTemplateBodyParameterSchema
 from .phase_request import PhaseBodyParameterSchema
+from .phase_overage_responsibility_request import (
+    PhaseOverageResponsibilityBodyRequestSchema,
+    PhaseOverageResponsibilityBodyUpdateRequestSchema,
+)
 from .project_request import (
     ProjectAbbreviationParameterSchema,
     ProjectBodyParameterSchema,
@@ -115,13 +120,21 @@ from .work_request import (
     WorkIssuesParameterSchema,
     WorkIssuesUpdateCloneSchema,
     WorkIssuesUpdateEditSchema,
+    WorkPhaseNotesBodySchema,
     WorkNotesBodySchema,
     WorkPlanDownloadQueryParamSchema,
     WorkStatusParameterSchema,
     WorkTypeIdQueryParamSchema,
     WorkQueryParameterSchema,
+    WorkPhaseQueryParameterSchema
 )
 from .ministry_request import (
     MinistryBodyParameterSchema,
     MinistryUpdateParameterSchema,
+)
+from .work_resource_request import (
+    WorkResourceRequestSchema,
+    WorkResourceBodySchema,
+    WorkResourceIdPathSchema,
+    WorkResourceUpdateBodySchema
 )

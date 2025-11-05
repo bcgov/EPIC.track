@@ -22,7 +22,7 @@ const Option = ({
     if (filterProps?.selectedOptions) {
       setIsSelected(filterProps?.selectedOptions.indexOf(data.value) > -1);
     }
-  }, [filterProps?.selectedOptions]);
+  }, [filterProps?.selectedOptions, data.value]);
 
   return (
     <Box title={data.label}>
@@ -55,7 +55,7 @@ const Option = ({
             onClick={(event: any) => {
               rest.setValue(
                 event.target.checked ? event.target.value : "",
-                "select-option"
+                "select-option",
               );
             }}
             sx={{ color: "inherit !important" }}

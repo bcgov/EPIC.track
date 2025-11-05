@@ -1,6 +1,8 @@
+import { ReactNode } from "react";
+
 export interface WarningBoxProps {
   title?: string;
   isTitleBold: boolean;
-  subTitle?: string;
+  subTitle?: ReactNode;
   onCloseHandler?: () => void;
 }

@@ -51,12 +51,6 @@ class TokenInfo:
         return username
 
     @staticmethod
-    def is_super_user() -> bool:
-        """Return True if the user is staff user."""
-        # TODO Implement this method
-        return True
-
-    @staticmethod
     def get_roles():
         """Return roles of a user from the token."""
         token_info = g.token_info

@@ -14,7 +14,7 @@ let workCounter = 0;
 
 export const generateFakePosition = () => {
   return {
-    email: faker.internet.email(),
+    email: `${faker.string.alphanumeric(5)}@example.com`,
     first_name: faker.person.firstName(),
     full_name: faker.person.fullName(),
     id: faker.number.int(),
@@ -45,7 +45,7 @@ export const mockProject = {
 const generateMockWork = (): Work => {
   workCounter += 1;
   return {
-    id: faker.datatype.number() + workCounter,
+    id: faker.number.int() + workCounter,
     title: `${faker.commerce.productName()} ${workCounter}`,
     simple_title: faker.commerce.productName(),
     report_description: faker.lorem.paragraph(),
@@ -62,20 +62,20 @@ const generateMockWork = (): Work => {
     first_nation_notes: faker.lorem.paragraph(),
     status_notes: faker.lorem.paragraph(),
     issue_notes: faker.lorem.sentence(),
-    work_state: faker.random.word(),
-    project_id: faker.datatype.number(),
-    ministry_id: faker.datatype.number(),
-    ea_act_id: faker.datatype.number(),
-    eao_team_id: faker.datatype.number(),
-    federal_involvement_id: faker.datatype.number(),
-    responsible_epd_id: faker.datatype.number(),
-    work_lead_id: faker.datatype.number(),
-    work_type_id: faker.datatype.number(),
-    current_work_phase_id: faker.datatype.number(),
-    substitution_act_id: faker.datatype.number(),
-    eac_decision_by_id: faker.datatype.number(),
-    decision_by_id: faker.datatype.number(),
-    decision_maker_position_id: faker.datatype.number(),
+    work_state: faker.lorem.word(),
+    project_id: faker.number.int(),
+    ministry_id: faker.number.int(),
+    ea_act_id: faker.number.int(),
+    eao_team_id: faker.number.int(),
+    federal_involvement_id: faker.number.int(),
+    responsible_epd_id: faker.number.int(),
+    work_lead_id: faker.number.int(),
+    work_type_id: faker.number.int(),
+    current_work_phase_id: faker.number.int(),
+    substitution_act_id: faker.number.int(),
+    eac_decision_by_id: faker.number.int(),
+    decision_by_id: faker.number.int(),
+    decision_maker_position_id: faker.number.int(),
     start_date_locked: faker.datatype.boolean(),
     created_at: faker.date.past().toISOString(),
     anticipated_referral_date: faker.date.future().toISOString(),
@@ -83,13 +83,13 @@ const generateMockWork = (): Work => {
       created_at: faker.date.past().toISOString(),
       description: faker.lorem.paragraph(),
       address: faker.address.streetAddress(),
-      abbreviation: faker.random.word(),
-      type: { id: workCounter, name: faker.random.word() },
-      sub_type: { id: workCounter, name: faker.random.word() },
+      abbreviation: faker.lorem.word(),
+      type: { id: workCounter, name: faker.lorem.word() },
+      sub_type: { id: workCounter, name: faker.lorem.word() },
       proponent: { id: workCounter, name: faker.company.buzzPhrase() },
       region_env: { id: workCounter, name: faker.address.state() },
       region_flnro: { id: workCounter, name: faker.address.state() },
-      name: faker.random.word(),
+      name: faker.lorem.word(),
       id: workCounter,
     },
     ministry: {
@@ -99,15 +99,31 @@ const generateMockWork = (): Work => {
       combined: "",
       minister: mockStaffs[workCounter - 1] as Staff,
       sort_order: workCounter,
+      minister_id: 0,
+      date_created: "",
+      date_closed: "",
     },
-    ea_act: { id: workCounter, name: faker.random.word() },
-    eao_team: { id: workCounter, name: faker.random.word() },
-    federal_involvement: { id: workCounter, name: faker.random.word() },
+    ea_act: { id: workCounter, name: faker.lorem.word() },
+    eao_team: { id: workCounter, name: faker.lorem.word() },
+    federal_involvement: { id: workCounter, name: faker.lorem.word() },
     responsible_epd: mockStaffs[workCounter - 1] as Staff,
     work_lead: mockStaffs[workCounter - 1] as Staff,
-    work_type: { id: workCounter, name: faker.random.word() },
-    current_work_phase: { id: workCounter, name: faker.random.word() },
-    substitution_act: { id: workCounter, name: faker.random.word() },
+    work_type: { id: workCounter, name: faker.lorem.word() },
+    current_work_phase: {
+      id: workCounter,
+      name: faker.lorem.word(),
+      end_date: "",
+      start_date: "",
+      phase: { id: workCounter, name: faker.lorem.word() },
+      milestone_progress: 0,
+      next_milestone: "",
+      is_completed: false,
+      is_suspended: false,
+      legislated: false,
+      suspended_date: "",
+      number_of_days: "",
+    },
+    substitution_act: { id: workCounter, name: faker.lorem.word() },
     eac_decision_by: mockStaffs[workCounter - 1] as Staff,
     decision_by: mockStaffs[workCounter - 1] as Staff,
   };
@@ -278,11 +294,11 @@ describe("WorkList", () => {
     cy.mount(
       <Router>
         <WorkList />
-      </Router>
+      </Router>,
     );
   });
 
   it("should display the work list", () => {
-    cy.get(".MuiInputBase-root");
+    cy.get("table").should("exist").and("be.visible");
   });
 });

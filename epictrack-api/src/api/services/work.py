@@ -46,7 +46,7 @@ from api.models import (
     WorkStateEnum,
     db,
 )
-from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
+from api.models.dashboard_search_options import WorkplanDashboardSearchOptions
 from api.models.event_category import EventCategoryEnum
 from api.models.event_template import EventTemplateVisibilityEnum
 from api.models.indigenous_nation import IndigenousNation
@@ -98,6 +98,27 @@ class WorkService:  # pylint: disable=too-many-public-methods
     def find_all_works(cls, is_active=False):
         """Find all non-deleted works"""
         works = Work.find_all(is_active)
+        return works
+
+    @classmethod
+    def get_works_by_staff(cls, staff_id: Optional[int] = None) -> List[Work]:
+        """Fetch all active, non-deleted works and filter by staff_id if provided."""
+        query = Work.query.filter(
+            Work.is_active.is_(True),
+            Work.is_deleted.is_(False)
+        )
+
+        if staff_id:
+            query = query.join(
+                StaffWorkRole,
+                and_(
+                    StaffWorkRole.work_id == Work.id,
+                    StaffWorkRole.staff_id == staff_id,
+                    StaffWorkRole.is_active.is_(True),
+                    StaffWorkRole.is_deleted.is_(False)
+                )
+            )
+        works = query.all()
         return works
 
     @classmethod
@@ -178,6 +199,22 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return serialized_work
 
     @classmethod
+    def get_work_ids_by_staff(cls, staff_id: int) -> list[int]:
+        """Get all work ids by staff id."""
+        work_ids = [
+            row[0] for row in (
+                db.session.query(StaffWorkRole.work_id)
+                .filter(
+                    StaffWorkRole.staff_id == staff_id,
+                    StaffWorkRole.is_active.is_(True)
+                )
+                .distinct()
+                .all()
+            )
+        ]
+        return work_ids
+
+    @classmethod
     def find_allocated_resources(cls, is_active=None):
         """Find all allocated resources"""
         lead = aliased(Staff)
@@ -205,18 +242,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 StaffWorkRole.is_active.is_(True),
             )
         work_result = query.all()
-        works = [
-            {
-                "id": work.id,
-                "title": work.title,
-                "project": work.project,
-                "eao_team": work.eao_team,
-                "responsible_epd": work.responsible_epd,
-                "work_lead": work.work_lead,
-            }
-            for work in work_result
-        ]
-        work_ids = [work["id"] for work in works]
+        work_ids = [work.id for work in work_result]
         staff_result = (
             Staff.query.join(StaffWorkRole, StaffWorkRole.staff_id == Staff.id)
             .filter(
@@ -229,10 +255,13 @@ class WorkService:  # pylint: disable=too-many-public-methods
             .add_columns(StaffWorkRole.work_id)
             .all()
         )
-        for work in works:
-            staffs = [staff for staff in staff_result if staff.work_id == work["id"]]
-            work["staff"] = staffs
-        return works
+        for work in work_result:
+            staffs = [
+                s
+                for s in staff_result if s.work_id == work.id
+            ]
+            setattr(work, "staff", staffs)
+        return work_result
 
     @classmethod
     def create_work(cls, payload, commit: bool = True):
@@ -636,6 +665,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
     @classmethod
     def delete_work(cls, work_id: int):
         """Delete work by id."""
+        cls._check_delete_auth()
         work = Work.find_by_id(work_id)
         work.is_deleted = True
         Work.commit()
@@ -1066,3 +1096,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
             KeycloakRole.EDIT.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
+
+    @classmethod
+    def _check_delete_auth(cls):
+        """Check if user has delete role"""
+        one_of_roles = [KeycloakRole.DELETE.value]
+        authorisation.check_auth(one_of_roles=one_of_roles)

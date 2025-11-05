@@ -33,7 +33,7 @@ export class UserDetail {
     staffId: number,
     phone: string,
     position: string,
-    roles: string[]
+    roles: string[],
   ) {
     this.sub = sub;
     this.preferred_username = preferred_username;

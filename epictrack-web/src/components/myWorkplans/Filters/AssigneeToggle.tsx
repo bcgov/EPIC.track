@@ -1,50 +1,68 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Stack } from "@mui/material";
 import { useAppSelector } from "../../../hooks";
 import { ETCaption2 } from "../../shared";
 import { Palette } from "../../../styles/theme";
 import { CustomSwitch } from "../../shared/CustomSwitch";
-import { MyWorkplansContext } from "../MyWorkPlanContext";
 
-export const AssigneeToggle = () => {
+interface AssigneeToggleProps<T extends { staff_id: number | null }> {
+  searchOptions: T;
+  setSearchOptions: React.Dispatch<React.SetStateAction<T>>;
+  loading: boolean;
+  total: number;
+  label?: string;
+  disabled?: boolean;
+}
+
+export const AssigneeToggle = <T extends { staff_id: number | null }>({
+  searchOptions,
+  setSearchOptions,
+  loading,
+  total,
+  label,
+  disabled,
+}: AssigneeToggleProps<T>) => {
   const user = useAppSelector((state) => state.user.userDetail);
-  const { searchOptions, setSearchOptions, loadingWorkplans, totalWorkplans } =
-    useContext(MyWorkplansContext);
   const [haveInitializedtoggle, setHaveInitializedToggle] = useState(false);
-
-  const [isUsersWorkPlans, setIsUsersWorkPlans] = useState(
-    Boolean(searchOptions.staff_id)
+  const [isUsersItems, setIsUsersItems] = useState(
+    searchOptions.staff_id != null,
   );
 
-  const handleToggleChange = (checked: boolean) => {
-    setIsUsersWorkPlans(checked);
-    setSearchOptions((prev) => ({
-      ...prev,
-      staff_id: checked ? user.staffId : null,
-    }));
-  };
+  const handleToggleChange = useCallback(
+    (checked: boolean) => {
+      setIsUsersItems(checked);
+      setSearchOptions((prev) => ({
+        ...prev,
+        staff_id: checked ? user.staffId : null,
+      }));
+    },
+    [setSearchOptions, user.staffId],
+  );
 
   useEffect(() => {
-    if (!haveInitializedtoggle && !loadingWorkplans) {
+    if (!haveInitializedtoggle && !loading) {
       setHaveInitializedToggle(true);
-      if (totalWorkplans === 0) {
+      if (total === 0) {
         handleToggleChange(false);
       }
     }
-  }, [loadingWorkplans]);
+  }, [handleToggleChange, haveInitializedtoggle, loading, total]);
 
   return (
     <Stack direction="row" spacing={1} alignItems={"center"}>
       <>
         <ETCaption2 bold color={Palette.neutral.dark}>
-          {user.firstName}'s{" "}
+          {user.firstName}'s
         </ETCaption2>
-        <ETCaption2 color={Palette.neutral.dark}>Workplans</ETCaption2>
+        <ETCaption2 color={Palette.neutral.dark}>
+          {label ? label : "Items"}
+        </ETCaption2>
       </>
       <CustomSwitch
         color="primary"
-        checked={isUsersWorkPlans}
-        onChange={() => handleToggleChange(!isUsersWorkPlans)}
+        checked={isUsersItems}
+        onChange={() => handleToggleChange(!isUsersItems)}
+        disabled={disabled}
       />
     </Stack>
   );

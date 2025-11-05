@@ -1,5 +1,4 @@
 import React, { useContext, useState } from "react";
-import { WorkplanContext } from "../../../WorkPlanContext";
 import { ETCaption1, ETCaption3, ETPreviewText } from "../../../../shared";
 import Timeline from "@mui/lab/Timeline";
 import { IconProps } from "../../../../icons/type";
@@ -26,29 +25,71 @@ import { StatusContext } from "../../StatusContext";
 import { Restricted } from "../../../../shared/restricted";
 import { EmptyStatusHistory } from "./EmptyStatusHistory";
 import { useUserHasRole } from "../../../utils";
+import { Status } from "models/status";
 
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
 
-const StatusHistory = () => {
-  const { statuses } = React.useContext(WorkplanContext);
+interface MergedStatus extends Status {
+  end_date?: string;
+}
+
+const mergeAdjacentStatuses = (statuses: Status[]): MergedStatus[] => {
+  if (!statuses || statuses.length === 0) return [];
+
+  const merged: MergedStatus[] = [];
+  let current: MergedStatus = { ...statuses[0] };
+
+  for (let i = 1; i < statuses.length; i++) {
+    const next = statuses[i];
+    if (current.description === next.description) {
+      current = {
+        ...current,
+        end_date: next.posted_date,
+      };
+    } else {
+      merged.push(current);
+      current = { ...next };
+    }
+  }
+
+  merged.push(current);
+  return merged;
+};
+
+const StatusHistory = ({
+  statuses,
+  highlightFirstInTimelineApproved = true,
+  defaultExpanded = true,
+  showEdit = true,
+  showOne = false,
+}: {
+  statuses: Status[];
+  highlightFirstInTimelineApproved?: boolean;
+  defaultExpanded?: boolean;
+  showEdit?: boolean;
+  showOne?: boolean;
+}) => {
   const { setShowStatusForm, setStatus } = useContext(StatusContext);
   const [expand, setExpand] = useState(false);
   const theme = useTheme();
+  const userHasRole = useUserHasRole();
 
   const approvedStatuses = statuses.filter(
-    (status) => status.is_approved && status.id !== statuses?.[0]?.id
+    (status) => status.is_approved && status.id !== statuses?.[0]?.id,
   );
-  const highlightFirstInTimeLineApproved = !statuses?.[0]?.is_approved;
+
+  const mergedStatuses = mergeAdjacentStatuses(approvedStatuses);
+
+  if (showOne && mergedStatuses.length > 0) {
+    mergedStatuses.splice(1);
+  }
 
   const SHOW_MORE_THRESHOLD = 3;
 
-  const userHasRole = useUserHasRole();
-
-  if (approvedStatuses.length === 0) {
+  if (mergedStatuses.length === 0) {
     return <EmptyStatusHistory />;
   }
-
   return (
     <Box sx={{ paddingTop: "8px" }}>
       <ETCaption1 bold color={Palette.neutral.dark}>
@@ -65,9 +106,9 @@ const StatusHistory = () => {
           paddingLeft: 0,
         }}
       >
-        {approvedStatuses.slice(0, SHOW_MORE_THRESHOLD).map((status, index) => {
-          const isSuccess = highlightFirstInTimeLineApproved && index === 0;
-          const finalItem = approvedStatuses.length === index + 1;
+        {mergedStatuses.slice(0, SHOW_MORE_THRESHOLD).map((status, index) => {
+          const isSuccess = highlightFirstInTimelineApproved && index === 0;
+          const finalItem = mergedStatuses.length === index + 1;
           const lastItemHidden = index + 1 !== SHOW_MORE_THRESHOLD;
           const showConnector = (!finalItem && lastItemHidden) || expand;
           return (
@@ -78,11 +119,11 @@ const StatusHistory = () => {
                     isSuccess ? Palette.neutral.dark : Palette.neutral.main
                   }
                 >
-                  <ReadMoreText defaultExpanded={isSuccess}>
+                  <ReadMoreText defaultExpanded={isSuccess && defaultExpanded}>
                     {status.description}
                   </ReadMoreText>
                 </ETPreviewText>
-                <When condition={isSuccess}>
+                <When condition={isSuccess && showEdit}>
                   <Restricted
                     allowed={[ROLES.EXTENDED_EDIT]}
                     errorProps={{ disabled: true }}
@@ -123,42 +164,48 @@ const StatusHistory = () => {
                   />
                 </When>
               </TimelineSeparator>
-              <TimelineContent>
+              <TimelineContent sx={{ minWidth: "88px" }}>
                 <ETCaption3 color={Palette.neutral.main}>
-                  {moment(status.posted_date).format(MONTH_DAY_YEAR)}
+                  {status.end_date ? (
+                    <>
+                      {moment(status.end_date).format(MONTH_DAY_YEAR)}
+                      <br />-{" "}
+                      {moment(status.posted_date).format(MONTH_DAY_YEAR)}
+                    </>
+                  ) : (
+                    moment(status.posted_date).format(MONTH_DAY_YEAR)
+                  )}
                 </ETCaption3>
               </TimelineContent>
             </TimelineItem>
           );
         })}
-        <When condition={approvedStatuses.length > SHOW_MORE_THRESHOLD}>
+        <When condition={mergedStatuses.length > SHOW_MORE_THRESHOLD}>
           <Collapse in={expand}>
-            {approvedStatuses
-              .slice(SHOW_MORE_THRESHOLD)
-              .map((status, index) => {
-                const finalItem =
-                  approvedStatuses.length === index + 1 + SHOW_MORE_THRESHOLD;
-                return (
-                  <TimelineItem key={status.id}>
-                    <TimelineOppositeContent>
-                      <ETPreviewText color={Palette.neutral.main}>
-                        <ReadMoreText>{status.description}</ReadMoreText>
-                      </ETPreviewText>
-                    </TimelineOppositeContent>
-                    <TimelineSeparator>
-                      <TimelineDot />
-                      <Unless condition={finalItem}>
-                        <TimelineConnector />
-                      </Unless>
-                    </TimelineSeparator>
-                    <TimelineContent>
-                      <ETCaption3 color={Palette.neutral.main}>
-                        {moment(status.posted_date).format(MONTH_DAY_YEAR)}
-                      </ETCaption3>
-                    </TimelineContent>
-                  </TimelineItem>
-                );
-              })}
+            {mergedStatuses.slice(SHOW_MORE_THRESHOLD).map((status, index) => {
+              const finalItem =
+                mergedStatuses.length === index + 1 + SHOW_MORE_THRESHOLD;
+              return (
+                <TimelineItem key={status.id}>
+                  <TimelineOppositeContent>
+                    <ETPreviewText color={Palette.neutral.main}>
+                      <ReadMoreText>{status.description}</ReadMoreText>
+                    </ETPreviewText>
+                  </TimelineOppositeContent>
+                  <TimelineSeparator>
+                    <TimelineDot />
+                    <Unless condition={finalItem}>
+                      <TimelineConnector />
+                    </Unless>
+                  </TimelineSeparator>
+                  <TimelineContent>
+                    <ETCaption3 color={Palette.neutral.main}>
+                      {moment(status.posted_date).format(MONTH_DAY_YEAR)}
+                    </ETCaption3>
+                  </TimelineContent>
+                </TimelineItem>
+              );
+            })}
           </Collapse>
           <TimelineItem sx={{ paddingLeft: "86px" }} key="expand-button">
             <Grid container>

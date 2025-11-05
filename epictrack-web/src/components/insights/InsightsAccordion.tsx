@@ -1,159 +1,126 @@
-import React from "react";
-import {
-  Box,
-  BoxProps,
-  Stack,
-  SxProps,
-  Grid,
-  GridProps,
-  Link,
-  Collapse,
-} from "@mui/material";
-import { ETDescription } from "components/shared";
+import { Children, FC, useEffect, useRef, useState } from "react";
+import { Grid, Collapse, Link, Button } from "@mui/material";
+import { ETParagraph, ETDescription } from "components/shared";
+import ETAccordion from "components/shared/accordion/Accordion";
+import ETAccordionDetails from "components/shared/accordion/components/AccordionDetails";
+import ETAccordionSummary from "components/shared/accordion/components/AccordionSummary";
+import Icons from "../icons/index";
+import { IconProps } from "../icons/type";
 import { Palette } from "styles/theme";
+import { exportAccordionChartsToPdf } from "./utils";
 
-type InsightsAccordionProps = {
+const ExpandIcon: FC<IconProps> = Icons["ExpandIcon"];
+
+interface InsightAccordionProps {
+  tab?: string;
+  title: string;
   children: React.ReactNode;
-  expanded?: boolean;
-  sx?: SxProps;
-  onClick?: () => void;
-};
-export const InsightsAccordion = ({
-  children,
-  expanded = false,
-  onClick = () => {
-    return;
-  },
-  sx,
-}: InsightsAccordionProps) => {
-  return (
-    <InsightsAccordionProvider expanded={expanded} onClick={onClick}>
-      <Stack
-        direction="column"
-        spacing={0}
-        sx={{
-          ...sx,
-          border: `1px solid ${Palette.neutral.bg.dark}`,
-          paddingBottom: "24px",
-        }}
-      >
-        {children}
-      </Stack>
-    </InsightsAccordionProvider>
-  );
-};
+  showMoreContent?: React.ReactNode;
+  showMoreLabel?: boolean;
+  defaultExpanded?: boolean;
+}
 
-export const InsightsAccordionSummary = ({ children, ...rest }: GridProps) => {
-  const { onClick, expanded } = useInsightsAccordionContext();
+const InsightAccordion: React.FC<InsightAccordionProps> = ({
+  tab = "",
+  title,
+  children,
+  showMoreContent,
+  showMoreLabel = false,
+  defaultExpanded = false,
+}) => {
+  const [expanded, setExpanded] = useState(defaultExpanded);
+  const [showMore, setShowMore] = useState(false);
+
+  const chartsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setShowMore(false);
+  }, [expanded]);
+
   return (
-    <Grid
-      container
-      height="56px"
-      direction="row"
-      justifyContent={"flex-start"}
-      alignItems={"center"}
+    <ETAccordion
+      expanded={expanded}
+      onChange={() => setExpanded((prev) => !prev)}
       sx={{
-        backgroundColor: Palette.neutral.bg.light,
-        borderBottom: `1px solid ${Palette.neutral.bg.dark}`,
-        padding: "0 24px 0 24px",
+        border: `1px solid ${Palette.neutral.main}`,
+        borderLeft: `1px solid ${Palette.neutral.main}`,
       }}
-      {...rest}
     >
-      <Grid item xs>
-        {children}
-      </Grid>
-      <Grid item xs={3} container justifyContent={"flex-end"}>
-        <ETDescription>
-          <Link
-            onClick={(e) => {
-              e.preventDefault();
-              onClick && onClick();
+      <ETAccordionSummary
+        expanded={expanded}
+        expandIcon={
+          <ExpandIcon
+            className=""
+            style={{
+              borderRadius: "4px",
+              padding: "2px",
+              width: "20px",
+              height: "20px",
             }}
-            sx={{
-              cursor: "pointer",
+          />
+        }
+      >
+        <ETParagraph sx={{ paddingLeft: "4px" }}>{title}</ETParagraph>
+      </ETAccordionSummary>
+      <ETAccordionDetails sx={{ pt: "24px" }}>
+        <Grid container spacing={2}>
+          {showMoreLabel && (
+            <Grid
+              item
+              xs={12}
+              container
+              justifyContent="flex-end"
+              alignItems="center"
+              style={{ paddingTop: 0 }}
+            >
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() =>
+                  exportAccordionChartsToPdf(
+                    chartsRef.current!,
+                    `${tab} ${title ?? "Insights"}`,
+                  )
+                }
+                sx={{ m: "0.5rem", p: "0.275rem 0.5rem" }}
+              >
+                Export to PDF
+              </Button>
+              <ETDescription sx={{ p: "0.5rem" }}>
+                <Link
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowMore((prev) => !prev);
+                  }}
+                  sx={{ cursor: "pointer" }}
+                >
+                  {showMore ? "Show Less" : "Show More"}
+                </Link>
+              </ETDescription>
+            </Grid>
+          )}
+          <div
+            ref={chartsRef}
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "16px",
+              alignItems: "flex-start",
             }}
           >
-            {expanded ? "Show Less" : "Show More"}
-          </Link>
-        </ETDescription>
-      </Grid>
-    </Grid>
+            {Children.map(children, (child) => (
+              <div style={{ flex: "1 1 auto", minWidth: 300 }}>{child}</div>
+            ))}
+          </div>
+          {showMoreContent && (
+            <Grid item xs={12}>
+              <Collapse in={showMore}>{showMoreContent}</Collapse>
+            </Grid>
+          )}
+        </Grid>
+      </ETAccordionDetails>
+    </ETAccordion>
   );
 };
 
-export const InsightsAccordionDetails = ({ children, ...rest }: BoxProps) => {
-  return (
-    <Box
-      {...rest}
-      sx={{
-        padding: "24px 24px 0 24px",
-      }}
-    >
-      {children}
-    </Box>
-  );
-};
-
-export const InsightsAccordionCollapsableDetails = ({
-  children,
-  ...rest
-}: BoxProps) => {
-  const { expanded } = useInsightsAccordionContext();
-
-  const { sx, ...otherProps } = rest;
-  return (
-    <Box
-      sx={{
-        ...sx,
-      }}
-      {...otherProps}
-    >
-      <Collapse in={expanded}>{children}</Collapse>
-    </Box>
-  );
-};
-
-type InsightsAccordionContextProps = {
-  expanded: boolean;
-  onClick?: () => void;
-};
-
-type InsightsAccordionProvidedProps = {
-  children: React.ReactNode;
-  expanded: boolean;
-  onClick: () => void;
-};
-
-const InsightsAccordionContext = React.createContext<
-  InsightsAccordionContextProps | undefined
->(undefined);
-
-export const useInsightsAccordionContext = () => {
-  const context = React.useContext(InsightsAccordionContext);
-  if (!context) {
-    throw new Error(
-      "useInsightsAccordionContext must be used within an InsightsAccordionProvider"
-    );
-  }
-  return context;
-};
-
-export const InsightsAccordionProvider = ({
-  children,
-  expanded = false,
-  onClick = () => {
-    return;
-  },
-}: InsightsAccordionProvidedProps) => {
-  // Provide the necessary values to the context
-  const contextValue: InsightsAccordionContextProps = {
-    expanded,
-    onClick,
-  };
-
-  return (
-    <InsightsAccordionContext.Provider value={contextValue}>
-      {children}
-    </InsightsAccordionContext.Provider>
-  );
-};
+export default InsightAccordion;

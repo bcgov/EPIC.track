@@ -1,4 +1,3 @@
-import { ETParagraph } from "components/shared";
 import { SpecialHistoryProvider } from "./SpecialHistorySettingsContext";
 import SpecialHistorySettings from "./SpecialHistorySettings";
 

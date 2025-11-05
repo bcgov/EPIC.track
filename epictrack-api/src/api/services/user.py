@@ -13,6 +13,7 @@
 # limitations under the License.
 """User service"""
 from flask import current_app
+import sys
 
 from api.exceptions import BusinessError, PermissionDeniedError
 from api.services import authorisation
@@ -31,14 +32,16 @@ class UserService:
         users = KeycloakService.get_users()
         for user in users:
             user["group"] = None
-        groups = UserService.get_groups()
-        groups = sorted(groups, key=UserService._get_level)
+        groups = cls.get_groups()
+        groups = sorted(groups, key=cls._get_level)
         for group in groups:
             members = KeycloakService.get_group_members(group["id"])
             member_ids = [member["id"] for member in members]
-            filtered_users = [user for user in users if user["id"] in member_ids]
-            for user in filtered_users:
-                user["group"] = group
+            for user in users:
+                if user["id"] in member_ids:
+                    # assign group only if user has no group yet or this group has higher level
+                    if (user["group"] is None) or (cls._get_level(group) > cls._get_level(user["group"])):
+                        user["group"] = group
         return users
 
     @classmethod
@@ -97,7 +100,12 @@ class UserService:
         token_groups = TokenInfo.get_user_data()["groups"]
         groups = cls.get_groups()
         requesters_group = next(
-            (group for group in groups if group["name"] in token_groups), None
+            (
+                group
+                for group in groups
+                if group["name"] in token_groups
+            ),
+            None,
         )
         updating_group = next(
             (
@@ -115,30 +123,12 @@ class UserService:
         ):
             raise PermissionDeniedError("Permission denied")
 
-        # if a group has exclusive flag , user can only be present exclusively in that group
-        # All other group access has to be removed before assigning to exclusive group
-        requires_all_group_removal = updating_group.get("attributes", {}).get("exclusive", ['false'])[
-                                          0].lower() == 'true'
-
-        if requires_all_group_removal:
-            UserService._delete_from_all_epictrack_subgroups(user_id)
-        else:
-            UserService._delete_from_current_group(user_group_request, user_id)
+        UserService._delete_from_all_epictrack_subgroups(user_id)
 
         result = KeycloakService.update_user_group(
             user_id, user_group_request["group_id_to_update"]
         )
         return result
-
-    @classmethod
-    def _delete_from_current_group(cls, user_group_request, user_id):
-        existing_group_id = user_group_request.get("existing_group_id")
-        if existing_group_id:
-            result = KeycloakService.delete_user_group(
-                user_id, user_group_request.get("existing_group_id")
-            )
-            if result.status_code != 204:
-                raise BusinessError("Error removing group", 500)
 
     @staticmethod
     def _delete_from_all_epictrack_subgroups(user_id):
@@ -146,7 +136,7 @@ class UserService:
         groups = KeycloakService.get_user_groups(user_id)
 
         # Find the main group 'epictrack' and get its subgroups
-        track_subgroups = [group for group in groups if 'track' in group['path'].lower()]
+        track_subgroups = [group for group in groups if 'track/' in group['path'].lower()]
 
         for subgroup in track_subgroups:
             result = KeycloakService.delete_user_group(user_id, subgroup['id'])
@@ -165,14 +155,14 @@ class UserService:
 
         Returns:
           int: The level extracted from the group. If the level is not found or
-             cannot be converted to an integer, returns 0.
+             cannot be converted to an integer, returns -sys.maxsize.
         """
-        level_str = group["attributes"].get("level", [0])[0]
+        level_str = group["attributes"].get("level", [-sys.maxsize])[0]
         try:
             return int(level_str)
         except (KeyError, IndexError, TypeError) as e:
-            current_app.logger.error(f"Error getting level from group: {e}. Returning 0.")
-            return 0
+            current_app.logger.error(f"Error getting level from group: {e}. Returning lowest int.")
+            return -sys.maxsize
 
     @classmethod
     def _check_auth(cls):

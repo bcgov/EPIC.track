@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Model to handle all operations related to Payment Disbursement status code."""
+"""Model to handle all operations related to phase codes."""
 import enum
 
 from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, String
@@ -35,7 +35,7 @@ class PhaseCode(db.Model, CodeTableVersioned):
 
     id = Column(
         Integer, primary_key=True, autoincrement=True
-    )  # TODO check how it can be inherited from parent
+    )  # TODO check how it can be inherited from parent TRACK-532
     name = Column(String(250))
     work_type_id = Column(ForeignKey("work_types.id"), nullable=False)
     ea_act_id = Column(ForeignKey("ea_acts.id"), nullable=False)

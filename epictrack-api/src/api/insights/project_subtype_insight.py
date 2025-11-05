@@ -6,15 +6,20 @@ from sqlalchemy import func
 
 from api.models import db
 from api.models.project import Project
+from api.models.staff import Staff
+from api.models.staff_work_role import StaffWorkRole
 from api.models.sub_types import SubType
+from api.models.work import Work
+from api.insights.insights_table_filters import build_insights_filters
 
 
 # pylint: disable=not-callable
 class ProjectBySubTypeInsightGenerator:
     """Insight generator for project resource filtered by type and grouped by subtypes"""
 
-    def generate_partition_query(self, type_id: int):
+    def generate_partition_query(self, filters: List = None, staff_id: int = None):
         """Generates the group by subquery."""
+        filter_exprs = build_insights_filters(filters, "projects") if filters else []
         partition_query = (
             db.session.query(
                 Project.sub_type_id,
@@ -22,19 +27,29 @@ class ProjectBySubTypeInsightGenerator:
                 .over(order_by=Project.sub_type_id, partition_by=Project.sub_type_id)
                 .label("count"),
             )
-            .filter(
-                Project.is_active.is_(True),
-                Project.is_deleted.is_(False),
-                Project.type_id == type_id
-            )
-            .distinct(Project.sub_type_id)
-            .subquery()
+            .join(SubType, Project.sub_type_id == SubType.id)
         )
-        return partition_query
+        if staff_id:
+            partition_query = (
+                partition_query.join(Work, Work.project_id == Project.id)
+                .join(StaffWorkRole, StaffWorkRole.work_id == Work.id)
+                .join(Staff, StaffWorkRole.staff_id == Staff.id)
+                .filter(Staff.id == staff_id)
+                .filter(Staff.is_active.is_(True))
+                .filter(StaffWorkRole.is_active.is_(True))
+            )
 
-    def fetch_data(self, type_id: int) -> List[dict]:
+        partition_query = partition_query.filter(
+            Project.is_active.is_(True),
+            Project.is_deleted.is_(False),
+            *filter_exprs if filter_exprs else []
+        ).distinct(Project.sub_type_id)
+
+        return partition_query.subquery()
+
+    def fetch_data(self, filters: List = None, staff_id: int = None) -> List[dict]:
         """Fetch data from db"""
-        partition_query = self.generate_partition_query(type_id)
+        partition_query = self.generate_partition_query(filters, staff_id)
 
         subtype_insights = (
             db.session.query(SubType)

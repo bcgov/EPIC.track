@@ -1,6 +1,6 @@
 import { FC, useContext } from "react";
 import { Else, If, Then } from "react-if";
-import { Button, Grid } from "@mui/material";
+import { Box, Button, Grid, Tooltip } from "@mui/material";
 import moment from "moment";
 import { WorkIssue } from "../../../../models/Issue";
 import icons from "../../../icons";
@@ -14,15 +14,25 @@ import { ETCaption1, ETHeading4, ETParagraph, GrayBox } from "../../../shared";
 import {
   MONTH_DAY_YEAR,
   ROLES,
+  StalenessEnum,
 } from "../../../../constants/application-constant";
 import { useIsActiveTeamMember, useUserHasRole } from "../../utils";
-import IssueHistory from "./IssueHistory";
 
-const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
+const IssueDetails = ({
+  issue,
+  showStalenessIcon = false,
+  headingCaption = "",
+}: {
+  issue: WorkIssue;
+  showStalenessIcon?: boolean;
+  headingCaption?: string;
+}) => {
   const latestUpdate = issue.updates[0] ?? null;
   const CheckCircleIcon: FC<IconProps> = icons["CheckCircleIcon"];
   const PencilEditIcon: FC<IconProps> = icons["PencilEditIcon"];
   const AddIcon: FC<IconProps> = icons["AddIcon"];
+  const ExclamationIcon: FC<IconProps> = icons["ExclamationMediumIcon"];
+
   const isActiveTeamMember = useIsActiveTeamMember();
   const userHasRole = useUserHasRole();
 
@@ -43,146 +53,165 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
 
   return (
     <>
-      <Grid container spacing={2}>
-        <Grid item lg={6} xs={12}>
-          <GrayBox>
-            <Grid container spacing={2}>
-              <Grid
-                item
-                xs={12}
-                container
-                spacing={2}
-                justifyContent={"space-between"}
-              >
-                <Grid item xs={"auto"}>
-                  <ETCaption1 bold color={Palette.neutral.dark}>
-                    {moment(latestUpdate?.posted_date)
-                      .format(MONTH_DAY_YEAR)
-                      .toUpperCase()}
-                  </ETCaption1>
+      <GrayBox>
+        <Grid container spacing={2}>
+          <Grid
+            item
+            xs={12}
+            container
+            spacing={2}
+            justifyContent={"space-between"}
+          >
+            <Grid item xs={"auto"} display={"flex"} alignItems="center">
+              <ETCaption1 bold color={Palette.neutral.dark}>
+                {moment(latestUpdate?.posted_date)
+                  .format(MONTH_DAY_YEAR)
+                  .toUpperCase()}
+              </ETCaption1>
+              {showStalenessIcon &&
+                !issue.is_resolved &&
+                issue.is_active &&
+                (latestUpdate.staleness === StalenessEnum.CRITICAL ||
+                  latestUpdate.staleness === StalenessEnum.WARN) && (
+                  <Tooltip
+                    title={
+                      latestUpdate.staleness === StalenessEnum.CRITICAL
+                        ? "This work issue is out of date."
+                        : "This work issue is almost out of date."
+                    }
+                  >
+                    <Box
+                      sx={{
+                        width: "1.875rem",
+                        height: "1.875rem",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <ExclamationIcon
+                        aria-label="staleness level"
+                        style={{
+                          fill:
+                            latestUpdate.staleness === StalenessEnum.CRITICAL
+                              ? Palette.error.main
+                              : Palette.secondary.main,
+                          marginLeft: "8px",
+                        }}
+                      />
+                    </Box>
+                  </Tooltip>
+                )}
+            </Grid>
+            <If condition={latestUpdate?.is_approved}>
+              <Then>
+                <Grid item xs="auto">
+                  <ETChip active data-cy={`approved-chip`} label="Approved" />
                 </Grid>
-                <If condition={latestUpdate?.is_approved}>
-                  <Then>
-                    <Grid item xs="auto">
-                      <ETChip
-                        active
-                        data-cy={`approved-chip`}
-                        label="Approved"
-                      />
-                    </Grid>
-                  </Then>
-                  <Else>
-                    <Grid item xs="auto">
-                      <ETChip
-                        error
-                        data-cy={`need-approval-chip`}
-                        label="Need Approval"
-                      />
-                    </Grid>
-                  </Else>
-                </If>
-              </Grid>
+              </Then>
+              <Else>
+                <Grid item xs="auto">
+                  <ETChip
+                    error
+                    data-cy={`need-approval-chip`}
+                    label="Need Approval"
+                  />
+                </Grid>
+              </Else>
+            </If>
+          </Grid>
 
-              <Grid item xs={12}>
-                <ETParagraph
-                  data-cy="issue-description"
-                  color={Palette.neutral.dark}
-                  sx={{ whiteSpace: "pre-wrap" }}
-                >
-                  {latestUpdate?.description}
-                </ETParagraph>
-              </Grid>
+          <Grid item xs={12}>
+            <ETParagraph
+              data-cy="issue-description"
+              color={Palette.neutral.dark}
+              sx={{ whiteSpace: "pre-wrap" }}
+            >
+              {latestUpdate?.description}
+            </ETParagraph>
+          </Grid>
 
-              <If condition={!latestUpdate?.is_approved}>
-                <Then>
-                  <Grid item>
-                    <Restricted
-                      allowed={[ROLES.EDIT]}
-                      exception={isActiveTeamMember}
-                      errorProps={{ disabled: true }}
-                    >
-                      <Button
-                        data-cy="approve-issue-update-button"
-                        variant="text"
-                        startIcon={<CheckCircleIcon />}
-                        sx={{
-                          backgroundColor: "inherit",
-                          borderColor: "transparent",
-                        }}
-                        onClick={() => {
-                          setIssueToApproveId(issue.id);
-                        }}
-                      >
-                        Approve
-                      </Button>
-                    </Restricted>
-                  </Grid>
-                </Then>
-                <Else>
-                  <Grid item>
-                    <Restricted
-                      allowed={[ROLES.CREATE]}
-                      exception={isActiveTeamMember}
-                      errorProps={{ disabled: true }}
-                    >
-                      <Button
-                        data-cy="new-issue-update-button"
-                        variant="text"
-                        startIcon={<AddIcon />}
-                        sx={{
-                          backgroundColor: "inherit",
-                          borderColor: "transparent",
-                        }}
-                        onClick={() => {
-                          setUpdateToClone(latestUpdate);
-                          setNewIssueUpdateFormIsOpen(true);
-                        }}
-                      >
-                        New Update
-                      </Button>
-                    </Restricted>
-                  </Grid>
-                </Else>
-              </If>
-
+          <If condition={!latestUpdate?.is_approved}>
+            <Then>
               <Grid item>
                 <Restricted
-                  allowed={[
-                    latestUpdate?.is_approved
-                      ? ROLES.EXTENDED_EDIT
-                      : ROLES.EDIT,
-                  ]}
-                  exception={
-                    (!latestUpdate?.is_approved && isActiveTeamMember) ||
-                    userHasRole
-                  }
+                  allowed={[ROLES.EDIT]}
+                  exception={isActiveTeamMember}
                   errorProps={{ disabled: true }}
                 >
                   <Button
-                    data-cy="edit-issue-update-button"
+                    data-cy="approve-issue-update-button"
                     variant="text"
-                    startIcon={<PencilEditIcon />}
+                    startIcon={<CheckCircleIcon />}
                     sx={{
                       backgroundColor: "inherit",
                       borderColor: "transparent",
                     }}
                     onClick={() => {
-                      setUpdateToEdit(latestUpdate);
-                      setEditIssueUpdateFormIsOpen(true);
+                      setIssueToApproveId(issue.id);
                     }}
                   >
-                    Edit
+                    Approve
                   </Button>
                 </Restricted>
               </Grid>
-            </Grid>
-          </GrayBox>
-        </Grid>
+            </Then>
+            <Else>
+              <Grid item>
+                <Restricted
+                  allowed={[ROLES.CREATE]}
+                  exception={isActiveTeamMember}
+                  errorProps={{ disabled: true }}
+                >
+                  <Button
+                    data-cy="new-issue-update-button"
+                    variant="text"
+                    startIcon={<AddIcon />}
+                    sx={{
+                      backgroundColor: "inherit",
+                      borderColor: "transparent",
+                    }}
+                    onClick={() => {
+                      setUpdateToClone(latestUpdate);
+                      setNewIssueUpdateFormIsOpen(true);
+                    }}
+                  >
+                    New Update
+                  </Button>
+                </Restricted>
+              </Grid>
+            </Else>
+          </If>
 
-        <Grid item lg={6} xs={12}>
-          <IssueHistory issue={issue} />
+          <Grid item>
+            <Restricted
+              allowed={[
+                latestUpdate?.is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT,
+              ]}
+              exception={
+                (!latestUpdate?.is_approved && isActiveTeamMember) ||
+                userHasRole
+              }
+              errorProps={{ disabled: true }}
+            >
+              <Button
+                data-cy="edit-issue-update-button"
+                variant="text"
+                startIcon={<PencilEditIcon />}
+                sx={{
+                  backgroundColor: "inherit",
+                  borderColor: "transparent",
+                }}
+                onClick={() => {
+                  setUpdateToEdit(latestUpdate);
+                  setEditIssueUpdateFormIsOpen(true);
+                }}
+              >
+                Edit
+              </Button>
+            </Restricted>
+          </Grid>
         </Grid>
-      </Grid>
+      </GrayBox>
 
       <TrackDialog
         open={issueToApproveId === issue.id}
@@ -195,6 +224,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
         onClose={() => setIssueToApproveId(null)}
         onOk={handleApproveIssue}
         isActionsRequired
+        subHeading={headingCaption}
       >
         <ETHeading4>
           Once approved, this issue will be automatically added to the report.

@@ -18,7 +18,6 @@ type IFormInputProps = {
   onHandleChange?: (val: any) => void;
   closeMenuOnSelect?: boolean;
   hideSelectedOptions?: boolean;
-  // menuPortalTarget: HTMLElement | undefined;
 };
 
 const ControlledSelectV2: React.ForwardRefRenderFunction<
@@ -35,13 +34,12 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
     disabled,
     helperText,
     onHandleChange,
-    // menuPortalTarget,
     closeMenuOnSelect,
     hideSelectedOptions,
     defaultValue,
     ...otherProps
   },
-  ref
+  ref,
 ) => {
   const [selectedOptions, setSelectedOptions] = React.useState<any>([]);
 
@@ -51,7 +49,7 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
 
   const handleChange = (item: any) => {
     const selected: Array<any> = [];
-    item.map((o: any) => {
+    item.forEach((o: any) => {
       const val = getOptionValue(o);
       selected.push(val);
     });

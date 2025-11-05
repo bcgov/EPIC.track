@@ -26,6 +26,7 @@ ACTION_HANDLER_CLASS_MAPS = {
     ActionEnum.ADD_PHASE: "AddPhase",
     ActionEnum.CREATE_WORK: "CreateWork",
     ActionEnum.SET_EVENT_DATE: "SetEventDate",
+    ActionEnum.SET_EVENT_NAME: "SetEventName",
     ActionEnum.SET_EVENTS_STATUS: "SetEventsStatus",
     ActionEnum.SET_PHASES_STATUS: "SetPhasesStatus",
     ActionEnum.SET_WORK_DECISION_MAKER: "SetWorkDecisionMaker",

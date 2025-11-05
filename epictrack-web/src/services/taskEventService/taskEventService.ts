@@ -1,6 +1,7 @@
 import { TaskEvent } from "../../models/taskEvent";
 import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
+import { CalendarSearchOptions } from "components/calendar/EventCalendarContext";
 
 export type TaskEventMutationRequest = {
   name: string;
@@ -17,20 +18,26 @@ class TaskEventService {
   async create(taskEvent: TaskEventMutationRequest) {
     return await http.PostRequest<TaskEvent>(
       Endpoints.TaskEvents.EVENTS,
-      JSON.stringify(taskEvent)
+      JSON.stringify(taskEvent),
     );
   }
   async update(taskEvent: TaskEventMutationRequest, eventId: number) {
     return await http.PutRequest<TaskEvent>(
       `${Endpoints.TaskEvents.EVENTS}/${eventId}`,
-      JSON.stringify(taskEvent)
+      JSON.stringify(taskEvent),
     );
   }
 
   async getAll(workPhaseId: number) {
     return await http.GetRequest(
-      `${Endpoints.TaskEvents.EVENTS}?work_phase_id=${workPhaseId}`
+      `${Endpoints.TaskEvents.EVENTS}?work_phase_id=${workPhaseId}`,
     );
+  }
+
+  async getCalendarTasks(searchOptions: CalendarSearchOptions) {
+    return await http.GetRequest<any>(Endpoints.TaskEvents.CALENDAR_TASKS, {
+      ...searchOptions,
+    });
   }
 
   async getById(eventId: number) {
@@ -40,7 +47,7 @@ class TaskEventService {
   async importTasksFromTemplate(payload: any, templateId: number) {
     return await http.PostRequest(
       `${Endpoints.TaskEvents.TASKS}/templates/${templateId}/events`,
-      JSON.stringify(payload)
+      JSON.stringify(payload),
     );
   }
 
@@ -48,15 +55,15 @@ class TaskEventService {
     return await http.GetRequest(
       `${Endpoints.TaskEvents.MY_TASKS.replace(
         ":staff_id",
-        staffId.toString()
-      )}`
+        staffId.toString(),
+      )}?is_active=true`,
     );
   }
 
   async patchTasks(payload: any) {
     return await http.PatchRequest(
       Endpoints.TaskEvents.EVENTS,
-      JSON.stringify(payload)
+      JSON.stringify(payload),
     );
   }
 
@@ -67,10 +74,10 @@ class TaskEventService {
   importTasks = async (work_phase_id: number, data: any) => {
     const url = Endpoints.TaskEvents.IMPORT_TASKS.replace(
       ":work_phase_id",
-      work_phase_id.toString()
+      work_phase_id.toString(),
     );
     return await http.MultipartFormPostRequest(url, data);
   };
 }
 
-export default new TaskEventService();
+export const taskEventService = new TaskEventService();

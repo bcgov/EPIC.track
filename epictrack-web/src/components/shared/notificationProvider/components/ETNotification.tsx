@@ -17,6 +17,10 @@ const ETNotification = React.forwardRef<HTMLDivElement, ETNotificationProps>(
       helpText: HelpText,
       actions,
       iconVariant,
+      autoHideDuration,
+      persist,
+      anchorOrigin,
+      hideIconVariant,
       ...other
     } = props;
     const { closeSnackbar } = useSnackbar();
@@ -143,7 +147,7 @@ const ETNotification = React.forwardRef<HTMLDivElement, ETNotificationProps>(
         )}
       </SnackbarContent>
     );
-  }
+  },
 );
 
 ETNotification.displayName = "ETNotification";

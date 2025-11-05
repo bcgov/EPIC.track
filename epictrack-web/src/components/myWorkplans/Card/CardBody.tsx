@@ -90,11 +90,11 @@ const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
   const statusStaleness = calculateStatusStaleness(
     (workplan.status_info as Status) || !workplan.status_info?.posted_date,
     statusStalenessSettings?.staleness_length,
-    statusStalenessSettings?.warning_length
+    statusStalenessSettings?.warning_length,
   );
 
   const lastStatusUpdate = dayjs(workplan.status_info.posted_date).format(
-    MONTH_DAY_YEAR
+    MONTH_DAY_YEAR,
   );
   const workTitle = `${workplan.work_type.name}${
     workplan.simple_title ? ` - ${workplan.simple_title}` : ""
@@ -103,7 +103,7 @@ const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
   const currentWorkPhaseInfo = useMemo(() => {
     if (!workplan.phase_info) return undefined;
     const currentPhaseInfo = workplan.phase_info.filter(
-      (p) => p.work_phase.id === workplan.current_work_phase_id
+      (p) => p.work_phase.id === workplan.current_work_phase_id,
     );
     return currentPhaseInfo[0];
   }, [workplan]);
@@ -125,7 +125,6 @@ const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
           <ETHeading4
             bold
             color={Palette.neutral.dark}
-            xs
             enableTooltip
             enableEllipsis
             tooltip={workTitle}
@@ -158,7 +157,6 @@ const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
             >
               <ETCaption2
                 bold
-                enableEllipsis
                 color={phase_color}
                 sx={{
                   overflow: "hidden",
@@ -176,7 +174,6 @@ const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
               />
               <ETCaption2
                 bold
-                enableEllipsis
                 color={
                   currentWorkPhaseInfo?.days_left > 0
                     ? Palette.neutral.main
@@ -196,7 +193,7 @@ const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
       <Grid container sx={{ height: "64px" }} spacing={1}>
         <If
           condition={decisionWorkStates.includes(
-            WorkStateEnum[workplan?.work_state as keyof typeof WorkStateEnum]
+            WorkStateEnum[workplan?.work_state as keyof typeof WorkStateEnum],
           )}
         >
           <Then>
@@ -231,7 +228,7 @@ const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
               !decisionWorkStates.includes(
                 WorkStateEnum[
                   workplan?.work_state as keyof typeof WorkStateEnum
-                ]
+                ],
               )
             }
           >
@@ -251,8 +248,8 @@ const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
             overflow: "hidden",
             textOverflow: "ellipsis",
             display: "-webkit-box",
-            "-webkit-line-clamp": "2",
-            "-webkit-box-orient": "vertical",
+            WebkitLineClamp: "2",
+            WebkitBoxOrient: "vertical",
           }}
         >
           {workplan.status_info.description}

@@ -4,7 +4,7 @@ import { Work } from "models/work";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { ETGridTitle, IButton } from "components/shared";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
-import TableFilter from "components/shared/filterSelect/TableFilter";
+import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { WorkStaff } from "models/workStaff";
 import { useGetWorkStaffsQuery } from "services/rtkQuery/workStaffInsights";
@@ -15,6 +15,8 @@ import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
+import { useInsightsContext } from "components/insights/InsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
@@ -23,21 +25,38 @@ type WorkStaffWithWork = WorkStaff & { work: Work };
 const WorkList = () => {
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 15,
   });
   const [workData, setWorkData] = React.useState<WorkStaffWithWork[]>([]);
-  const [workRoles, setWorkRoles] = React.useState<
-    MRT_ColumnDef<WorkStaffWithWork>[]
-  >([]);
+  const { columnFilters, setColumnFilters } = useTableFilterContext();
+  const { isUserInsights, staffId } = useInsightsContext();
+
+  const queryArg = useMemo(() => {
+    return {
+      is_active: true,
+      ...(isUserInsights && staffId ? { staffId } : {}),
+    };
+  }, [isUserInsights, staffId]);
+
+  const { data: works } = useGetWorksQuery(queryArg, {
+    refetchOnMountOrArgChange: true,
+  });
+
   const { data: workStaffs, isLoading } = useGetWorkStaffsQuery();
-  const { data: works } = useGetWorksQuery();
 
   useEffect(() => {
     if (workStaffs && works) {
       const mergedData = workStaffs
+        .filter((workStaff) =>
+          isUserInsights
+            ? workStaff.staff
+                .map((staff) => staff.id)
+                ?.includes(staffId ? staffId : -1)
+            : true,
+        )
         .map((workStaff) => {
           const work = works.find(
-            (w) => w.eao_team_id === workStaff.eao_team.id
+            (w) => w.eao_team_id === workStaff.eao_team.id,
           );
           if (!work) {
             return null;
@@ -51,22 +70,22 @@ const WorkList = () => {
         pageSize: workStaffs.length,
       }));
     }
-  }, [workStaffs, works]);
+  }, [isUserInsights, staffId, works, workStaffs]);
 
   const workLeads = useMemo(() => {
     return Array.from(
       new Set(
         workStaffs?.map((workStaff) => workStaff.work_lead.full_name).sort() ||
-          []
-      )
+          [],
+      ),
     );
   }, [workStaffs]);
 
   const teams = useMemo(() => {
     return Array.from(
       new Set(
-        workStaffs?.map((workStaff) => workStaff.eao_team.name).sort() || []
-      )
+        workStaffs?.map((workStaff) => workStaff.eao_team.name).sort() || [],
+      ),
     );
   }, [workStaffs]);
 
@@ -76,54 +95,60 @@ const WorkList = () => {
       const staff = workStaffs.flatMap((row: any) =>
         row.staff
           ? row.staff.filter((p: { role: Role }) => p.role.id === roleId)
-          : []
+          : [],
       );
       const staffSorted = sort(staff, "full_name");
       const uniqueStaffNames = Array.from(
         new Set(
           staffSorted.map(
             (staffEntry: any) =>
-              `${staffEntry.last_name}, ${staffEntry.first_name}`
-          )
-        )
+              `${staffEntry.last_name}, ${staffEntry.first_name}`,
+          ),
+        ),
       );
       return uniqueStaffNames;
     },
-    [workStaffs]
+    [workStaffs],
   );
 
   const coLeadOptions = filteredStaffByPosition(WorkStaffRole.TEAM_CO_LEAD);
   const officerAnalystOptions = filteredStaffByPosition(
-    WorkStaffRole.OFFICER_ANALYST
+    WorkStaffRole.OFFICER_ANALYST,
   );
 
-  const roleFilterFunction = (row: any, id: any, filterValue: any) => {
-    const options =
-      id === WorkStaffRoleNames[WorkStaffRole.OFFICER_ANALYST]
+  const roleFilterFunction = useCallback(
+    (row: any, id: any, filterValue: any) => {
+      const options =
+        id === WorkStaffRoleNames[WorkStaffRole.OFFICER_ANALYST]
+          ? officerAnalystOptions
+          : coLeadOptions;
+      if (
+        !filterValue.length ||
+        filterValue.length > options.length // select all is selected
+      ) {
+        return true;
+      }
+
+      const value: string = row.getValue(id) || "";
+      // Split the cell value into individual names
+      const names = value.split("; ");
+
+      // Check if any name includes the filter value
+      return names.some((name) => filterValue.includes(name));
+    },
+    [coLeadOptions, officerAnalystOptions],
+  );
+
+  const getRolefilterOptions = useCallback(
+    (role: WorkStaffRole) => {
+      return role === WorkStaffRole.OFFICER_ANALYST
         ? officerAnalystOptions
         : coLeadOptions;
-    if (
-      !filterValue.length ||
-      filterValue.length > options.length // select all is selected
-    ) {
-      return true;
-    }
+    },
+    [officerAnalystOptions, coLeadOptions],
+  );
 
-    const value: string = row.getValue(id) || "";
-    // Split the cell value into individual names
-    const names = value.split("; ");
-
-    // Check if any name includes the filter value
-    return names.some((name) => filterValue.includes(name));
-  };
-
-  const getRolefilterOptions = (role: WorkStaffRole) => {
-    return role === WorkStaffRole.OFFICER_ANALYST
-      ? officerAnalystOptions
-      : coLeadOptions;
-  };
-
-  const tableColumns = React.useMemo(() => {
+  useEffect(() => {
     const cols: Array<MRT_ColumnDef<WorkStaffWithWork>> = [];
     if (workStaffs && workStaffs.length > 0) {
       const roles = [WorkStaffRole.TEAM_CO_LEAD, WorkStaffRole.OFFICER_ANALYST];
@@ -138,7 +163,7 @@ const WorkList = () => {
               return "";
             }
             const staffRowWithRole = row.staff.filter(
-              (p: { role: Role }) => p.role.id === role
+              (p: { role: Role }) => p.role.id === role,
             );
             return staffRowWithRole
               .map((staff: any) => `${staff.last_name}, ${staff.first_name}`)
@@ -164,8 +189,7 @@ const WorkList = () => {
         });
       });
     }
-    setWorkRoles(cols);
-  }, [workStaffs]);
+  }, [getRolefilterOptions, roleFilterFunction, workStaffs]);
 
   const columns = React.useMemo<MRT_ColumnDef<WorkStaffWithWork>[]>(() => {
     return [
@@ -177,7 +201,6 @@ const WorkList = () => {
           return (
             <ETGridTitle
               to={`/work-plan?work_id=${row.original.id}`}
-              titleText={row.original.title}
               enableTooltip
               tooltip={row.original.title}
             >
@@ -219,6 +242,25 @@ const WorkList = () => {
         },
       },
       {
+        accessorFn: (row) =>
+          row.staff?.map((s) => `${s.first_name} ${s.last_name}`).join(", ") ||
+          "",
+        id: "staff",
+        header: "Staff",
+        size: 200,
+        Cell: ({ row }) => {
+          const staffList = row.original.staff
+            ?.map((s) => `${s.first_name} ${s.last_name}`)
+            .join(", ");
+          return <span>{staffList}</span>;
+        },
+        filterFn: (row, id, filterValue) => {
+          if (!filterValue) return true;
+          const value: string = row.getValue(id) || "";
+          return value.toLowerCase().includes(filterValue.toLowerCase());
+        },
+      },
+      {
         accessorKey: "work_lead.full_name",
         header: "Lead",
         size: 100,
@@ -248,9 +290,8 @@ const WorkList = () => {
           return filterValue.includes(value);
         },
       },
-      ...workRoles,
     ];
-  }, [workLeads, teams, workRoles]);
+  }, [workLeads, teams]);
 
   return (
     <MasterTrackTable
@@ -264,11 +305,15 @@ const WorkList = () => {
           },
         ],
       }}
+      loading={isLoading}
+      onColumnFiltersChange={setColumnFilters}
       state={{
         isLoading: isLoading,
         showGlobalFilter: true,
         pagination: pagination,
+        columnFilters,
       }}
+      renderResultCount
       renderTopToolbarCustomActions={({ table }) => (
         <Box
           sx={{

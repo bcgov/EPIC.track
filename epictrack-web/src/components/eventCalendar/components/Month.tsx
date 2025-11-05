@@ -1,8 +1,8 @@
-import React from "react";
+import { memo } from "react";
 import * as Moment from "moment";
 import { extendMoment } from "moment-range";
 import * as _ from "lodash";
-import { Box } from "@mui/material";
+import { Box, Tooltip } from "@mui/material";
 import { ETParagraph } from "../../shared";
 
 const extendedMoment = extendMoment(Moment);
@@ -13,7 +13,6 @@ const Month = ({
   hoveredEvent,
   setHoveredEvent,
   handleEventClick,
-  key,
 }: any) => {
   const start = month;
   const end = extendedMoment(month).endOf("month");
@@ -41,15 +40,16 @@ const Month = ({
 
   const engagements = _.filter(
     events,
-    (e: any) => e.project && e.project !== "null"
+    (e: any) => e.project && e.project !== "null",
   );
+
   const engagementsWithoutProject = prepareEventDates(
-    _.filter(events, (e: any) => e.project === "null" || e.project === null)
+    _.filter(events, (e: any) => e.project === "null" || e.project === null),
   );
 
   const eventsData = _.groupBy(
     prepareEventDates(_.slice(_.orderBy(engagements, "start_date"))),
-    "project"
+    "project",
   );
 
   const numTasks =
@@ -74,10 +74,12 @@ const Month = ({
 
   const renderMonthDates = () => [
     <ETParagraph
+      key={month.format("MMMM")}
       style={{ gridColumn: "8 / 15", textAlign: "center" }}
     ></ETParagraph>,
-    monthDates.map((date: any, i: number) => (
+    ...monthDates.map((date: any, i: number) => (
       <Box
+        key={`month-date-box-${i}`}
         sx={{
           ...(!date && {
             gridRow: `span ${numTasks + 1}`,
@@ -85,7 +87,7 @@ const Month = ({
             backgroundColor: "#d2d8e5",
           }),
           ...(date && {
-            [`&:nth-child(${3 + i})`]: {
+            [`&:nth-of-type(${3 + i})`]: {
               "&::after": {
                 content: '" "',
                 height: "1px",
@@ -117,32 +119,33 @@ const Month = ({
 
   const renderProjectNames = () =>
     _.keys(eventsData).map((projectName: string, i: number) => (
-      <ETParagraph
-        sx={{
-          fontWeight: "bold",
-          fontSize: "1rem",
-          "&::after": {
-            content: '" "',
-            height: "1px",
-            backgroundColor: "#a7bce8",
-            left: "0",
-            right: "0",
-            display: "block",
-            position: "absolute",
-            width: "100%",
-            gridColumnStart: "8",
-          },
-        }}
-        key={`${projectName}-name`}
-        title={projectName}
-        style={{ gridColumn: "8 / 15", textAlign: "center", gridRow: i + 2 }}
-      >
-        {eventsData[projectName][0].project_short_code &&
-        eventsData[projectName][0].project_short_code !== "null" &&
-        eventsData[projectName][0].project_short_code !== "undefined"
-          ? eventsData[projectName][0].project_short_code
-          : getShortForm(projectName)}
-      </ETParagraph>
+      <Tooltip title={projectName} key={`tooltip-${projectName}-${i}`}>
+        <ETParagraph
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1rem",
+            "&::after": {
+              content: '" "',
+              height: "1px",
+              backgroundColor: "#a7bce8",
+              left: "0",
+              right: "0",
+              display: "block",
+              position: "absolute",
+              width: "100%",
+              gridColumnStart: "8",
+            },
+          }}
+          key={`${projectName}-name`}
+          style={{ gridColumn: "8 / 15", textAlign: "center", gridRow: i + 2 }}
+        >
+          {eventsData[projectName][0].project_short_code &&
+          eventsData[projectName][0].project_short_code !== "null" &&
+          eventsData[projectName][0].project_short_code !== "undefined"
+            ? eventsData[projectName][0].project_short_code
+            : getShortForm(projectName)}
+        </ETParagraph>
+      </Tooltip>
     ));
 
   const renderEvents = (projectData: any, projectStart: any) =>
@@ -192,6 +195,7 @@ const Month = ({
       if (projectData) {
         const projectStart = _.minBy(projectData, "start_date");
         const projectEnd = _.maxBy(projectData, "end_date");
+        if (!projectStart || !projectEnd) return null;
         const projectEventDuration =
           1 + (projectEnd.end_date.date() - projectStart.start_date.date());
         const style = {
@@ -206,13 +210,12 @@ const Month = ({
         };
 
         return (
-          <>
-            <Box style={style} key={`${projectName}-grid`}>
-              {renderEvents(projectData, projectStart)}
-            </Box>
-          </>
+          <Box style={style} key={`${projectName}-grid`}>
+            {renderEvents(projectData, projectStart)}
+          </Box>
         );
       }
+      return null;
     });
 
   const renderEngagements = () =>
@@ -258,7 +261,6 @@ const Month = ({
         "&:not(:last-child)": { borderBottom: "none" },
       }}
       style={style}
-      key={key}
     >
       <Box
         style={style}
@@ -293,4 +295,4 @@ const Month = ({
   );
 };
 
-export default React.memo(Month);
+export default memo(Month);

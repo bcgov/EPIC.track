@@ -37,8 +37,10 @@ const Endpoints = {
   },
   Works: {
     WORKS: "works",
+    WORKS_BY_STAFF: "works/by-staff/:staff_id",
     WORK_RESOURCES: "works/resources",
     WORK_RESOURCES_ACTIVE: "works/resources?is_active=true",
+    WORK_PHASE_ADDITIONAL_INFO: "works/:work_id/phase/:phase_id/additionalinfo",
     DOWNLOAD_WORK_PLAN: "works/workplan/download",
     WORK_TEAM_MEMBERS: "works/:work_id/staff-roles",
     WORK_TEAM_MEMBER: "works/staff-roles/:work_staff_id",
@@ -52,11 +54,16 @@ const Endpoints = {
     WORK_IMPORT_FIRST_NATIONS: "works/:work_id/first-nations/import",
     GET_ALL_WORK_TYPES: "works/types",
     GET_WORK_PHASE_BY_ID: "works/work-phases/:work_phase_id",
+    WORK_PHASE_RESPONSIBILITY_NOTES:
+      "works/work-phases/:work_phase_id/overage-responsibility-notes",
+    GET_OVERAGE_RESPONSIBILITY_BY_PHASE_ID:
+      "works/work-phases/:work_phase_id/overage-responsibilities",
   },
   WorkTypes: {
     GET_ALL: "work-types",
   },
   WorkIssues: {
+    GET_ALL: "work-issues/dashboard",
     ISSUES: "work/:work_id/issues",
     EDIT_ISSUE: "work/:work_id/issues/:issue_id",
     EDIT_ISSUE_UPDATE: "work/:work_id/issues/:issue_id/update/:issue_update_id",
@@ -66,6 +73,10 @@ const Endpoints = {
   },
   WorkStatuses: {
     WORK_STATUSES: "work/:work_id/statuses",
+    GET_ALL: "work-statuses/dashboard",
+  },
+  PhaseOverageResponsibilities: {
+    OVERAGE_RESPONSIBILITIES: "overage-responsibilities",
   },
   SubTypes: {
     SUB_TYPES: "sub-types",
@@ -83,12 +94,14 @@ const Endpoints = {
   },
   Events: {
     MILESTONE_EVENTS: "milestones",
+    CALENDAR_EVENTS: "milestones/calendar",
   },
   TaskEvents: {
     EVENTS: "tasks/events",
     TASKS: "tasks",
     MY_TASKS: "tasks/events/staff-work/:staff_id",
     IMPORT_TASKS: "tasks/work_phase/:work_phase_id/sheet",
+    CALENDAR_TASKS: "tasks/calendar",
   },
   Configurations: {
     CONFIGURATIONS: "/event-configurations",
@@ -117,6 +130,7 @@ const Endpoints = {
   SpecialFields: {
     SPECIAL_FIELDS: "/special-fields",
     UPDATE: "/special-fields/:specialFieldId",
+    DELETE: "/special-fields/:specialFieldId",
   },
   Ministry: {
     MINISTRY: "/ministries",
@@ -158,6 +172,11 @@ const Endpoints = {
     STALENESS_BY_TYPE: "/staleness-settings/:staleness_type",
     STALENESS: "/staleness-settings",
     UPDATE_STALENESS_BY_TYPE: "/staleness-settings/:staleness_type",
+  },
+  WorkResources: {
+    WORK_RESOURCES: "/work-resources",
+    GET_WORK_RESOURCES_BY_WORK: "/work-resources?work_id=:work_id",
+    WORK_RESOURCE_BY_ID: "/work-resources/:work_resource_id",
   },
 };
 export default Endpoints;

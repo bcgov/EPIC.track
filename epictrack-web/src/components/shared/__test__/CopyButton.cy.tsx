@@ -25,7 +25,7 @@ describe("CopyButton component", () => {
     cy.mount(
       <ETNotificationProvider>
         <CopyButton copyText="test" />
-      </ETNotificationProvider>
+      </ETNotificationProvider>,
     );
 
     // Click the button

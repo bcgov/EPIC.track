@@ -32,6 +32,7 @@ def find_by_staff_work_role_staff_id(
 
     if is_active is not None:
         query = query.filter(TaskEvent.is_active.is_(is_active))
+        query = query.filter(StaffWorkRole.is_active.is_(True))
 
     query = query.order_by(TaskEvent.start_date.asc())
     return query.all()

@@ -1,28 +1,42 @@
-import React, { useEffect, useMemo } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
+import { Tooltip, Box } from "@mui/material";
 import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
-import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
-import TableFilter from "components/shared/filterSelect/TableFilter";
+import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
+import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
-import { Tooltip, Box } from "@mui/material";
 import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
+import { useInsightsContext } from "components/insights/InsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
+const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
 const WorkList = () => {
-  const [pagination, setPagination] = React.useState({
+  const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 15,
   });
-  const { data, error, isLoading } = useGetWorksQuery();
+  const { columnFilters, setColumnFilters } = useTableFilterContext();
+  const { isUserInsights, staffId } = useInsightsContext();
 
-  const works = data || [];
+  const queryArg = useMemo(() => {
+    return {
+      is_active: true,
+      ...(isUserInsights && staffId ? { staffId } : {}),
+    };
+  }, [isUserInsights, staffId]);
+
+  const { data, error, isLoading } = useGetWorksQuery(queryArg, {
+    refetchOnMountOrArgChange: true,
+  });
+
+  const works = useMemo(() => data || [], [data]);
 
   useEffect(() => {
     setPagination((prev) => ({
@@ -38,10 +52,10 @@ const WorkList = () => {
           works
             .map((work) => work?.work_type?.name || "")
             .filter((type) => type)
-            .sort()
-        )
+            .sort(),
+        ),
       ),
-    [works]
+    [works],
   );
 
   const projects = useMemo(
@@ -51,10 +65,10 @@ const WorkList = () => {
           works
             .map((work) => work?.project?.name || "")
             .filter((project) => project)
-            .sort()
-        )
+            .sort(),
+        ),
       ),
-    [works]
+    [works],
   );
 
   const phases = useMemo(
@@ -64,35 +78,35 @@ const WorkList = () => {
           works
             .map((work) => work?.current_work_phase?.name || "")
             .filter((phase) => phase)
-            .sort()
-        )
+            .sort(),
+        ),
       ),
-    [works]
+    [works],
   );
 
   useEffect(() => {
     if (error) {
-      showNotification("Error fetching works", { type: "error" });
+      showNotification("Error fetching Works", {
+        duration: 3000,
+        type: "error",
+      });
     }
   }, [error]);
 
-  const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
+  const columns = useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
         accessorKey: "title",
         header: "Name",
         size: 300,
         Cell: ({ row, renderedCellValue }) => (
-          // <Link to={`/work-plan?work_id=${row.original.id}`}>
           <ETGridTitle
             to={`/work-plan?work_id=${row.original.id}`}
             enableTooltip
             tooltip={row.original.title}
-            titleText={row.original.title}
           >
             {renderedCellValue}
           </ETGridTitle>
-          // </Link>
         ),
         sortingFn: "sortFn",
         filterFn: searchFilter,
@@ -186,7 +200,7 @@ const WorkList = () => {
         },
       },
     ],
-    [projects, phases, workTypes]
+    [projects, phases, workTypes],
   );
   return (
     <MasterTrackTable
@@ -200,11 +214,15 @@ const WorkList = () => {
           },
         ],
       }}
+      loading={isLoading}
+      onColumnFiltersChange={setColumnFilters}
       state={{
         isLoading: isLoading,
         showGlobalFilter: true,
         pagination: pagination,
+        columnFilters,
       }}
+      renderResultCount
       renderTopToolbarCustomActions={({ table }) => (
         <Box
           sx={{

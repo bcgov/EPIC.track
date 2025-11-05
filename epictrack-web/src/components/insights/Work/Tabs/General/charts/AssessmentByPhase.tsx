@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
@@ -6,15 +5,24 @@ import { getChartColor } from "components/insights/utils";
 import { AssessmentByPhase } from "models/insights";
 import { useGetAssessmentsByPhaseQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
+import { useInsightsContext } from "components/insights/InsightsContext";
 
 const AssessmentByPhaseChart = () => {
+  const { isUserInsights, staffId } = useInsightsContext();
+  const { columnFilters } = useTableFilterContext();
   const {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetAssessmentsByPhaseQuery();
+  } = useGetAssessmentsByPhaseQuery(
+    {
+      columnFilters,
+      staffId: isUserInsights ? staffId : undefined,
+    },
+    { skip: columnFilters.length === 0 },
+  );
 
   const formatData = (data?: AssessmentByPhase[]) => {
     if (!data) return [];
@@ -27,13 +35,15 @@ const AssessmentByPhaseChart = () => {
     });
   };
 
-  if (isChartLoading) {
-    return <PieChartSkeleton />;
+  if (error) {
+    showNotification("Could not load Assessments by Phase data", {
+      duration: 3000,
+      type: "error",
+    });
   }
 
-  if (error) {
-    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
-    return <div>Error</div>;
+  if (isChartLoading || error) {
+    return <PieChartSkeleton loading={isChartLoading} />;
   }
 
   const chartData = formatData(data);
@@ -73,8 +83,10 @@ const AssessmentByPhaseChart = () => {
               iconSize={16}
               wrapperStyle={{
                 fontSize: "16px",
-                maxWidth: "200px", // Add this line to limit the width of the legend
+                maxWidth: "300px",
                 overflow: "hidden",
+                maxHeight: "350px",
+                overflowY: "auto",
               }}
             />
             <Tooltip />

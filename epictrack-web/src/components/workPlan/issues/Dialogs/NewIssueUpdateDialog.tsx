@@ -3,7 +3,11 @@ import TrackDialog from "../../../shared/TrackDialog";
 import { IssuesContext } from "../IssuesContext";
 import NewIssueUpdate from "../Forms/NewIssueUpdate";
 
-const NewIssueUpdateDialog = () => {
+const NewIssueUpdateDialog = ({
+  headingCaption = "",
+}: {
+  headingCaption?: string;
+}) => {
   const { newIssueUpdateFormIsOpen, setNewIssueUpdateFormIsOpen } =
     React.useContext(IssuesContext);
 
@@ -23,6 +27,7 @@ const NewIssueUpdateDialog = () => {
         setNewIssueUpdateFormIsOpen(false);
       }}
       isActionsRequired
+      subHeading={headingCaption}
     >
       <NewIssueUpdate />
     </TrackDialog>

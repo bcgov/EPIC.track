@@ -6,10 +6,10 @@ import { Grid, TextField, Tooltip, Box } from "@mui/material";
 import { ETFormLabel } from "../../shared";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { showNotification } from "../../shared/notificationProvider";
-import IndigenousNationsConsultationLevels from "../../../services/indigenousNationConsultationLevel";
+import { indigenousNationsConsultationLevels } from "../../../services/indigenousNationConsultationLevel";
 import indigenousNationService from "../../../services/indigenousNationService/indigenousNationService";
 import { sort } from "../../../utils";
-import workService from "../../../services/workService/workService";
+import { workService } from "../../../services/workService/workService";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import { WorkplanContext } from "../WorkPlanContext";
 import {
@@ -43,7 +43,7 @@ const schema = yup.object().shape({
           const validateWorkNation = await workService.checkWorkNationExists(
             parent["work_id"],
             Number(value),
-            parent["id"]
+            parent["id"],
           );
           return !(validateWorkNation.data as any)["exists"] as boolean;
         }
@@ -67,6 +67,19 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
   const pipLinkRef = React.useRef(null);
   const ctx = React.useContext(WorkplanContext);
 
+  const methods = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: workFirstNation,
+    mode: "onBlur",
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = methods;
+
   React.useEffect(() => {
     getAllFirstNations();
     getAllConsultationLevels();
@@ -74,7 +87,7 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
 
   const getAllConsultationLevels = async () => {
     try {
-      const result = await IndigenousNationsConsultationLevels.getAll();
+      const result = await indigenousNationsConsultationLevels.getAll();
       if (result.status === 200) {
         const consultationLevels = result.data.map(
           (level: ConsultationLevel) => {
@@ -82,7 +95,7 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
               value: String(level.id),
               label: level.name,
             };
-          }
+          },
         );
         setConsultationLevels(consultationLevels);
       }
@@ -99,19 +112,13 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
       work_id: ctx.work?.id,
       is_active: true,
     });
-  }, [ctx.work?.id]);
-
-  React.useEffect(() => {
-    if (workNationId) {
-      getWorkFirstNation();
-    }
-  }, [workNationId]);
+  }, [ctx.work?.id, reset, workFirstNation]);
 
   React.useEffect(() => {
     if (workFirstNation) {
       reset(workFirstNation);
     }
-  }, [workFirstNation]);
+  }, [reset, workFirstNation]);
 
   const getAllFirstNations = async () => {
     try {
@@ -127,39 +134,34 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
     }
   };
 
-  const getWorkFirstNation = async () => {
-    try {
-      const result = await workService.getWorkFirstNation(Number(workNationId));
-      if (result.status === 200) {
-        const firstNation = result.data as WorkFirstNation;
-        setWorkFirstNation(firstNation);
+  React.useEffect(() => {
+    const getWorkFirstNation = async () => {
+      try {
+        const result = await workService.getWorkFirstNation(
+          Number(workNationId),
+        );
+        if (result.status === 200) {
+          const firstNation = result.data as WorkFirstNation;
+          setWorkFirstNation(firstNation);
+        }
+      } catch (e) {
+        showNotification(COMMON_ERROR_MESSAGE, {
+          type: "error",
+        });
       }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
+    };
+
+    if (workNationId) {
+      getWorkFirstNation();
     }
-  };
-
-  const methods = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: workFirstNation,
-    mode: "onBlur",
-  });
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = methods;
+  }, [workNationId]);
 
   const onSubmitHandler = async (data: WorkFirstNation) => {
     try {
       if (workNationId) {
         const createResult = await workService.updateFirstNation(
           data,
-          Number(workNationId)
+          Number(workNationId),
         );
         if (createResult.status === 200) {
           showNotification("Your changes were successfully saved", {
@@ -172,7 +174,7 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
       } else {
         const createResult = await workService.createFirstNation(
           data,
-          Number(ctx.work?.id)
+          Number(ctx.work?.id),
         );
         if (createResult.status === 201) {
           showNotification("First nation details inserted", {
@@ -193,7 +195,7 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
 
   const onFirstNationChangeHandler = (firstNationId: number) => {
     const selectedFirstNation = firstNations.filter(
-      (p) => p.id === Number(firstNationId)
+      (p) => p.id === Number(firstNationId),
     )[0];
     (relationShipHolderRef?.current as any)["value"] = selectedFirstNation
       ? selectedFirstNation.relationship_holder?.full_name || ""

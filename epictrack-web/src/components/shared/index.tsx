@@ -72,6 +72,22 @@ export const ETPageContainer = (props: PageContainerProps) => {
     </Grid>
   );
 };
+export const ETReportContainer = (props: PageContainerProps) => {
+  const state = useAppSelector((state) => state.uiState);
+  return (
+    <Grid
+      {...props}
+      sx={{
+        ...props.sx,
+        padding: `${state.showEnvBanner ? "6" : "4"}rem 0rem 1rem 0rem`,
+        justifyContent: "flex-start",
+        alignItems: "flex-start",
+      }}
+    >
+      {props.children}
+    </Grid>
+  );
+};
 export const ETHeading1 = ({ bold, children, sx, ...rest }: HeaderProps) => {
   return (
     <Typography
@@ -128,12 +144,14 @@ export const ETHeading4 = ({
   color,
   children,
   sx,
+  enableTooltip,
+  enableEllipsis,
   ...rest
 }: HeaderProps) => {
   return (
     <Tooltip
       title={rest.tooltip as string}
-      disableHoverListener={!rest.enableTooltip}
+      disableHoverListener={!enableTooltip}
     >
       <Typography
         color={color}
@@ -143,7 +161,7 @@ export const ETHeading4 = ({
             ? MET_Header_Font_Weight_Bold
             : MET_Header_Font_Weight_Regular,
           fontFamily: MET_Header_Font_Family,
-          ...(rest.enableEllipsis && useStyle.textEllipsis),
+          ...(enableEllipsis && useStyle.textEllipsis),
         }}
         variant="h4"
         {...rest}
@@ -181,34 +199,41 @@ export const ETSubhead = ({
 
 export const ETParagraph = React.forwardRef(
   (
-    { bold, color, children, sx, ...rest }: HeaderProps,
-    ref: React.ForwardedRef<HTMLDivElement>
+    {
+      bold,
+      color,
+      children,
+      sx,
+      enableTooltip,
+      enableEllipsis,
+      ...rest
+    }: HeaderProps,
+    ref: React.ForwardedRef<HTMLDivElement>,
   ) => {
     return (
-      <div ref={ref}>
-        <Tooltip
-          title={rest.tooltip as string}
-          disableHoverListener={!rest.enableTooltip}
+      <Tooltip
+        title={rest.tooltip as string}
+        disableHoverListener={!enableTooltip}
+      >
+        <Typography
+          ref={ref}
+          color={color}
+          sx={{
+            fontWeight: bold
+              ? MET_Header_Font_Weight_Bold
+              : MET_Header_Font_Weight_Regular,
+            fontFamily: MET_Header_Font_Family,
+            ...sx,
+            ...(enableEllipsis && useStyle.textEllipsis),
+          }}
+          variant="body1"
+          {...rest}
         >
-          <Typography
-            color={color}
-            sx={{
-              fontWeight: bold
-                ? MET_Header_Font_Weight_Bold
-                : MET_Header_Font_Weight_Regular,
-              fontFamily: MET_Header_Font_Family,
-              ...sx,
-              ...(rest.enableEllipsis && useStyle.textEllipsis),
-            }}
-            variant="body1"
-            {...rest}
-          >
-            {children}
-          </Typography>
-        </Tooltip>
-      </div>
+          {children}
+        </Typography>
+      </Tooltip>
     );
-  }
+  },
 );
 
 export const ETCaption1 = ({
@@ -271,6 +296,8 @@ export const ETGridTitle = ({
   children,
   sx,
   disabled = false,
+  enableTooltip,
+  enableEllipsis,
   ...rest
 }: LinkHeaderProps) => {
   if (disabled) {
@@ -281,13 +308,13 @@ export const ETGridTitle = ({
     <ETLink onClick={rest.onClick} {...rest}>
       <Tooltip
         title={rest.tooltip as string}
-        disableHoverListener={!rest.enableTooltip}
+        disableHoverListener={!enableTooltip}
       >
         <ETParagraph
           bold={bold}
           {...rest}
           sx={{
-            ...(rest.enableEllipsis && useStyle.textEllipsis),
+            ...(enableEllipsis && useStyle.textEllipsis),
           }}
           color={Palette.primary.accent.main}
         >
@@ -345,7 +372,7 @@ export const ETFormLabel = (props: FormLabelBaseProps & FormLabelOwnProps) => {
 };
 
 export const ETFormLabelWithCharacterLimit = (
-  props: FormLabelWithCharacterCountProps
+  props: FormLabelWithCharacterCountProps,
 ) => {
   return (
     <Box
@@ -353,6 +380,7 @@ export const ETFormLabelWithCharacterLimit = (
         display: "flex",
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "baseline",
       }}
     >
       <FormLabel
@@ -371,11 +399,14 @@ export const ETFormLabelWithCharacterLimit = (
       </FormLabel>
       <ETParagraph
         sx={{
+          fontSize: "12px",
+          margin: 0,
+          lineHeight: "1.5rem",
           color: Palette.neutral.light,
         }}
       >
         {props.maxCharacterLength - props.characterCount}/
-        {props.maxCharacterLength} character left
+        {props.maxCharacterLength} characters left
       </ETParagraph>
     </Box>
   );

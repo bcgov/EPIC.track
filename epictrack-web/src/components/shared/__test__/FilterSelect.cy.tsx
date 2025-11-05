@@ -45,7 +45,7 @@ describe("FilterSelect", () => {
     ];
 
     cy.mount(
-      <FilterSelect options={options} variant={"inline"} isMulti={true} />
+      <FilterSelect options={options} variant={"inline"} isMulti={true} />,
     );
     cy.get("input").click();
     // Check that 'Option 1' and 'Option 2' are visible within the MuiBox-root

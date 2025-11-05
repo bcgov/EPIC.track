@@ -18,15 +18,26 @@ from collections import defaultdict
 from datetime import timezone
 from typing import List, Dict, Any, Union
 
+from api.insights.utils import get_days_left_subquery, get_days_taken_subquery, get_extension_days_subquery, get_suspended_days_subquery, get_total_days_subquery, get_work_subquery
+from api.models.ea_act import EAAct
+from api.models.phase_overage_responsibility import PhaseOverageResponsibility
 from api.models import PhaseCode, WorkPhase, PRIMARY_CATEGORIES, db
 from api.models.event_type import EventTypeEnum
 from api.models.event_category import EventCategoryEnum
-from api.schemas.work_v2 import WorkPhaseSchema
+from api.models.staff_work_role import StaffWorkRole
+from api.schemas.work import WorkPhaseSchema
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.event_template import EventPositionEnum
 from api.services.event import EventService
 from api.services.task_template import TaskTemplateService
+from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
+from api.models.work import Work
+from api.models.phase_code import PhaseCode as Phase
+from api.models.work_type import WorkType
+from api.models.project import Project
+
 from .common_service import event_compare_func
+from sqlalchemy import func, and_
 
 
 class WorkPhaseService:  # pylint: disable=too-few-public-methods
@@ -55,17 +66,10 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return work_phases
 
     @classmethod
-    def find_by_work_nd_phase(cls, work_id: int, phase_id: int) -> WorkPhase:
-        """Find the workphase by work and phase"""
-        work_phase = (
-            db.session.query(WorkPhase)
-            .filter(
-                WorkPhase.work_id == work_id,
-                WorkPhase.phase_id == phase_id,
-                WorkPhase.is_active.is_(True),
-            )
-            .scalar()
-        )
+    def find_by_work_and_phase(cls, work_id: int, phase_id: int) -> WorkPhase:
+        """Find the workphase status by work_id and work_phase id"""
+        work_phases_dict = cls.find_work_phases_by_work_ids([work_id])[0]
+        work_phase = cls.find_work_phase_status(work_id, phase_id, work_phases_dict.get(work_id, []))
         return work_phase
 
     @classmethod
@@ -115,7 +119,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         work_phases_dict = cls.find_work_phases_by_work_ids(work_ids)[0]
 
         for work_id, _work_phase_id in work_params_dict.items():
-            result_dict[work_id] = cls._find_work_phase_status(
+            result_dict[work_id] = cls.find_work_phase_status(
                 work_id, None, work_phases_dict.get(work_id, [])
             )
 
@@ -146,7 +150,15 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return result_dict, total_work_phases
 
     @classmethod
-    def _find_work_phase_status(cls, work_id, work_phase_id, work_phases):
+    def save_notes(cls, work_phase_id: int, notes: str) -> WorkPhase:
+        """Save overage responsibility notes in the work phase."""
+        work_phase = WorkPhase.find_by_id(work_phase_id)
+        work_phase.responsibility_notes = notes
+        work_phase.save()
+        return work_phase
+
+    @classmethod
+    def find_work_phase_status(cls, work_id, work_phase_id, work_phases):
         """Find work phase status for the work Id.If work_phase_id is passed , only that phase is considered."""
         result = []
         events = EventService.find_events(work_id, event_categories=PRIMARY_CATEGORIES)
@@ -154,10 +166,16 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             work_phases = [wp for wp in work_phases if wp.id == work_phase_id]
         for index, work_phase in enumerate(work_phases, start=1):
             result_item = {"work_phase": work_phase}
-            total_days = (
-                work_phase.end_date.date() - work_phase.start_date.date()
-            ).days
             work_phase_events = cls._filter_sort_events(events, work_phase)
+            extension_events = [
+                e for e in work_phase_events
+                if e.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_EXTENSION.value
+            ]
+            extension_days = sum(e.number_of_days for e in extension_events)
+            if work_phase.number_of_days:
+                total_days = work_phase.number_of_days + extension_days
+            else:
+                total_days = (work_phase.end_date.date() - work_phase.start_date.date()).days
 
             suspended_days = functools.reduce(
                 lambda x, y: x + y,
@@ -177,9 +195,12 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             milestone_info = cls._get_milestone_information(work_phase_events)
             result_item = {**result_item, **milestone_info}
 
-            days_left = cls._get_days_left(suspended_days, total_days, work_phase)
+            days_left = cls._get_days_left(suspended_days, total_days, work_phase, work_phase_events)
             result_item["days_left"] = days_left
+            days_taken = cls._get_days_taken(work_phase, work_phase_events, suspended_days)
+            result_item["days_taken"] = days_taken if days_taken else 0
             result_item["is_last_phase"] = index == len(work_phases)
+            result_item["overage_responsibility"] = PhaseOverageResponsibilityService.find_by_work_phase_id(int(work_phase.id), is_deleted=False)
             result.append(result_item)
         return result
 
@@ -202,7 +223,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         end_milestone = next(
             (
                 event
-                for event in remaining_milestone_events
+                for event in work_phase_events
                 if event.event_position == EventPositionEnum.END.value
             ),
             None,
@@ -218,6 +239,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             if remaining_milestone_events
             else None
         )
+        result["end_milestone"] = end_milestone
 
         decision_milestones = [
             event
@@ -231,7 +253,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             decision_milestones[-1].name if decision_milestones else None
         )
         result["decision"] = (
-            decision_milestones[-1].outcome.name if decision_milestones else None
+            decision_milestones[-1].outcome.name if decision_milestones and decision_milestones[-1].outcome else None
         )
         result["decision_milestone_date"] = (
             decision_milestones[-1].actual_date if decision_milestones else None
@@ -245,9 +267,13 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
 
     @classmethod
     def _calculate_milestone_progress(cls, work_phase_events):
+        any_incomplete_phase = any(getattr(e.event_configuration.work_phase, 'is_completed', True) is False for e in work_phase_events)
         total_number_of_milestones = len(work_phase_events)
         completed_ones = sum(1 for x in work_phase_events if x.actual_date is not None)
         milestone_progress = (completed_ones / total_number_of_milestones) * 100
+        # If all milestones are complete but the phase is not marked complete, cap progress at 90% so progress bar is not full
+        if milestone_progress == 100 and any_incomplete_phase:
+            milestone_progress = 90
         return milestone_progress
 
     @classmethod
@@ -261,22 +287,164 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return work_phase_events
 
     @classmethod
-    def _get_days_left(cls, suspended_days, total_days, work_phase):
+    def _get_days_left(cls, suspended_days, total_days, work_phase, events):
         if (
             work_phase.work.current_work_phase_id == work_phase.id
             and work_phase.is_completed is False
         ):
-            if work_phase.is_suspended:
-                days_passed = (
-                    work_phase.suspended_date.date() - work_phase.start_date.date()
-                ).days
-            else:
-                days_passed = (
-                    datetime.datetime.now(timezone.utc).date()
-                    - work_phase.start_date.date()
-                ).days
-                days_passed = 0 if days_passed < 0 else days_passed
+            days_passed = cls._get_days_taken(work_phase, events, suspended_days)
             days_left = (total_days - suspended_days) - days_passed
         else:
             days_left = total_days - suspended_days
         return days_left
+
+    @classmethod
+    def _get_days_taken(cls, work_phase, events, suspended_days=0):
+        all_events_completed = all(
+            e.actual_date is not None for e in events
+        )
+        days_taken = 0
+        # Completed phase
+        if work_phase.is_completed or all_events_completed:
+            start_event = next(
+                (
+                    e
+                    for e in events
+                    if e.event_configuration.event_position.name == "START"
+                    and e.actual_date is not None
+                ),
+                None,
+            )
+            end_event = next(
+                (
+                    e
+                    for e in events
+                    if e.event_configuration.event_position.name == "END"
+                    and e.actual_date is not None
+                ),
+                None,
+            )
+            if start_event and end_event:
+                days_taken = (end_event.actual_date.date() - start_event.actual_date.date()).days
+            else:
+                days_taken = 0
+        # Current phase uncompleted phase
+        elif work_phase.work.current_work_phase_id == work_phase.id:
+            if work_phase.is_suspended:
+                days_taken = (
+                    work_phase.suspended_date.date() - work_phase.start_date.date()
+                ).days
+            else:
+                days_taken = (
+                    datetime.datetime.now(timezone.utc).date()
+                    - work_phase.start_date.date()
+                ).days
+                days_taken = max(0, days_taken)
+
+        days_taken = max(0, days_taken - suspended_days)
+        return days_taken
+
+    @classmethod
+    def find_all_work_phases_with_additional_info(cls, staff_id: int = None, legislated: bool = None) -> List[WorkPhase]:
+        """Return all work phases."""
+        work_subq = get_work_subquery()
+        ext_subq = get_extension_days_subquery()
+        sus_subq = get_suspended_days_subquery()
+        total_days_subq = get_total_days_subquery(ext_subq)
+        days_taken_subq = get_days_taken_subquery(sus_subq)
+        days_left_subq = get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq)
+
+        query = db.session.query(
+            Work.id.label("work_id"),
+            WorkPhase.id.label("work_phase_id"),
+            Work.title.label("work_title"),
+            WorkType.name.label("work_type_name"),
+            WorkType.id.label("work_type_id"),
+            Phase.name.label("phase_name"),
+            Phase.id.label("phase_id"),
+            EAAct.name.label("ea_act_name"),
+            WorkPhase.end_date.label("work_phase_end_date"),
+            total_days_subq.c.total_days.label("total_days"),
+            days_taken_subq.c.days_taken.label("days_taken"),
+            days_left_subq.c.days_left.label("days_left"),
+            func.coalesce(
+                func.array_agg(
+                    PhaseOverageResponsibility.responsibility
+                ).filter(
+                    PhaseOverageResponsibility.responsibility.isnot(None),
+                    PhaseOverageResponsibility.is_active.is_(True),
+                    PhaseOverageResponsibility.is_deleted.is_(False)
+                ),
+                []
+            ).label("phase_overage_responsibilities"),
+        ).select_from(WorkPhase) \
+         .join(Work, WorkPhase.work_id == Work.id) \
+         .join(Phase, WorkPhase.phase_id == Phase.id) \
+         .join(WorkType, Work.work_type_id == WorkType.id) \
+         .join(Project, Work.project_id == Project.id) \
+         .join(EAAct, Work.ea_act_id == EAAct.id) \
+         .outerjoin(PhaseOverageResponsibility, PhaseOverageResponsibility.work_phase_id == WorkPhase.id)
+
+        query = query \
+            .outerjoin(total_days_subq, total_days_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(days_taken_subq, days_taken_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(days_left_subq, days_left_subq.c.work_phase_id == WorkPhase.id)
+
+        query = query.filter(
+            WorkPhase.is_active.is_(True),
+            WorkPhase.is_deleted.is_(False),
+            legislated is None or WorkPhase.legislated == legislated,
+        )
+
+        if staff_id:
+            query = query.join(
+                StaffWorkRole,
+                and_(
+                    StaffWorkRole.work_id == WorkPhase.work_id,
+                    StaffWorkRole.is_active.is_(True),
+                    StaffWorkRole.is_deleted.is_(False),
+                    StaffWorkRole.staff_id == staff_id
+                )
+            )
+
+        # Group by necessary fields to use aggregate functions like array_agg for PhaseOverageResponsibility
+        query = query.group_by(
+            Work.id,
+            WorkPhase.id,
+            Work.title,
+            WorkType.name,
+            WorkType.id,
+            Phase.name,
+            Phase.id,
+            EAAct.name,
+            WorkPhase.end_date,
+            total_days_subq.c.total_days,
+            days_taken_subq.c.days_taken,
+            days_left_subq.c.days_left
+        )
+
+        data = cls._serialize_work_phases(query)
+        return data
+
+    @classmethod
+    def _serialize_work_phases(cls, query) -> List[dict]:
+        """Serialize work phases from query result."""
+        data = []
+        for row in query.all():
+            item = {
+                "work_id": row.work_id,
+                "work_type_id": row.work_type_id,
+                "work_phase_id": row.work_phase_id,
+                "work_title": row.work_title,
+                "work_type_name": row.work_type_name,
+                "phase_name": row.phase_name,
+                "phase_id": row.phase_id,
+                "work_phase_end_date": row.work_phase_end_date,
+                "ea_act_name": row.ea_act_name,
+                "phase_overage_responsibilities": [p.value if hasattr(p, 'value') else p for p in row.phase_overage_responsibilities],
+                "total_days": row.total_days,
+                "days_taken": row.days_taken,
+                "days_left": row.days_left,
+            }
+            data.append(item)
+        return data

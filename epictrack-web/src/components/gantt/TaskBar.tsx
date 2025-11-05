@@ -1,4 +1,3 @@
-// TaskBar.js
 import moment from "moment";
 import { dayWidth } from "./constants";
 import { GanttItem } from "./types";
@@ -6,11 +5,11 @@ import { ETCaption3 } from "components/shared";
 import { useGanttContext } from "./GanttContext";
 import TaskBarTooltip from "./TaskBarTooltip";
 
-type TaskBar = {
+type GanttTaskBar = {
   task: GanttItem;
 };
 
-const TaskBar = ({ task }: TaskBar) => {
+const TaskBar = ({ task }: GanttTaskBar) => {
   const { start, CustomTaskBarTooltip } = useGanttContext();
   const momentStart = moment(start);
   const momentTaskStart = moment(task.start);

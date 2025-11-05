@@ -9,16 +9,8 @@ interface WorkStateProps {
 
 const WorkState = ({ work_state }: WorkStateProps) => {
   const formatWorkStateString = () => {
-    if (!work_state) return;
-    let workState = "";
-    work_state.split("_").map((word: string) => {
-      if (workState) {
-        workState += " ";
-      }
-      workState += capitalizeFirstLetterOfWord(word);
-    });
-
-    return workState;
+    if (!work_state) return "";
+    return work_state.split("_").map(capitalizeFirstLetterOfWord).join(" ");
   };
 
   return (
@@ -51,7 +43,7 @@ const WorkState = ({ work_state }: WorkStateProps) => {
       </Case>
       <Case
         condition={["WITHDRAWN", "CLOSED", "TERMINATED"].includes(
-          work_state || ""
+          work_state || "",
         )}
       >
         <Box

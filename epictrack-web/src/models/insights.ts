@@ -74,3 +74,25 @@ export type ProjectBySubtype = {
   sub_type: string;
   sub_type_id: number;
 };
+
+export type PhasesByAverageOverage = {
+  phase_id: number;
+  phase: string;
+  count: number;
+  total_overage: number;
+  average_overage: number;
+};
+
+export type ResponsibilityByWorktypePhase = {
+  responsibility_id: number;
+  responsibility_name: string;
+  count: number;
+};
+
+export type OveragesByAct = {
+  phase_id: number;
+  phase: string;
+  act_id: number;
+  act: string;
+  percent_over: number;
+};

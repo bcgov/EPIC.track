@@ -1,4 +1,5 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { useAppSelector } from "hooks";
 import NotFound from "./NotFound";
 import StaffList from "../components/staff/StaffList";
 import AnticipatedEAOSchedule from "../components/reports/eaReferral/AnticipatedEAOSchedule";
@@ -11,7 +12,6 @@ import ProjectList from "../components/project/ProjectList";
 import UserList from "../components/user/UserList";
 import TemplateList from "../components/task/template/TemplateList";
 import { MasterProvider } from "../components/shared/MasterContext";
-import WorkStaffList from "../components/work/workStaff/WorkStaffList";
 import WorkPlan from "../components/workPlan";
 import EventCalendar from "../components/eventCalendar/EventCalendar";
 import { ROLES } from "../constants/application-constant";
@@ -21,8 +21,19 @@ import MyWorkPlans from "../components/myWorkplans";
 import Insights from "components/insights";
 import MyTasksList from "components/myTasks/MyTasksList";
 import Settings from "components/settings";
+import MyUpdates from "components/myUpdates";
+import MyCalendar from "components/myCalendar";
 
 const AuthenticatedRoutes = () => {
+  const isAuthorized = useAppSelector((state) => state.user.isAuthorized);
+  const isAuthenticated = useAppSelector(
+    (state) => state.user.authentication.authenticated,
+  );
+
+  if (isAuthenticated && !isAuthorized) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
   return (
     <Routes>
       <Route
@@ -74,13 +85,14 @@ const AuthenticatedRoutes = () => {
           </MasterProvider>
         }
       />
-      <Route path="/list-management/work-staff" element={<WorkStaffList />} />
       <Route path="/work-plan" element={<WorkPlan />} />
       <Route element={<AuthGate allowed={[ROLES.MANAGE_USERS]} />}>
         <Route path="/admin/users" element={<UserList />} />
         <Route path="/admin/settings" element={<Settings />} />
       </Route>
       <Route path="/" element={<MyWorkPlans />} />
+      <Route path="/updates" element={<MyUpdates />} />
+      <Route path="/my-calendar" element={<MyCalendar />} />
       <Route path="/insights" element={<Insights />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="*" element={<NotFound />} />

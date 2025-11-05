@@ -18,17 +18,19 @@ from io import BytesIO
 from flask import jsonify, request, send_file
 from flask_restx import Namespace, Resource, cors
 
-from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
+from api.models.dashboard_search_options import WorkplanDashboardSearchOptions
 from api.models.pagination_options import PaginationOptions
 from api.schemas import request as req
 from api.schemas import response as res
+from api.schemas.response.phase_overage_responsibility_response import PhaseOverageResponsibilityResponseSchema
 from api.services import WorkService
 from api.services.work_phase import WorkPhaseService
+from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
 from api.utils import auth, constants, profiletime
 from api.utils.caching import AppCache
 from api.utils.datetime_helper import get_start_of_day
 from api.utils.util import cors_preflight
-from api.models.work_phase import WorkPhase
+from api.models.work_phase import WorkPhase as WorkPhaseModel
 
 API = Namespace("works", description="Works")
 
@@ -70,7 +72,7 @@ class WorkDashboard(Resource):
             page=args.get('page', None, int),
             size=args.get('size', None, int),
             sort_key=args.get('sort_key', 'name', str),
-            sort_order=args.get('sort_order', 'asc', str),
+            sort_order=args.get('sort_order', 'desc', str),
         )
         search_options = WorkplanDashboardSearchOptions(
             teams=list(map(int, args.getlist('teams[]'))),
@@ -98,11 +100,24 @@ class Works(Resource):
         """Return all active works."""
         request_args = req.WorkQueryParameterSchema().load(request.args)
         is_active = request_args.get("is_active", None)
+        staff_id = request_args.get("staff_id", None)
         include_indigenous_nations = request_args.get('include_indigenous_nations')
-        works = WorkService.find_all_works(is_active)
+        if staff_id is not None:
+            works = WorkService.get_works_by_staff(staff_id)
+        else:
+            works = WorkService.find_all_works(is_active)
         exclude = [] if include_indigenous_nations else ['indigenous_works']
         works_schema = res.WorkResponseSchema(many=True, exclude=exclude)
 
+        include_phase_status = request_args.get('include_phase_status', False)
+        if include_phase_status:
+            augmented_works = []
+            for work in works:
+                work_data = works_schema.dump([work])[0]
+                work_phase_statuses = res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(WorkPhaseService.find_work_phases_status(work.id))
+                work_data['work_phase_status'] = work_phase_statuses
+                augmented_works.append(work_data)
+            return jsonify(augmented_works), HTTPStatus.OK
         return jsonify(works_schema.dump(works)), HTTPStatus.OK
 
     @staticmethod
@@ -115,6 +130,21 @@ class Works(Resource):
         request_json["start_date"] = get_start_of_day(request_json["start_date"])
         work = WorkService.create_work(request_json)
         return res.WorkResponseSchema().dump(work), HTTPStatus.CREATED
+
+
+@cors_preflight("GET")
+@API.route("/by-staff/<int:staff_id>", methods=["GET", "OPTIONS"])
+class WorksByStaff(Resource):
+    """Endpoint resource to manage works."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(staff_id):
+        """Return all work ids that a staff is assigned to."""
+        work_ids = WorkService.get_work_ids_by_staff(staff_id)
+        return work_ids, 200
 
 
 @cors_preflight("GET")
@@ -186,6 +216,23 @@ class WorkPhases(Resource):
         work_phases = WorkPhaseService.find_work_phases_status(work_id)
         return (
             res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(work_phases), HTTPStatus.OK)
+
+
+@cors_preflight("GET")
+@API.route("/<int:work_id>/phase/<int:phase_id>/additionalinfo", methods=["GET", "OPTIONS"])
+class WorkPhase(Resource):
+    """Endpoint resource to return phase details for given work id."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(work_id, phase_id):
+        """Return additional work_phase details based on id + work_id."""
+        work_phase = WorkPhaseService.find_by_work_and_phase(work_id, phase_id)
+        return (
+            res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(work_phase), HTTPStatus.OK
+        )
 
 
 @cors_preflight("GET, POST")
@@ -317,11 +364,55 @@ class WorkPhaseId(Resource):
     def get(work_phase_id):
         """Get the status if template upload is available"""
         req.WorkIdPhaseIdPathParameterSchema().load(request.view_args)
-        work_phase = WorkPhase.find_by_id(work_phase_id)
+        work_phase = WorkPhaseModel.find_by_id(work_phase_id)
         return (
             res.WorkPhaseByIdResponseSchema().dump({'work_phase': work_phase}),
             HTTPStatus.OK,
         )
+
+
+@cors_preflight("GET,POST")
+@API.route("/work-phases/<int:work_phase_id>/overage-responsibilities", methods=["GET", "OPTIONS"])
+class WorkPhaseOverageResponsibilities(Resource):
+    """Endpoints to get work phase overage responsibilitiy"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(work_phase_id):
+        """Get the overage responsibility if it is available"""
+        req.WorkIdPhaseIdPathParameterSchema().load(request.view_args)
+        overage_responsibility = PhaseOverageResponsibilityService.find_by_work_phase_id(int(work_phase_id), is_deleted=False)
+        return jsonify(PhaseOverageResponsibilityResponseSchema(many=True).dump(overage_responsibility)), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post():
+        """Create the new phase overage responsibility"""
+        request_json = request.get_json()
+        data = req.PhaseOverageResponsibilityBodyRequestSchema().load(request_json)
+        responsibility = PhaseOverageResponsibilityService.create(data)
+        return PhaseOverageResponsibilityResponseSchema().dump(responsibility), HTTPStatus.CREATED
+
+
+@cors_preflight("PATCH, OPTIONS")
+@API.route("/work-phases/<int:work_phase_id>/overage-responsibility-notes", methods=["PATCH", "OPTIONS"])
+class WorkPhaseResponsibilityNotes(Resource):
+    """Endpoints to handle work phase overage notes"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def patch(work_phase_id):
+        """Save the notes to corresponding work phase"""
+        req.WorkIdPhaseIdPathParameterSchema().load(request.view_args)
+        notes = req.WorkPhaseNotesBodySchema().load(API.payload)["notes"]
+        work_phase = WorkPhaseService.save_notes(work_phase_id, notes)
+        return res.WorkPhaseResponseSchema().dump(work_phase), HTTPStatus.OK
 
 
 @cors_preflight("GET,POST")

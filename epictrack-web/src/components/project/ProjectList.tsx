@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { Box, Button, Grid } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import { Project } from "../../models/project";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
-import projectService from "../../services/projectService/projectService";
+import { projectService } from "../../services/projectService/projectService";
 import { ETChip } from "../shared/chip/ETChip";
-import TableFilter from "../shared/filterSelect/TableFilter";
+import { TableFilter } from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
 import { Restricted } from "../shared/restricted";
 import { ROLES } from "../../constants/application-constant";
@@ -15,27 +15,27 @@ import { ProjectDialog } from "./Dialog";
 import { showNotification } from "components/shared/notificationProvider";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
+import { getStatusFilter } from "components/shared/filterSelect/utils";
 
 const projectsListingFiltersCacheKey = "projects-listing-filters";
 const ProjectList = () => {
-  const [envRegions, setEnvRegions] = React.useState<string[]>([]);
-  const [subTypes, setSubTypes] = React.useState<string[]>([]);
-  const [proponents, setProponents] = React.useState<string[]>([]);
-  const [types, setTypes] = React.useState<string[]>([]);
-  const [projectId, setProjectId] = React.useState<number>();
-  const [showFormDialog, setShowFormDialog] = React.useState(false);
-  const [projects, setProjects] = React.useState<Project[]>([]);
-  const [loadingProjects, setLoadingProjects] = React.useState(true);
+  const [subTypes, setSubTypes] = useState<string[]>([]);
+  const [proponents, setProponents] = useState<string[]>([]);
+  const [types, setTypes] = useState<string[]>([]);
+  const [projectId, setProjectId] = useState<number>();
+  const [showFormDialog, setShowFormDialog] = useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
   const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
     projectsListingFiltersCacheKey,
-    []
+    [],
   );
 
   const fetchProjects = async () => {
     setLoadingProjects(true);
     try {
       const response = await projectService.getAll();
-      setProjects(response.data);
+      setProjects(response.data || []);
       setLoadingProjects(false);
     } catch (error) {
       showNotification("Could not load Projects", { type: "error" });
@@ -46,15 +46,12 @@ const ProjectList = () => {
     fetchProjects();
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const types = projects
       .map((p) => p.type.name)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     const subTypes = projects
       .map((p) => p.sub_type.name)
-      .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-    const envRegions = projects
-      .map((p) => p.region_env?.name)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     const projectProponents = projects
       .map((p) => p.proponent.name)
@@ -62,7 +59,6 @@ const ProjectList = () => {
     setProponents(projectProponents);
     setTypes(types);
     setSubTypes(subTypes);
-    setEnvRegions(envRegions);
   }, [projects]);
 
   const statusesOptions = useMemo(
@@ -71,17 +67,17 @@ const ProjectList = () => {
         projects,
         "is_active",
         (value) => (value ? "Active" : "Inactive"),
-        (value) => value
+        (value) => value,
       ),
-    [projects]
+    [projects],
   );
 
   const envRegionsOptions = getSelectFilterOptions(
     projects.map((project) => project.region_env),
-    "name"
+    "name",
   );
 
-  const columns = React.useMemo<MRT_ColumnDef<Project>[]>(
+  const columns = useMemo<MRT_ColumnDef<Project>[]>(
     () => [
       {
         accessorKey: "name",
@@ -119,15 +115,13 @@ const ProjectList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > types.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
           }
-
+          if (types.length > 0 && filterValue.length >= types.length) {
+            return true; // "select all" case
+          }
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
@@ -148,15 +142,13 @@ const ProjectList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > subTypes.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
           }
-
+          if (subTypes.length > 0 && filterValue.length >= subTypes.length) {
+            return true; // "select all" case
+          }
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
@@ -178,20 +170,21 @@ const ProjectList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > proponents.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
           }
-
+          if (
+            proponents.length > 0 &&
+            filterValue.length >= proponents.length
+          ) {
+            return true; // "select all" case
+          }
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
       {
-        accessorKey: "region_env.name",
+        accessorFn: (row) => row.region_env?.name || "",
         header: "ENV Region",
         filterSelectOptions: envRegionsOptions,
         filterVariant: "multi-select",
@@ -207,15 +200,16 @@ const ProjectList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > envRegionsOptions.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
           }
-
+          if (
+            envRegionsOptions.length > 0 &&
+            filterValue.length >= envRegionsOptions.length
+          ) {
+            return true; // "select all" case
+          }
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
@@ -224,31 +218,8 @@ const ProjectList = () => {
         header: "Status",
         filterVariant: "multi-select",
         filterSelectOptions: statusesOptions,
-        Filter: ({ header, column }) => {
-          return (
-            <Box sx={{ width: "100px" }}>
-              <TableFilter
-                isMulti
-                header={header}
-                column={column}
-                variant="inline"
-                name="rolesFilter"
-              />
-            </Box>
-          );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > statusesOptions.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id);
-
-          return filterValue.includes(value);
-        },
+        Filter: getStatusFilter<Project>,
+        filterFn: "multiSelectFilter",
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && <ETChip active label="Active" />}
@@ -257,7 +228,7 @@ const ProjectList = () => {
         ),
       },
     ],
-    [types, subTypes, envRegions, proponents]
+    [envRegionsOptions, proponents, statusesOptions, subTypes, types],
   );
 
   const handleCacheFilters = (filters?: ColumnFilter[]) => {
@@ -286,12 +257,13 @@ const ProjectList = () => {
                   desc: false,
                 },
               ],
-              columnFilters: columnFilters,
             }}
             state={{
               isLoading: loadingProjects,
               showGlobalFilter: true,
+              columnFilters,
             }}
+            loading={loadingProjects}
             tableName={"project-listing"}
             enableExport
             renderTopToolbarCustomActions={({ table }) => (
@@ -311,6 +283,7 @@ const ProjectList = () => {
               </Restricted>
             )}
             onCacheFilters={handleCacheFilters}
+            renderResultCount
           />
         </Grid>
       </ETPageContainer>

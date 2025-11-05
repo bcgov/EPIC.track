@@ -37,7 +37,7 @@ describe("Date calculator form tests", () => {
       startDate,
       endDate,
       suspendedDate,
-      resumptionDate
+      resumptionDate,
     );
 
     const expected: DayCalculatorResult = {
@@ -61,7 +61,7 @@ describe("Date calculator form tests", () => {
       startDate,
       endDate,
       suspendedDate,
-      resumptionDate
+      resumptionDate,
     );
 
     const expected: DayCalculatorResult = {
@@ -85,7 +85,7 @@ describe("Date calculator form tests", () => {
       startDate,
       endDate,
       suspendedDate,
-      resumptionDate
+      resumptionDate,
     );
 
     const expected: DayCalculatorResult = {
@@ -109,7 +109,7 @@ describe("Date calculator form tests", () => {
       startDate,
       endDate,
       suspendedDate,
-      resumptionDate
+      resumptionDate,
     );
 
     const expected: DayCalculatorResult = {
@@ -132,7 +132,7 @@ describe("Date calculator form tests", () => {
       startDate,
       endDate,
       suspendedDate,
-      resumptionDate
+      resumptionDate,
     );
 
     const expected: DayCalculatorResult = {
@@ -155,7 +155,7 @@ describe("Date calculator form tests", () => {
       startDate,
       endDate,
       suspendedDate,
-      resumptionDate
+      resumptionDate,
     );
 
     const expected: DayCalculatorResult = {
@@ -182,7 +182,7 @@ describe("Date calculator form tests", () => {
       startDate,
       endDate,
       suspendedDate,
-      resumptionDate
+      resumptionDate,
     );
 
     const expected: DayCalculatorResult = {
@@ -209,7 +209,7 @@ describe("Date calculator form tests", () => {
       startDate,
       endDate,
       suspendedDate,
-      resumptionDate
+      resumptionDate,
     );
 
     const expected: DayCalculatorResult = {
@@ -236,7 +236,7 @@ describe("Date calculator form tests", () => {
       startDate,
       endDate,
       suspendedDate,
-      resumptionDate
+      resumptionDate,
     );
 
     const expected: DayCalculatorResult = {

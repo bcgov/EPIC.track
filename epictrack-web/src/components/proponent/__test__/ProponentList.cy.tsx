@@ -8,8 +8,11 @@ import {
   testTableFiltering,
 } from "../../../../cypress/support/common";
 import { AppConfig } from "config";
-import { Endpoint, setupIntercepts } from "../../../../cypress/support/utils";
-import { Method } from "cypress/types/net-stubbing";
+import {
+  HttpMethod,
+  Endpoint,
+  setupIntercepts,
+} from "../../../../cypress/support/utils";
 
 //ensure proponents are never the same by incrementing the counter
 let proponentCounter = 0;
@@ -17,10 +20,10 @@ let proponentCounter = 0;
 const generateMockProponent = (): Proponent => {
   proponentCounter += 1;
   return {
-    id: faker.datatype.number() + proponentCounter,
+    id: faker.number.int() + proponentCounter,
     name: `${faker.commerce.productName()} ${proponentCounter}`,
     is_active: faker.datatype.boolean(),
-    relationship_holder_id: faker.datatype.number() + proponentCounter,
+    relationship_holder_id: faker.number.int() + proponentCounter,
     relationship_holder: mockStaffs[proponentCounter - 1] as Staff,
   };
 };
@@ -32,7 +35,7 @@ const proponents = [proponent1, proponent2];
 const endpoints: Endpoint[] = [
   {
     name: "getProponents",
-    method: "GET" as Method,
+    method: "GET" as HttpMethod,
     url: `${AppConfig.apiUrl}proponents`,
     response: {
       body: proponents,
@@ -40,12 +43,12 @@ const endpoints: Endpoint[] = [
   },
   {
     name: "getActiveStaffsOptions",
-    method: "OPTIONS" as Method,
+    method: "OPTIONS" as HttpMethod,
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
   },
   {
     name: "getActiveStaff",
-    method: "GET" as Method,
+    method: "GET" as HttpMethod,
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
     response: { body: mockStaffs },
   },
@@ -57,13 +60,12 @@ describe("ProponentList", () => {
     cy.mount(
       <Router>
         <ProponentList />
-      </Router>
+      </Router>,
     );
   });
 
   it("should display the proponent list", () => {
-    // Select the table container
-    cy.get(".MuiInputBase-root");
+    cy.get("table").should("exist").and("be.visible");
   });
 
   it("should filter the proponent list based on the proponent name input", () => {
@@ -75,18 +77,18 @@ describe("ProponentList", () => {
   it("should filter the proponent list based on the proponent relationship holder  input", () => {
     testTableFiltering(
       "Relationship Holder",
-      proponent1.relationship_holder?.full_name as Staff["full_name"]
+      proponent1.relationship_holder?.full_name as Staff["full_name"],
     );
     cy.get("table")
       .contains(
         "tr",
-        proponent1.relationship_holder?.full_name as Staff["full_name"]
+        proponent1.relationship_holder?.full_name as Staff["full_name"],
       )
       .should("be.visible");
     cy.get("table")
       .contains(
         "tr",
-        proponent2.relationship_holder?.full_name as Staff["full_name"]
+        proponent2.relationship_holder?.full_name as Staff["full_name"],
       )
       .should("not.exist");
   });

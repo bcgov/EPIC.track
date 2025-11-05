@@ -28,10 +28,10 @@ import {
 } from "models/work";
 import { ListType } from "models/code";
 import { setLoadingState } from "services/loadingService";
-import eventService from "services/eventService/eventService";
-import responsibilityService from "services/responsibilityService/responsibilityService";
-import taskEventService from "services/taskEventService/taskEventService";
-import workService from "services/workService/workService";
+import { eventService } from "services/eventService/eventService";
+import { responsibilityService } from "services/responsibilityService/responsibilityService";
+import { taskEventService } from "services/taskEventService/taskEventService";
+import { workService } from "services/workService/workService";
 import { OptionType } from "../../shared/filterSelect/type";
 import { showNotification } from "../../shared/notificationProvider";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
@@ -75,7 +75,7 @@ const EventList = () => {
     useState<boolean>(false);
   const [showTemplateForm, setShowTemplateForm] = useState<boolean>(false);
   const [staffSelectOptions, setStaffSelectOptions] = useState<OptionType[]>(
-    []
+    [],
   );
   const [taskEvent, setTaskEvent] = useState<TaskEvent>();
   const [templateAvailable, setTemplateAvailable] = useState<TemplateStatus>();
@@ -94,7 +94,7 @@ const EventList = () => {
   const userIsActiveTeamMember = useMemo(
     () =>
       team.some((member) => member.staff.email === email && member.is_active),
-    [team, email]
+    [team, email],
   );
   const isConfettiShown = useAppSelector((state) => state.uiState.showConfetti);
   const { handleHighlightRows } = useContext(EventContext);
@@ -106,7 +106,7 @@ const EventList = () => {
       Number(selectedWorkPhase?.days_left) < 0 &&
       selectedWorkPhase?.work_phase.legislated &&
       openExtensionWarningBox,
-    [selectedWorkPhase, openExtensionWarningBox]
+    [selectedWorkPhase, openExtensionWarningBox],
   );
 
   const isEventFormFieldLocked = useMemo(() => {
@@ -114,15 +114,12 @@ const EventList = () => {
   }, [milestoneEvent]);
 
   useEffect(() => setEvents([]), [selectedWorkPhase?.work_phase.id]);
+
   useEffect(() => {
     setTimeout(() => {
       dispatch(showConfetti(false));
     }, 5000);
-  }, [isConfettiShown]);
-
-  useEffect(() => {
-    getCombinedEvents();
-  }, [work?.id, selectedWorkPhase?.work_phase.id]);
+  }, [dispatch, isConfettiShown]);
 
   useEffect(() => {
     const options: OptionType[] = team
@@ -135,16 +132,78 @@ const EventList = () => {
       })
       .filter(
         (ele, index, arr) =>
-          arr.findIndex((t) => t.value === ele.value) === index
+          arr.findIndex((t) => t.value === ele.value) === index,
       );
     setStaffSelectOptions(options);
   }, [team]);
 
+  const getTaskEvents = useCallback(
+    async (phaseId: number): Promise<EventsGridModel[]> => {
+      let result: EventsGridModel[] = [];
+      try {
+        const taskResult = await taskEventService.getAll(phaseId);
+
+        if (taskResult.status === 200) {
+          result = (taskResult.data as EventsGridModel[]).map((element) => {
+            element.type = EVENT_TYPE.TASK;
+            element.end_date = dateUtils
+              .add(element.start_date, element.number_of_days, "days")
+              .toISOString();
+            return element;
+          });
+        }
+      } catch (e) {
+        setLoading(false);
+      }
+      return Promise.resolve(result);
+    },
+    [],
+  );
+
+  const milestoneEvents = useMemo(
+    () => events.filter((p) => p.type === EVENT_TYPE.MILESTONE),
+    [events],
+  );
+
+  const getMilestoneEvents = useCallback(
+    async (phaseId: number): Promise<EventsGridModel[]> => {
+      let result: EventsGridModel[] = [];
+      try {
+        const milestoneResult = await eventService.getMilestoneEvents(phaseId);
+        if (milestoneResult.status === 200) {
+          result = (milestoneResult.data as any[]).map((element) => {
+            element.type = EVENT_TYPE.MILESTONE;
+            element.start_date =
+              element.actual_date || element.anticipated_date;
+            element.is_complete = !!element.actual_date;
+            const actualToTodayDiff = Moment(element.start_date).diff(
+              Moment(),
+              "days",
+            );
+            element.status = element.is_complete
+              ? EVENT_STATUS.COMPLETED
+              : actualToTodayDiff <= 0
+                ? EVENT_STATUS.INPROGRESS
+                : EVENT_STATUS.NOT_STARTED;
+            element.visibility = element.event_configuration.visibility;
+            return element;
+          });
+        }
+      } catch (e) {
+        setLoading(false);
+      }
+      return Promise.resolve(result);
+    },
+    [],
+  );
+
   const getCombinedEvents = useCallback(() => {
     let result: EventsGridModel[] = [];
-    if (work?.id && selectedWorkPhase?.work_phase.id) {
+    const phaseId = selectedWorkPhase?.work_phase.id;
+
+    if (work?.id && phaseId) {
       setLoading(true);
-      Promise.all([getMilestoneEvents(), getTaskEvents()]).then(
+      Promise.all([getMilestoneEvents(phaseId), getTaskEvents(phaseId)]).then(
         (data: Array<EventsGridModel[]>) => {
           data.forEach((array: EventsGridModel[]) => {
             result = result.concat(array);
@@ -172,7 +231,7 @@ const EventList = () => {
             // Next priorit is for dates, lower dates comes first
             const diff = Moment(eventX.start_date).diff(
               eventY.start_date,
-              "days"
+              "days",
             );
             if (diff < 0) {
               return -1;
@@ -182,7 +241,7 @@ const EventList = () => {
             }
             // Next if the dates are equal, then
             if (
-              Moment(eventX.start_date).diff(eventY.start_date, "days") == 0
+              Moment(eventX.start_date).diff(eventY.start_date, "days") === 0
             ) {
               // If both events are MILESTONE, sort it based on the visibility
               if (
@@ -191,7 +250,7 @@ const EventList = () => {
               ) {
                 // If both events are either MANDATORY OR OPTIONAL, sort is based on its autogenerated datebase ids
                 if (
-                  (eventX.visibility == EventTemplateVisibility.MANDATORY &&
+                  (eventX.visibility === EventTemplateVisibility.MANDATORY &&
                     eventY.visibility === EventTemplateVisibility.MANDATORY) ||
                   (eventX.visibility === EventTemplateVisibility.OPTIONAL &&
                     eventY.visibility === EventTemplateVisibility.OPTIONAL)
@@ -239,92 +298,49 @@ const EventList = () => {
           });
           setEvents(result);
           setLoading(false);
-        }
+        },
       );
     }
     setRowSelection({});
-  }, [work, selectedWorkPhase?.work_phase.id]);
+  }, [
+    getMilestoneEvents,
+    getTaskEvents,
+    work?.id,
+    selectedWorkPhase?.work_phase.id,
+  ]);
 
-  const getTaskEvents = async (): Promise<EventsGridModel[]> => {
-    let result: EventsGridModel[] = [];
-    try {
-      const taskResult = await taskEventService.getAll(
-        Number(selectedWorkPhase?.work_phase.id)
-      );
+  useEffect(() => {
+    getCombinedEvents();
+  }, [getCombinedEvents, work?.id, selectedWorkPhase?.work_phase.id]);
 
-      if (taskResult.status === 200) {
-        result = (taskResult.data as EventsGridModel[]).map((element) => {
-          element.type = EVENT_TYPE.TASK;
-          element.end_date = dateUtils
-            .add(element.start_date, element.number_of_days, "days")
-            .toISOString();
-          return element;
-        });
-      }
-    } catch (e) {
-      setLoading(false);
-    }
-    return Promise.resolve(result);
-  };
-  const milestoneEvents = useMemo(
-    () => events.filter((p) => p.type === EVENT_TYPE.MILESTONE),
-    [events]
-  );
-  const getMilestoneEvents = async (): Promise<EventsGridModel[]> => {
-    let result: EventsGridModel[] = [];
-    try {
-      const milestoneResult = await eventService.getMilestoneEvents(
-        Number(selectedWorkPhase?.work_phase.id)
+  const updateSelectedWorkPhaseState = useCallback(() => {
+    if (work?.current_work_phase_id && workPhases.length > 0) {
+      const selectedWp = workPhases.find(
+        (p) => p.work_phase.id === work.current_work_phase_id,
       );
-      if (milestoneResult.status === 200) {
-        result = (milestoneResult.data as any[]).map((element) => {
-          element.type = EVENT_TYPE.MILESTONE;
-          element.start_date = element.actual_date || element.anticipated_date;
-          element.is_complete = !!element.actual_date;
-          const actualToTodayDiff = Moment(element.start_date).diff(
-            Moment(),
-            "days"
-          );
-          element.status = element.is_complete
-            ? EVENT_STATUS.COMPLETED
-            : actualToTodayDiff <= 0
-            ? EVENT_STATUS.INPROGRESS
-            : EVENT_STATUS.NOT_STARTED;
-          element.visibility = element.event_configuration.visibility;
-          return element;
-        });
+      if (selectedWp) {
+        setSelectedWorkPhase(selectedWp);
       }
-    } catch (e) {
-      setLoading(false);
     }
-    return Promise.resolve(result);
-  };
+  }, [setSelectedWorkPhase, work?.current_work_phase_id, workPhases]);
 
   // update the selectedworkphase state in the context when the state of the work or workphases changes
   useEffect(() => {
     updateSelectedWorkPhaseState();
-  }, [workPhases, work]);
-
-  const updateSelectedWorkPhaseState = useCallback(() => {
-    if (selectedWorkPhase) {
-      const selectedWp = workPhases.filter(
-        (p) => p.work_phase.id === work?.current_work_phase_id
-      )[0];
-      setSelectedWorkPhase(selectedWp);
-    }
-  }, [work, workPhases]);
+  }, [updateSelectedWorkPhaseState, workPhases, work?.current_work_phase_id]);
 
   const getWorkPhases = useCallback(async () => {
     if (work?.id) {
       setLoading(true);
       const workPhasesResult = await workService.getWorkPhases(
-        String(work?.id)
+        String(work?.id),
       );
       const workPhases = workPhasesResult.data as WorkPhaseAdditionalInfo[];
       setWorkPhases(workPhases);
       setLoading(false);
+      return workPhases;
     }
-  }, []);
+  }, [setWorkPhases, setLoading, work?.id]);
 
   const getWorkById = useCallback(async () => {
     if (work?.id) {
@@ -332,14 +348,22 @@ const EventList = () => {
       const workResult = result.data as Work;
       setWork(workResult);
     }
-  }, [workPhases]);
+  }, [setWork, work?.id]);
 
-  const onSaveHandler = () => {
+  const onSaveHandler = (dispatchShowConfetti?: boolean) => {
     setShowTaskForm(false);
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
     getCombinedEvents();
-    getWorkPhases().then(() => getWorkById());
+    getWorkPhases().then((newWorkPhases) => {
+      getWorkById();
+      const allLegislatedWorkPhasesComplete = (newWorkPhases ?? [])
+        .filter((wp) => wp.work_phase.legislated)
+        .every((wp) => wp.work_phase.is_completed);
+      if (allLegislatedWorkPhasesComplete && dispatchShowConfetti) {
+        dispatch(showConfetti(true));
+      }
+    });
     getTemplateUploadStatus();
     if (
       milestoneEvent?.event_configuration?.event_position === EventPosition.END
@@ -370,7 +394,7 @@ const EventList = () => {
         {
           work_phase_id: selectedWorkPhase?.work_phase.id,
         },
-        Number(selectedTemplateId)
+        Number(selectedTemplateId),
       );
       if (result.status === 201) {
         showNotification("Task events uploaded", {
@@ -391,10 +415,10 @@ const EventList = () => {
   const handleExportToSheet = useCallback(async () => {
     try {
       const binaryReponse = await workService.downloadWorkplan(
-        Number(selectedWorkPhase?.work_phase.id)
+        Number(selectedWorkPhase?.work_phase.id),
       );
       const url = window.URL.createObjectURL(
-        new Blob([(binaryReponse as any).data])
+        new Blob([(binaryReponse as any).data]),
       );
       const link = document.createElement("a");
       link.href = url;
@@ -406,7 +430,7 @@ const EventList = () => {
         type: "success",
       });
     } catch (error) {}
-  }, [work?.id, selectedWorkPhase?.work_phase.phase.id]);
+  }, [selectedWorkPhase, work?.project.name, work?.title]);
 
   const handleTaskFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -444,8 +468,8 @@ const EventList = () => {
     }
     dispatch(setLoadingState(false));
     setShowDeleteMilestoneButton(
-      row.type === EVENT_TYPE.MILESTONE &&
-        !(row.visibility === EventTemplateVisibility.MANDATORY)
+      (row.type === EVENT_TYPE.MILESTONE || row.type === EVENT_TYPE.TASK) &&
+        !(row.visibility === EventTemplateVisibility.MANDATORY),
     );
   };
 
@@ -477,7 +501,7 @@ const EventList = () => {
       const result = await taskEventService.getById(Number(eventId));
       if (result.status === 200) {
         const assignee_ids: any[] = (result.data as any)["assignees"].map(
-          (p: any) => p["assignee_id"]
+          (p: any) => p["assignee_id"],
         );
         const responsibility_ids: any[] = (result.data as any)[
           "responsibilities"
@@ -501,7 +525,7 @@ const EventList = () => {
         notificationId.current = null;
       }
       const response = await workService.checkTemplateUploadStatus(
-        Number(selectedWorkPhase.work_phase.id)
+        Number(selectedWorkPhase.work_phase.id),
       );
       const templateUploadStatus: TemplateStatus =
         response.data as TemplateStatus;
@@ -534,7 +558,7 @@ const EventList = () => {
         notificationId.current = notification;
       }
     }
-  }, [selectedWorkPhase?.work_phase.phase.id]);
+  }, [selectedWorkPhase, work]);
 
   const getWorkPhaseById = useCallback(async () => {
     const workPhaseId = selectedWorkPhase?.work_phase.id;
@@ -542,7 +566,7 @@ const EventList = () => {
     if (workPhaseId) {
       try {
         const workPhase = (await workService.getWorkPhaseById(
-          Number(workPhaseId)
+          Number(workPhaseId),
         )) as WorkPhase;
 
         if (workPhase?.is_completed && !isCompleted) {
@@ -551,15 +575,15 @@ const EventList = () => {
       } catch (error) {
         console.error(
           `Error fetching work phase with ID: ${workPhaseId}`,
-          error
+          error,
         );
       }
     }
-  }, [selectedWorkPhase?.work_phase.id]);
+  }, [dispatch, selectedWorkPhase]);
 
   useEffect(() => {
     getTemplateUploadStatus();
-  }, [selectedWorkPhase]);
+  }, [getTemplateUploadStatus, selectedWorkPhase]);
 
   const getResponsibilities = async (): Promise<ListType[]> => {
     const result: ListType[] = [];
@@ -590,12 +614,12 @@ const EventList = () => {
         setTemplateAvailable(undefined);
       }
     };
-  }, []);
+  }, [setSelectedWorkPhase]);
 
   const assignTasks = useCallback(
     async (assignee_ids: any) => {
       assignee_ids = assignee_ids.filter(
-        (assignee_id: string) => assignee_id !== "<SELECT_ALL>"
+        (assignee_id: string) => assignee_id !== "<SELECT_ALL>",
       );
       const data = {
         task_ids: Object.keys(rowSelection),
@@ -623,13 +647,13 @@ const EventList = () => {
         });
       }
     },
-    [rowSelection]
+    [getCombinedEvents, handleHighlightRows, rowSelection, work?.id],
   );
 
   const assignResponsibility = useCallback(
     async (responsibility_ids: any) => {
       responsibility_ids = responsibility_ids.filter(
-        (responsibility_id: string) => responsibility_id !== "<SELECT_ALL>"
+        (responsibility_id: string) => responsibility_id !== "<SELECT_ALL>",
       );
       const data = {
         task_ids: Object.keys(rowSelection),
@@ -657,7 +681,7 @@ const EventList = () => {
         });
       }
     },
-    [rowSelection]
+    [getCombinedEvents, handleHighlightRows, rowSelection, work?.id],
   );
 
   const assignProgress = useCallback(
@@ -688,21 +712,34 @@ const EventList = () => {
         });
       }
     },
-    [rowSelection]
+    [getCombinedEvents, handleHighlightRows, rowSelection, work?.id],
   );
 
+  const taskData = () => {
+    if (Object.keys(rowSelection).length === 0) {
+      return {
+        task_ids: taskEvent?.id,
+        work_id: work?.id,
+      };
+    } else {
+      return {
+        task_ids: Object.keys(rowSelection).join(","),
+        work_id: work?.id,
+      };
+    }
+  };
+
   const deleteTasks = async () => {
-    const data = {
-      task_ids: Object.keys(rowSelection).join(","),
-      work_id: work?.id,
-    };
+    const data = taskData();
     const response = await taskEventService.deleteTasks(data);
     try {
       if (response.status === 200) {
         showNotification("Deleted successfully", {
           type: "success",
         });
+        setShowDeleteDialog(false);
         getCombinedEvents();
+        onSaveHandler();
       }
     } catch (e) {}
   };
@@ -731,7 +768,7 @@ const EventList = () => {
   };
   const deleteAction = (
     <>
-      {showDeleteMilestoneButton && (
+      {showDeleteMilestoneButton && taskEvent && (
         <Box
           sx={{
             display: "flex",
@@ -908,6 +945,7 @@ const EventList = () => {
         isActionsRequired
         onCancel={() => onCancelHandler()}
         formId="task-form"
+        additionalActions={deleteAction}
       >
         <TaskForm onSave={onSaveHandler} taskEvent={taskEvent} />
       </TrackDialog>

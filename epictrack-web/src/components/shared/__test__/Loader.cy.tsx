@@ -21,7 +21,7 @@ describe("Loader", () => {
     cy.mount(
       <Provider store={store}>
         <Loader />
-      </Provider>
+      </Provider>,
     );
     cy.get("div").should("have.class", "MuiBackdrop-root");
     cy.get("svg").should("have.class", "MuiCircularProgress-svg");

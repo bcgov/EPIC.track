@@ -44,6 +44,7 @@ from .ops import API as OPS_API
 from .outcome import API as OUTCOME_API
 from .outcome_configuration import API as OUTCOME_CONFIGURATION_API
 from .phase import API as PHASE_API
+from .phase_overage_responsibility import API as PHASE_OVERAGE_RESPONSIBILITY_API
 from .pip_org_type import API as PIP_ORG_TYPES_API
 from .position import API as POSITION_API
 from .project import API as PROJECTS_API
@@ -66,11 +67,14 @@ from .task_template import API as TASK_TEMPLATE_API
 from .types import API as TYPES_API
 from .user import API as USER_API
 from .work import API as WORK_API
-from .work_issues import API as WORK_ISSUES_API
-from .work_status import API as WORK_STATUS_API
+from .work_issues import ISSUES_DASHBOARD_API
+from .work_issues import WORK_ISSUES_API
+from .work_status import WORK_STATUS_API
+from .work_status import STATUS_DASHBOARD_API as WORK_STATUS_DASHBOARD_API
 from .work_type import API as WORK_TYPES_API
 from .project_state import API as PROJECT_STATE_API
-
+from .work_resource import API as WORK_RESOURCE_API
+from .work_phases import API as WORK_PHASES_API
 
 __all__ = ("API_BLUEPRINT", "OPS_BLUEPRINT")
 
@@ -107,6 +111,7 @@ API.add_namespace(PROJECTS_API, path="/projects")
 API.add_namespace(PROJECT_TYPES_API, path="/project-types")
 API.add_namespace(SYNC_FORM_DATA_API, path="/sync-form-data")
 API.add_namespace(PHASE_API, path="/phases")
+API.add_namespace(PHASE_OVERAGE_RESPONSIBILITY_API, path="/overage-responsibilities")
 API.add_namespace(STAFF_API, path="/staffs")
 API.add_namespace(STALENESS_SETTINGS_API, path="/staleness-settings")
 API.add_namespace(ELEVATED_ROLE_API, path='/elevated-roles')
@@ -130,8 +135,10 @@ API.add_namespace(RESPONSIBILITY_API, path="/responsibilities")
 API.add_namespace(OUTCOME_CONFIGURATION_API, path="/outcome-configurations")
 API.add_namespace(ACT_SECTION_API, path="/act-sections")
 API.add_namespace(WORK_STATUS_API, path='/work/<int:work_id>/statuses')
+API.add_namespace(WORK_STATUS_DASHBOARD_API, path='/work-statuses')
 API.add_namespace(WORK_TYPES_API, path='/work-types')
 API.add_namespace(WORK_ISSUES_API, path='/work/<int:work_id>/issues')
+API.add_namespace(ISSUES_DASHBOARD_API, path='/work-issues')
 API.add_namespace(SPECIAL_FIELD_API, path='/special-fields')
 API.add_namespace(POSITION_API, path='/positions')
 API.add_namespace(REGION_API, path='/regions')
@@ -146,3 +153,5 @@ API.add_namespace(SUBSTITUTION_ACTS_API, path='/substitution-acts')
 API.add_namespace(PIP_ORG_TYPES_API, path='/pip-org-types')
 API.add_namespace(INSIGHTS_API, path='/insights')
 API.add_namespace(PROJECT_STATE_API, path='/project-states')
+API.add_namespace(WORK_RESOURCE_API, path='/work-resources')
+API.add_namespace(WORK_PHASES_API, path='/work-phases')

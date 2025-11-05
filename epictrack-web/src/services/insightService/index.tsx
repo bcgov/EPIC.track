@@ -8,6 +8,6 @@ export const getWorkByType = async () => {
 
 export const getAssessmentByPhase = async () => {
   return await http.GetRequest<AssessmentByPhase[]>(
-    Endpoints.Insights.ASSESSMENT_BY_PHASE
+    Endpoints.Insights.ASSESSMENT_BY_PHASE,
   );
 };

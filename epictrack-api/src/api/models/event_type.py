@@ -31,6 +31,7 @@ class EventTypeEnum(enum.Enum):
     EAC_MINISTER = 13
     MINISTER_DECISION = 14
     REFERRAL = 5
+    TIME_LIMIT_EXTENSION = 10
     TIME_LIMIT_RESUMPTION = 38
     TIME_LIMIT_SUSPENSION = 12
 
@@ -42,7 +43,7 @@ class EventType(BaseModelVersioned):
 
     id = sa.Column(
         sa.Integer, primary_key=True, autoincrement=True
-    )  # TODO check how it can be inherited from parent
+    )  # TODO check how it can be inherited from parent TRACK-532
     name = sa.Column(sa.String)
     event_category_id = sa.Column(sa.ForeignKey("event_categories.id"), nullable=False)
     sort_order = sa.Column(sa.Integer, nullable=False)

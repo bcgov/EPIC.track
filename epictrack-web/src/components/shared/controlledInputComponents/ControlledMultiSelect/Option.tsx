@@ -1,6 +1,12 @@
-import React from "react";
 import { Box, Checkbox } from "@mui/material";
 import { components, OptionProps } from "react-select";
+
+interface CustomSelectProps {
+  filterProps?: {
+    selectedOptions: string[];
+    getOptionValue: (data: any) => string;
+  };
+}
 
 const Option = ({
   getStyles,
@@ -10,16 +16,14 @@ const Option = ({
   innerProps,
   isMulti,
   ...rest
-}: OptionProps) => {
-  const [isSelected, setIsSelected] = React.useState(false);
+}: OptionProps & { selectProps: CustomSelectProps }) => {
   const { filterProps } = rest.selectProps;
 
-  React.useEffect(() => {
-    if (filterProps?.selectedOptions && filterProps.getOptionValue) {
-      const val = filterProps.getOptionValue(rest.data);
-      setIsSelected(filterProps?.selectedOptions.indexOf(val) > -1);
-    }
-  }, [filterProps?.selectedOptions]);
+  let isSelected = false;
+  if (filterProps?.selectedOptions && filterProps.getOptionValue) {
+    const val = filterProps.getOptionValue(rest.data);
+    isSelected = filterProps.selectedOptions.includes(val);
+  }
 
   return (
     <Box>

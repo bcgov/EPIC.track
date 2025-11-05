@@ -1,29 +1,34 @@
-import React from "react";
-import { Case, Switch } from "react-if";
-import { WORK_INSIGHTS_TAB } from "../constants";
 import Staff from "./Staff";
-import { useWorkInsightsContext } from "../WorkInsightsContext";
 import General from "./General";
 import Partners from "./Partners";
+import { Grid } from "@mui/material";
 import Trends from "./Trends";
+import { TableFilterProvider } from "components/insights/TableFilterContext";
 
 const WorkInsightsTabs = () => {
-  const { activeTab } = useWorkInsightsContext();
   return (
-    <Switch>
-      <Case condition={activeTab === WORK_INSIGHTS_TAB.Staff}>
-        <Staff />
-      </Case>
-      <Case condition={activeTab === WORK_INSIGHTS_TAB.General}>
-        <General />
-      </Case>
-      <Case condition={activeTab === WORK_INSIGHTS_TAB.Partners}>
-        <Partners />
-      </Case>
-      <Case condition={activeTab === WORK_INSIGHTS_TAB.Trends}>
-        <Trends />
-      </Case>
-    </Switch>
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <TableFilterProvider>
+          <General />
+        </TableFilterProvider>
+      </Grid>
+      <Grid item xs={12}>
+        <TableFilterProvider>
+          <Staff />
+        </TableFilterProvider>
+      </Grid>
+      <Grid item xs={12}>
+        <TableFilterProvider>
+          <Partners />
+        </TableFilterProvider>
+      </Grid>
+      <Grid item xs={12}>
+        <TableFilterProvider>
+          <Trends />
+        </TableFilterProvider>
+      </Grid>
+    </Grid>
   );
 };
 

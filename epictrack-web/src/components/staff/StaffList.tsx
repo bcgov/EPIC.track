@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { Box, Button, Grid } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import { Staff } from "../../models/staff";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
 import { hasPermission, Restricted } from "../shared/restricted";
 import { ETChip } from "../shared/chip/ETChip";
-import TableFilter from "../shared/filterSelect/TableFilter";
+import { getStatusFilter } from "components/shared/filterSelect/utils";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { showNotification } from "components/shared/notificationProvider";
 import { ETGridTitle, ETPageContainer } from "../shared";
@@ -27,7 +27,7 @@ const StaffList = () => {
   const [positions, setPositions] = useState<string[]>([]);
   const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
     staffListColumnFiltersCacheKey,
-    []
+    [],
   );
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
@@ -52,7 +52,7 @@ const StaffList = () => {
       const positions = staffs
         .map((staffs) => staffs.position)
         .sort(
-          (positionA, positionB) => positionA.sort_order - positionB.sort_order
+          (positionA, positionB) => positionA.sort_order - positionB.sort_order,
         )
         .map((position) => position.name)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
@@ -60,11 +60,15 @@ const StaffList = () => {
     }
   }, [staffs]);
 
-  const statusesOptions = getSelectFilterOptions(
-    staffs,
-    "is_active",
-    (value) => (value ? "Active" : "Inactive"),
-    (value) => value
+  const statusesOptions = useMemo(
+    () =>
+      getSelectFilterOptions(
+        staffs,
+        "is_active",
+        (value) => (value ? "Active" : "Inactive"),
+        (value) => value,
+      ),
+    [staffs],
   );
 
   const columns = useMemo<MRT_ColumnDef<Staff>[]>(
@@ -104,17 +108,6 @@ const StaffList = () => {
         accessorKey: "position.name",
         header: "Position",
         filterVariant: "multi-select",
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="positionsFilter"
-            />
-          );
-        },
         filterSelectOptions: positions,
         filterFn: "multiSelectFilter",
       },
@@ -124,31 +117,8 @@ const StaffList = () => {
         filterVariant: "multi-select",
         filterSelectOptions: statusesOptions,
         size: 115,
-        Filter: ({ header, column }) => {
-          return (
-            <Box sx={{ width: "100px" }}>
-              <TableFilter
-                isMulti
-                header={header}
-                column={column}
-                variant="inline"
-                name="rolesFilter"
-              />
-            </Box>
-          );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > statusesOptions.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id);
-
-          return filterValue.includes(value);
-        },
+        Filter: getStatusFilter<Staff>,
+        filterFn: "multiSelectFilter",
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && <ETChip active label="Active" />}
@@ -157,15 +127,40 @@ const StaffList = () => {
         ),
       },
     ],
-    [canEdit, statusesOptions, positions]
+    [canEdit, statusesOptions, positions],
   );
 
-  const handleCacheFilters = (filters?: ColumnFilter[]) => {
-    if (!filters) {
-      return;
-    }
-    setColumnFilters(filters);
-  };
+  const handleCacheFilters = useCallback(
+    (filters?: ColumnFilter[]) => {
+      if (!filters) return;
+
+      // Avoid update if filters are identical
+      const current = JSON.stringify(columnFilters);
+      const next = JSON.stringify(filters);
+
+      if (current !== next) {
+        setColumnFilters(filters);
+      }
+    },
+    [columnFilters, setColumnFilters],
+  );
+
+  const renderTopToolbarCustomActions = useCallback(
+    () => (
+      <Restricted allowed={[ROLES.CREATE]} errorProps={{ disabled: true }}>
+        <Button
+          variant="contained"
+          onClick={() => {
+            setShowFormDialog(true);
+            setStaffId(undefined);
+          }}
+        >
+          Create Staff
+        </Button>
+      </Restricted>
+    ),
+    [setShowFormDialog, setStaffId],
+  );
 
   return (
     <>
@@ -179,6 +174,8 @@ const StaffList = () => {
           <MasterTrackTable
             columns={columns}
             data={staffs}
+            enableExport
+            loading={loading}
             initialState={{
               sorting: [
                 {
@@ -186,31 +183,16 @@ const StaffList = () => {
                   desc: false,
                 },
               ],
-              columnFilters,
             }}
             state={{
               isLoading: loading,
               showGlobalFilter: true,
+              columnFilters,
             }}
             tableName={"staff-listing"}
-            enableExport
-            renderTopToolbarCustomActions={({ table }) => (
-              <Restricted
-                allowed={[ROLES.CREATE]}
-                errorProps={{ disabled: true }}
-              >
-                <Button
-                  variant="contained"
-                  onClick={() => {
-                    setShowFormDialog(true);
-                    setStaffId(undefined);
-                  }}
-                >
-                  Create Staff
-                </Button>
-              </Restricted>
-            )}
             onCacheFilters={handleCacheFilters}
+            renderTopToolbarCustomActions={renderTopToolbarCustomActions}
+            renderResultCount
           />
         </Grid>
       </ETPageContainer>

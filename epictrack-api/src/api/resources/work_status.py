@@ -14,20 +14,25 @@
 """Resource for work status endpoints."""
 from http import HTTPStatus
 
-from flask import jsonify
+from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
 
+from api.models.dashboard_search_options import StatusDashboardSearchOptions
+from api.models.pagination_options import PaginationOptions
 from api.schemas import request as req
 from api.schemas import response as res
 from api.services import WorkStatusService
 from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
 
-API = Namespace("work-statuses", description="Work Statuses")
+# work/<int:work_id>/statuses
+WORK_STATUS_API = Namespace("work-statuses", description="Work Statuses")
+# work-statuses/dashboard
+STATUS_DASHBOARD_API = Namespace("work-statuses-dashboard", description="Work Status Dashboard")
 
 
 @cors_preflight("GET, POST")
-@API.route("", methods=["GET", "POST", "OPTIONS"])
+@WORK_STATUS_API.route("", methods=["GET", "POST", "OPTIONS"])
 class WorkStatus(Resource):
     """Endpoint resource to manage work status."""
 
@@ -45,13 +50,46 @@ class WorkStatus(Resource):
     @profiletime
     def post(work_id):
         """Create new work status"""
-        request_dict = req.WorkStatusParameterSchema().load(API.payload)
+        request_dict = req.WorkStatusParameterSchema().load(WORK_STATUS_API.payload)
         work_status = WorkStatusService.create_work_status(work_id, request_dict)
         return res.WorkStatusResponseSchema().dump(work_status), HTTPStatus.CREATED
 
 
+@cors_preflight("GET")
+@STATUS_DASHBOARD_API.route("/dashboard", methods=["GET", "OPTIONS"])
+class StatusDashboard(Resource):
+    """Endpoint resource to manage works status."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    def get():
+        """Return most recent status for works."""
+        args = request.args
+
+        pagination_options = PaginationOptions(
+            page=args.get('page', None, int),
+            size=args.get('size', None, int),
+            sort_key=args.get('sort_key', 'name', str),
+            sort_order=args.get('sort_order', 'asc', str),
+        )
+        search_options = StatusDashboardSearchOptions(
+            is_approved=args.getlist('is_approved[]'),
+            project_status=args.getlist('project_is_active[]'),
+            regions=list(map(int, args.getlist('regions[]'))),
+            staff_id=args.get('staff_id', None, int),
+            staleness=args.getlist('staleness[]'),
+            teams=list(map(int, args.getlist('teams[]'))),
+            text=args.get('text', None, str),
+            work_status=args.getlist('work_is_active[]'),
+            work_types=list(map(int, args.getlist('work_types[]'))),
+        )
+        statuses = WorkStatusService.fetch_status_for_all_works(pagination_options, search_options)
+        return jsonify(statuses), HTTPStatus.OK
+
+
 @cors_preflight("GET, PUT")
-@API.route("/<int:status_id>", methods=["GET", "PUT", "OPTIONS"])
+@WORK_STATUS_API.route("/<int:status_id>", methods=["GET", "PUT", "OPTIONS"])
 class Status(Resource):
     """Endpoint resource to manage a work status."""
 
@@ -61,7 +99,7 @@ class Status(Resource):
     @profiletime
     def put(work_id, status_id):
         """Update work status"""
-        request_dict = req.WorkStatusParameterSchema().load(API.payload)
+        request_dict = req.WorkStatusParameterSchema().load(WORK_STATUS_API.payload)
 
         updated_work_status = WorkStatusService.update_work_status(work_id, status_id, request_dict)
 
@@ -69,7 +107,7 @@ class Status(Resource):
 
 
 @cors_preflight("PATCH")
-@API.route("/<int:status_id>/approve", methods=["PATCH", "OPTIONS"])
+@WORK_STATUS_API.route("/<int:status_id>/approve", methods=["PATCH", "OPTIONS"])
 class ApproveStatus(Resource):
     """Endpoint resource to manage approving of work status."""
 

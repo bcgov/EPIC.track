@@ -8,18 +8,21 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export const useOnScreen = (ref: RefObject<HTMLElement>) => {
   const [isOnScreen, setIsOnScreen] = useState<boolean>(false);
+
   const observer = useMemo(
     () =>
       new IntersectionObserver(([entry]) => {
         setIsOnScreen(entry.isIntersecting);
       }),
-    [ref]
+    [],
   );
+
   useEffect(() => {
     if (ref.current) {
       observer.observe(ref.current);
     }
     return () => observer.disconnect();
-  }, []);
+  }, [observer, ref]);
+
   return isOnScreen;
 };

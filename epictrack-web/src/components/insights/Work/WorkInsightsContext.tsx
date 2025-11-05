@@ -1,16 +1,8 @@
-import React, { createContext, useContext, useState } from "react";
-import { WORK_INSIGHTS_TAB, WorkInsightsTab } from "./constants";
+import React, { createContext, useContext } from "react";
 
-type WorkInsightsContextState = {
-  activeTab: WorkInsightsTab;
-  setActiveTab: (tab: WorkInsightsTab) => void;
-};
-const WorkInsightsContext = createContext<WorkInsightsContextState>({
-  activeTab: WORK_INSIGHTS_TAB.Staff,
-  setActiveTab: () => {
-    return;
-  },
-});
+type WorkInsightsContextState = {};
+
+const WorkInsightsContext = createContext<WorkInsightsContextState>({});
 
 type WorkInsightsContextProviderProps = {
   children: React.ReactNode;
@@ -18,17 +10,8 @@ type WorkInsightsContextProviderProps = {
 const WorkInsightsContextProvider: React.FC<
   WorkInsightsContextProviderProps
 > = ({ children }) => {
-  const [activeTab, setActiveTab] = useState<WorkInsightsTab>(
-    WORK_INSIGHTS_TAB.General
-  );
-
   return (
-    <WorkInsightsContext.Provider
-      value={{
-        activeTab,
-        setActiveTab,
-      }}
-    >
+    <WorkInsightsContext.Provider value={{}}>
       {children}
     </WorkInsightsContext.Provider>
   );

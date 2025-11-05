@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useRef } from "react";
 import {
   MaterialReactTable,
   MRT_ColumnDef,
@@ -12,7 +12,6 @@ import SearchIcon from "../../../assets/images/search.svg";
 import { Palette } from "../../../styles/theme";
 import { MET_Header_Font_Weight_Bold } from "../../../styles/constants";
 import { ETHeading2, IButton } from "..";
-import { FiltersCache } from "./FiltersCache";
 import { exportToCsv } from "./utils";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
@@ -84,11 +83,6 @@ const MasterTrackTable = <TData extends MRT_RowData>({
   ...rest
 }: MaterialReactTableProps<TData>) => {
   const { initialState, state, icons, ...otherProps } = rest;
-  const [otherPropsData, setOtherPropsData] = useState(otherProps);
-
-  useEffect(() => {
-    setOtherPropsData(otherProps);
-  }, [columns, data]);
 
   const table = useMaterialReactTable({
     columns: columns,
@@ -200,6 +194,19 @@ const MasterTrackTable = <TData extends MRT_RowData>({
         },
       },
     },
+    onColumnFiltersChange: (updaterOrValue) => {
+      // Apply and cache filters
+      const newFilters =
+        typeof updaterOrValue === "function"
+          ? updaterOrValue(state?.columnFilters || [])
+          : updaterOrValue;
+      if (rest.onColumnFiltersChange) {
+        rest.onColumnFiltersChange(newFilters);
+      }
+      if (onCacheFilters) {
+        onCacheFilters(newFilters);
+      }
+    },
     sortingFns: {
       sortFn: (rowA: any, rowB: any, columnId: string) => {
         return rowA
@@ -223,7 +230,7 @@ const MasterTrackTable = <TData extends MRT_RowData>({
         >
           {renderResultCount && (
             <Box sx={{ flexGrow: 1 }}>
-              <Typography>Results: {rowCount}</Typography>
+              <Typography>Results: {filteredRowCount}</Typography>
             </Box>
           )}
           <Box
@@ -277,26 +284,27 @@ const MasterTrackTable = <TData extends MRT_RowData>({
         return filterValue.includes(row.getValue(id));
       },
     },
-    ...otherPropsData,
+    ...otherProps,
   });
 
-  const rowCount = useMemo(
-    () => (!loading ? table.getRowModel().rows.length : 0),
-    [loading, table]
-  );
+  const filteredRowCount = !loading
+    ? table.getFilteredRowModel().rows.length
+    : 0;
+
+  const prevTableRef = useRef<MRT_TableInstance<TData> | null>(null);
 
   useEffect(() => {
     if (table && setTableInstance) {
-      setTableInstance(table);
+      if (prevTableRef.current !== table) {
+        prevTableRef.current = table;
+        setTableInstance(table);
+      }
     }
-  }, [setTableInstance, table]);
+  }, [table, setTableInstance]);
 
   return (
     <>
       <MaterialReactTable table={table} />
-      {onCacheFilters && (
-        <FiltersCache onCacheFilters={onCacheFilters} table={table} />
-      )}
     </>
   );
 };

@@ -8,5 +8,8 @@ export default defineConfig({
       framework: "create-react-app",
       bundler: "webpack",
     },
+    specPattern: "**/*.cy.{js,jsx,ts,tsx}",
+    experimentalMemoryManagement: true,
+    numTestsKeptInMemory: 0,
   },
 });

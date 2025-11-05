@@ -71,7 +71,7 @@ export const DateCalculatorForm = () => {
         startDate,
         endDate,
         suspensionDate,
-        resumptionDate
+        resumptionDate,
       );
       if (res) {
         setStartDate(res.startDate);
@@ -179,7 +179,7 @@ export const DateCalculatorForm = () => {
             <TrackSelect
               value={
                 DATE_CALCULATION_TYPES.find(
-                  (option) => option.value === selectedCalculationType
+                  (option) => option.value === selectedCalculationType,
                 ) || null
               }
               options={DATE_CALCULATION_TYPES}

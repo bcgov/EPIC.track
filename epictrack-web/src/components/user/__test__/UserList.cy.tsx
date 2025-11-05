@@ -17,15 +17,15 @@ let userCounter = 0;
 const generateMockUser = (): User => {
   userCounter += 1;
   return {
-    id: faker.datatype.string() + userCounter,
-    email: faker.internet.email(),
+    id: faker.string.uuid() + userCounter,
+    email: `${faker.string.alphanumeric(5)}@example.com`,
     first_name: faker.name.firstName(),
     last_name: faker.name.lastName(),
-    group_id: faker.datatype.string() + userCounter,
+    group_id: faker.string.uuid() + userCounter,
     group: {
       name: "test" + userCounter,
       path: "/test" + userCounter,
-      id: faker.datatype.string() + userCounter,
+      id: faker.string.uuid() + userCounter,
       level: 0,
       display_name: "test" + userCounter,
     },
@@ -100,13 +100,12 @@ describe("UserList", () => {
             <UserList />
           </MasterContext.Provider>
         </Router>
-      </SnackbarProvider>
+      </SnackbarProvider>,
     );
   });
 
   it("should display the user list", () => {
-    // Select the table container
-    cy.get(".MuiInputBase-root");
+    cy.get("table").should("exist").and("be.visible");
   });
 
   it("should filter the user list based on the user name input", () => {

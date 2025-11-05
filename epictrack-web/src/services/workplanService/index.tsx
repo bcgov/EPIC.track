@@ -7,16 +7,18 @@ class WorkPlanService {
   async getAll(
     page: number,
     size: number,
-    searchOptions: WorkPlanSearchOptions
+    sort_order: string,
+    searchOptions: WorkPlanSearchOptions,
   ) {
     return await http.GetRequest<{ items: WorkPlan[]; total: number }>(
       Endpoints.Workplan.GET_ALL,
       {
         page: page,
         size: size,
+        sort_order: sort_order,
         ...searchOptions,
-      }
+      },
     );
   }
 }
-export default new WorkPlanService();
+export const workplanService = new WorkPlanService();

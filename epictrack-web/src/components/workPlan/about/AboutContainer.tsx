@@ -1,26 +1,27 @@
-import { Box, Grid } from "@mui/material";
-import React, { useContext } from "react";
-import { ETHeading3, ETLink, ETParagraph } from "../../shared";
+import { SyntheticEvent, useContext, useState } from "react";
+import { Button, Grid } from "@mui/material";
+import { ETHeading3 } from "../../shared";
 import { tabPanelStyle, tabStyle, titleStyle } from "../common/styles";
 import { Palette } from "../../../styles/theme";
 import { ETTabs, ETTab } from "../../shared/tab/Tab";
 import TabPanel from "../../shared/tab/TabPanel";
 import ComingSoon from "../../../routes/ComingSoon";
 import AboutDetails from "./aboutDetails";
-import { ABOUT_RESOURCES } from "../../../constants/application-constant";
-import Icons from "../../icons";
-import { IconProps } from "../../icons/type";
-import { WorkplanContext } from "../WorkPlanContext";
+import WorkResources from "./workResources";
+import { IconProps } from "components/icons/type";
+import Icons from "components/icons";
+import { AboutContext } from "./AboutContext";
 
-const LinkIcon: React.FC<IconProps> = Icons["LinkIcon"];
+const AddIcon: React.FC<IconProps> = Icons["AddIcon"];
 
 const AboutContainer = () => {
-  const { work } = useContext(WorkplanContext);
-  const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
+  const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
-  const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
+  const handleTabSelected = (event: SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
   };
+
+  const { setShowCreateDialog } = useContext(AboutContext);
 
   return (
     <Grid container columnSpacing={1.5}>
@@ -53,10 +54,25 @@ const AboutContainer = () => {
         <ETHeading3
           sx={{
             ...titleStyle,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "100%",
           }}
           color={Palette.primary.main}
         >
-          Resources
+          <span>Resources</span>
+          <Button
+            onClick={() => setShowCreateDialog(true)}
+            variant="contained"
+            color="primary"
+            sx={{
+              maxHeight: "20px",
+            }}
+            startIcon={<AddIcon sx={{ width: "12px", height: "12px" }} />}
+          >
+            Add Resource
+          </Button>
         </ETHeading3>
       </Grid>
       <Grid
@@ -93,90 +109,7 @@ const AboutContainer = () => {
           pt: "2rem",
         }}
       >
-        <Box
-          sx={{
-            ...tabPanelStyle,
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
-            padding: 0,
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              padding: "1rem 1.5rem",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              gap: ".5rem",
-              alignSelf: "stretch",
-              borderRadius: "4px",
-              backgroundColor: Palette.neutral.bg.light,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                gap: ".5rem",
-                alignItems: "center",
-              }}
-            >
-              <LinkIcon fill={`${Palette.primary.accent.main}`} />
-              <ETLink
-                to={`https://projects.eao.gov.bc.ca/projects-list?keywords=${work?.project?.name}`}
-                target="_blank"
-                rel="noopener"
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: 700,
-                  lineHeight: "1.5rem",
-                }}
-              >
-                Link to EPIC.Public
-              </ETLink>
-            </Box>
-          </Box>
-          {ABOUT_RESOURCES.map((resource) => {
-            return (
-              <>
-                <Box
-                  sx={{
-                    display: "flex",
-                    padding: "1rem 1.5rem",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    gap: ".5rem",
-                    alignSelf: "stretch",
-                    borderRadius: "4px",
-                    backgroundColor: Palette.neutral.bg.light,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: ".5rem",
-                      alignItems: "center",
-                    }}
-                  >
-                    <LinkIcon fill={`${Palette.primary.accent.main}`} />
-                    <ETLink
-                      to={`${resource.url}`}
-                      target="_blank"
-                      rel="noopener"
-                      style={{
-                        fontSize: "1rem",
-                        fontWeight: 700,
-                        lineHeight: "1.5rem",
-                      }}
-                    >
-                      {resource.title}
-                    </ETLink>
-                  </Box>
-                </Box>
-              </>
-            );
-          })}
-        </Box>
+        <WorkResources />
       </Grid>
     </Grid>
   );

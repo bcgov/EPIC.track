@@ -10,7 +10,7 @@ describe("Header", () => {
         <Router>
           <Header />
         </Router>
-      </Provider>
+      </Provider>,
     );
   });
 
@@ -18,10 +18,8 @@ describe("Header", () => {
     cy.get('[data-testid="appbar-header"]').should("be.visible");
   });
 
-  it("displays user menu on hover", () => {
-    // Assuming the user menu box has a test id of 'user-menu-box'
-    cy.get('[data-testid="user-menu-box"]').trigger("mouseover");
-    // Assuming the UserMenu component has a test id of 'user-menu'
+  it("displays user menu on click", () => {
+    cy.get('[data-testid="user-menu-box"]').click();
     cy.get('[data-testid="user-menu"]').should("be.visible");
   });
 });

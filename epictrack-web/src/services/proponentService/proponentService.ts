@@ -12,14 +12,14 @@ class ProponentService implements ServiceBase {
   async create(data: MasterBase) {
     return await http.PostRequest(
       Endpoints.Proponents.PROPONENTS,
-      JSON.stringify(data)
+      JSON.stringify(data),
     );
   }
 
   async update(data: MasterBase, id: string) {
     return await http.PutRequest(
       Endpoints.Proponents.PROPONENTS + `/${id}`,
-      JSON.stringify(data)
+      JSON.stringify(data),
     );
   }
 
@@ -29,7 +29,7 @@ class ProponentService implements ServiceBase {
 
   async getById(id: string) {
     return await http.GetRequest<Proponent>(
-      Endpoints.Proponents.PROPONENTS + `/${id}`
+      Endpoints.Proponents.PROPONENTS + `/${id}`,
     );
   }
 
@@ -37,7 +37,7 @@ class ProponentService implements ServiceBase {
     const encodedName = encodeURIComponent(name);
     return await http.GetRequest(
       Endpoints.Proponents.PROPONENTS +
-        `/exists?name=${encodedName}${id ? "&proponent_id=" + id : ""}`
+        `/exists?name=${encodedName}${id ? "&proponent_id=" + id : ""}`,
     );
   }
 }

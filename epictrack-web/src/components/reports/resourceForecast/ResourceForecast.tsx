@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Autocomplete,
   Box,
@@ -7,13 +7,14 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
+import ClearAllIcon from "@mui/icons-material/ClearAll";
 import {
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
-  MRT_ToggleFullScreenButton,
-  MRT_ShowHideColumnsButton,
+  MRT_ShowHideColumnsButton as MRTShowHideColumnsButton,
   MRT_TableInstance,
-  MRT_ToggleFiltersButton,
+  MRT_ToggleFiltersButton as MRTToggleFiltersButton,
+  MRT_ToggleFullScreenButton as MRTToggleFullScreenButton,
   MRT_VisibilityState,
 } from "material-react-table";
 import { json2csv } from "json-2-csv";
@@ -25,33 +26,34 @@ import {
 import ReportService from "../../../services/reportService";
 import { dateUtils } from "../../../utils";
 import { ResourceForecastModel } from "./type";
-import ClearAllIcon from "@mui/icons-material/ClearAll";
 import ReportHeader from "../shared/report-header/ReportHeader";
-import { ETPageContainer, ETParagraph, IButton } from "../../shared";
+import { ETReportContainer, ETParagraph, IButton } from "../../shared";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { showNotification } from "components/shared/notificationProvider";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
+
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 export default function ResourceForecast() {
+  const [includeFirstPhase, setIncludeFirstPhase] = useState<boolean>(false);
   const [reportDate, setReportDate] = useState<string>("");
   const [showReportDateBanner, setShowReportDateBanner] =
     useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [rfData, setRFData] = useState<ResourceForecastModel[]>([]);
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>(
-    []
+    [],
   );
   const [columnVisibility, setColumnVisibility] = useState<MRT_VisibilityState>(
-    {}
+    {},
   );
   const [globalFilter, setGlobalFilter] = useState();
   const [filters, setFilters] = useState({});
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10, //customize the default page size
+    pageSize: 15, //customize the default page size
   });
 
   const FILENAME_PREFIX = "EAO_Resource_Forecast";
@@ -63,17 +65,26 @@ export default function ResourceForecast() {
       pageSize: options[options.length - 1].value,
     }));
   }, [rfData]);
-  React.useEffect(() => {
+
+  useEffect(() => {
     const hiddenColumns = Object.keys(columnVisibility).filter(
-      (p) => !columnVisibility[p]
+      (p) => !columnVisibility[p],
     );
     const filteredColumnFilters = columnFilters.filter(
-      (p) => !hiddenColumns.includes(p.id)
+      (p) => !hiddenColumns.includes(p.id),
     );
-    setColumnFilters(filteredColumnFilters);
-  }, [columnFilters, columnVisibility, setColumnFilters]);
+    if (
+      filteredColumnFilters.length !== columnFilters.length ||
+      filteredColumnFilters.some(
+        (f, i) =>
+          f.id !== columnFilters[i]?.id || f.value !== columnFilters[i]?.value,
+      )
+    ) {
+      setColumnFilters(filteredColumnFilters);
+    }
+  }, [columnFilters, columnVisibility]);
 
-  const exportToCsv = React.useCallback(
+  const exportToCsv = useCallback(
     async (table: MRT_TableInstance<ResourceForecastModel>) => {
       const filteredResult = table.getFilteredRowModel().flatRows.map((p) => {
         return {
@@ -97,37 +108,42 @@ export default function ResourceForecast() {
       link.setAttribute(
         "download",
         `${FILENAME_PREFIX}-${dateUtils.formatDate(
-          reportDate ? reportDate : new Date().toISOString()
-        )}.csv`
+          reportDate ? reportDate : new Date().toISOString(),
+        )}.csv`,
       );
       document.body.appendChild(link);
       link.click();
     },
-    [reportDate]
+    [reportDate],
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     const diff = dateUtils.diff(
       reportDate,
       new Date(2019, 11, 19).toISOString(),
-      "days"
+      "days",
     );
     setShowReportDateBanner(diff < 0 && !Number.isNaN(diff));
   }, [reportDate]);
-  React.useEffect(() => {
+
+  useEffect(() => {
     setFilters((prev) => {
       const state = {
         ...prev,
         exclude: Object.keys(columnVisibility).filter(
-          (p) => !columnVisibility[p]
+          (p) => !columnVisibility[p],
         ),
         filter_search: (() => {
-          let result = {};
+          let result: Record<string, any> = {};
           columnFilters.forEach((filter) => {
-            result = {
-              ...result,
-              [filter["id"]]: filter["value"],
-            };
+            if (
+              filter.value !== undefined &&
+              filter.value !== null &&
+              filter.value !== "" &&
+              !(Array.isArray(filter.value) && filter.value.length === 0)
+            ) {
+              result[filter.id] = filter.value;
+            }
           });
           return result;
         })(),
@@ -137,7 +153,7 @@ export default function ResourceForecast() {
     });
   }, [columnFilters, columnVisibility, globalFilter]);
 
-  const setMonthColumns = React.useCallback(() => {
+  const setMonthColumns = useCallback(() => {
     let columns: Array<MRT_ColumnDef<ResourceForecastModel>> = [];
     if (rfData && rfData.length > 0) {
       columns = rfData[0].months.map((rfMonth: any, index: number) => {
@@ -170,13 +186,13 @@ export default function ResourceForecast() {
     return columns;
   }, [rfData]);
 
-  const filterFn = React.useCallback(
+  const filterFn = useCallback(
     (filterField: keyof ResourceForecastModel) =>
       rfData
         .filter((p) => p[filterField])
         .map((p) => p[filterField]?.toString())
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
-    [rfData]
+    [rfData],
   );
 
   const eaTypeFilter = filterFn("ea_type");
@@ -191,7 +207,7 @@ export default function ResourceForecast() {
   const epdFilter = filterFn("responsible_epd");
   const teamFilter = filterFn("eao_team");
 
-  const columns = React.useMemo<MRT_ColumnDef<ResourceForecastModel>[]>(
+  const columns = useMemo<MRT_ColumnDef<ResourceForecastModel>[]>(
     () => [
       {
         accessorKey: "work_title",
@@ -221,7 +237,7 @@ export default function ResourceForecast() {
         filterFn: (row, id, filterValue) => {
           return !filterValue.includes(row.getValue(id));
         },
-        Cell: ({ row }: any) => (
+        Cell: ({ row }: { row: any }) => (
           <ETParagraph
             enableEllipsis
             enableTooltip
@@ -237,22 +253,23 @@ export default function ResourceForecast() {
       },
       {
         accessorKey: "fte_positions_construction",
-        header: "Est. FTEs for construction",
+        header: "Est. FTEs for Construction",
       },
       {
         accessorKey: "fte_positions_operation",
-        header: "Est. FTEs for operation",
+        header: "Est. FTEs for Operation ",
       },
       {
         accessorKey: "ea_type",
         header: "EA Type",
         enableHiding: false,
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: eaTypeFilter,
       },
       {
+        accessorKey: "project_phase",
         header: "Project Phase",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: projectPhaseFilter,
         Cell: ({ row }: any) => (
           <ETParagraph
@@ -267,52 +284,66 @@ export default function ResourceForecast() {
       {
         accessorKey: "ea_act",
         header: "EA Act",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: eaActFilter,
       },
       {
         accessorKey: "iaac",
         header: "IAAC",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: iaacFilter,
       },
       {
         accessorKey: "sector(sub)",
         header: "Type (Subtype)",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: typeFilter,
       },
       {
         accessorKey: "env_region",
         header: "ENV Region",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: envRegionFilter,
       },
       {
         accessorKey: "nrs_region",
         header: "NRS Region",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: nrsRegionFilter,
       },
       {
         accessorKey: "responsible_epd",
         header: "Responsible EPD",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: epdFilter,
       },
       {
         accessorKey: "eao_team",
         header: "Lead's Team",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: teamFilter,
       },
       {
         accessorKey: "work_lead",
         header: "Work Lead",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: workLeadFilter,
       },
       {
+        accessorKey: "coleads",
+        header: "Co-Leads",
+        Cell: ({ row }: any) => (
+          <ETParagraph
+            enableEllipsis
+            enableTooltip
+            tooltip={row.original.coleads}
+          >
+            {row.original.coleads}
+          </ETParagraph>
+        ),
+      },
+      {
+        accessorKey: "work_team_members",
         header: "Work Team Members",
         Cell: ({ row }: any) => (
           <ETParagraph
@@ -348,22 +379,25 @@ export default function ResourceForecast() {
       teamFilter,
       typeFilter,
       workLeadFilter,
-    ]
+    ],
   );
-  const fetchReportData = React.useCallback(async () => {
+
+  const fetchReportData = useCallback(async () => {
+    setIsLoading(true);
     try {
       const reportData = await ReportService.fetchReportData(
         REPORT_TYPE.RESOURCE_FORECAST,
         {
           report_date: reportDate,
           color_intensity: "25",
-        }
+          first_phase: includeFirstPhase,
+        },
       );
       if (reportData.status && reportData.status === 200) {
         const data = reportData.data as never[];
         data.forEach((element) => {
           Object.keys(element).forEach(
-            (key) => (element[key] = element[key] ?? "")
+            (key) => (element[key] = element[key] ?? ""),
           );
         });
         setRFData(data);
@@ -375,10 +409,12 @@ export default function ResourceForecast() {
         type: "error",
       });
       setRFData([]);
+    } finally {
+      setIsLoading(false);
     }
-  }, [reportDate]);
+  }, [includeFirstPhase, reportDate]);
 
-  const downloadPDFReport = React.useCallback(async () => {
+  const downloadPDFReport = useCallback(async () => {
     try {
       const binaryReponse = await ReportService.downloadPDF(
         REPORT_TYPE.RESOURCE_FORECAST,
@@ -386,18 +422,19 @@ export default function ResourceForecast() {
           report_date: reportDate,
           filters,
           color_intensity: "25",
-        }
+          first_phase: includeFirstPhase,
+        },
       );
       const url = window.URL.createObjectURL(
-        new Blob([(binaryReponse as any).data])
+        new Blob([(binaryReponse as any).data]),
       );
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute(
         "download",
         `${FILENAME_PREFIX}-${dateUtils.formatDate(
-          reportDate ? reportDate : new Date().toISOString()
-        )}.pdf`
+          reportDate ? reportDate : new Date().toISOString(),
+        )}.pdf`,
       );
       document.body.appendChild(link);
       link.click();
@@ -406,10 +443,10 @@ export default function ResourceForecast() {
         type: "error",
       });
     }
-  }, [reportDate, filters]);
+  }, [includeFirstPhase, reportDate, filters]);
 
   return (
-    <ETPageContainer
+    <ETReportContainer
       direction="row"
       justifyContent="flex-start"
       alignItems="flex-start"
@@ -422,10 +459,12 @@ export default function ResourceForecast() {
           setReportDate={setReportDate}
           fetchReportData={fetchReportData}
           downloadPDFReport={downloadPDFReport}
+          setIncludeFirstPhase={setIncludeFirstPhase}
+          includeFirstPhase={includeFirstPhase}
           showReportDateBanner={showReportDateBanner}
         />
       </Grid>
-      <Grid item sm={12}>
+      <Grid item sm={11.75} sx={{ marginLeftight: "1rem" }}>
         <MasterTrackTable
           columns={columns}
           enablePagination
@@ -469,9 +508,8 @@ export default function ResourceForecast() {
           enableHiding={true}
           renderToolbarInternalActions={({ table }) => (
             <>
-              <MRT_ToggleFiltersButton table={table} />
-              <MRT_ShowHideColumnsButton table={table} />
-              {/* add your own custom print button or something */}
+              <MRTToggleFiltersButton table={table} />
+              <MRTShowHideColumnsButton table={table} />
               <Tooltip title="Clear all filters">
                 <IconButton
                   onClick={() => {
@@ -488,12 +526,12 @@ export default function ResourceForecast() {
                   <DownloadIcon className="icon" />
                 </IButton>
               </Tooltip>
-              <MRT_ToggleFullScreenButton table={table} />
+              <MRTToggleFullScreenButton table={table} />
             </>
           )}
           data={rfData}
         />
       </Grid>
-    </ETPageContainer>
+    </ETReportContainer>
   );
 }

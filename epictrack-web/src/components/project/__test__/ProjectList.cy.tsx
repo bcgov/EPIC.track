@@ -15,8 +15,8 @@ function testTableFiltering(tableHeaderName: string, propertyToTest: string) {
       // Within the table cell, find the div that includes 'the property to test' in its class name
       cy.wrap($tableCell)
         .find("input:first")
-        .click()
-        .type(`${propertyToTest}{enter}`); // Type into the input field and press Enter
+        .click({ force: true }) // Click the input field to focus it
+        .type(`${propertyToTest}{enter}`, { force: true }); // Type into the input field and press Enter
 
       cy.contains("button", "Apply").click();
     });
@@ -40,19 +40,18 @@ describe("ProjectList", () => {
     cy.mount(
       <Router>
         <ProjectList />
-      </Router>
+      </Router>,
     );
   });
 
   it("should display the project list", () => {
-    // Select the table container
-    cy.get(".MuiInputBase-root");
+    cy.get("table").should("exist").and("be.visible");
   });
 
   it("should filter the project list based on the project name input", () => {
     // Type a project name into the project name input field
     cy.get('input[placeholder="Project Name"][type="text"]').type(
-      project1.name
+      project1.name,
     );
 
     // Check that the table contains a row for Project 1 and does not contain a row for Project 2

@@ -15,7 +15,7 @@ type ControlledDatePickerProps = {
     maxDate?: dayjs.Dayjs | undefined;
     onDateChange?: (
       value: dayjs.Dayjs | null,
-      defaultOnChangeFunc: (value: dayjs.Dayjs | null) => void
+      defaultOnChangeFunc: (value: dayjs.Dayjs | null) => void,
     ) => void;
     // Add any other DatePicker-specific props you want to pass
   };
@@ -31,7 +31,7 @@ const ControlledDatePicker: React.FC<ControlledDatePickerProps> = ({
   defaultValue,
   disabled,
 }) => {
-  const { control, register } = useFormContext();
+  const { control } = useFormContext();
   return (
     <Controller
       name={name}
@@ -47,10 +47,9 @@ const ControlledDatePicker: React.FC<ControlledDatePickerProps> = ({
               helperText: error?.message || "",
               ...datePickerSlotProps,
             },
-            ...register(name),
           }}
           {...datePickerProps}
-          value={value ? dayjs(value) : value}
+          value={value ? dayjs(value) : null}
           onChange={(event: Dayjs | null) => {
             if (datePickerProps?.onDateChange) {
               datePickerProps.onDateChange(event, onChange);

@@ -8,15 +8,15 @@ class MinistryService {
   async create(data: any) {
     return await http.PostRequest(
       Endpoints.Ministry.MINISTRY,
-      JSON.stringify(data)
+      JSON.stringify(data),
     );
   }
   async update(data: any, id: number) {
     return await http.PutRequest(
       Endpoints.Ministry.MINISTRY + `/${id}`,
-      JSON.stringify(data)
+      JSON.stringify(data),
     );
   }
 }
 
-export default new MinistryService();
+export const ministryService = new MinistryService();

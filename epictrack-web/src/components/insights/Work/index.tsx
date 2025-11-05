@@ -1,11 +1,10 @@
-import React from "react";
 import { WorkInsightsContextProvider } from "./WorkInsightsContext";
-import WorkAccordion from "./Accordion";
+import WorkInsightsContainer from "./WorkInsightsContainer";
 
 const WorkInsights = () => {
   return (
     <WorkInsightsContextProvider>
-      <WorkAccordion />
+      <WorkInsightsContainer />
     </WorkInsightsContextProvider>
   );
 };

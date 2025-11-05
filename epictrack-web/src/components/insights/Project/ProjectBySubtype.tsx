@@ -1,49 +1,46 @@
-import React, { useEffect, useMemo } from "react";
-import { Box, Grid } from "@mui/material";
+import { useEffect } from "react";
+import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
-import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { getChartColor } from "components/insights/utils";
 import { useLazyGetProjectBySubTypeQuery } from "services/rtkQuery/projectInsights";
 import { ProjectBySubtype } from "models/insights";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
-import TrackSelect from "components/shared/TrackSelect";
 import { useProjectsContext } from "./ProjectsContext";
-import { getProjectsTypes } from "./utils";
-import { OptionType } from "components/shared/filterSelect/type";
+import { useTableFilterContext } from "../TableFilterContext";
+import { useInsightsContext } from "../InsightsContext";
 
 const ProjectBySubtypeChart = () => {
-  const { projects, loadingProjects } = useProjectsContext();
-  const projectTypes = useMemo(() => getProjectsTypes(projects), [projects]);
-  const [selectedType, setSelectedType] = React.useState({
-    id: 0,
-    name: "",
-  });
+  const { columnFilters } = useTableFilterContext();
+  const { loadingProjects } = useProjectsContext();
+  const { isUserInsights, staffId } = useInsightsContext();
 
   const [loadChartTrigger, queryResult] = useLazyGetProjectBySubTypeQuery();
 
   useEffect(() => {
-    if (projectTypes) {
-      const defaultSubtype = projectTypes[0];
-      setSelectedType(defaultSubtype);
-    }
-  }, [projectTypes]);
+    loadChartTrigger({
+      columnFilters,
+      staffId: isUserInsights ? staffId : undefined,
+    });
+  }, [loadChartTrigger, columnFilters, staffId, isUserInsights]);
 
-  useEffect(() => {
-    if (selectedType?.id) {
-      loadChartTrigger(selectedType.id);
-    }
-  }, [selectedType]);
-
-  if (loadingProjects || queryResult.isLoading || !selectedType) {
-    return <PieChartSkeleton />;
+  if (queryResult.isError) {
+    showNotification("Could not load Project Subtype data", {
+      type: "error",
+      duration: 3000,
+    });
   }
 
-  // TODO: handle error
-  if (queryResult.isError) {
-    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
-    return <div>Error</div>;
+  if (loadingProjects || queryResult.isLoading) {
+    return <PieChartSkeleton loading={queryResult.isLoading} />;
   }
 
   const formatData = (data?: ProjectBySubtype[]) => {
@@ -84,57 +81,39 @@ const ProjectBySubtypeChart = () => {
             The proportion of active Projects categorized by their subtype
           </ETCaption3>
         </Grid>
-        <Grid item xs={12} container justifyContent="flex-end">
-          <Box sx={{ width: "200px" }}>
-            <TrackSelect
-              options={projectTypes.map((subtype) => ({
-                value: subtype.id,
-                label: subtype.name,
-              }))}
-              value={{
-                value: selectedType.id,
-                label: selectedType.name,
-              }}
-              onChange={(selectedOption) => {
-                const option = selectedOption as OptionType;
-                setSelectedType({
-                  id: Number(option.value),
-                  name: option.label as string,
-                });
-              }}
-              isClearable={false}
-            />
-          </Box>
-        </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <PieChart width={600} height={300}>
-            <Pie
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              outerRadius={80}
-              fill="#8884d8"
-              dataKey="value"
-              label={!noData}
-              isAnimationActive={false}
-            >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${entry.id}`} fill={getChartColor(index)} />
-              ))}
-            </Pie>
-            <Legend
-              layout="vertical"
-              verticalAlign="middle"
-              align="right"
-              iconSize={16}
-              wrapperStyle={{
-                fontSize: "16px",
-                maxWidth: "200px", // Add this line to limit the width of the legend
-                overflow: "hidden",
-              }}
-            />
-            {!noData && <Tooltip />}
-          </PieChart>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+                label={!noData}
+                isAnimationActive={false}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${entry.id}`} fill={getChartColor(index)} />
+                ))}
+              </Pie>
+              <Legend
+                layout="vertical"
+                verticalAlign="middle"
+                align="right"
+                iconSize={16}
+                wrapperStyle={{
+                  fontSize: "16px",
+                  maxWidth: "250px",
+                  maxHeight: "330px",
+                  overflowY: "auto",
+                  overflowX: "hidden",
+                }}
+              />
+              {!noData && <Tooltip />}
+            </PieChart>
+          </ResponsiveContainer>
         </Grid>
       </Grid>
     </GrayBox>

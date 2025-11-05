@@ -5,11 +5,25 @@ import { BAR_COLOR } from "components/insights/utils";
 import { WorkByNation } from "models/insights";
 import { useGetWorksByNationQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
+import { useInsightsContext } from "components/insights/InsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const WorkByNationChart = () => {
-  const { data, error, isLoading: isChartLoading } = useGetWorksByNationQuery();
+  const { isUserInsights, staffId } = useInsightsContext();
+
+  const { columnFilters } = useTableFilterContext();
+  const {
+    data,
+    error,
+    isLoading: isChartLoading,
+  } = useGetWorksByNationQuery(
+    {
+      columnFilters,
+      staffId: isUserInsights ? staffId : undefined,
+    },
+    { skip: columnFilters.length === 0 },
+  );
 
   const formatData = (data?: WorkByNation[]) => {
     if (!data) return [];
@@ -21,13 +35,15 @@ const WorkByNationChart = () => {
     });
   };
 
-  if (isChartLoading) {
-    return <BarChartSkeleton />;
+  if (error) {
+    showNotification("Could not load Work by Nation data", {
+      duration: 3000,
+      type: "error",
+    });
   }
 
-  if (error) {
-    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
-    return <div>Error</div>;
+  if (isChartLoading || error) {
+    return <BarChartSkeleton loading={isChartLoading} />;
   }
 
   const chartData = formatData(data);
@@ -45,26 +61,29 @@ const WorkByNationChart = () => {
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
           <Box style={{ width: "100%", height: "300px", overflowY: "scroll" }}>
-            <BarChart
-              layout="vertical"
-              data={chartData}
-              margin={{
-                left: 30, // Increase left margin if names are getting cut off
-              }}
-              height={chartData.length * 30 + 100}
-              width={350} // Adjust this value as needed
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" allowDecimals={false} />
-              <YAxis
-                dataKey="nation"
-                type="category"
-                width={40}
-                tick={{ fontSize: 12 }}
-              />
-              <Tooltip />
-              <Bar dataKey="count" fill={BAR_COLOR} barSize={20} />
-            </BarChart>
+            {chartData.length > 0 && (
+              <BarChart
+                layout="vertical"
+                data={chartData}
+                margin={{
+                  left: 40, // Increase left margin if names are getting cut off
+                }}
+                height={chartData.length * 30 + 100}
+                width={600} // Adjust this value as needed
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" allowDecimals={false} />
+                <YAxis
+                  dataKey="nation"
+                  interval={0}
+                  tick={{ fontSize: 12 }}
+                  type="category"
+                  width={100}
+                />
+                <Tooltip />
+                <Bar dataKey="count" fill={BAR_COLOR} barSize={20} />
+              </BarChart>
+            )}
           </Box>
         </Grid>
       </Grid>

@@ -12,7 +12,7 @@ describe("WarningBox", () => {
         isTitleBold={true}
         subTitle="Test Subtitle"
         onCloseHandler={onCloseHandler}
-      />
+      />,
     );
   });
 
@@ -20,7 +20,7 @@ describe("WarningBox", () => {
     cy.get('[data-cy="warning-box-title"]').should("contain", "Test Title");
     cy.get('[data-cy="warning-box-subtitle"]').should(
       "contain",
-      "Test Subtitle"
+      "Test Subtitle",
     );
   });
 

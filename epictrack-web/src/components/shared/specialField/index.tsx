@@ -1,5 +1,6 @@
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import dayjs from "dayjs";
 import { Box, Button, IconButton, TextField } from "@mui/material";
-import React, { useEffect, useMemo, useState } from "react";
 import { When } from "react-if";
 import {
   MRT_ColumnDef,
@@ -19,17 +20,20 @@ import TrackSelect from "../TrackSelect";
 import {
   DATE_FORMAT,
   MIN_WORK_START_DATE,
+  ROLES,
 } from "../../../constants/application-constant";
-import dayjs from "dayjs";
 import MasterTrackTable from "../MasterTrackTable";
-import { useDispatch } from "react-redux";
 import { showNotification } from "../notificationProvider";
 import { getErrorMessage } from "utils/axiosUtils";
+import { Restricted } from "../restricted";
+import { useIsActiveTeamMember } from "components/workPlan/utils";
+import TrackDialog from "../TrackDialog";
 
-const AddIcon: React.FC<IconProps> = Icons["AddIcon"];
-const EditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
-const CheckIcon: React.FC<IconProps> = Icons["CheckIcon"];
-const CancelIcon: React.FC<IconProps> = Icons["CloseXIcon"];
+const AddIcon: FC<IconProps> = Icons["AddIcon"];
+const CancelIcon: FC<IconProps> = Icons["CloseXIcon"];
+const CheckIcon: FC<IconProps> = Icons["CheckIcon"];
+const DeleteIcon: FC<IconProps> = Icons["DeleteIcon"];
+const EditIcon: FC<IconProps> = Icons["PencilEditIcon"];
 
 const Styles = {
   flexStart: {
@@ -42,14 +46,6 @@ type SPECIAL_FIELD_KEY = "field_value" | "active_from";
 const SPECIAL_FIELD_KEYS: { [x: string]: SPECIAL_FIELD_KEY } = {
   FIELD_VALUE: "field_value",
   ACTIVE_FROM: "active_from",
-};
-
-type ErrorState = {
-  [key in SPECIAL_FIELD_KEY]: boolean;
-};
-
-type Errors = {
-  [key: string]: ErrorState | undefined;
 };
 
 export const SpecialFieldGrid = ({
@@ -72,30 +68,33 @@ export const SpecialFieldGrid = ({
   });
   const [tableInstance, setTableInstance] =
     useState<MRT_TableInstance<SpecialField>>();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
 
-  const dispatch = useDispatch();
+  const isActiveTeamMember = useIsActiveTeamMember();
+
   const tableState = useMemo<MRT_TableState<SpecialField> | undefined>(() => {
     if (tableInstance) {
       return tableInstance.getState();
     }
   }, [tableInstance]);
 
-  const getEntries = async () => {
+  const getEntries = useCallback(async () => {
     setLoading(true);
     const specialFieldEntries = await specialFieldService.getEntries(
       entity,
       entity_id,
-      fieldName
+      fieldName,
     );
     if (specialFieldEntries.status === 200) {
       setEntries(specialFieldEntries.data as SpecialField[]);
     }
     setLoading(false);
-  };
+  }, [entity, entity_id, fieldName]);
 
   useEffect(() => {
     getEntries();
-  }, [fieldName]);
+  }, [fieldName, getEntries]);
 
   const resetErrors = () => {
     setErrors({
@@ -157,13 +156,11 @@ export const SpecialFieldGrid = ({
                 <TrackSelect
                   options={options}
                   placeholder={fieldLabel}
-                  filterAppliedCallback={() => {
-                    return;
-                  }}
                   name={fieldName}
                   defaultValue={value || ""}
                   onChange={onBlur}
                   error={errors.field_value}
+                  fullWidth
                 />
               </When>
               <When condition={fieldType === "text"}>
@@ -234,7 +231,7 @@ export const SpecialFieldGrid = ({
         },
       },
     ],
-    [fieldLabel, fieldName, options, errors, tableState]
+    [fieldLabel, fieldName, fieldType, options, errors, tableState],
   );
 
   const validateRowInputs = (values: Record<SPECIAL_FIELD_KEY, any>) => {
@@ -289,7 +286,7 @@ export const SpecialFieldGrid = ({
 
   const saveEntry = async (
     payload: SpecialField,
-    objectId: number | undefined = undefined
+    objectId: number | undefined = undefined,
   ) => {
     const data = {
       ...payload,
@@ -307,6 +304,24 @@ export const SpecialFieldGrid = ({
     getEntries();
     if (onSave) {
       onSave();
+    }
+  };
+
+  const handleDeleteEntry = async (objectId: number) => {
+    try {
+      await specialFieldService.deleteSpecialFieldEntry(objectId);
+      getEntries();
+      showNotification("Entry deleted successfully", {
+        type: "success",
+      });
+      if (onSave) {
+        onSave();
+      }
+    } catch (error) {
+      const message = getErrorMessage(error);
+      showNotification(message, {
+        type: "error",
+      });
     }
   };
 
@@ -397,15 +412,42 @@ export const SpecialFieldGrid = ({
           onEditingRowSave={handleEditRowSave}
           onCreatingRowSave={handleCreateRowSave}
           renderRowActions={({ row, table }) => (
-            <IconButton
-              onClick={() => {
-                table.setEditingRow(row);
-                table.setCreatingRow(null);
-                resetErrors();
-              }}
-            >
-              <EditIcon fill={Palette.primary.accent.main} />
-            </IconButton>
+            <>
+              <Box>
+                <Restricted
+                  allowed={[ROLES.EXTENDED_EDIT]}
+                  errorProps={{ disabled: true }}
+                  exception={isActiveTeamMember}
+                >
+                  <IconButton
+                    onClick={() => {
+                      table.setEditingRow(row);
+                      table.setCreatingRow(null);
+                      resetErrors();
+                    }}
+                  >
+                    <EditIcon fill={Palette.primary.accent.main} />
+                  </IconButton>
+                </Restricted>
+              </Box>
+
+              <Box>
+                <Restricted
+                  allowed={[ROLES.EXTENDED_EDIT]}
+                  errorProps={{ disabled: true }}
+                  exception={isActiveTeamMember}
+                >
+                  <IconButton
+                    onClick={() => {
+                      setDeleteTargetId(Number(row.original.id));
+                      setShowDeleteDialog(true);
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Restricted>
+              </Box>
+            </>
           )}
           icons={{
             SaveIcon: (props: any) => (
@@ -417,6 +459,29 @@ export const SpecialFieldGrid = ({
           }}
         />
       </Box>
+      <TrackDialog
+        cancelButtonText={"Cancel"}
+        dialogContentText={
+          "Once deleted, this entry will no longer be displayed in History."
+        }
+        dialogTitle={"Delete Entry?"}
+        isActionsRequired
+        isCancelRequired
+        isOkRequired
+        okButtonText={"Delete"}
+        open={showDeleteDialog}
+        onCancel={() => {
+          setShowDeleteDialog(false);
+          setDeleteTargetId(null);
+        }}
+        onOk={async () => {
+          if (deleteTargetId !== null) {
+            await handleDeleteEntry(deleteTargetId);
+            setShowDeleteDialog(false);
+            setDeleteTargetId(null);
+          }
+        }}
+      />
     </Box>
   );
 };

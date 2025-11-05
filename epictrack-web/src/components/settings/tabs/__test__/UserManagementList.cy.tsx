@@ -89,14 +89,13 @@ describe("UserManagementList", () => {
         <Router>
           <UserManagementList />
         </Router>
-      </SnackbarProvider>
+      </SnackbarProvider>,
     );
     cy.wait(["@getAllStaffs", "@getElevatedRoles", "@getStaffElevatedRoles"]);
   });
 
   it("should display the user management list", () => {
-    // Select the table container
-    cy.get(".MuiInputBase-root");
+    cy.get("table").should("exist").and("be.visible");
   });
 
   it("should filter the user management list based on the staff name input", () => {

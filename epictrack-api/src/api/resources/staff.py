@@ -43,8 +43,11 @@ class Staffs(Resource):
         positions = args.get('positions')
         is_active = args.get('is_active')
         if positions:
-            current_app.logger.info(f'Position ids are {positions}')
-            staffs = StaffService.find_by_position_ids(positions)
+            current_app.logger.debug(f'Position ids are {positions}')
+            if is_active is None or is_active is True:
+                staffs = StaffService.find_by_position_ids(positions, False)
+            else:
+                staffs = StaffService.find_by_position_ids(positions, False)
         else:
             staffs = StaffService.find_all_non_deleted_staff(is_active)
         return jsonify(res.StaffResponseSchema(many=True).dump(staffs)), HTTPStatus.OK

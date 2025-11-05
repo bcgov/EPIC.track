@@ -13,11 +13,19 @@
 # limitations under the License.
 """Model to handle all operations related to Event."""
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_
-from sqlalchemy.orm import relationship
+import copy
+from datetime import date
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, and_, cast, func, literal_column, or_
+from sqlalchemy.orm import relationship, aliased
 
+from flask import current_app
+
+from api.models.event_template import EventPositionEnum
+from api.models.dashboard_search_options import EventCalendarSearchOptions
 from api.models.event_category import EventCategory, PRIMARY_CATEGORIES
 from api.models.event_configuration import EventConfiguration
+from api.models.work_phase import WorkPhase
+from api.utils.work_phases import FIRST_WORK_PHASES
 
 from .base_model import BaseModelVersioned
 
@@ -58,10 +66,109 @@ class Event(BaseModelVersioned):
     )
     notes = Column(String)
 
+    def as_dict_snapshot(self, recursive=True):
+        """Return JSON Representation (detached copy)."""
+        mapper = self.__mapper__
+        result = {c.key: getattr(self, c.key) for c in mapper.columns}
+        if recursive:
+            for rel in mapper.relationships:
+                relationship_name = rel.key
+                relational_data = getattr(self, relationship_name, None)
+                result[relationship] = relational_data.as_dict() if relational_data else None
+        return copy.deepcopy(result)
+
     @classmethod
     def find_by_work_id(cls, work_id: int):
         """Return by work id."""
         return cls.query.filter_by(work_id=work_id)
+
+    @classmethod
+    def fetch_all_events_by_calendar_search_criteria(
+        cls,
+        work_ids: list[int],
+        search_filters: EventCalendarSearchOptions = None
+    ):
+        """Fetch all active events with optional event type / category filters."""
+        if not work_ids:
+            return [], 0
+
+        # create alias inside method
+        event_config_alias = aliased(EventConfiguration)
+
+        include_phase_zero = True
+
+        # parse event_types[] filters
+        filter_conditions = []
+        if search_filters and search_filters.event_types:
+            for f in search_filters.event_types:
+                try:
+                    key, value = f.split(":")
+                    if key == "event_category":
+                        val = int(value)
+                        filter_conditions.append(event_config_alias.event_category_id == val)
+                    elif key == "event_type":
+                        val = int(value)
+                        filter_conditions.append(event_config_alias.event_type_id == val)
+                    elif key == "event_position":
+                        # EAO Calendar removes phase zero events
+                        include_phase_zero = False
+                        positions = [v.strip().upper() for v in value.split(",")]
+                        valid_positions = []
+                        for position in positions:
+                            try:
+                                valid_positions.append(EventPositionEnum[position])
+                            except KeyError:
+                                current_app.logger.warning(f"Invalid event_position value: {position}")
+                        if valid_positions:
+                            condition = event_config_alias.event_position.in_(valid_positions)
+
+                            # For START/END events we only want legislated ones
+                            if any(p in (EventPositionEnum.START, EventPositionEnum.END) for p in valid_positions):
+                                condition = and_(condition, WorkPhase.legislated.is_(True))
+
+                            filter_conditions.append(condition)
+
+                except ValueError:
+                    current_app.logger.warning(f"Invalid filter format: {f}. Expected format 'key:value'.")
+                    continue
+
+        query = cls.find_by_work_ids_and_year(work_ids, search_filters, event_config_alias, include_phase_zero)
+
+        if filter_conditions:
+            # combine all conditions with OR
+            query = query.filter(or_(*filter_conditions))
+
+        items = query.all()
+        return items, len(items)
+
+    @classmethod
+    def find_by_work_ids_and_year(cls, work_ids, search_filters, event_config_alias, include_phase_zero=True):
+        """Find events by work ids and year."""
+        start_of_year = date(search_filters.year, 1, 1)
+        end_of_year = date(search_filters.year, 12, 31)
+
+        start_date = func.coalesce(Event.actual_date, Event.anticipated_date)
+        interval_expr = literal_column("INTERVAL '1 day'") * Event.number_of_days
+        end_date = start_date + interval_expr
+
+        query = (
+            Event.query
+            .join(event_config_alias, Event.event_configuration)
+            .join(Event.work)
+            .join(event_config_alias.work_phase)  # join via the alias
+            .filter(
+                Event.work_id.in_(work_ids),
+                Event.is_deleted.is_(False),
+                Event.is_active.is_(True),
+                start_date <= cast(end_of_year, Date),
+                end_date >= cast(start_of_year, Date),
+            )
+        )
+
+        if not include_phase_zero:
+            query = query.filter(WorkPhase.name.notin_(FIRST_WORK_PHASES))
+
+        return query
 
     @classmethod
     def find_milestone_events_by_work_phase(cls, work_phase_id: int):
