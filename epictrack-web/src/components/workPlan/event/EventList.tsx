@@ -768,7 +768,7 @@ const EventList = () => {
   };
   const deleteAction = (
     <>
-      {showDeleteMilestoneButton && taskEvent && (
+      {showDeleteMilestoneButton && (
         <Box
           sx={{
             display: "flex",
