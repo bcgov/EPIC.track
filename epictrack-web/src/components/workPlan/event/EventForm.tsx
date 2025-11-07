@@ -76,8 +76,6 @@ interface NumberOfDaysChangeProps {
   actualDate?: string | undefined;
 }
 const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
-const ExclamationIcon: React.FC<IconProps> = Icons["ExclamationMediumIcon"];
-const CloseIconComponent: React.FC<IconProps> = Icons["NotificationClose"];
 const EventForm = ({
   onSave = () => {
     return;
