@@ -2,7 +2,7 @@
 
 from typing import List
 
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 from api.models import db
 from api.models.work_phase import WorkPhase
@@ -52,10 +52,15 @@ class OverageByResponsibilityInsightGenerator:
         query = query.filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
-            WorkPhase.legislated.is_(True),
+            or_(
+                WorkPhase.legislated.is_(True),
+                WorkType.name == "Amendment"
+            ),
             *filter_exprs if filter_exprs else [],
             PhaseOverageResponsibility.is_active.is_(True),
             PhaseOverageResponsibility.is_deleted.is_(False),
+            Phase.is_active.is_(True),
+            Phase.is_deleted.is_(False),
         )
 
         if selected_work_type:

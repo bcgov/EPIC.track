@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { AppConfig } from "config";
 import {
-  OveragesByAct,
-  PhasesByAverageOverage,
+  MedianOverageByWorktype,
+  PhasesByMedianOverage,
   ResponsibilityByWorktypePhase,
 } from "models/insights";
 import { prepareHeaders } from "./util";
@@ -39,8 +39,8 @@ export const phaseInsightsApi = createApi({
       query: ({ legislated = true, staffId } = {}) =>
         buildQueryString("work-phases", { legislated, staffId }),
     }),
-    getPhasesByAverageOverage: builder.query<
-      PhasesByAverageOverage[],
+    getPhasesByMedianOverage: builder.query<
+      PhasesByMedianOverage[],
       {
         columnFilters?: ColumnFilter[];
         selectedWorkType?: string;
@@ -51,7 +51,7 @@ export const phaseInsightsApi = createApi({
         url: `insights/phases`,
         method: "POST",
         body: {
-          group_by: "average_phase_overage",
+          group_by: "median_phase_overage",
           filters: columnFilters ?? [],
           selected_work_type_id: selectedWorkType,
           staff_id: staffId,
@@ -59,7 +59,7 @@ export const phaseInsightsApi = createApi({
       }),
     }),
     getPercentOfPhasesWithOverages: builder.query<
-      PhasesByAverageOverage[],
+      PhasesByMedianOverage[],
       {
         columnFilters?: ColumnFilter[];
         selectedWorkType?: string;
@@ -98,40 +98,19 @@ export const phaseInsightsApi = createApi({
         },
       }),
     }),
-    getOverageByAct: builder.query<
-      OveragesByAct[],
+    getMedianPhaseOverageByWorktype: builder.query<
+      MedianOverageByWorktype[],
       {
         columnFilters?: ColumnFilter[];
-        selectedWorkType?: string;
         staffId?: number;
       }
     >({
-      query: ({ columnFilters, selectedWorkType, staffId }) => ({
+      query: ({ columnFilters, staffId }) => ({
         url: `insights/phases`,
         method: "POST",
         body: {
-          group_by: "overages_by_act",
+          group_by: "median_overage_by_worktype",
           filters: columnFilters ?? [],
-          selected_work_type_id: selectedWorkType,
-          staff_id: staffId,
-        },
-      }),
-    }),
-    getOverageByYear: builder.query<
-      OveragesByAct[],
-      {
-        columnFilters?: ColumnFilter[];
-        selectedWorkType?: string;
-        staffId?: number;
-      }
-    >({
-      query: ({ columnFilters, selectedWorkType, staffId }) => ({
-        url: `insights/phases`,
-        method: "POST",
-        body: {
-          group_by: "overages_by_year",
-          filters: columnFilters ?? [],
-          selected_work_type_id: selectedWorkType,
           staff_id: staffId,
         },
       }),
@@ -141,10 +120,9 @@ export const phaseInsightsApi = createApi({
 });
 
 export const {
-  useGetPhasesByAverageOverageQuery,
+  useGetPhasesByMedianOverageQuery,
   useGetPercentOfPhasesWithOveragesQuery,
   useGetOverageResponsibilityQuery,
   useGetWorkPhasesQuery,
-  useGetOverageByActQuery,
-  useGetOverageByYearQuery,
+  useGetMedianPhaseOverageByWorktypeQuery,
 } = phaseInsightsApi;

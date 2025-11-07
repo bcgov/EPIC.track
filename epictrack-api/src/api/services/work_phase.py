@@ -16,6 +16,7 @@ import datetime
 import functools
 from collections import defaultdict
 from datetime import timezone
+from operator import or_
 from typing import List, Dict, Any, Union
 
 from api.insights.utils import get_days_left_subquery, get_days_taken_subquery, get_extension_days_subquery, get_suspended_days_subquery, get_total_days_subquery, get_work_subquery
@@ -393,7 +394,12 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         query = query.filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
-            legislated is None or WorkPhase.legislated == legislated,
+            Phase.is_active.is_(True),
+            Phase.is_deleted.is_(False),
+            or_(
+                legislated is None or WorkPhase.legislated == legislated,
+                WorkType.name == "Amendment"
+            )
         )
 
         if staff_id:

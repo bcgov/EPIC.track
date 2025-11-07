@@ -12,7 +12,7 @@ from api.models.staff import Staff
 from api.models.staff_work_role import StaffWorkRole
 from api.insights.insights_table_filters import build_insights_filters
 from api.insights.utils import get_days_left_subquery, get_days_taken_subquery, get_extension_days_subquery, get_suspended_days_subquery, get_total_days_subquery, get_work_subquery
-from sqlalchemy import func, case, Float, cast
+from sqlalchemy import func, case, Float, cast, or_
 
 
 # pylint: disable=not-callable
@@ -43,10 +43,10 @@ class PercentPhaseOverageInsightGenerator:
             ).label("percent_with_overages"),
         ).select_from(WorkPhase) \
          .join(Work, WorkPhase.work_id == Work.id) \
-         .join(Phase, WorkPhase.phase_id == Phase.id)
+         .join(Phase, WorkPhase.phase_id == Phase.id) \
+         .join(WorkType, Work.work_type_id == WorkType.id)
 
         if filters:
-            query = query.join(WorkType, Work.work_type_id == WorkType.id)
             query = query.join(Project, Work.project_id == Project.id)
 
         if staff_id:
@@ -57,7 +57,12 @@ class PercentPhaseOverageInsightGenerator:
         query = query.filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
-            WorkPhase.legislated.is_(True),
+            or_(
+                WorkPhase.legislated.is_(True),
+                WorkType.name == "Amendment"
+            ),
+            Phase.is_active.is_(True),
+            Phase.is_deleted.is_(False),
             *filter_exprs if filter_exprs else [],
         )
 

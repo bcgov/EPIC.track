@@ -75,12 +75,14 @@ export type ProjectBySubtype = {
   sub_type_id: number;
 };
 
-export type PhasesByAverageOverage = {
+export type PhasesByMedianOverage = {
   phase_id: number;
   phase: string;
   count: number;
   total_overage: number;
-  average_overage: number;
+  median_overage: number;
+  iqr_low: number;
+  iqr_high: number;
 };
 
 export type ResponsibilityByWorktypePhase = {
@@ -89,10 +91,9 @@ export type ResponsibilityByWorktypePhase = {
   count: number;
 };
 
-export type OveragesByAct = {
-  phase_id: number;
+export type MedianOverageByWorktype = {
   phase: string;
-  act_id: number;
-  act: string;
-  percent_over: number;
+  work_type: string;
+  median_overage: number;
+  phase_sort_order?: number;
 };

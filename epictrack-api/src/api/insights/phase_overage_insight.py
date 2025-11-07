@@ -11,12 +11,12 @@ from api.models.project import Project
 from api.insights.insights_table_filters import build_insights_filters
 from api.insights.utils import get_days_left_subquery, get_days_taken_subquery, get_extension_days_subquery, get_suspended_days_subquery, get_total_days_subquery, get_work_subquery
 from api.utils.helpers import filter_query_by_staff
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 
 # pylint: disable=not-callable
 # pylint: disable=too-few-public-methods
-class AveragePhaseOverageInsightGenerator:
+class MedianPhaseOverageInsightGenerator:
     """Insight generator for phase resource grouped by phases"""
 
     def fetch_data(self, filters: List = None, selected_work_type_id: str = "all", staff_id: int = None) -> List[dict]:
@@ -34,9 +34,15 @@ class AveragePhaseOverageInsightGenerator:
 
         # pylint: disable=duplicate-code
 
+        median_expr = func.percentile_cont(0.5).within_group(days_left_subq.c.days_left)
+        q1_expr = func.percentile_cont(0.25).within_group(days_left_subq.c.days_left)
+        q3_expr = func.percentile_cont(0.75).within_group(days_left_subq.c.days_left)
+
         query = db.session.query(
             func.max(Phase.name).label("phase_name"),
-            func.avg(func.coalesce(days_left_subq.c.days_left, 0)).label("average_overage"),
+            median_expr.label("median_overage"),
+            q1_expr.label("iqr_low"),
+            q3_expr.label("iqr_high"),
         ).select_from(WorkPhase) \
          .join(Work, WorkPhase.work_id == Work.id) \
          .join(Phase, WorkPhase.phase_id == Phase.id)
@@ -51,7 +57,12 @@ class AveragePhaseOverageInsightGenerator:
         query = query.filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
-            WorkPhase.legislated.is_(True),
+            or_(
+                WorkPhase.legislated.is_(True),
+                WorkType.name == "Amendment"
+            ),
+            Phase.is_active.is_(True),
+            Phase.is_deleted.is_(False),
             *filter_exprs if filter_exprs else [],
         )
 
@@ -75,12 +86,27 @@ class AveragePhaseOverageInsightGenerator:
         return self._format_data(work_phases)
 
     def _format_data(self, data) -> List[dict]:
-        """Format data to the response format"""
-        phase_insights = [
-            {
+        """Format data to the response format; values are always positive days overdue."""
+        phase_insights = []
+        for phase in data:
+            # Make all values positive for display
+            median = abs(phase[1])
+            iqr_low = abs(phase[2])
+            iqr_high = abs(phase[3])
+
+            low, high = (iqr_low, iqr_high)
+            if iqr_low is not None and iqr_high is not None and iqr_low > iqr_high:
+                low, high = iqr_high, iqr_low
+
+            phase_insights.append({
                 "phase": phase[0],
-                "average_overage": round(abs(phase[1])),
-            }
-            for phase in data
-        ]
-        return sorted(phase_insights, key=lambda x: x['average_overage'], reverse=True)
+                "median_overage": round(median, 2),
+                "iqr_low": round(low, 2),
+                "iqr_high": round(high, 2),
+            })
+
+        return sorted(
+            phase_insights,
+            key=lambda x: x['median_overage'],
+            reverse=True
+        )

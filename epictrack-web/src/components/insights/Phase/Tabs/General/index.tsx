@@ -1,9 +1,9 @@
 import InsightAccordion from "components/insights/InsightsAccordion";
 import { Grid } from "@mui/material";
-import AveragePhaseOverageChart from "./Charts/AveragePhaseOverage";
+import MedianPhaseOverageChart from "./Charts/MedianPhaseOverage";
 import GeneralWorkPhaseListing from "./Charts/GeneralWorkPhaseListing";
-import PercentOfPhasesWithOveragesChart from "./Charts/PercentOfPhasesWithOverages";
 import OverageResponsibilityChart from "./Charts/OverageResponsibility";
+import MedianPhaseOverageByWorktypeChart from "./Charts/MedianPhaseOverageByWorktype";
 
 const General = () => (
   <InsightAccordion
@@ -14,14 +14,14 @@ const General = () => (
     data-cy="general-phase-accordion"
   >
     <Grid container spacing={2}>
-      <Grid className="chart-item" item xs={4}>
-        <AveragePhaseOverageChart />
-      </Grid>
-      <Grid className="chart-item" item xs={4}>
-        <PercentOfPhasesWithOveragesChart />
+      <Grid className="chart-item" item xs={8}>
+        <MedianPhaseOverageChart />
       </Grid>
       <Grid className="chart-item" item xs={4}>
         <OverageResponsibilityChart />
+      </Grid>
+      <Grid className="chart-item" item xs={12}>
+        <MedianPhaseOverageByWorktypeChart />
       </Grid>
     </Grid>
   </InsightAccordion>
