@@ -3,7 +3,7 @@
 from api.models.db import db
 from api.models.work_phase import WorkPhase
 from api.models.work import Work
-from api.models.work_type import WorkType
+from api.models.work_type import WorkType, WorkTypeEnum
 from api.models.project import Project
 from api.models.staff import Staff
 from api.models.staff_work_role import StaffWorkRole
@@ -13,7 +13,7 @@ from api.models.event_type import EventTypeEnum
 from api.models.phase_code import PhaseCode as Phase
 from api.models.event_category import PRIMARY_CATEGORIES
 
-from sqlalchemy import func, Integer, case, cast, select, Float
+from sqlalchemy import func, Integer, case, cast, or_, select, Float
 
 
 def get_filtered_work_phases(filter_exprs=None, selected_work_type=None, selected_year=None, staff_id=None):
@@ -139,8 +139,13 @@ def get_total_days_subquery(ext_subq):
         .filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
-            WorkPhase.legislated.is_(True),
+            or_(
+                WorkPhase.legislated.is_(True),
+                WorkType.id == WorkTypeEnum.AMENDMENT.value,
+            ),
         )
+        .join(Work, WorkPhase.work_id == Work.id)
+        .join(WorkType, Work.work_type_id == WorkType.id)
         .outerjoin(ext_subq, ext_subq.c.work_phase_id == WorkPhase.id)
         .subquery()
     )
@@ -213,10 +218,14 @@ def get_days_taken_subquery(sus_subq):
         )
         .select_from(WorkPhase)
         .join(Work, WorkPhase.work_id == Work.id)
+        .join(WorkType, Work.work_type_id == WorkType.id)
         .filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
-            WorkPhase.legislated.is_(True),
+            or_(
+                WorkPhase.legislated.is_(True),
+                WorkType.id == WorkTypeEnum.AMENDMENT.value
+            ),
         )
         .outerjoin(start_event_date_subq, start_event_date_subq.c.work_phase_id == WorkPhase.id)
         .outerjoin(end_event_date_subq, end_event_date_subq.c.work_phase_id == WorkPhase.id)
@@ -249,8 +258,13 @@ def get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq
         .filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
-            WorkPhase.legislated.is_(True),
+            or_(
+                WorkPhase.legislated.is_(True),
+                WorkType.id == WorkTypeEnum.AMENDMENT.value
+            ),
         )
+        .join(Work, WorkPhase.work_id == Work.id)
+        .join(WorkType, Work.work_type_id == WorkType.id)
         .outerjoin(days_taken_subq, days_taken_subq.c.work_phase_id == WorkPhase.id)
         .outerjoin(total_days_subq, total_days_subq.c.work_phase_id == WorkPhase.id)
         .outerjoin(work_subq, work_subq.c.work_phase_id == WorkPhase.id)
@@ -273,8 +287,12 @@ def get_work_subquery():
         .filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
-            WorkPhase.legislated.is_(True),
+            or_(
+                WorkPhase.legislated.is_(True),
+                WorkType.id == WorkTypeEnum.AMENDMENT.value
+            ),
         )
         .join(Work, WorkPhase.work_id == Work.id)
+        .join(WorkType, Work.work_type_id == WorkType.id)
         .subquery()
     )

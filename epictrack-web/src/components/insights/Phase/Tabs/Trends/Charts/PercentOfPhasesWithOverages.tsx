@@ -1,5 +1,13 @@
-import { Grid, Box } from "@mui/material";
-import { BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar } from "recharts";
+import { Grid, Box, Tooltip as MuiTooltip } from "@mui/material";
+import {
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Bar,
+  ResponsiveContainer,
+} from "recharts";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { useInsightsContext } from "components/insights/InsightsContext";
 import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsightsContext";
@@ -45,7 +53,11 @@ const PercentOfPhasesWithOveragesChart = () => {
     <GrayBox sx={{ height: "100%" }}>
       <Grid container spacing={1}>
         <Grid item xs={6}>
-          <ETCaption1 bold>% OF PHASES WITH OVERAGES</ETCaption1>
+          <MuiTooltip title="Includes Legislated Phases plus Amendment Phases">
+            <span>
+              <ETCaption1 bold>% OF PHASES WITH OVERAGES</ETCaption1>
+            </span>
+          </MuiTooltip>
         </Grid>
         <Grid
           item
@@ -67,44 +79,47 @@ const PercentOfPhasesWithOveragesChart = () => {
             }}
           >
             {chartData.length > 0 && (
-              <BarChart
-                layout="vertical"
-                data={chartData}
-                margin={{ left: 80, bottom: 40 }}
+              <ResponsiveContainer
                 height={Math.max(chartData.length * 50 + 100, 350)}
-                width={400}
+                width={"100%"}
               >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  type="number"
-                  allowDecimals={false}
-                  label={{
-                    value: "% of Phases with Overage",
-                    position: "insideBottom",
-                    offset: -5,
-                    dy: 20,
-                    style: { fontSize: 16 },
-                  }}
-                />
-                <YAxis
-                  dataKey="phase"
-                  type="category"
-                  width={40}
-                  tick={{ fontSize: 12 }}
-                />
-                <Tooltip
-                  formatter={(value: number, name: string) => [
-                    `${value}%`,
-                    name,
-                  ]}
-                />
-                <Bar
-                  dataKey="percent_overage"
-                  fill={BAR_COLOR}
-                  barSize={20}
-                  name="Average Overage"
-                />
-              </BarChart>
+                <BarChart
+                  layout="vertical"
+                  data={chartData}
+                  margin={{ left: 80, bottom: 40 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    type="number"
+                    allowDecimals={false}
+                    label={{
+                      value: "% of Phases with Overage",
+                      position: "insideBottom",
+                      offset: -5,
+                      dy: 20,
+                      style: { fontSize: 16 },
+                    }}
+                  />
+                  <YAxis
+                    dataKey="phase"
+                    type="category"
+                    width={40}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Tooltip
+                    formatter={(value: number, name: string) => [
+                      `${value}%`,
+                      name,
+                    ]}
+                  />
+                  <Bar
+                    dataKey="percent_overage"
+                    fill={BAR_COLOR}
+                    barSize={20}
+                    name="Average Overage"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             )}
           </Box>
         </Grid>

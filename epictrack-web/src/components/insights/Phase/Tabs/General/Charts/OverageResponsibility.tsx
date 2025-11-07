@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Grid, Tooltip as MuiTooltip } from "@mui/material";
 import { useInsightsContext } from "components/insights/InsightsContext";
 import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsightsContext";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
@@ -64,7 +64,11 @@ const OverageResponsibilityChart = () => {
     <GrayBox sx={{ height: "100%" }}>
       <Grid container spacing={1}>
         <Grid item xs={6}>
-          <ETCaption1 bold>OVERAGE RESPONSIBILITY</ETCaption1>
+          <MuiTooltip title="Includes Legislated Phases plus Amendment Phases">
+            <span>
+              <ETCaption1 bold>OVERAGE RESPONSIBILITY</ETCaption1>
+            </span>
+          </MuiTooltip>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
           <ResponsiveContainer width="100%" height={300}>
