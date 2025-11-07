@@ -55,7 +55,7 @@ const MedianPhaseOverageByWorktypeChart = () => {
     if (chartContainerRef.current) {
       setChartHeight(chartContainerRef.current.offsetHeight);
     }
-  });
+  }, []);
 
   const {
     data: chartData,
