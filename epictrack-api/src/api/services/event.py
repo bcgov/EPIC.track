@@ -25,7 +25,7 @@ from sqlalchemy.orm import joinedload
 
 from api.actions.action_handler import ActionHandler
 from api.models.dashboard_search_options import EventCalendarSearchOptions
-from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
+from api.exceptions import ResourceNotFoundError, UnprocessableEntityError, UnprocessableEventError
 from api.models import (
     PRIMARY_CATEGORIES,
     CalendarEvent,
@@ -1005,8 +1005,8 @@ class EventService:
                 )
                 previous_event = phase_events[event_index - 1]
                 if event_index > 0 and not previous_event.actual_date:
-                    raise UnprocessableEntityError(
-                        "Previous event should be completed to proceed"
+                    raise UnprocessableEventError(
+                        f"This milestone must occur before {previous_event.name}. Please check that the actual date you entered is correct, or change the anticipated date of {previous_event.name} before proceeding."
                     )
 
     @classmethod

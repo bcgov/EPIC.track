@@ -21,6 +21,7 @@ import ControlledDatePicker from "../../shared/controlledInputComponents/Control
 import RichTextEditor from "../../shared/richTextEditor";
 import TrackDialog from "../../shared/TrackDialog";
 import WarningBox from "../../shared/warningBox";
+import { ETHeading4 } from "../../shared";
 import { showNotification } from "../../shared/notificationProvider";
 import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
@@ -91,6 +92,7 @@ const EventForm = ({
   const [titleCharacterCount, setTitleCharacterCount] = useState<number>(0);
   const [showEventLockDialog, setShowEventLockDialog] =
     useState<boolean>(false);
+  const [lockDialogError, setLockDialogError] = useState<string>("");
   const [selectedConfiguration, setSelectedConfiguration] =
     useState<EventConfiguration>();
   const anticipatedDateRef = useRef();
@@ -543,6 +545,7 @@ const EventForm = ({
           !!dataToBeSubmitted?.actual_date);
       if (showLockConfirmDialog(dataToBeSubmitted) && !confirmSaveInLocked) {
         setShowEventLockDialog(true);
+        setLockDialogError(""); // Clear any previous errors
       } else {
         dataToBeSubmitted.anticipated_date = Moment(
           dataToBeSubmitted.anticipated_date,
@@ -559,13 +562,21 @@ const EventForm = ({
         );
         onSave(remainingPhasesToComplete);
         setDateCheckStatus(undefined);
+        setShowEventLockDialog(false);
+        setLockDialogError("");
       }
-    } catch (e) {
+    } catch (e: any) {
       const message = getErrorMessage(e);
-      showNotification(message, {
-        duration: 3000,
-        type: "error",
-      });
+      // If it's a 422 error and the lock dialog is open, show error in dialog
+      if (e.response?.status === 422 && showEventLockDialog) {
+        setLockDialogError(message);
+      } else {
+        // Otherwise show in snackbar
+        showNotification(message, {
+          duration: 3000,
+          type: "error",
+        });
+      }
     }
   };
 
@@ -874,14 +885,58 @@ const EventForm = ({
           dialogContentText="Entering an actual date will lock this Milestone. Once locked, you will only be able to edit the description and notes field."
           disableEscapeKeyDown
           fullWidth
+          isOkRequired={!lockDialogError}
           okButtonText="Yes"
-          cancelButtonText="No"
+          cancelButtonText={lockDialogError ? "Go Back" : "No"}
           onOk={() => handleSaveEvent(undefined, pushEvents, true)}
           onCancel={() => {
             setShowEventLockDialog(false);
+            setLockDialogError("");
           }}
           isActionsRequired
-        />
+        >
+          {lockDialogError && (
+            <Grid
+              sx={{
+                backgroundColor: Palette.error.bg.light,
+                padding: "16px 24px 16px 24px",
+                display: "flex",
+                flexDirection: "column",
+                color: Palette.error.dark,
+                borderRadius: "4px",
+                mt: 2,
+                border: `1px solid ${Palette.error.dark}`,
+              }}
+              container
+            >
+              <Grid
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: "1rem",
+                }}
+                item
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                ></Box>
+                <Box sx={{ flex: "1 0 0" }}>
+                  <ETHeading4
+                    data-cy="error-box-title"
+                    sx={{
+                      fontSize: "1rem",
+                    }}
+                  >
+                    {lockDialogError}
+                  </ETHeading4>
+                </Box>
+              </Grid>
+            </Grid>
+          )}
+        </TrackDialog>
       </FormProvider>
       <TrackDialog
         open={showEventPushConfirmation}
