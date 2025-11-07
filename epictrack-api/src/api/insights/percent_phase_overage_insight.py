@@ -5,7 +5,7 @@ from typing import List
 from api.models import db
 from api.models.work_phase import WorkPhase
 from api.models.work import Work
-from api.models.work_type import WorkType
+from api.models.work_type import WorkType, WorkTypeEnum
 from api.models.phase_code import PhaseCode as Phase
 from api.models.project import Project
 from api.models.staff import Staff
@@ -59,7 +59,7 @@ class PercentPhaseOverageInsightGenerator:
             WorkPhase.is_deleted.is_(False),
             or_(
                 WorkPhase.legislated.is_(True),
-                WorkType.name == "Amendment"
+                WorkType.id == WorkTypeEnum.AMENDMENT.value,
             ),
             Phase.is_active.is_(True),
             Phase.is_deleted.is_(False),

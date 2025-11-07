@@ -34,7 +34,7 @@ from api.services.task_template import TaskTemplateService
 from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
 from api.models.work import Work
 from api.models.phase_code import PhaseCode as Phase
-from api.models.work_type import WorkType
+from api.models.work_type import WorkType, WorkTypeEnum
 from api.models.project import Project
 
 from .common_service import event_compare_func
@@ -398,7 +398,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             Phase.is_deleted.is_(False),
             or_(
                 legislated is None or WorkPhase.legislated == legislated,
-                WorkType.name == "Amendment"
+                WorkType.id == WorkTypeEnum.AMENDMENT.value,
             )
         )
 

@@ -3,7 +3,7 @@
 from api.models.db import db
 from api.models.work_phase import WorkPhase
 from api.models.work import Work
-from api.models.work_type import WorkType
+from api.models.work_type import WorkType, WorkTypeEnum
 from api.models.project import Project
 from api.models.staff import Staff
 from api.models.staff_work_role import StaffWorkRole
@@ -141,7 +141,7 @@ def get_total_days_subquery(ext_subq):
             WorkPhase.is_deleted.is_(False),
             or_(
                 WorkPhase.legislated.is_(True),
-                WorkType.name == "Amendment"
+                WorkType.id == WorkTypeEnum.AMENDMENT.value,
             ),
         )
         .join(Work, WorkPhase.work_id == Work.id)
@@ -224,7 +224,7 @@ def get_days_taken_subquery(sus_subq):
             WorkPhase.is_deleted.is_(False),
             or_(
                 WorkPhase.legislated.is_(True),
-                WorkType.name == "Amendment"
+                WorkType.id == WorkTypeEnum.AMENDMENT.value
             ),
         )
         .outerjoin(start_event_date_subq, start_event_date_subq.c.work_phase_id == WorkPhase.id)
@@ -260,7 +260,7 @@ def get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq
             WorkPhase.is_deleted.is_(False),
             or_(
                 WorkPhase.legislated.is_(True),
-                WorkType.name == "Amendment"
+                WorkType.id == WorkTypeEnum.AMENDMENT.value
             ),
         )
         .join(Work, WorkPhase.work_id == Work.id)
@@ -289,7 +289,7 @@ def get_work_subquery():
             WorkPhase.is_deleted.is_(False),
             or_(
                 WorkPhase.legislated.is_(True),
-                WorkType.name == "Amendment"
+                WorkType.id == WorkTypeEnum.AMENDMENT.value
             ),
         )
         .join(Work, WorkPhase.work_id == Work.id)

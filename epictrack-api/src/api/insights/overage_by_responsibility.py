@@ -7,7 +7,7 @@ from sqlalchemy import func, or_
 from api.models import db
 from api.models.work_phase import WorkPhase
 from api.models.work import Work
-from api.models.work_type import WorkType
+from api.models.work_type import WorkType, WorkTypeEnum
 from api.models.phase_code import PhaseCode as Phase
 from api.models.phase_overage_responsibility import PhaseOverageResponsibility
 from api.models.project import Project
@@ -54,7 +54,7 @@ class OverageByResponsibilityInsightGenerator:
             WorkPhase.is_deleted.is_(False),
             or_(
                 WorkPhase.legislated.is_(True),
-                WorkType.name == "Amendment"
+                WorkType.id == WorkTypeEnum.AMENDMENT.value,
             ),
             *filter_exprs if filter_exprs else [],
             PhaseOverageResponsibility.is_active.is_(True),

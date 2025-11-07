@@ -5,7 +5,7 @@ from typing import List
 from api.models import db
 from api.models.work_phase import WorkPhase
 from api.models.work import Work
-from api.models.work_type import WorkType
+from api.models.work_type import WorkType, WorkTypeEnum
 from api.models.phase_code import PhaseCode as Phase
 from api.models.project import Project
 from api.insights.insights_table_filters import build_insights_filters
@@ -57,7 +57,7 @@ class MedianPhaseOverageByWorktypeInsightGenerator:
             WorkPhase.is_deleted.is_(False),
             or_(
                 WorkPhase.legislated.is_(True),
-                WorkType.name == "Amendment"
+                WorkType.id == WorkTypeEnum.AMENDMENT.value
             ),
             WorkType.is_active.is_(True),
             WorkType.is_deleted.is_(False),
