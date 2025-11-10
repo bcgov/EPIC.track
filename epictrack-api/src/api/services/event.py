@@ -1006,7 +1006,7 @@ class EventService:
                 previous_event = phase_events[event_index - 1]
                 if event_index > 0 and not previous_event.actual_date:
                     raise UnprocessableEventError(
-                        f"This milestone must occur before {previous_event.name}. Please check that the actual date you entered is correct, or change the anticipated date of {previous_event.name} before proceeding."
+                        f"This milestone must occur before '{previous_event.name}'. Please check that the actual date you entered is correct, or change the anticipated date of '{previous_event.name}' before proceeding."
                     )
 
     @classmethod
