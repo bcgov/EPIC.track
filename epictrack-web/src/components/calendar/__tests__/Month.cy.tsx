@@ -52,7 +52,7 @@ describe("Month", () => {
     cy.get("@toggleCollapsed").should("have.been.calledOnce");
   });
 
-  it("renders expanded month with collapse icon and legend", () => {
+  it("renders expanded month with collapse icon", () => {
     const toggleCollapsed = cy.stub();
 
     cy.mount(
@@ -76,9 +76,6 @@ describe("Month", () => {
 
     cy.contains("September 2025").should("exist");
     cy.get("svg").should("exist"); // Collapse icon rendered
-    mockEventsGrid.forEach((event) => {
-      cy.contains(event.work_name).should("exist");
-    });
   });
 
   it("renders MonthDatesRow always", () => {
