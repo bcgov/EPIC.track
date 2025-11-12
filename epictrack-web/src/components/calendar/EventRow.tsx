@@ -1,9 +1,7 @@
-import { FC, useMemo } from "react";
+import { FC } from "react";
 import { Box, Tooltip } from "@mui/material";
-import dayjs from "dayjs";
-import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { Palette } from "styles/theme";
+import dateUtils from "utils/dateUtils";
 import { CalendarEvent } from "models/event";
 import { ETCaption1 } from "components/shared";
 import { EVENT_TYPE } from "components/workPlan/phase/type";
@@ -13,14 +11,11 @@ import { useEventCalendarContext } from "./EventCalendarContext";
 import { darkenHex, getWorkColour } from "./Legends/utils";
 import { LEGEND_COLOURS } from "./constants";
 
-dayjs.extend(isSameOrAfter);
-dayjs.extend(isSameOrBefore);
-
 type EventWithRow = CalendarEvent & { row: number };
 
 function assignEventRows(events: CalendarEvent[]): EventWithRow[][] {
   const sorted = [...events].sort((a, b) =>
-    dayjs(a.event.start_date).diff(dayjs(b.event.start_date)),
+    dateUtils.diff(a.event.start_date, b.event.start_date, "days"),
   );
   const rows: EventWithRow[][] = [];
 
@@ -28,10 +23,7 @@ function assignEventRows(events: CalendarEvent[]): EventWithRow[][] {
     const placed = rows.some((row) => {
       const lastInRow = row[row.length - 1];
       if (
-        dayjs(event.event.start_date).isAfter(
-          dayjs(lastInRow.event.end_date),
-          "day",
-        )
+        dateUtils.isAfterDay(event.event.start_date, lastInRow.event.end_date)
       ) {
         row.push({ ...event, row: rows.indexOf(row) });
         return true;
@@ -51,7 +43,6 @@ type EventRowProps = {
   cellSizePx: number;
   days: (Date | null)[];
   events: CalendarEvent[];
-  legendHeight?: number;
   showWorkLegend: boolean;
 };
 
@@ -59,22 +50,9 @@ const EventRow: FC<EventRowProps> = ({
   cellSizePx,
   days,
   events,
-  legendHeight,
   showWorkLegend,
 }) => {
   const eventRows = assignEventRows(events);
-
-  const extraRowsNeeded = useMemo(() => {
-    if (!legendHeight) return 0;
-    const rowGapPx = 4;
-    const eventRowsHeight =
-      eventRows.length * cellSizePx +
-      Math.max(0, eventRows.length - 1) * rowGapPx;
-    return Math.max(
-      Math.ceil((legendHeight - eventRowsHeight) / (cellSizePx + rowGapPx)),
-      0,
-    );
-  }, [legendHeight, cellSizePx, eventRows.length]);
 
   const { handleEventClick } = useEventCalendarContext();
 
@@ -114,12 +92,12 @@ const EventRow: FC<EventRowProps> = ({
               );
             }
             const eventItem = rowEvents.find((ev) => {
-              const start = dayjs(ev.event.start_date);
-              const end = dayjs(ev.event.end_date);
+              const start = ev.event.start_date;
+              const end = ev.event.end_date;
               return (
                 day &&
-                dayjs(day).isSameOrAfter(start, "day") &&
-                dayjs(day).isSameOrBefore(end, "day")
+                dateUtils.isSameOrAfterDay(day, start) &&
+                dateUtils.isSameOrBeforeDay(day, end)
               );
             });
 
@@ -134,11 +112,11 @@ const EventRow: FC<EventRowProps> = ({
                 [...days].reverse().findIndex((d) => d !== null);
 
               const actualStartIdx = days.findIndex(
-                (d) => d && dayjs(d).isSame(dayjs(event.start_date), "day"),
+                (d) => d && dateUtils.isSameDay(d, event.start_date),
               );
 
               const actualEndIdx = days.findIndex(
-                (d) => d && dayjs(d).isSame(dayjs(event.end_date), "day"),
+                (d) => d && dateUtils.isSameDay(d, event.end_date),
               );
 
               // If the event starts before this month, start from first day in month
@@ -225,10 +203,10 @@ const EventRow: FC<EventRowProps> = ({
             // If this cell falls inside a span already rendered, skip rendering it
             const inSpan = rowEvents.some((ev) => {
               const evStartIdx = days.findIndex(
-                (d) => d && dayjs(d).isSame(dayjs(ev.event.start_date), "day"),
+                (d) => d && dateUtils.isSameDay(d, ev.event.start_date),
               );
               const evEndIdx = days.findIndex(
-                (d) => d && dayjs(d).isSame(dayjs(ev.event.end_date), "day"),
+                (d) => d && dateUtils.isSameDay(d, ev.event.end_date),
               );
               const start = evStartIdx === -1 ? 0 : evStartIdx;
               const end = evEndIdx === -1 ? days.length - 1 : evEndIdx;
@@ -247,47 +225,6 @@ const EventRow: FC<EventRowProps> = ({
                     : "inherit",
                   color: isWeekendByIndex(dayIdx)
                     ? Palette.neutral.light
-                    : "inherit",
-                  border: day ? `1px solid ${Palette.neutral.bg.dark}` : "none",
-                  borderRadius: "2px",
-                }}
-              />
-            );
-          })}
-        </Box>
-      ))}
-      {[...Array(extraRowsNeeded)].map((_, idx) => (
-        /* Filler rows to match legend height */
-        <Box
-          key={`filler-${idx}`}
-          display="grid"
-          gridTemplateColumns={`repeat(${days.length}, ${cellSizePx}px)`}
-          gap={0.5}
-        >
-          {days.map((day, dayIdx) => {
-            if (!day) {
-              return (
-                <Box
-                  key={`filler-empty-${idx}-${dayIdx}`}
-                  sx={{
-                    height: cellSizePx,
-                    backgroundColor: isWeekendByIndex(dayIdx)
-                      ? "#F6F6F6"
-                      : Palette.neutral.bg.light,
-                    color: "transparent",
-                    border: "none",
-                    borderRadius: "2px",
-                  }}
-                />
-              );
-            }
-            return (
-              <Box
-                key={`filler-cell-${idx}-${dayIdx}`}
-                sx={{
-                  height: cellSizePx,
-                  backgroundColor: isWeekendByIndex(dayIdx)
-                    ? "#F6F6F6"
                     : "inherit",
                   border: day ? `1px solid ${Palette.neutral.bg.dark}` : "none",
                   borderRadius: "2px",

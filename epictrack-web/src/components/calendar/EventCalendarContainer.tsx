@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Box, CircularProgress, Grid, IconButton } from "@mui/material";
-import dayjs from "dayjs";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { Palette } from "styles/theme";
@@ -25,6 +24,8 @@ import {
 import MyCalendarLegend from "./Legends/FullCalendarLegend";
 import { getWorkColour } from "./Legends/utils";
 import { getEventIcon } from "./utils/eventIcons";
+import WorksLegend, { CalendarWork } from "./Legends/WorksLegend";
+import dateUtils from "utils/dateUtils";
 
 type EventCalendarProps = {
   cellSizePx?: number;
@@ -57,6 +58,7 @@ export const EventCalendarContainer = ({
   } = useEventCalendarContext();
 
   const [cellSizePx, setCellSizePx] = useState(DEFAULT_MIN_CELL_SIZE_PX);
+  const [legendWorks, setLegendWorks] = useState<CalendarWork[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const labelWidth = showWorkLegend
@@ -64,20 +66,52 @@ export const EventCalendarContainer = ({
     : DEFAULT_LABEL_WIDTH;
 
   const months = useMemo(() => {
-    const start = dayjs(`${selectedYear}-01-01`);
     const result = [];
-    let current = start;
     for (let i = 0; i < 12; i++) {
+      const monthDate = new Date(selectedYear, i, 1);
       result.push({
-        year: current.year(),
-        month: current.month(),
-        label: current.format("MMM 'YY"),
-        start: current,
+        year: selectedYear,
+        month: i,
+        label: dateUtils.formatDate(monthDate.toDateString(), "MMM 'YY"),
+        start: monthDate,
       });
-      current = current.add(1, "month");
     }
     return result;
   }, [selectedYear]);
+
+  useEffect(() => {
+    // Get events from non-collapsed months only
+    const visibleEvents = events?.filter((calendarItem: CalendarEvent) => {
+      const eventStart = calendarItem.event.start_date;
+      const eventEnd = calendarItem.event.end_date;
+
+      // Check if event belongs to any non-collapsed month
+      return months.some(({ label, start }) => {
+        if (collapsedMonths[label]) return false;
+
+        const monthStart = dateUtils.startOfMonth(start);
+        const monthEnd = dateUtils.endOfMonth(start);
+
+        return (
+          (dateUtils.isBeforeDay(eventStart, monthEnd) &&
+            dateUtils.isAfterDay(eventEnd, monthStart)) ||
+          dateUtils.isSameMonth(eventStart, monthStart) ||
+          dateUtils.isSameMonth(eventEnd, monthStart)
+        );
+      });
+    });
+
+    const uniqueWorks = Array.from(
+      new Set(visibleEvents?.map((event) => event.work_id)),
+    ).map((workId) => {
+      const event = visibleEvents?.find((event) => event.work_id === workId);
+      return {
+        id: workId,
+        title: event ? event.work_name : "Unknown Work",
+      };
+    });
+    setLegendWorks(uniqueWorks);
+  }, [events, collapsedMonths, months]);
 
   const handlePrevYear = () => setSelectedYear((y: number) => y - 1);
   const handleNextYear = () => setSelectedYear((y: number) => y + 1);
@@ -283,6 +317,9 @@ export const EventCalendarContainer = ({
 
               {months.map(({ label, start }) => {
                 const days = getNDaysArray(start, daysInRow);
+                const monthStart = dateUtils.startOfMonth(start);
+                const monthEnd = dateUtils.endOfMonth(start);
+
                 return (
                   <Month
                     key={label}
@@ -295,15 +332,14 @@ export const EventCalendarContainer = ({
                     daysInRow={daysInRow}
                     milestoneEvents={events.filter(
                       (calendarItem: CalendarEvent) => {
-                        const eventStart = dayjs(calendarItem.event.start_date);
-                        const eventEnd = dayjs(calendarItem.event.end_date);
-                        const monthStart = dayjs(start).startOf("month");
-                        const monthEnd = dayjs(start).endOf("month");
+                        const eventStart = calendarItem.event.start_date;
+                        const eventEnd = calendarItem.event.end_date;
+
                         return (
-                          (eventStart.isBefore(monthEnd) &&
-                            eventEnd.isAfter(monthStart)) ||
-                          eventStart.isSame(monthStart, "month") ||
-                          eventEnd.isSame(monthStart, "month")
+                          (dateUtils.isBeforeDay(eventStart, monthEnd) &&
+                            dateUtils.isAfterDay(eventEnd, monthStart)) ||
+                          dateUtils.isSameMonth(eventStart, monthStart) ||
+                          dateUtils.isSameMonth(eventEnd, monthStart)
                         );
                       },
                     )}
@@ -320,10 +356,13 @@ export const EventCalendarContainer = ({
               width: `calc(${DEFAULT_PANEL_SIZE}px - 3rem)`,
               flexShrink: 1,
               transition: "all 0.3s ease",
-              height: "100%",
+              height: "calc(100vh)",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
             <MyCalendarLegend calendar={calendarType} />
+            {showWorkLegend && <WorksLegend legendWorks={legendWorks} />}
           </Box>
         )}
         {modalOpen && (
