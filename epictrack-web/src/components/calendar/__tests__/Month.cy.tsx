@@ -1,16 +1,19 @@
 import { MemoryRouter as Router } from "react-router-dom";
-import dayjs from "dayjs";
 import Month from "../Month";
 import { EventCalendarProvider } from "../EventCalendarContext";
 import { mockEventsGrid } from "../../../../cypress/support/common";
 import { EVENT_TYPE } from "components/workPlan/phase/type";
 
 describe("Month", () => {
-  const days = Array.from({ length: 30 }, (_, i) =>
-    dayjs()
-      .date(i + 1)
-      .toDate(),
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+
+  const days = Array.from(
+    { length: 30 },
+    (_, i) => new Date(year, month, i + 1),
   );
+
   const labelWidth = 120;
   const cellSizePx = 40;
   const daysInRow = 30;

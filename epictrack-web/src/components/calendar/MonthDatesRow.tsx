@@ -2,13 +2,10 @@ import { Box } from "@mui/material";
 import { Palette } from "styles/theme";
 import { FC } from "react";
 import { isWeekendByIndex } from "./utils/utils";
-import dayjs from "dayjs";
-import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { CalendarEvent } from "models/event";
 import { IconProps } from "components/icons/type";
 import Icons from "components/icons";
-
-dayjs.extend(isSameOrBefore);
+import dateUtils from "utils/dateUtils";
 
 const AddIcon: React.FC<IconProps> = Icons["AddIcon"];
 
@@ -23,16 +20,17 @@ const MonthDatesRow: FC<MonthDatesRowProps> = ({
   cellSizePx,
   events,
 }) => {
+  const formatDateKey = (date: Date) => date.toISOString().split("T")[0];
+
   function getEventCountsByDate(events: CalendarEvent[]) {
     return events.reduce<Record<string, number>>((acc, event) => {
-      const start = dayjs(event.event.start_date);
-      const end = dayjs(event.event.end_date);
-      let current = start.clone();
+      const end = new Date(event.event.end_date);
+      let current = new Date(event.event.start_date);
       // Count every date this event covers
-      while (current.isSameOrBefore(end, "day")) {
-        const key = current.format("YYYY-MM-DD");
+      while (dateUtils.isSameOrBeforeDay(current, end)) {
+        const key = formatDateKey(current);
         acc[key] = (acc[key] || 0) + 1;
-        current = current.add(1, "day");
+        current = new Date(current.getTime() + 24 * 60 * 60 * 1000);
       }
       return acc;
     }, {});
@@ -41,8 +39,6 @@ const MonthDatesRow: FC<MonthDatesRowProps> = ({
   const eventCounts = getEventCountsByDate(events);
 
   const dotSize = Math.max(3, Math.min(Math.floor(cellSizePx / 8), 5));
-
-  const formatDateKey = (date: Date) => date.toISOString().split("T")[0];
 
   return (
     <>

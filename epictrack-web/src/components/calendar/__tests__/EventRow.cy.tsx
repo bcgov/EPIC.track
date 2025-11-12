@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import EventRow from "components/calendar/EventRow";
 import { EventCalendarProvider } from "components/calendar/EventCalendarContext";
 import { EVENT_TYPE } from "components/workPlan/phase/type";
@@ -6,24 +5,33 @@ import {
   generateMockEvent,
   mockEventsGrid,
 } from "../../../../cypress/support/common";
+import { dateUtils } from "utils";
 
 const generateDaysForMonth = (
-  year = dayjs().year(),
-  month = dayjs().month(),
+  year = new Date().getFullYear(),
+  month = new Date().getMonth(),
   daysInRow = 7,
-) => {
-  const start = dayjs().year(year).month(month).startOf("month");
-  const daysInMonth = start.daysInMonth();
+): (Date | null)[] => {
+  const start = dateUtils.startOfMonth(new Date(year, month, 1));
   const daysArray: (Date | null)[] = [];
 
-  // add nulls for the first week offset
-  for (let i = 0; i < start.day(); i++) daysArray.push(null);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  for (let i = 0; i < daysInMonth; i++) {
-    daysArray.push(start.add(i, "day").toDate());
+  // add nulls for the first week offset
+  for (let i = 0; i < start.getDay(); i++) {
+    daysArray.push(null);
   }
 
-  while (daysArray.length < daysInRow) daysArray.push(null);
+  // add each date of the month
+  for (let i = 0; i < daysInMonth; i++) {
+    const date = new Date(year, month, 1 + i);
+    daysArray.push(date);
+  }
+
+  // pad trailing nulls to fill row
+  while (daysArray.length < daysInRow) {
+    daysArray.push(null);
+  }
 
   return daysArray;
 };
@@ -62,11 +70,18 @@ describe("EventRow Component", () => {
   });
 
   it("renders multi-day events correctly", () => {
+    const now = new Date();
+    const startOfMonth = dateUtils.startOfMonth(now);
+    const endDate = dateUtils
+      .add(startOfMonth.toISOString(), 3, "days")
+      .toISOString();
+
     const multiDayEvent = generateMockEvent({
       type: EVENT_TYPE.TASK,
-      start_date: dayjs().startOf("month").toISOString(),
-      end_date: dayjs().startOf("month").add(3, "day").toISOString(),
+      start_date: startOfMonth.toISOString(),
+      end_date: endDate,
     });
+
     const events = [
       {
         event: multiDayEvent,
@@ -91,13 +106,23 @@ describe("EventRow Component", () => {
   });
 
   it("renders overlapping events on multiple rows", () => {
+    const now = new Date();
+    const startOfMonth = dateUtils.startOfMonth(now);
+
     const event1 = generateMockEvent({
-      start_date: dayjs().startOf("month").toISOString(),
-      end_date: dayjs().startOf("month").add(2, "day").toISOString(),
+      start_date: startOfMonth.toISOString(),
+      end_date: dateUtils
+        .add(startOfMonth.toISOString(), 2, "days")
+        .toISOString(),
     });
+
     const event2 = generateMockEvent({
-      start_date: dayjs().startOf("month").add(1, "day").toISOString(),
-      end_date: dayjs().startOf("month").add(3, "day").toISOString(),
+      start_date: dateUtils
+        .add(startOfMonth.toISOString(), 1, "days")
+        .toISOString(),
+      end_date: dateUtils
+        .add(startOfMonth.toISOString(), 3, "days")
+        .toISOString(),
     });
 
     const events = [
