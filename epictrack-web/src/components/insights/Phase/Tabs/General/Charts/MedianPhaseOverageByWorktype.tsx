@@ -18,6 +18,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useGetMedianPhaseOverageByWorktypeQuery } from "services/rtkQuery/phaseInsights";
+import { PhaseChartProps } from "components/insights/type";
 
 const formatData = (data: MedianOverageByWorktype[]) => {
   const phaseOrder: { [phase: string]: number } = {};
@@ -43,7 +44,9 @@ const formatData = (data: MedianOverageByWorktype[]) => {
   };
 };
 
-const MedianPhaseOverageByWorktypeChart = () => {
+const MedianPhaseOverageByWorktypeChart = ({
+  isUnderageToggled = false,
+}: PhaseChartProps) => {
   const { columnFilters } = useTableFilterContext();
   const { loadingWorkPhases } = usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
@@ -65,6 +68,7 @@ const MedianPhaseOverageByWorktypeChart = () => {
     {
       columnFilters,
       staffId: isUserInsights ? staffId : undefined,
+      isUnderageToggled,
     },
     { skip: columnFilters.length === 0 },
   );
@@ -92,7 +96,7 @@ const MedianPhaseOverageByWorktypeChart = () => {
   const { data, sortedPhases } = formatData(chartData);
 
   return (
-    <Grid container spacing={2}>
+    <Grid container>
       <Grid
         item
         xs={8}
@@ -111,7 +115,10 @@ const MedianPhaseOverageByWorktypeChart = () => {
             <Grid item xs={6}>
               <MuiTooltip title="Includes Legislated Phases plus Amendment Phases">
                 <span>
-                  <ETCaption1 bold>MEDIAN PHASE OVERAGE BY WORKTYPE</ETCaption1>
+                  <ETCaption1 bold>
+                    MEDIAN PHASE {isUnderageToggled ? "UNDERAGE" : "OVERAGE"} BY
+                    WORKTYPE
+                  </ETCaption1>
                 </span>
               </MuiTooltip>
             </Grid>
@@ -128,7 +135,11 @@ const MedianPhaseOverageByWorktypeChart = () => {
             }}
           >
             {chartData.length > 0 && (
-              <ResponsiveContainer width="100%" height={400}>
+              <ResponsiveContainer
+                width="100%"
+                height={400}
+                key={isUnderageToggled ? "underage" : "overage"}
+              >
                 <BarChart
                   data={data}
                   layout="vertical"

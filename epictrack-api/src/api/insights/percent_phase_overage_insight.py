@@ -20,10 +20,9 @@ from sqlalchemy import func, case, Float, cast, or_
 class PercentPhaseOverageInsightGenerator:
     """Insight generator for phase resource grouped by phases"""
 
-    def fetch_data(self, filters: List = None, selected_work_type_id: str = "all", staff_id: int = None) -> List[dict]:
+    def fetch_data(self, filters: List = None, staff_id: int = None, is_underage_toggled: bool = False) -> List[dict]:
         """Fetch data for the insight"""
         filter_exprs = build_insights_filters(filters, "phases") if filters else []
-        selected_work_type = WorkType.find_by_id(int(selected_work_type_id)) if selected_work_type_id != "all" else None
 
         # Build all necessary subqueries
         work_subq = get_work_subquery()
@@ -33,14 +32,40 @@ class PercentPhaseOverageInsightGenerator:
         days_taken_subq = get_days_taken_subquery(sus_subq)
         days_left_subq = get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq)
 
+        # if is_underage_toggled:
+        #     count_case = func.count(case((days_left_subq.c.days_left > 0, 1)))
+        # else:
+        #     count_case = func.count(case((days_left_subq.c.days_left < 0, 1)))
+
+        # percent_expr = (
+        #     cast(count_case, Float) /
+        #     cast(func.count(func.distinct(WorkPhase.id)), Float)
+        # )
+        if is_underage_toggled:
+            # Only count if days_taken > 0 and days_taken < total_days
+            count_case = func.count(
+                case(
+                    (
+                        (days_taken_subq.c.days_taken > 0) &
+                        (days_taken_subq.c.days_taken < total_days_subq.c.total_days),
+                        1
+                    )
+                )
+            )
+        else:
+            # Count all where days_left < 0 (overtime)
+            count_case = func.count(case((days_left_subq.c.days_left < 0, 1)))
+        # -------- Adjusted Section Ends Here --------
+
+        percent_expr = (
+            cast(count_case, Float) /
+            cast(func.count(func.distinct(WorkPhase.id)), Float)
+        )
         # pylint: disable=duplicate-code
 
         query = db.session.query(
             Phase.name.label("phase_name"),
-            (
-                (cast(func.count(case((days_left_subq.c.days_left < 0, 1))), Float)
-                 / cast(func.count(func.distinct(WorkPhase.id)), Float)) * 100
-            ).label("percent_with_overages"),
+            (percent_expr * 100).label("percent")
         ).select_from(WorkPhase) \
          .join(Work, WorkPhase.work_id == Work.id) \
          .join(Phase, WorkPhase.phase_id == Phase.id) \
@@ -57,6 +82,7 @@ class PercentPhaseOverageInsightGenerator:
         query = query.filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
+            WorkPhase.is_completed.is_(True) if is_underage_toggled else True,
             or_(
                 WorkPhase.legislated.is_(True),
                 WorkType.id == WorkTypeEnum.AMENDMENT.value,
@@ -65,9 +91,6 @@ class PercentPhaseOverageInsightGenerator:
             Phase.is_deleted.is_(False),
             *filter_exprs if filter_exprs else [],
         )
-
-        if selected_work_type:
-            query = query.filter(Work.work_type_id == selected_work_type.id)
 
         query = query \
             .outerjoin(ext_subq, ext_subq.c.work_phase_id == WorkPhase.id) \
@@ -78,13 +101,8 @@ class PercentPhaseOverageInsightGenerator:
             .outerjoin(work_subq, work_subq.c.work_phase_id == WorkPhase.id) \
             .group_by(Phase.name)
         # pylint: enable=duplicate-code
-        # Only include the data where percent is not 0
-        query = query.having(
-            (
-                cast(func.count(func.distinct(case((days_left_subq.c.days_left < 0, 1)))), Float)
-                / cast(func.count(func.distinct(WorkPhase.id)), Float)
-            ) > 0
-        )
+
+        query = query.having(percent_expr > 0)
 
         work_phases = query.all()
 

@@ -16,8 +16,11 @@ import { BAR_COLOR } from "components/insights/utils";
 import { GrayBox, ETCaption1 } from "components/shared";
 import { showNotification } from "components/shared/notificationProvider";
 import { useGetPercentOfPhasesWithOveragesQuery } from "services/rtkQuery/phaseInsights";
+import { PhaseChartProps } from "components/insights/type";
 
-const PercentOfPhasesWithOveragesChart = () => {
+const PercentOfPhasesWithOveragesChart = ({
+  isUnderageToggled = false,
+}: PhaseChartProps) => {
   const { columnFilters } = useTableFilterContext();
   const { loadingWorkPhases } = usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
@@ -29,8 +32,8 @@ const PercentOfPhasesWithOveragesChart = () => {
   } = useGetPercentOfPhasesWithOveragesQuery(
     {
       columnFilters,
-      selectedWorkType: "all",
       staffId: isUserInsights ? staffId : undefined,
+      isUnderageToggled,
     },
     { skip: columnFilters.length === 0 },
   );
@@ -55,7 +58,9 @@ const PercentOfPhasesWithOveragesChart = () => {
         <Grid item xs={6}>
           <MuiTooltip title="Includes Legislated Phases plus Amendment Phases">
             <span>
-              <ETCaption1 bold>% OF PHASES WITH OVERAGES</ETCaption1>
+              <ETCaption1 bold>
+                % OF PHASES WITH {isUnderageToggled ? "UNDERAGE" : "OVERAGE"}
+              </ETCaption1>
             </span>
           </MuiTooltip>
         </Grid>
@@ -116,7 +121,7 @@ const PercentOfPhasesWithOveragesChart = () => {
                     dataKey="percent_overage"
                     fill={BAR_COLOR}
                     barSize={20}
-                    name="Average Overage"
+                    name="Median Overage"
                   />
                 </BarChart>
               </ResponsiveContainer>

@@ -3,6 +3,7 @@ import { useInsightsContext } from "components/insights/InsightsContext";
 import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsightsContext";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
+import { PhaseChartProps } from "components/insights/type";
 import { getChartColor } from "components/insights/utils";
 import { GrayBox, ETCaption1 } from "components/shared";
 import { showNotification } from "components/shared/notificationProvider";
@@ -17,7 +18,9 @@ import {
 } from "recharts";
 import { useGetOverageResponsibilityQuery } from "services/rtkQuery/phaseInsights";
 
-const OverageResponsibilityChart = () => {
+const OverageResponsibilityChart = ({
+  isUnderageToggled = false,
+}: PhaseChartProps) => {
   const { columnFilters } = useTableFilterContext();
   const { loadingWorkPhases } = usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
@@ -29,11 +32,10 @@ const OverageResponsibilityChart = () => {
   } = useGetOverageResponsibilityQuery(
     {
       columnFilters,
-      selectedWorkType: "all",
-      selectedPhase: "all",
       staffId: isUserInsights ? staffId : undefined,
+      isUnderageToggled,
     },
-    { skip: columnFilters.length === 0 },
+    { skip: columnFilters.length === 0 || isUnderageToggled },
   );
 
   if (error) {
@@ -71,34 +73,39 @@ const OverageResponsibilityChart = () => {
           </MuiTooltip>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart width={400} height={350}>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                label
-                isAnimationActive={false}
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${entry.id}`} fill={getChartColor(index)} />
-                ))}
-              </Pie>
-              <Legend
-                layout="vertical"
-                verticalAlign="middle"
-                align="right"
-                iconSize={16}
-                wrapperStyle={{
-                  fontSize: "16px",
-                }}
-              />
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+          {!isUnderageToggled && (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart width={400} height={350}>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label
+                  isAnimationActive={false}
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${entry.id}`}
+                      fill={getChartColor(index)}
+                    />
+                  ))}
+                </Pie>
+                <Legend
+                  layout="vertical"
+                  verticalAlign="middle"
+                  align="right"
+                  iconSize={16}
+                  wrapperStyle={{
+                    fontSize: "16px",
+                  }}
+                />
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
         </Grid>
       </Grid>
     </GrayBox>

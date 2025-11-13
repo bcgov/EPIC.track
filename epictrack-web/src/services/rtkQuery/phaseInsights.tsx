@@ -43,18 +43,18 @@ export const phaseInsightsApi = createApi({
       PhasesByMedianOverage[],
       {
         columnFilters?: ColumnFilter[];
-        selectedWorkType?: string;
         staffId?: number;
+        isUnderageToggled?: boolean;
       }
     >({
-      query: ({ columnFilters, selectedWorkType, staffId }) => ({
+      query: ({ columnFilters, staffId, isUnderageToggled }) => ({
         url: `insights/phases`,
         method: "POST",
         body: {
           group_by: "median_phase_overage",
           filters: columnFilters ?? [],
-          selected_work_type_id: selectedWorkType,
           staff_id: staffId,
+          is_underage_toggled: isUnderageToggled,
         },
       }),
     }),
@@ -62,18 +62,18 @@ export const phaseInsightsApi = createApi({
       PhasesByMedianOverage[],
       {
         columnFilters?: ColumnFilter[];
-        selectedWorkType?: string;
         staffId?: number;
+        isUnderageToggled?: boolean;
       }
     >({
-      query: ({ columnFilters, selectedWorkType, staffId }) => ({
+      query: ({ columnFilters, staffId, isUnderageToggled }) => ({
         url: `insights/phases`,
         method: "POST",
         body: {
           group_by: "percent_of_phases_with_overages",
           filters: columnFilters ?? [],
-          selected_work_type_id: selectedWorkType,
           staff_id: staffId,
+          is_underage_toggled: isUnderageToggled,
         },
       }),
     }),
@@ -81,20 +81,18 @@ export const phaseInsightsApi = createApi({
       ResponsibilityByWorktypePhase[],
       {
         columnFilters?: ColumnFilter[];
-        selectedWorkType?: string;
-        selectedPhase?: string;
         staffId?: number;
+        isUnderageToggled?: boolean;
       }
     >({
-      query: ({ columnFilters, selectedWorkType, selectedPhase, staffId }) => ({
+      query: ({ columnFilters, staffId, isUnderageToggled }) => ({
         url: `insights/phases`,
         method: "POST",
         body: {
           group_by: "overage_responsibility",
           filters: columnFilters ?? [],
-          selected_work_type_id: selectedWorkType,
-          selected_phase_id: selectedPhase,
           staff_id: staffId,
+          is_underage_toggled: isUnderageToggled,
         },
       }),
     }),
@@ -103,15 +101,17 @@ export const phaseInsightsApi = createApi({
       {
         columnFilters?: ColumnFilter[];
         staffId?: number;
+        isUnderageToggled?: boolean;
       }
     >({
-      query: ({ columnFilters, staffId }) => ({
+      query: ({ columnFilters, staffId, isUnderageToggled }) => ({
         url: `insights/phases`,
         method: "POST",
         body: {
           group_by: "median_overage_by_worktype",
           filters: columnFilters ?? [],
           staff_id: staffId,
+          is_underage_toggled: isUnderageToggled,
         },
       }),
     }),
