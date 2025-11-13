@@ -32,15 +32,6 @@ class PercentPhaseOverageInsightGenerator:
         days_taken_subq = get_days_taken_subquery(sus_subq)
         days_left_subq = get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq)
 
-        # if is_underage_toggled:
-        #     count_case = func.count(case((days_left_subq.c.days_left > 0, 1)))
-        # else:
-        #     count_case = func.count(case((days_left_subq.c.days_left < 0, 1)))
-
-        # percent_expr = (
-        #     cast(count_case, Float) /
-        #     cast(func.count(func.distinct(WorkPhase.id)), Float)
-        # )
         if is_underage_toggled:
             # Only count if days_taken > 0 and days_taken < total_days
             count_case = func.count(
@@ -55,7 +46,6 @@ class PercentPhaseOverageInsightGenerator:
         else:
             # Count all where days_left < 0 (overtime)
             count_case = func.count(case((days_left_subq.c.days_left < 0, 1)))
-        # -------- Adjusted Section Ends Here --------
 
         percent_expr = (
             cast(count_case, Float) /
