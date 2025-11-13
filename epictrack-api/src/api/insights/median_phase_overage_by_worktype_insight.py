@@ -19,10 +19,9 @@ from sqlalchemy import func, or_
 class MedianPhaseOverageByWorktypeInsightGenerator:
     """Insight generator for phase resource grouped by phases"""
 
-    def fetch_data(self, filters: List = None, selected_work_type_id: str = "all", staff_id: int = None) -> List[dict]:
+    def fetch_data(self, filters: List = None, staff_id: int = None, is_underage_toggled: bool = False) -> List[dict]:
         """Fetch data from db"""
         filter_exprs = build_insights_filters(filters, "phases") if filters else []
-        selected_work_type = WorkType.find_by_id(int(selected_work_type_id)) if selected_work_type_id != "all" else None
 
         # Build all necessary subqueries
         work_subq = get_work_subquery()
@@ -34,7 +33,12 @@ class MedianPhaseOverageByWorktypeInsightGenerator:
 
         # pylint: disable=duplicate-code
 
-        median_expr = func.percentile_cont(0.5).within_group(days_left_subq.c.days_left)
+        if is_underage_toggled:
+            percentile_column = days_taken_subq.c.days_taken
+        else:
+            percentile_column = days_left_subq.c.days_left
+
+        median_expr = func.percentile_cont(0.5).within_group(percentile_column)
 
         query = db.session.query(
             func.max(WorkType.name).label("work_type_name"),
@@ -55,6 +59,7 @@ class MedianPhaseOverageByWorktypeInsightGenerator:
         query = query.filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
+            WorkPhase.is_completed.is_(True) if is_underage_toggled else True,
             or_(
                 WorkPhase.legislated.is_(True),
                 WorkType.id == WorkTypeEnum.AMENDMENT.value
@@ -66,18 +71,20 @@ class MedianPhaseOverageByWorktypeInsightGenerator:
             *filter_exprs if filter_exprs else [],
         )
 
-        if selected_work_type:
-            query = query.filter(Work.work_type_id == selected_work_type.id)
-
         query = query \
             .outerjoin(ext_subq, ext_subq.c.work_phase_id == WorkPhase.id) \
             .outerjoin(sus_subq, sus_subq.c.work_phase_id == WorkPhase.id) \
             .outerjoin(days_taken_subq, days_taken_subq.c.work_phase_id == WorkPhase.id) \
             .outerjoin(total_days_subq, total_days_subq.c.work_phase_id == WorkPhase.id) \
             .outerjoin(days_left_subq, days_left_subq.c.work_phase_id == WorkPhase.id) \
-            .outerjoin(work_subq, work_subq.c.work_phase_id == WorkPhase.id) \
-            .where(days_left_subq.c.days_left < 0) \
-            .group_by(WorkType.name, Phase.name, Phase.sort_order)
+            .outerjoin(work_subq, work_subq.c.work_phase_id == WorkPhase.id)
+
+        if is_underage_toggled:
+            query = query.where(days_left_subq.c.days_left > 0).where(days_taken_subq.c.days_taken > 0).where(days_taken_subq.c.days_taken < total_days_subq.c.total_days)
+        else:
+            query = query.where(days_left_subq.c.days_left < 0)
+
+        query = query.group_by(WorkType.name, Phase.name, Phase.sort_order)
 
         # pylint: enable=duplicate-code
 

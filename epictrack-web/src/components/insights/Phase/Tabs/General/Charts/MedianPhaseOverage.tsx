@@ -3,6 +3,7 @@ import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { useInsightsContext } from "components/insights/InsightsContext";
 import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsightsContext";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
+import { PhaseChartProps } from "components/insights/type";
 import { BAR_COLOR } from "components/insights/utils";
 import { GrayBox, ETCaption1, ETCaption2 } from "components/shared";
 import { showNotification } from "components/shared/notificationProvider";
@@ -19,7 +20,9 @@ import {
 } from "recharts";
 import { useGetPhasesByMedianOverageQuery } from "services/rtkQuery/phaseInsights";
 
-const MedianPhaseOverageChart = () => {
+const MedianPhaseOverageChart = ({
+  isUnderageToggled = false,
+}: PhaseChartProps) => {
   const { columnFilters } = useTableFilterContext();
   const { loadingWorkPhases } = usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
@@ -31,8 +34,8 @@ const MedianPhaseOverageChart = () => {
   } = useGetPhasesByMedianOverageQuery(
     {
       columnFilters,
-      selectedWorkType: "all",
       staffId: isUserInsights ? staffId : undefined,
+      isUnderageToggled,
     },
     { skip: columnFilters.length === 0 },
   );
@@ -61,7 +64,8 @@ const MedianPhaseOverageChart = () => {
         >
           <div>{label}</div>
           <div>
-            Median Overage: {median_overage}
+            Median {isUnderageToggled ? "Underage" : "Overage"}:{" "}
+            {median_overage}
             <br />
             IQR Low: {iqr_low}
             <br />
@@ -112,7 +116,9 @@ const MedianPhaseOverageChart = () => {
         <Grid item xs={6}>
           <MuiTooltip title="Includes Legislated Phases plus Amendment Phases">
             <span>
-              <ETCaption1 bold>MEDIAN PHASE OVERAGE</ETCaption1>
+              <ETCaption1 bold>
+                MEDIAN PHASE {isUnderageToggled ? "UNDERAGE" : "OVERAGE"}
+              </ETCaption1>
             </span>
           </MuiTooltip>
         </Grid>
@@ -144,7 +150,7 @@ const MedianPhaseOverageChart = () => {
                   <BarChart
                     layout="vertical"
                     data={chartData}
-                    margin={{ left: 80, bottom: 40 }}
+                    margin={{ left: 80, bottom: 40, top: 20 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
