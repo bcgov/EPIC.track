@@ -74,7 +74,7 @@ from .work_issue_updates import WorkIssueUpdates
 from .work_issues import WorkIssues
 from .work_phase import WorkPhase
 from .work_status import WorkStatus
-from .work_type import WorkType
+from .work_type import WorkType, WorkTypeEnum
 from .indigenous_consultation_levels import IndigenousConsultationLevel
 from .linked_work import LinkedWork
 from .project_state import ProjectState

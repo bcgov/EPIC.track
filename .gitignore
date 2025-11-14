@@ -35,3 +35,4 @@ node_modules
 wc-lib
 data
 /epictrack-web/.env
+/epictrack-web/cypress/screenshots/
