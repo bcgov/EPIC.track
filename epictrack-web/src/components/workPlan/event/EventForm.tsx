@@ -495,21 +495,33 @@ const EventForm = ({
         return;
       }
 
-      const updatedResult = await eventService.update(
-        data,
-        Number(event.id),
-        pushEvents || pushEventConfirmed,
-      );
-      showNotification("Milestone details updated", {
-        type: "success",
-      });
-      handleHighlightRows([
-        {
-          type: EVENT_TYPE.MILESTONE,
-          id: event.id,
-        },
-      ]);
-      return updatedResult;
+      try {
+        const updatedResult = await eventService.update(
+          data,
+          Number(event.id),
+          pushEvents || pushEventConfirmed,
+        );
+
+        showNotification("Milestone details updated", {
+          type: "success",
+        });
+        handleHighlightRows([
+          {
+            type: EVENT_TYPE.MILESTONE,
+            id: event.id,
+          },
+        ]);
+        return updatedResult;
+      } catch (error: any) {
+        const errorMessage =
+          error?.response?.data || "Failed to update milestone details";
+
+        showNotification(errorMessage, {
+          type: "error",
+          duration: 5000,
+        });
+        throw error;
+      }
     },
     [event, handleHighlightRows, pushEvents],
   );
@@ -524,6 +536,7 @@ const EventForm = ({
     },
     [event, createEvent, updateEvent],
   );
+
   const handleSaveEvent = async (
     data?: MilestoneEvent,
     pushEventConfirmed = false,
@@ -567,8 +580,8 @@ const EventForm = ({
       }
     } catch (e: any) {
       const message = getErrorMessage(e);
-      // If it's a 422 error and the lock dialog is open, show error in dialog
-      if (e.response?.status === 422 && showEventLockDialog) {
+      // If it's a UnprocessableEventError and the lock dialog is open, show error in dialog
+      if (e.errorCode === "UnprocessableEventError" && showEventLockDialog) {
         setLockDialogError(message);
       } else {
         // Otherwise show in snackbar

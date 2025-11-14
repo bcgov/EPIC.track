@@ -10,30 +10,32 @@ import {
 import { When } from "react-if";
 import { Box, Button, Grid, IconButton, SxProps, Tooltip } from "@mui/material";
 import Moment from "moment";
-import { ETCaption1, ETParagraph } from "../../shared";
-import ETAccordion from "../../shared/accordion/Accordion";
-import ETAccordionSummary from "../../shared/accordion/components/AccordionSummary";
-import ETAccordionDetails from "../../shared/accordion/components/AccordionDetails";
-import BorderLinearProgress from "../../shared/progress/Progress";
+import { ETCaption1, ETParagraph } from "components/shared";
+import { Restricted } from "components/shared/restricted";
+import { showNotification } from "components/shared/notificationProvider";
+import BorderLinearProgress from "components/shared/progress/Progress";
+import ETAccordion from "components/shared/accordion/Accordion";
+import ETAccordionDetails from "components/shared/accordion/components/AccordionDetails";
+import ETAccordionSummary from "components/shared/accordion/components/AccordionSummary";
+import TrackDialog from "components/shared/TrackDialog";
 import EventGrid from "../event";
 import { WorkplanContext } from "../WorkPlanContext";
 import Icons from "../../icons/index";
 import { IconProps } from "../../icons/type";
 import { Palette } from "../../../styles/theme";
-import { MONTH_DAY_YEAR, ROLES } from "../../../constants/application-constant";
+import { MONTH_DAY_YEAR, ROLES } from "constants/application-constant";
 import { PhaseAccordionProps } from "./type";
 import phaseOverageResponsibilityService from "services/phaseOverageResponsibilityService";
-import { showNotification } from "components/shared/notificationProvider";
+import { workService } from "services/workService/workService";
 import {
   OverageResponsibilityEnum,
   OverageResponsibilityLookup,
   PhaseOverageResponsibility,
 } from "models/phaseOverageResponsibilities";
+import { WorkTypeEnum } from "models/workType";
 import OverageResponsibilityForm from "./overageResponsibility/OverageResponsibilityForm";
-import TrackDialog from "components/shared/TrackDialog";
-import { Restricted } from "components/shared/restricted";
 import { useUserHasRole } from "../utils";
-import { workService } from "services/workService/workService";
+import WarningBox from "components/shared/warningBox";
 
 const GoToIcon: FC<IconProps> = Icons["GoToIcon"];
 const ExpandIcon: FC<IconProps> = Icons["ExpandIcon"];
@@ -118,6 +120,8 @@ const PhaseAccordion = ({
 
   const isCompleted = phase.work_phase.is_completed;
   const isLegislated = phase.work_phase.legislated;
+  const isOverageResponsibilityRequired =
+    isLegislated || work?.work_type_id === WorkTypeEnum.AMENDMENT;
   const responsibilitiesText = overageResponsibilities
     ?.map((r) => r.responsibility)
     .join(", ");
@@ -188,10 +192,10 @@ const PhaseAccordion = ({
   ]);
 
   const getPhaseOverdueColour = (
-    isLegislated: boolean,
+    isOverageResponsibilityRequired: boolean,
     isCompleted: boolean,
   ) => {
-    if (!isLegislated) return Palette.neutral.dark;
+    if (!isOverageResponsibilityRequired) return Palette.neutral.dark;
     if (daysAhead > 0 && isCompleted) return Palette.success.dark;
     if (daysAhead < 0) return Palette.error.dark;
     else return Palette.neutral.dark;
@@ -326,14 +330,16 @@ const PhaseAccordion = ({
                         sx={{
                           ...summaryContentStyle,
                           color: getPhaseOverdueColour(
-                            isLegislated,
+                            isOverageResponsibilityRequired,
                             isCompleted,
                           ),
                         }}
                       >
                         <>
                           {phase.days_taken} / {phase.total_number_of_days}
-                          {isLegislated && <> {daysTakenText}</>}
+                          {isOverageResponsibilityRequired && (
+                            <> {daysTakenText}</>
+                          )}
                         </>
                       </ETParagraph>
                       <When condition={phase.days_left < 0}>
@@ -378,7 +384,7 @@ const PhaseAccordion = ({
                       }}
                     >
                       Overage Responsibility
-                      {hasOverage && isLegislated && (
+                      {hasOverage && isOverageResponsibilityRequired && (
                         <span style={{ color: "red", marginLeft: "2px" }}>
                           *
                         </span>
@@ -521,6 +527,29 @@ const PhaseAccordion = ({
             }}
           >
             {expanded && <EventGrid />}
+            {hasOverage &&
+              isOverageResponsibilityRequired &&
+              overageResponsibilities?.length <= 0 && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    width: "100%",
+                    padding: "0",
+                  }}
+                >
+                  <WarningBox
+                    title={`You've exceeded the ${isLegislated ? "legislated" : ""} timeline in ${phase.work_phase.name}.`}
+                    subTitle={
+                      <>
+                        You must add an <b>Overage Responsibility</b> before you
+                        can to complete this phase.
+                      </>
+                    }
+                    isTitleBold={true}
+                  />
+                </Box>
+              )}
           </ETAccordionDetails>
         </ETAccordion>
       </Box>
@@ -541,7 +570,7 @@ const PhaseAccordion = ({
           daysTakenText={daysTakenText}
           overageResponsibilities={overageResponsibilities ?? []}
           daysAhead={daysAhead}
-          isLegislated={isLegislated}
+          isRequired={isOverageResponsibilityRequired}
           hasOverage={hasOverage}
         />
       </TrackDialog>

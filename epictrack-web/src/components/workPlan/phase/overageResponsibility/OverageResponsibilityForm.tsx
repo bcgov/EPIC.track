@@ -40,7 +40,7 @@ interface OverageResponsibilityFormProps {
   overageResponsibilities: PhaseOverageResponsibility[];
   daysAhead: number;
   hasOverage: boolean;
-  isLegislated: boolean;
+  isRequired: boolean;
 }
 
 const OverageResponsibilityForm = ({
@@ -48,7 +48,7 @@ const OverageResponsibilityForm = ({
   daysTakenText,
   overageResponsibilities,
   hasOverage,
-  isLegislated,
+  isRequired,
 }: OverageResponsibilityFormProps) => {
   const { selectedWorkPhase } = useContext(WorkplanContext);
 
@@ -62,7 +62,7 @@ const OverageResponsibilityForm = ({
       responsibility:
         overageResponsibilities?.map((r) => r.responsibility) ?? [],
       notes: selectedWorkPhase?.work_phase.responsibility_notes ?? "",
-      isLegislated,
+      isRequired,
       hasOverage,
     },
     mode: "onBlur",
@@ -114,7 +114,7 @@ const OverageResponsibilityForm = ({
           </ETCaption1>
         </Grid>
         <Grid item xs={12}>
-          <ETFormLabel required={isLegislated && hasOverage}>
+          <ETFormLabel required={isRequired && hasOverage}>
             Overage Responsibility
           </ETFormLabel>
           <FormControl sx={{ minWidth: 220, width: "100%" }}>
