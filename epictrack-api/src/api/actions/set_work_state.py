@@ -44,5 +44,5 @@ class SetWorkState(ActionFactory):
             "field_type": FieldTypeEnum.STRING.value,
         }
         SpecialFieldService.create_special_field_entry(
-            work_state_special_field_data, commit=False
+            work_state_special_field_data, commit=False, work_id=source_event.work_id
         )
