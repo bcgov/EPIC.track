@@ -22,16 +22,6 @@ def find_event_date(event) -> datetime:
 
 def event_compare_func(event_x, event_y):
     """Compare function for event sort"""
-    # if (
-    #     event_x.event_position == EventPositionEnum.START.value
-    #     or event_y.event_position == EventPositionEnum.END.value
-    # ):
-    #     return -1
-    # if (
-    #     event_y.event_position == EventPositionEnum.START.value
-    #     or event_x.event_position == EventPositionEnum.END.value
-    # ):
-    #     return 1
     if (find_event_date(event_x).date() - find_event_date(event_y).date()).days == 0:
         return -1 if event_x.id < event_y.id else 1
     if (find_event_date(event_x).date() - find_event_date(event_y).date()).days < 0:

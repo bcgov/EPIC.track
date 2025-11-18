@@ -229,6 +229,7 @@ class EventService:
 
         if commit:
             db.session.commit()
+
         return event
 
     @classmethod
@@ -268,6 +269,7 @@ class EventService:
                 event_to_check,
                 all_work_events,
                 number_of_days_to_be_pushed,
+                event_old_data,
             )
             result["subsequent_event_push_required"] = True
             result["days_pushed"] = number_of_days_to_be_pushed
@@ -280,9 +282,11 @@ class EventService:
         event: Event,
         all_work_events: List[Event],
         number_of_days_to_be_pushed: int,
+        event_old_data: dict = None,
     ):
         # pylint: disable=too-many-arguments,too-many-locals
         """Validate the existing event to see which phase end date does it cause this event or any other event to go"""
+        event_old_copy = Event(**event_old_data) if event_old_data else None
         result = {"phase_end_push_required": False}
         legislated_phase_end_push_can_happen = (
             event.event_configuration.event_position.value
@@ -302,7 +306,7 @@ class EventService:
             all_work_phases, current_work_phase
         )
         current_event_index = cls.find_event_index(
-            all_work_events, event, current_work_phase
+            all_work_events, event_old_copy if event_old_copy else event, current_work_phase
         )
         work_phases_to_be_checked = [all_work_phases[current_work_phase_index]]
         if current_work_phase.legislated:

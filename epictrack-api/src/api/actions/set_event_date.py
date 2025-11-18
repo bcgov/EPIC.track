@@ -15,6 +15,8 @@ class SetEventDate(ActionFactory):  # pylint: disable=too-few-public-methods
         from api.services.event import EventService  # pylint: disable=import-outside-toplevel
 
         event_configuration = find_configuration(source_event, params)
+        if event_configuration is None:
+            raise ValueError(f"Event configuration not found when setting event date for event ID {event.id if event else 'N/A'} while processing action based on source event ID {source_event.id}")
         number_of_days_to_be_added = int(params.get("start_at", event_configuration.start_at))
         if event is None:
             # fallback if no event passed
