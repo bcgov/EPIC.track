@@ -660,10 +660,9 @@ class EventService:
 
         if not cls._is_last_phase(current_work_phase, all_work_phases): # not last phase
             return True
-        if (
-            event.actual_date
-            and event.event_configuration.event_position.value != EventPositionEnum.END.value
-        ): # not end event
+        if event.event_configuration.event_position.value != EventPositionEnum.END.value: # not end event
+            return True
+        if not event.actual_date: # event is not completed
             return True
         # find date difference between event actual and phase end date
         days_difference = (event.actual_date.date() - current_work_phase.end_date.date()).days
