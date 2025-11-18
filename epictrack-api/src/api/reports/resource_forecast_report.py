@@ -326,10 +326,11 @@ class EAResourceForeCastReport(ReportFactory):
         """Returns work_ids matches event actual >= report date"""
         end_work_phase_query = (
             db.session.query(
-                func.max(WorkPhase.id).label("end_phase_id"),
+                WorkPhase.id.label("end_phase_id"),
             )
             .filter(WorkPhase.is_active.is_(True), WorkPhase.is_deleted.is_(False))
-            .group_by(WorkPhase.work_id)
+            .distinct(WorkPhase.work_id)
+            .order_by(WorkPhase.work_id, func.coalesce(WorkPhase.sort_order, WorkPhase.id).desc())
             .subquery()
         )
         current_app.logger.info(f"End work phase query: {end_work_phase_query}")
