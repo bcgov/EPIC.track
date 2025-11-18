@@ -24,7 +24,6 @@ def find_configuration(source_event: Event, params) -> int:
         PhaseCode.ea_act_id == params.get("ea_act_id"),
         WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
         WorkPhase.is_active.is_(True),
-        WorkPhase.is_completed.is_(False),
         PhaseCode.is_active.is_(True),
     ]
     if work_phase_is_completed is not None:
