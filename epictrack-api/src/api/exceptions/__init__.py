@@ -84,10 +84,20 @@ class UnprocessableEntityError(UnprocessableEntity):
 
 
 class UnprocessableEventError(UnprocessableEntity):
-    """Exception raised when resource is not processable"""
+    """Exception raised when event resource is not processable"""
 
     def __init__(self, message, *args, **kwargs):
         """Return a valid UnprocessableEntityError."""
         super().__init__(*args, **kwargs)
         self.description = {"message": message, "code": "UnprocessableEventError"}
+        self.response = Response(self.description, status=422)
+
+
+class UnprocessableEndEventError(UnprocessableEntity):
+    """Exception raised when END event resource would conflict"""
+
+    def __init__(self, message, *args, **kwargs):
+        """Return a valid UnprocessableEntityError."""
+        super().__init__(*args, **kwargs)
+        self.description = {"message": message, "code": "UnprocessableEndEventError"}
         self.response = Response(self.description, status=422)

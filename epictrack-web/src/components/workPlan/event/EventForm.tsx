@@ -494,34 +494,21 @@ const EventForm = ({
       if (!event) {
         return;
       }
-
-      try {
-        const updatedResult = await eventService.update(
-          data,
-          Number(event.id),
-          pushEvents || pushEventConfirmed,
-        );
-
-        showNotification("Milestone details updated", {
-          type: "success",
-        });
-        handleHighlightRows([
-          {
-            type: EVENT_TYPE.MILESTONE,
-            id: event.id,
-          },
-        ]);
-        return updatedResult;
-      } catch (error: any) {
-        const errorMessage =
-          error?.response?.data || "Failed to update milestone details";
-
-        showNotification(errorMessage, {
-          type: "error",
-          duration: 5000,
-        });
-        throw error;
-      }
+      const updatedResult = await eventService.update(
+        data,
+        Number(event.id),
+        pushEvents || pushEventConfirmed,
+      );
+      showNotification("Milestone details updated", {
+        type: "success",
+      });
+      handleHighlightRows([
+        {
+          type: EVENT_TYPE.MILESTONE,
+          id: event.id,
+        },
+      ]);
+      return updatedResult;
     },
     [event, handleHighlightRows, pushEvents],
   );
@@ -580,9 +567,18 @@ const EventForm = ({
       }
     } catch (e: any) {
       const message = getErrorMessage(e);
-      // If it's a UnprocessableEventError and the lock dialog is open, show error in dialog
-      if (e.errorCode === "UnprocessableEventError" && showEventLockDialog) {
+      // If it's an UnprocessableEventError or UnprocessableEndEventError and the lock dialog is open, show error in dialog
+      if (
+        (e.response.data.code === "UnprocessableEventError" ||
+          e.response.data.code === "UnprocessableEndEventError") &&
+        showEventLockDialog
+      ) {
         setLockDialogError(message);
+        showNotification("Failed to update milestone details", {
+          type: "error",
+          duration: 3000,
+        });
+        return;
       } else {
         // Otherwise show in snackbar
         showNotification(message, {
