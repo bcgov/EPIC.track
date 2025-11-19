@@ -25,7 +25,7 @@ from sqlalchemy.orm import joinedload
 
 from api.actions.action_handler import ActionHandler
 from api.models.dashboard_search_options import EventCalendarSearchOptions
-from api.exceptions import ResourceNotFoundError, UnprocessableEntityError, UnprocessableEventError
+from api.exceptions import ResourceNotFoundError, UnprocessableEntityError, UnprocessableEventError, UnprocessableEndEventError
 from api.models import (
     PRIMARY_CATEGORIES,
     CalendarEvent,
@@ -42,7 +42,7 @@ from api.models import (
 )
 from api.models.action import Action, ActionEnum
 from api.models.action_configuration import ActionConfiguration
-from api.models.event_template import EventPositionEnum
+from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
 from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
 from api.models.project import Project
 from api.models.work_type import WorkType
@@ -986,8 +986,12 @@ class EventService:
     ) -> None:
         """Check to see if the previous event has actual date present
 
-        # When you put actual date of an event, it is mandatory to
+        When you put actual date of an event, it is mandatory to
         have actual dates in all the previous events.
+
+        For legislated phases: checks if setting an actual date would cause
+        a MANDATORY event to occur after the END event, requiring the END event's
+        anticipated date to be updated first.
         """
         event_old_copy = Event(**event_old_data) if event_old_data else None
         if event.actual_date:
@@ -1012,10 +1016,37 @@ class EventService:
                 phase_events = sorted(
                     phase_events, key=functools.cmp_to_key(event_compare_func)
                 )
+                # For legislated phases check if a mandatory event would occur after the END event
+                current_work_phase = all_work_phases[current_work_phase_index]
+                if current_work_phase.legislated:
+                    end_event = next(
+                        (
+                            e for e in phase_events
+                            if e.event_position == EventPositionEnum.END.value
+                        ),
+                        None
+                    )
+                    if (
+                        end_event and
+                        event.event_configuration.visibility.value == EventTemplateVisibilityEnum.MANDATORY.value and
+                        event.id != end_event.id
+                    ):
+                        # Check if this event would occur after the END event
+                        end_event_index = next(
+                            (i for i, e in enumerate(phase_events) if e.id == end_event.id),
+                            None
+                        )
+                        if end_event_index is not None and event_index > end_event_index:
+                            # This mandatory event is being set to occur after the END event
+                            if end_event.anticipated_date:
+                                raise UnprocessableEndEventError(
+                                    f"This milestone must occur before the end event '{end_event.name}'. Please update the anticipated date of '{end_event.name}' before proceeding."
+                                )
+                # Default check for previous events
                 previous_event = phase_events[event_index - 1]
                 if event_index > 0 and not previous_event.actual_date:
                     raise UnprocessableEventError(
-                        f"This milestone must occur before '{previous_event.name}'. Please check that the actual date you entered is correct, or change the anticipated date of '{previous_event.name}' before proceeding."
+                        f"This milestone must occur before '{previous_event.name}'. Please change the anticipated date of that milestone before proceeding."
                     )
 
     @classmethod

@@ -50,11 +50,10 @@ const AxiosErrorHandler = ({ ...props }) => {
             //   break;
             // // ... And so on
             case 422: // Handles the unique case for UnprocessableEventError
-              const errorCode = error.response.data?.code;
+              console.log("Error 422 intercepted in AxiosErrorHandler");
+              console.log("error response data:", error.response.data);
               error.response.data = error.response.data.message;
-              if (errorCode === "UnprocessableEventError") {
-                return Promise.reject(error);
-              }
+              console.log("Modified error response data:", error.response.data);
               throw error;
             default:
               throw error;
