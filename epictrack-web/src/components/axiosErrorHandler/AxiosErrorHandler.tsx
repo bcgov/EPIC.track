@@ -49,9 +49,6 @@ const AxiosErrorHandler = ({ ...props }) => {
             //   // Handle Unauthorized here
             //   break;
             // // ... And so on
-            case 422: // Handles the unique case for UnprocessableEventError
-              // error.response.data = error.response.data.message;
-              throw error;
             default:
               throw error;
           }
