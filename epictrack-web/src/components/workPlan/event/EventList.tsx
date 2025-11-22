@@ -61,7 +61,6 @@ const EventList = () => {
   const [events, setEvents] = useState<EventsGridModel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [milestoneEvent, setMilestoneEvent] = useState<MilestoneEvent>();
-  const [openExtensionWarningBox, setOpenExtensionWarningBox] = useState(true);
   const [responsibilities, setResponsibilities] = useState<OptionType[]>([]);
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
@@ -101,14 +100,6 @@ const EventList = () => {
   const { handleHighlightRows } = useContext(EventContext);
 
   const notificationId = useRef<SnackbarKey | null>(null);
-
-  const showExtensionWarningBox = useMemo(
-    () =>
-      Number(selectedWorkPhase?.days_left) < 0 &&
-      selectedWorkPhase?.work_phase.legislated &&
-      openExtensionWarningBox,
-    [selectedWorkPhase, openExtensionWarningBox],
-  );
 
   const endEvent = useMemo(
     () =>
@@ -852,17 +843,6 @@ const EventList = () => {
         />
       </Grid>
       <Grid container>
-        <When
-          condition={
-            Number(selectedWorkPhase?.days_left) < 0 && showExtensionWarningBox
-          }
-        >
-          <WarningBox
-            onCloseHandler={() => setOpenExtensionWarningBox(false)}
-            title="The time limit for this Phase has been exceeded"
-            isTitleBold={true}
-          />
-        </When>
         <When
           condition={
             selectedWorkPhase?.work_phase.is_suspended &&
