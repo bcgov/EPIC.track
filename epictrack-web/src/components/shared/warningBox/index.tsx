@@ -21,13 +21,9 @@ const WarningBox = (props?: WarningBoxProps) => {
         flexDirection: "column",
         color:
           props?.variant === "error"
-            ? Palette.neutral.dark
+            ? Palette.error.text
             : Palette.secondary.dark,
         borderRadius: "4px",
-        border:
-          props?.variant === "error"
-            ? `1px solid ${Palette.error.light}`
-            : "unset",
       }}
       container
     >
