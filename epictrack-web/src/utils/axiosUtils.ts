@@ -9,7 +9,9 @@ export const getErrorMessage = (_error: any): string => {
   const axiosError = getAxiosError(_error);
   if (axiosError) {
     const errorData = axiosError.response?.data as any;
-    return errorData?.message || COMMON_ERROR_MESSAGE;
+    return (
+      errorData?.message.message || errorData?.message || COMMON_ERROR_MESSAGE
+    );
   }
   return COMMON_ERROR_MESSAGE;
 };

@@ -159,7 +159,7 @@ class EventService:
             one_of_roles=one_of_roles, work_id=work_id
         )
         all_work_events = cls.find_events(
-            work_id, None, PRIMARY_CATEGORIES, scoped=False
+            work_id, current_work_phase.id, PRIMARY_CATEGORIES, scoped=False
         )
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
