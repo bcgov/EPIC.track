@@ -17,7 +17,7 @@ const WorksLegend: React.FC<WorksLegendProps> = ({ legendWorks }) => {
   return (
     <Box
       sx={{
-        padding: "0.5rem",
+        padding: "0.5rem 1rem",
         height: "100%",
         display: "flex",
         flexDirection: "column",
