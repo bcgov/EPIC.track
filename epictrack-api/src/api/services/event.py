@@ -161,6 +161,12 @@ class EventService:
         all_work_events = cls.find_events(
             work_id, None, PRIMARY_CATEGORIES, scoped=False
         )
+        current_phase_events = list(
+            filter(
+                lambda x: x.event_configuration.work_phase_id == current_work_phase.id,
+                all_work_events,
+            )
+        )
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
 
@@ -169,17 +175,16 @@ class EventService:
         if (event.event_position == EventPositionEnum.END.value
                 and event.actual_date is None
                 and data.get("actual_date")):
-            start_event = next(
+            phase_start_event = next(
                             (
                                 e
-                                for e in all_work_events
+                                for e in current_phase_events
                                 if e.event_position == EventPositionEnum.START.value
-                                and e.actual_date is not None
                             ),
                             None,
                         )
-            if start_event:
-                days_taken = (data.get("actual_date").date() - start_event.actual_date.date()).days
+            if phase_start_event and phase_start_event.actual_date:
+                days_taken = (data.get("actual_date").date() - phase_start_event.actual_date.date()).days
                 work: Work = Work.find_by_id(work_id)
                 if (current_work_phase.legislated or work.work_type_id == WorkTypeEnum.AMENDMENT.value) \
                         and (current_work_phase.number_of_days - days_taken < 0):

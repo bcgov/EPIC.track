@@ -130,6 +130,7 @@ const PhaseAccordion = ({
     : `Upcoming ${isLegislated ? "Legislated " : ""}Phase`;
   const daysAhead = phase.total_number_of_days - phase.days_taken;
   const hasOverage = daysAhead < 0;
+  const isNextEventEndEvent = phase.next_milestone === phase.end_milestone.name;
 
   const isSelectedPhase = useMemo<boolean>(
     () => phase.work_phase.id === selectedWorkPhase?.work_phase.id,
@@ -529,7 +530,8 @@ const PhaseAccordion = ({
             {expanded && <EventGrid />}
             {hasOverage &&
               isOverageResponsibilityRequired &&
-              overageResponsibilities?.length <= 0 && (
+              overageResponsibilities?.length <= 0 &&
+              isNextEventEndEvent && (
                 <Box
                   sx={{
                     display: "flex",
