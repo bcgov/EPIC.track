@@ -999,6 +999,8 @@ class EventService:
         anticipated date to be updated first.
         """
         event_old_copy = Event(**event_old_data) if event_old_data else None
+        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order)
+
         if event.actual_date:
             if current_work_phase_index > 0:
                 previous_work_phase = all_work_phases[current_work_phase_index - 1]
