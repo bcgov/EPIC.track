@@ -5,7 +5,6 @@ import GeneralWorkPhaseListing from "./Charts/GeneralWorkPhaseListing";
 import OverageResponsibilityChart from "./Charts/OverageResponsibility";
 import MedianPhaseOverageByWorktypeChart from "./Charts/MedianPhaseOverageByWorktype";
 import { useState } from "react";
-import PhaseInsightUnderageToggle from "../../PhaseUnderageToggle";
 
 const General = () => {
   const [viewUnderage, setViewUnderage] = useState(false);
@@ -16,11 +15,10 @@ const General = () => {
       showMoreContent={<GeneralWorkPhaseListing />}
       defaultExpanded={true}
       data-cy="general-phase-accordion"
+      phaseInsights={true}
+      viewPhaseUnderage={viewUnderage}
+      setViewPhaseUnderage={setViewUnderage}
     >
-      <PhaseInsightUnderageToggle
-        checked={viewUnderage}
-        handleToggle={setViewUnderage}
-      />
       <Grid container spacing={2}>
         <Grid className="chart-item" item xs={8}>
           <MedianPhaseOverageChart isUnderageToggled={viewUnderage} />
