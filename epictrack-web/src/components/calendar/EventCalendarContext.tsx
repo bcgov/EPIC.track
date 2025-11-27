@@ -6,7 +6,6 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import dayjs from "dayjs";
 import { CalendarEvent, MilestoneEvent } from "models/event";
 import { eventService } from "services/eventService/eventService";
 import { taskEventService } from "services/taskEventService/taskEventService";
@@ -89,12 +88,14 @@ export const EventCalendarProvider = ({
     event_types: [],
     work_ids: [],
     staff_id: null,
-    year: dayjs().year(),
+    year: new Date().getFullYear(),
     teams: [],
     ...initialSearchOptions,
   };
   const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [selectedYear, setSelectedYear] = useState<number>(dayjs().year());
+  const [selectedYear, setSelectedYear] = useState<number>(
+    new Date().getFullYear(),
+  );
   const [loading, setLoading] = useState<boolean>(false);
   const [searchOptions, setSearchOptions] =
     useState<CalendarSearchOptions>(defaultSearchOptions);
@@ -116,10 +117,13 @@ export const EventCalendarProvider = ({
 
   const initialCollapsedMonths = useMemo(() => {
     const collapsed: Record<string, boolean> = {};
-    const currentMonthLabel = dayjs().format("MMM 'YY");
+    const currentMonthLabel = dateUtils.formatMonthLabel(
+      new Date().getFullYear(),
+      new Date().getMonth(),
+    );
 
     for (let i = 0; i < 12; i++) {
-      const monthLabel = dayjs().year(selectedYear).month(i).format("MMM 'YY");
+      const monthLabel = dateUtils.formatMonthLabel(selectedYear, i);
       collapsed[monthLabel] = monthLabel !== currentMonthLabel;
     }
     return collapsed;

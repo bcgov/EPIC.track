@@ -25,7 +25,7 @@ const FullCalendarLegend: React.FC<CalendarType> = ({ calendar }) => {
           color={Palette.primary.main}
           bold
         >
-          Legend
+          Icon Legend
         </ETSubhead>
       </Grid>
       <Grid item xs={12}>

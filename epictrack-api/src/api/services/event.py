@@ -25,7 +25,7 @@ from sqlalchemy.orm import joinedload
 
 from api.actions.action_handler import ActionHandler
 from api.models.dashboard_search_options import EventCalendarSearchOptions
-from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
+from api.exceptions import ResourceNotFoundError, UnprocessableEntityError, UnprocessableEventError, UnprocessableEndEventError
 from api.models import (
     PRIMARY_CATEGORIES,
     CalendarEvent,
@@ -37,11 +37,12 @@ from api.models import (
     WorkCalendarEvent,
     WorkPhase,
     WorkStateEnum,
+    WorkTypeEnum,
     db,
 )
 from api.models.action import Action, ActionEnum
 from api.models.action_configuration import ActionConfiguration
-from api.models.event_template import EventPositionEnum
+from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
 from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
 from api.models.project import Project
 from api.models.work_type import WorkType
@@ -160,23 +161,33 @@ class EventService:
         all_work_events = cls.find_events(
             work_id, None, PRIMARY_CATEGORIES, scoped=False
         )
+        current_phase_events = list(
+            filter(
+                lambda x: x.event_configuration.work_phase_id == current_work_phase.id,
+                all_work_events,
+            )
+        )
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
 
-        # First check overage responsibility is set for end event in legislated phase if overage
-        if event_old_data.get("event_position") == EventPositionEnum.END.value and event_old_data.get("actual_date"):
-            start_event = next(
+        # If a phase has an overage, check a responsibility is set if this is the end event in legislated phase
+        # or a phase in an Amendment.
+        if (event.event_position == EventPositionEnum.END.value
+                and event.actual_date is None
+                and data.get("actual_date")):
+            phase_start_event = next(
                             (
                                 e
-                                for e in all_work_events
-                                if e.event_configuration.event_position == EventPositionEnum.START.value
-                                and e.actual_date is not None
+                                for e in current_phase_events
+                                if e.event_position == EventPositionEnum.START.value
                             ),
                             None,
                         )
-            if start_event:
-                days_taken = (event.actual_date.date() - start_event.actual_date.date()).days
-                if current_work_phase.legislated and (current_work_phase.total_number_of_days - days_taken < 0):
+            if phase_start_event and phase_start_event.actual_date:
+                days_taken = (data.get("actual_date").date() - phase_start_event.actual_date.date()).days
+                work: Work = Work.find_by_id(work_id)
+                if (current_work_phase.legislated or work.work_type_id == WorkTypeEnum.AMENDMENT.value) \
+                        and (current_work_phase.number_of_days - days_taken < 0):
                     responsibilities = PhaseOverageResponsibilityService.find_by_work_phase_id(
                         current_work_phase.id, is_deleted=False
                     )
@@ -185,7 +196,7 @@ class EventService:
                             "Cannot complete a legislated phase without an Overage Responsibility. Select a responsibility first."
                         )
             else:
-                current_app.logger.info("No start event found in the phase.")
+                current_app.logger.info("No start event found in the phase. Cannot calculate days taken or check overage responsibility.")
 
         event = event.update(data, commit=False)
 
@@ -223,6 +234,7 @@ class EventService:
 
         if commit:
             db.session.commit()
+
         return event
 
     @classmethod
@@ -262,6 +274,7 @@ class EventService:
                 event_to_check,
                 all_work_events,
                 number_of_days_to_be_pushed,
+                event_old_data,
             )
             result["subsequent_event_push_required"] = True
             result["days_pushed"] = number_of_days_to_be_pushed
@@ -274,9 +287,11 @@ class EventService:
         event: Event,
         all_work_events: List[Event],
         number_of_days_to_be_pushed: int,
+        event_old_data: dict = None,
     ):
         # pylint: disable=too-many-arguments,too-many-locals
         """Validate the existing event to see which phase end date does it cause this event or any other event to go"""
+        event_old_copy = Event(**event_old_data) if event_old_data else None
         result = {"phase_end_push_required": False}
         legislated_phase_end_push_can_happen = (
             event.event_configuration.event_position.value
@@ -296,7 +311,7 @@ class EventService:
             all_work_phases, current_work_phase
         )
         current_event_index = cls.find_event_index(
-            all_work_events, event, current_work_phase
+            all_work_events, event_old_copy if event_old_copy else event, current_work_phase
         )
         work_phases_to_be_checked = [all_work_phases[current_work_phase_index]]
         if current_work_phase.legislated:
@@ -650,10 +665,9 @@ class EventService:
 
         if not cls._is_last_phase(current_work_phase, all_work_phases): # not last phase
             return True
-        if (
-            event.actual_date
-            and event.event_configuration.event_position.value != EventPositionEnum.END.value
-        ): # not end event
+        if event.event_configuration.event_position.value != EventPositionEnum.END.value: # not end event
+            return True
+        if not event.actual_date: # event is not completed
             return True
         # find date difference between event actual and phase end date
         days_difference = (event.actual_date.date() - current_work_phase.end_date.date()).days
@@ -977,10 +991,16 @@ class EventService:
     ) -> None:
         """Check to see if the previous event has actual date present
 
-        # When you put actual date of an event, it is mandatory to
+        When you put actual date of an event, it is mandatory to
         have actual dates in all the previous events.
+
+        For legislated phases: checks if setting an actual date would cause
+        a MANDATORY event to occur after the END event, requiring the END event's
+        anticipated date to be updated first.
         """
         event_old_copy = Event(**event_old_data) if event_old_data else None
+        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order)
+
         if event.actual_date:
             if current_work_phase_index > 0:
                 previous_work_phase = all_work_phases[current_work_phase_index - 1]
@@ -1003,10 +1023,37 @@ class EventService:
                 phase_events = sorted(
                     phase_events, key=functools.cmp_to_key(event_compare_func)
                 )
+                # For legislated phases check if a mandatory event would occur after the END event
+                current_work_phase = all_work_phases[current_work_phase_index]
+                if current_work_phase.legislated:
+                    end_event = next(
+                        (
+                            e for e in phase_events
+                            if e.event_position == EventPositionEnum.END.value
+                        ),
+                        None
+                    )
+                    if (
+                        end_event and
+                        event.event_configuration.visibility.value == EventTemplateVisibilityEnum.MANDATORY.value and
+                        event.id != end_event.id
+                    ):
+                        # Check if this event would occur after the END event
+                        end_event_index = next(
+                            (i for i, e in enumerate(phase_events) if e.id == end_event.id),
+                            None
+                        )
+                        if end_event_index is not None and event_index > end_event_index:
+                            # This mandatory event is being set to occur after the END event
+                            if end_event.anticipated_date:
+                                raise UnprocessableEndEventError(
+                                    f"This milestone must occur before the end event '{end_event.name}'. Please update the anticipated date of '{end_event.name}' before proceeding."
+                                )
+                # Default check for previous events
                 previous_event = phase_events[event_index - 1]
                 if event_index > 0 and not previous_event.actual_date:
-                    raise UnprocessableEntityError(
-                        "Previous event should be completed to proceed"
+                    raise UnprocessableEventError(
+                        f"This milestone must occur before '{previous_event.name}'. Please change the anticipated date of that milestone before proceeding."
                     )
 
     @classmethod

@@ -61,7 +61,6 @@ const EventList = () => {
   const [events, setEvents] = useState<EventsGridModel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [milestoneEvent, setMilestoneEvent] = useState<MilestoneEvent>();
-  const [openExtensionWarningBox, setOpenExtensionWarningBox] = useState(true);
   const [responsibilities, setResponsibilities] = useState<OptionType[]>([]);
   const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
@@ -69,6 +68,7 @@ const EventList = () => {
   const [showDeleteMilestoneButton, setShowDeleteMilestoneButton] =
     useState<boolean>(false);
   const [showMilestoneForm, setShowMilestoneForm] = useState<boolean>(false);
+  const [showEndEventWarningBox, setShowEndEventWarningBox] = useState(false);
   const [showSuspendedWarningBox, setShowSuspendedWarningBox] = useState(true);
   const [showTaskForm, setShowTaskForm] = useState<boolean>(false);
   const [showTemplateConfirmation, setShowTemplateConfirmation] =
@@ -101,12 +101,13 @@ const EventList = () => {
 
   const notificationId = useRef<SnackbarKey | null>(null);
 
-  const showExtensionWarningBox = useMemo(
+  const endEvent = useMemo(
     () =>
-      Number(selectedWorkPhase?.days_left) < 0 &&
-      selectedWorkPhase?.work_phase.legislated &&
-      openExtensionWarningBox,
-    [selectedWorkPhase, openExtensionWarningBox],
+      events.find(
+        (event) =>
+          event.event_configuration?.event_position === EventPosition.END,
+      ),
+    [events],
   );
 
   const isEventFormFieldLocked = useMemo(() => {
@@ -114,6 +115,32 @@ const EventList = () => {
   }, [milestoneEvent]);
 
   useEffect(() => setEvents([]), [selectedWorkPhase?.work_phase.id]);
+
+  useEffect(() => {
+    if (!endEvent || !selectedWorkPhase?.work_phase.legislated) {
+      setShowEndEventWarningBox(false);
+      return;
+    }
+    const endEventIndex = events.indexOf(endEvent);
+    const mandatoryEventIndices = events.reduce<number[]>(
+      (indices, event, index) => {
+        if (event.visibility === EventTemplateVisibility.MANDATORY) {
+          indices.push(index);
+        }
+        return indices;
+      },
+      [],
+    );
+    // Check if any mandatory event comes after the end event
+    if (
+      mandatoryEventIndices.length > 0 &&
+      endEventIndex < Math.max(...mandatoryEventIndices)
+    ) {
+      setShowEndEventWarningBox(true);
+      return;
+    }
+    setShowEndEventWarningBox(false);
+  }, [endEvent, events, selectedWorkPhase, setShowEndEventWarningBox]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -768,7 +795,7 @@ const EventList = () => {
   };
   const deleteAction = (
     <>
-      {showDeleteMilestoneButton && taskEvent && (
+      {showDeleteMilestoneButton && (
         <Box
           sx={{
             display: "flex",
@@ -818,17 +845,6 @@ const EventList = () => {
       <Grid container>
         <When
           condition={
-            Number(selectedWorkPhase?.days_left) < 0 && showExtensionWarningBox
-          }
-        >
-          <WarningBox
-            onCloseHandler={() => setOpenExtensionWarningBox(false)}
-            title="The time limit for this Phase has been exceeded"
-            isTitleBold={true}
-          />
-        </When>
-        <When
-          condition={
             selectedWorkPhase?.work_phase.is_suspended &&
             showSuspendedWarningBox
           }
@@ -840,6 +856,30 @@ const EventList = () => {
             subTitle="You will need to add a Resumption Milestone to resume this Work"
           />
         </When>
+        {showEndEventWarningBox && (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              width: "100%",
+              padding: "0",
+            }}
+          >
+            <WarningBox
+              onCloseHandler={() => setShowEndEventWarningBox(false)}
+              title={"Phase End Event is Out of Order"}
+              subTitle={
+                <>
+                  You must change the <b>Anticipated Date</b> for the{" "}
+                  <b>{endEvent?.name}</b> milestone so that it occurs at the end
+                  of the phase.
+                </>
+              }
+              isTitleBold={true}
+              variant="error"
+            />
+          </Box>
+        )}
       </Grid>
       <Grid container item columnSpacing={2}>
         <Grid

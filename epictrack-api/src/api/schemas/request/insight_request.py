@@ -15,7 +15,6 @@
 from marshmallow import fields
 
 from .base import RequestQueryParameterSchema
-from datetime import datetime
 
 
 class WorkInsightRequestQueryParameterSchema(RequestQueryParameterSchema):
@@ -80,23 +79,10 @@ class PhaseInsightRequestQueryParameterSchema(RequestQueryParameterSchema):
         missing=None
     )
 
-    selected_work_type_id = fields.Str(
-        metadata={"description": "Selected work type to filter by (optional)"},
+    is_underage_toggled = fields.Bool(
+        metadata={"description": "Flag to determine whether we calculate underage or overage for Work Phases"},
         required=False,
-        default="all",
-    )
-
-    selected_phase_id = fields.Str(
-        metadata={"description": "Selected phase to filter by (optional)"},
-        required=False,
-        missing="all"
-    )
-
-    selected_year = fields.Int(
-        metadata={"description": "Selected year to filter by (optional)"},
-        required=False,
-        default=datetime.now().year,
-        missing=datetime.now().year
+        missing=False
     )
 
     staff_id = fields.Int(

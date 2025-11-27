@@ -57,6 +57,7 @@ export const Palette = {
     main: "#D8292F",
     dark: "#A31E22",
     light: "#E57074",
+    text: "#6D1417",
     bg: {
       light: "#FCEDEE",
     },

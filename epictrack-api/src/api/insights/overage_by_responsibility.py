@@ -2,12 +2,12 @@
 
 from typing import List
 
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 from api.models import db
 from api.models.work_phase import WorkPhase
 from api.models.work import Work
-from api.models.work_type import WorkType
+from api.models.work_type import WorkType, WorkTypeEnum
 from api.models.phase_code import PhaseCode as Phase
 from api.models.phase_overage_responsibility import PhaseOverageResponsibility
 from api.models.project import Project
@@ -21,10 +21,12 @@ from api.utils.helpers import filter_query_by_staff
 class OverageByResponsibilityInsightGenerator:
     """Insight generator for phase resource grouped by phases"""
 
-    def fetch_data(self, filters: List = None, selected_work_type_id: str = "all", selected_phase_id: str = "all", staff_id: int = None) -> List[dict]:
+    def fetch_data(self, filters: List = None, staff_id: int = None, is_underage_toggled: bool = False) -> List[dict]:
         """Fetch data from db"""
+        # Early return if underage toggled, as this insight is only for overages
+        if is_underage_toggled:
+            return []
         filter_exprs = build_insights_filters(filters, "phases") if filters else []
-        selected_work_type = WorkType.find_by_id(int(selected_work_type_id)) if selected_work_type_id != "all" else None
 
         # Build all necessary subqueries
         work_subq = get_work_subquery()
@@ -52,17 +54,16 @@ class OverageByResponsibilityInsightGenerator:
         query = query.filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
-            WorkPhase.legislated.is_(True),
+            or_(
+                WorkPhase.legislated.is_(True),
+                WorkType.id == WorkTypeEnum.AMENDMENT.value,
+            ),
             *filter_exprs if filter_exprs else [],
             PhaseOverageResponsibility.is_active.is_(True),
             PhaseOverageResponsibility.is_deleted.is_(False),
+            Phase.is_active.is_(True),
+            Phase.is_deleted.is_(False),
         )
-
-        if selected_work_type:
-            query = query.filter(Work.work_type_id == selected_work_type.id)
-
-        if selected_phase_id != "all":
-            query = query.filter(WorkPhase.phase_id == int(selected_phase_id))
 
         query = query \
             .outerjoin(ext_subq, ext_subq.c.work_phase_id == WorkPhase.id) \

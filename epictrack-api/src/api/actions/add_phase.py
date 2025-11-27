@@ -46,8 +46,8 @@ class AddPhase(ActionFactory):
             work_phase_data.update(
                 {
                     "work_id": source_event.work.id,
-                    "start_date": phase_start_date.isoformat(),
-                    "end_date": end_date.isoformat(),
+                    "start_date": f"{phase_start_date}",
+                    "end_date": end_date,
                     "sort_order": sort_order,
                 }
             )

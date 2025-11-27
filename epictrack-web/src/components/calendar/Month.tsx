@@ -1,20 +1,14 @@
-import { Box, Button, Grid } from "@mui/material";
-import { FC, useEffect, useRef, useState } from "react";
+import { Box, Button } from "@mui/material";
+import { FC } from "react";
 import { Palette } from "styles/theme";
 import { IconProps } from "../icons/type";
 import Icons from "../icons";
 import EventRow from "./EventRow";
 import MonthDatesRow from "./MonthDatesRow";
 import { CalendarEvent } from "models/event";
-import MonthWorkLegendItem from "./Legends/MonthWorkLegendItem";
 
 const ExpandIcon: FC<IconProps> = Icons["ExpandIcon"];
 const CollapseIcon: FC<IconProps> = Icons["CollapseIcon"];
-
-type CalendarWork = {
-  id: number;
-  title: string;
-};
 
 type MonthProps = {
   monthLabel: string;
@@ -39,37 +33,6 @@ const Month: FC<MonthProps> = ({
   milestoneEvents: events,
   showWorkLegend = false,
 }) => {
-  const [works, setWorks] = useState<CalendarWork[]>([]);
-
-  const legendRef = useRef<HTMLDivElement | null>(null);
-  const [legendHeight, setLegendHeight] = useState(0);
-
-  useEffect(() => {
-    if (!legendRef.current) return;
-
-    setLegendHeight(legendRef.current.offsetHeight);
-
-    const observer = new ResizeObserver(([entry]) => {
-      setLegendHeight(entry.contentRect.height);
-    });
-    observer.observe(legendRef.current);
-
-    return () => observer.disconnect();
-  }, [works, isCollapsed, showWorkLegend]);
-
-  useEffect(() => {
-    const uniqueWorks = Array.from(
-      new Set(events?.map((event) => event.work_id)),
-    ).map((workId) => {
-      const event = events?.find((event) => event.work_id === workId);
-      return {
-        id: workId,
-        title: event ? event.work_name : "Unknown Work",
-      };
-    });
-    setWorks(uniqueWorks);
-  }, [events]);
-
   return (
     <Box display="flex" alignItems="stretch" gap={0.5}>
       <Box
@@ -106,23 +69,6 @@ const Month: FC<MonthProps> = ({
         >
           {monthLabel}
         </Button>
-        {!isCollapsed && showWorkLegend && (
-          <Grid
-            container
-            direction="row"
-            ref={legendRef}
-            spacing={0}
-            sx={{ padding: "0.275rem" }}
-          >
-            {works.map((work) => (
-              <MonthWorkLegendItem
-                name={work.title}
-                key={work.id}
-                work_id={work.id}
-              />
-            ))}
-          </Grid>
-        )}
       </Box>
       <Box
         display="grid"
@@ -142,7 +88,6 @@ const Month: FC<MonthProps> = ({
             cellSizePx={cellSizePx}
             days={days}
             events={events ?? []}
-            legendHeight={legendHeight}
             showWorkLegend={showWorkLegend}
           />
         )}

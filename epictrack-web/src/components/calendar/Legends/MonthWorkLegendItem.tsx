@@ -32,7 +32,7 @@ const MonthWorkLegendItem = (item: MonthWorkLegendItemProps) => {
       sx={{
         cursor: "pointer",
         width: "100%",
-        padding: "0.275rem 0.275rem",
+        padding: "0.275rem",
         color: Palette.primary.accent.main,
         "&:hover": {
           color: Palette.primary.accent.light,

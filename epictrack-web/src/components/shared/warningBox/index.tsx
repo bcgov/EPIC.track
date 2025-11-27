@@ -12,11 +12,17 @@ const WarningBox = (props?: WarningBoxProps) => {
   return (
     <Grid
       sx={{
-        backgroundColor: Palette.secondary.bg.light,
+        backgroundColor:
+          props?.variant === "error"
+            ? Palette.error.bg.light
+            : Palette.secondary.bg.light,
         padding: "16px 24px 16px 24px",
         display: "flex",
         flexDirection: "column",
-        color: Palette.secondary.dark,
+        color:
+          props?.variant === "error"
+            ? Palette.error.text
+            : Palette.secondary.dark,
         borderRadius: "4px",
       }}
       container

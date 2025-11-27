@@ -49,9 +49,6 @@ const AxiosErrorHandler = ({ ...props }) => {
             //   // Handle Unauthorized here
             //   break;
             // // ... And so on
-            // case 422:
-            //   console.log("ERROR ", error.response?.data);
-            //   break;
             default:
               throw error;
           }

@@ -8,8 +8,10 @@ export const getAxiosError = (error: any): AxiosError | null => {
 export const getErrorMessage = (_error: any): string => {
   const axiosError = getAxiosError(_error);
   if (axiosError) {
-    const errorDate = axiosError.response?.data as any;
-    return errorDate?.message || COMMON_ERROR_MESSAGE;
+    const errorData = axiosError.response?.data as any;
+    return (
+      errorData?.message.message || errorData?.message || COMMON_ERROR_MESSAGE
+    );
   }
   return COMMON_ERROR_MESSAGE;
 };

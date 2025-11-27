@@ -53,16 +53,11 @@ class InsightService:  # pylint:disable=too-few-public-methods
 
     @classmethod
     # pylint: disable=too-many-arguments
-    def fetch_phase_insights(cls, group_by: str, selected_year: int, filters: list = None, selected_work_type_id: str = "all", selected_phase_id: str = "all", staff_id: int = None):
+    def fetch_phase_insights(cls, group_by: str, filters: list = None, staff_id: int = None, is_underage_toggled: bool = False):
         """Fetch phase insights"""
-        current_app.logger.debug(f"Fetch phase insights {group_by = }")
+        current_app.logger.debug(f"Fetch phase insights {group_by = } {filters = } {staff_id = } {is_underage_toggled = }")
         insight_generator: InsightGenerator = get_insight_generator(
             resource="phases", group_by=group_by
         )
-        if group_by == "overage_responsibility":
-            insights = insight_generator().fetch_data(filters=filters, selected_work_type_id=selected_work_type_id, selected_phase_id=selected_phase_id, staff_id=staff_id)
-        elif group_by == "overages_by_year":
-            insights = insight_generator().fetch_data(filters=filters, selected_year=selected_year, selected_work_type_id=selected_work_type_id, staff_id=staff_id)
-        else:
-            insights = insight_generator().fetch_data(filters=filters, selected_work_type_id=selected_work_type_id, staff_id=staff_id)
+        insights = insight_generator().fetch_data(filters=filters, staff_id=staff_id, is_underage_toggled=is_underage_toggled)
         return insights

@@ -1,6 +1,7 @@
 """Contains all insight generator related resources"""
 
 from api.insights.insight_protocol import InsightGenerator
+from api.insights.median_phase_overage_by_worktype_insight import MedianPhaseOverageByWorktypeInsightGenerator
 from api.insights.project_region_insight import ProjectByRegionInsightGenerator
 from api.insights.project_subtype_insight import ProjectBySubTypeInsightGenerator
 from api.insights.project_type_insight import ProjectByTypeInsightGenerator
@@ -15,11 +16,9 @@ from api.insights.work_type_insight import WorkByTypeInsightGenerator
 from api.insights.work_year_created_insight import WorkByYearOpenedInsightGenerator
 from api.insights.work_year_completed_insight import WorkByYearCompletedInsightGenerator
 from api.insights.work_closure_by_work_state import WorkClosureByWorkState
-from api.insights.phase_overage_insight import AveragePhaseOverageInsightGenerator
+from api.insights.phase_overage_insight import MedianPhaseOverageInsightGenerator
 from api.insights.percent_phase_overage_insight import PercentPhaseOverageInsightGenerator
 from api.insights.overage_by_responsibility import OverageByResponsibilityInsightGenerator
-from api.insights.overages_by_act_insight import OverageByActInsightGenerator
-from api.insights.overage_by_year import OverageByYearInsightGenerator
 
 
 def get_insight_generator(resource: str, group_by: str) -> InsightGenerator:
@@ -44,11 +43,10 @@ def get_insight_generator(resource: str, group_by: str) -> InsightGenerator:
             "subtype": ProjectBySubTypeInsightGenerator,
         },
         "phases": {
-            "average_phase_overage": AveragePhaseOverageInsightGenerator,
+            "median_phase_overage": MedianPhaseOverageInsightGenerator,
             "percent_of_phases_with_overages": PercentPhaseOverageInsightGenerator,
             "overage_responsibility": OverageByResponsibilityInsightGenerator,
-            "overages_by_act": OverageByActInsightGenerator,
-            "overages_by_year": OverageByYearInsightGenerator,
+            "median_overage_by_worktype": MedianPhaseOverageByWorktypeInsightGenerator,
         }
     }
 
