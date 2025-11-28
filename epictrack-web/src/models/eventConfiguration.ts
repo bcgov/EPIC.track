@@ -9,4 +9,5 @@ export default interface EventConfiguration {
   event_position: EventPosition;
   visibilty_mode: EventTemplateVisibility;
   work_phase_id: number;
+  start_at?: number;
 }
