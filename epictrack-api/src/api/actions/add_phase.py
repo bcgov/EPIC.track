@@ -51,6 +51,7 @@ class AddPhase(ActionFactory):
                     "sort_order": sort_order,
                 }
             )
+            db.session.flush()
             event_templates_for_the_phase = EventTemplateService.find_by_phase_id(
                 work_phase_data.get("phase_id")
             )

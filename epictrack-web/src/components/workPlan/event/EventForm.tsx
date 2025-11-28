@@ -295,8 +295,20 @@ const EventForm = ({
   );
 
   const anticipatedDefaultValue = useMemo(() => {
-    return event ? event.anticipated_date : selectedWorkPhase?.start_date;
-  }, [event, selectedWorkPhase]);
+    if (event) return event.anticipated_date;
+    else if (
+      selectedConfiguration &&
+      selectedConfiguration.start_at !== undefined &&
+      selectedWorkPhase?.start_date !== undefined
+    ) {
+      const startAtDate = new Date(selectedWorkPhase.start_date);
+      const newDate = new Date(
+        startAtDate.getTime() +
+          selectedConfiguration.start_at * 24 * 60 * 60 * 1000,
+      );
+      return newDate;
+    } else return selectedWorkPhase?.start_date;
+  }, [event, selectedWorkPhase, selectedConfiguration]);
 
   const actualReferenceDate = useMemo(() => {
     return event ? event.anticipated_date : anticipatedDefaultValue;
@@ -328,7 +340,15 @@ const EventForm = ({
     formState: { errors },
     reset,
     getValues,
+    setValue,
   } = methods;
+
+  useEffect(() => {
+    if (anticipatedDefaultValue && !event) {
+      // Only if there's no existing event
+      setValue("anticipated_date", dayjs(anticipatedDefaultValue).format());
+    }
+  }, [anticipatedDefaultValue, event, setValue]);
 
   useEffect(() => {
     if (

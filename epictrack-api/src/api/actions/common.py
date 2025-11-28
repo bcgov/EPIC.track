@@ -17,9 +17,10 @@ def find_configuration(source_event: Event, params) -> int:
         )
         return event_configuration
     work_phase_is_completed = params.get("work_phase_state_is_completed")
+    phase_name = params.get("phase_name") or source_event.event_configuration.work_phase.name
     work_phase_filters = [
         WorkPhase.work_id == source_event.work_id,
-        WorkPhase.name == params.get("phase_name"),
+        WorkPhase.name == phase_name,
         PhaseCode.work_type_id == params.get("work_type_id"),
         PhaseCode.ea_act_id == params.get("ea_act_id"),
         WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
@@ -82,3 +83,12 @@ def deactivate_calendar_events_by_configuration_ids(configuration_ids: [int]):
         db.session.query(CalendarEvent).filter(
             CalendarEvent.id.in_(calendar_event_ids)
         ).update({CalendarEvent.is_active: False})
+
+
+def param_to_bool(value):
+    """Convert parameter to boolean"""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.lower() == "true"
+    return False

@@ -84,6 +84,13 @@ class EventService:
         data["work_id"] = current_work_phase.work_id
         event = Event(**data)
         event.flush()
+
+        event = (
+            db.session.query(Event)
+            .options(joinedload(Event.event_configuration))
+            .filter_by(id=event.id)
+            .one()
+        )
         if not current_app.config["SKIP_EVENT_LOGIC"]:
             cls._process_events(
                 current_work_phase, event, all_work_events, push_events, None
