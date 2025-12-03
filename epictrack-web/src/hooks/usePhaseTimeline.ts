@@ -11,6 +11,7 @@ interface UsePhaseTimelineReturn {
   completedPhases: WorkPhaseAdditionalInfo[];
   overduePhases: WorkPhaseAdditionalInfo[];
   numberOfExtensionDaysRecommended: number;
+  isDecisionComplete: boolean;
 }
 
 export const usePhaseTimeline = ({
@@ -102,10 +103,20 @@ export const usePhaseTimeline = ({
     return legislatedPhasesBalance + finalPhaseDaysDiff;
   }, [finalPhaseDaysDiff, totalDaysEarly, totalDaysOverdue]);
 
+  const isDecisionComplete = useMemo(() => {
+    const finalPhase = workPhases.find((phase) => phase.is_last_phase);
+    if (!finalPhase) {
+      return false;
+    }
+    const endMilestone = finalPhase.end_milestone;
+    return endMilestone.actual_date != null;
+}, [workPhases]);
+
   return {
     currentAndFuturePhases,
     completedPhases,
     overduePhases,
     numberOfExtensionDaysRecommended,
+    isDecisionComplete,
   };
 };
