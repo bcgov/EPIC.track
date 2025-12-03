@@ -110,7 +110,7 @@ export const usePhaseTimeline = ({
     }
     const endMilestone = finalPhase.end_milestone;
     return endMilestone.actual_date != null;
-}, [workPhases]);
+  }, [workPhases]);
 
   return {
     currentAndFuturePhases,

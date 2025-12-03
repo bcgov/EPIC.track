@@ -143,8 +143,8 @@ const PhaseContainer = () => {
                 value={
                   showCompletedAnticipated
                     ? dateStyleOptions.find(
-                      (option) => option.value === "ACTUAL_AND_ANTICIPATED",
-                    )
+                        (option) => option.value === "ACTUAL_AND_ANTICIPATED",
+                      )
                     : dateStyleOptions[0]
                 }
                 onChange={(selectedOption) => {
@@ -216,13 +216,14 @@ const PhaseContainer = () => {
         >
           {!isDecisionComplete ? (
             <WarningBox
-              title={`You've exceeded the legislated timeline in phase${overduePhases.length > 1 ? "s" : ""
-                }: ${overduePhases.map((p) => p.work_phase.name).join(", ")}.`}
+              title={`You've exceeded the legislated timeline in phase${
+                overduePhases.length > 1 ? "s" : ""
+              }: ${overduePhases.map((p) => p.work_phase.name).join(", ")}.`}
               subTitle={
                 <>
                   You must add an <b>Extension Milestone</b> of{" "}
-                  <b>{numberOfExtensionDaysRecommended} days</b> to complete this
-                  Work.
+                  <b>{numberOfExtensionDaysRecommended} days</b> to complete
+                  this Work.
                 </>
               }
               isTitleBold={true}
@@ -232,14 +233,20 @@ const PhaseContainer = () => {
               title="Date Miscalculation"
               subTitle={
                 <>
-                  This Work was completed with a date miscalculation. Please {" "}
-                  <a href={REPORT_ISSUE_LINKS.JSM_PORTAL} target="_blank" rel="noopener noreferrer">
+                  This Work was completed with a date miscalculation. Please{" "}
+                  <a
+                    href={REPORT_ISSUE_LINKS.JSM_PORTAL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     submit a Data Fix request
-                  </a>{" "} to rectify this alert.
+                  </a>{" "}
+                  to rectify this alert.
                 </>
               }
               isTitleBold={true}
-            />)}
+            />
+          )}
         </Box>
       )}
     </Grid>
