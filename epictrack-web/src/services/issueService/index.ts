@@ -25,7 +25,7 @@ class IssueService {
     }>(Endpoints.WorkIssues.GET_ALL, {
       page: page,
       size: size,
-      sort_key: "start_date",
+      sort_key: "posted_date",
       sort_order: sort_order,
       ...searchOptions,
     });
