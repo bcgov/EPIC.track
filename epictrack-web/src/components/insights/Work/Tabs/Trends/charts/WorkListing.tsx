@@ -2,7 +2,10 @@ import React, { useEffect, useMemo } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
-import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
+import {
+  getSelectFilterOptions,
+  rowsPerPageOptions,
+} from "components/shared/MasterTrackTable/utils";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
@@ -17,6 +20,8 @@ import { MONTH_DAY_YEAR } from "constants/application-constant";
 import WorkState from "components/workPlan/WorkState";
 import { useInsightsContext } from "components/insights/InsightsContext";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
+import { getStatusFilter } from "components/shared/filterSelect/utils";
+import { ETChip } from "components/shared/chip/ETChip";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
@@ -30,7 +35,7 @@ const WorkList = () => {
 
   const queryArg = useMemo(() => {
     return {
-      is_active: true,
+      is_active: false,
       ...(isUserInsights && staffId ? { staffId } : {}),
     };
   }, [isUserInsights, staffId]);
@@ -119,6 +124,13 @@ const WorkList = () => {
       });
     }
   }, [error]);
+
+  const statuses = getSelectFilterOptions(
+    works,
+    "is_active",
+    (value) => (value ? "Active" : "Inactive"),
+    (value) => value,
+  );
 
   const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
     () => [
@@ -306,8 +318,23 @@ const WorkList = () => {
           );
         },
       },
+      {
+        accessorKey: "is_active",
+        header: "Status",
+        size: 75,
+        filterVariant: "multi-select",
+        filterSelectOptions: statuses,
+        filterFn: "multiSelectFilter",
+        Filter: getStatusFilter<Work>,
+        Cell: ({ cell }) => (
+          <span>
+            {cell.getValue<boolean>() && <ETChip active label="Active" />}
+            {!cell.getValue<boolean>() && <ETChip inactive label="Inactive" />}
+          </span>
+        ),
+      },
     ],
-    [projects, workStates, workTypes, started_years, closed_years],
+    [projects, workStates, workTypes, started_years, closed_years, statuses],
   );
   return (
     <MasterTrackTable

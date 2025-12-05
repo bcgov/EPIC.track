@@ -35,6 +35,7 @@ work_table_filter_map = {
     "start_date": lambda v: extract('year', Work.start_date).in_(v),
     "work_decision_date": lambda v: extract('year', Work.work_decision_date).in_(v),
     "work_state": Work.work_state.in_,
+    "is_active": lambda v: Work.is_active.is_(v[0]),
 }
 
 project_table_filter_map = {
