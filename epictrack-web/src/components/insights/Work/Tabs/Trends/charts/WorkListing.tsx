@@ -129,7 +129,7 @@ const WorkList = () => {
     works,
     "is_active",
     (value) => (value ? "Active" : "Inactive"),
-    (value) => value
+    (value) => value,
   );
 
   const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
@@ -334,7 +334,7 @@ const WorkList = () => {
         ),
       },
     ],
-    [projects, workStates, workTypes, started_years, closed_years, statuses]
+    [projects, workStates, workTypes, started_years, closed_years, statuses],
   );
   return (
     <MasterTrackTable
