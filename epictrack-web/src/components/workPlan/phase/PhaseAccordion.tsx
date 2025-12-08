@@ -111,7 +111,6 @@ const PhaseAccordion = ({
   const [overageResponsibilities, setOverageResponsibilities] = useState<
     PhaseOverageResponsibility[]
   >([]);
-  const [daysTakenText, setDaysTakenText] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
   const { getWorkPhases, selectedWorkPhase, setSelectedWorkPhase, work } =
     useContext(WorkplanContext);
@@ -143,29 +142,18 @@ const PhaseAccordion = ({
     }
   }, [expanded, phase, setSelectedWorkPhase]);
 
-  const getPhaseDaysTaken = useCallback(() => {
+  const daysTakenText = useMemo(() => {
     if (isCompleted) {
-      if (daysAhead > 0) {
-        setDaysTakenText(
-          `(${Math.abs(daysAhead)} day${daysAhead !== 1 ? "s" : ""} early)`,
-        );
-      } else if (daysAhead < 0) {
-        setDaysTakenText(
-          `(${Math.abs(daysAhead)} day${daysAhead !== 1 ? "s" : ""} over)`,
-        );
-      }
+      if (daysAhead > 0)
+        return `(${Math.abs(daysAhead)} day${daysAhead !== 1 ? "s" : ""} early)`;
+      if (daysAhead < 0)
+        return `(${Math.abs(daysAhead)} day${daysAhead !== 1 ? "s" : ""} over)`;
     } else {
-      if (daysAhead < 0) {
-        setDaysTakenText(
-          `(${Math.abs(daysAhead)} day${daysAhead !== 1 ? "s" : ""} over)`,
-        );
-      }
+      if (daysAhead < 0)
+        return `(${Math.abs(daysAhead)} day${daysAhead !== 1 ? "s" : ""} over)`;
     }
+    return "";
   }, [daysAhead, isCompleted]);
-
-  useEffect(() => {
-    getPhaseDaysTaken();
-  }, [getPhaseDaysTaken]);
 
   const getPhaseOverageResponsibilities = useCallback(async () => {
     try {
