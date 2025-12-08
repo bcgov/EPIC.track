@@ -214,21 +214,7 @@ const PhaseContainer = () => {
             padding: "1rem",
           }}
         >
-          {!isDecisionComplete ? (
-            <WarningBox
-              title={`You've exceeded the legislated timeline in phase${
-                overduePhases.length > 1 ? "s" : ""
-              }: ${overduePhases.map((p) => p.work_phase.name).join(", ")}.`}
-              subTitle={
-                <>
-                  You must add an <b>Extension Milestone</b> of{" "}
-                  <b>{numberOfExtensionDaysRecommended} days</b> to complete
-                  this Work.
-                </>
-              }
-              isTitleBold={true}
-            />
-          ) : (
+          {isDecisionComplete && ctx.work?.is_completed ? (
             <WarningBox
               title="Date Miscalculation"
               subTitle={
@@ -242,6 +228,23 @@ const PhaseContainer = () => {
                     submit a Data Fix request
                   </a>{" "}
                   to rectify this alert.
+                </>
+              }
+              isTitleBold={true}
+            />
+          ) : (
+            <WarningBox
+              title={`You've exceeded the legislated timeline in phase${
+                overduePhases.length > 1 ? "s" : ""
+              }: ${overduePhases.map((p) => p.work_phase.name).join(", ")}.`}
+              subTitle={
+                <>
+                  You must add an <b>Extension Milestone</b> of{" "}
+                  <b>
+                    {numberOfExtensionDaysRecommended} day
+                    {numberOfExtensionDaysRecommended > 1 ? "s" : ""}
+                  </b>{" "}
+                  to complete this Work.
                 </>
               }
               isTitleBold={true}

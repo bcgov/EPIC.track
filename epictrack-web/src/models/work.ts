@@ -13,7 +13,7 @@ export interface Work extends MasterBase {
   epic_description: string;
   is_cac_recommended: boolean;
   is_active: boolean;
-  is_complete: boolean;
+  is_completed: boolean;
   is_high_priority: boolean;
   is_deleted: boolean;
   start_date: string;
