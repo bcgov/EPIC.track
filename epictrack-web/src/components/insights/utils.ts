@@ -33,13 +33,15 @@ export const exportAccordionChartsToPdf = async (
 
   // Clone the charts container
   const clone = container.cloneNode(true) as HTMLDivElement;
+  //Fixed export size for consistency
+  const EXPORT_WIDTH = 750;
 
   // Offscreen wrapper to remove height restrictions
   const wrapper = document.createElement("div");
   wrapper.style.position = "absolute";
   wrapper.style.top = "-9999px";
   wrapper.style.left = "-9999px";
-  wrapper.style.width = container.offsetWidth + "px";
+  wrapper.style.width = EXPORT_WIDTH + "px";
   wrapper.style.display = "block";
   wrapper.classList.add("exporting");
 
@@ -49,21 +51,55 @@ export const exportAccordionChartsToPdf = async (
       max-height: none !important;
       height: auto !important;
       overflow: visible !important;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-smoothing: antialiased;
     }
+    .exporting svg {
+      overflow: visible !important;
+    }
+    /* Recharts does not render legends inside main svg of the chart. 
+    Manually set legend font sizes for export */
+    .exporting .recharts-legend-wrapper .recharts-legend-item-text {
+      font-size: 14px !important;
+      line-height: 1 !important;
+    }
+    .exporting .median-phase-overage-worktype-chart .recharts-legend-wrapper {
+      transform: scale(0.5) translateX(20%);
+      transform-origin: bottom right;
+    }
+  }
+
   `;
   wrapper.appendChild(style);
   wrapper.appendChild(clone);
   document.body.appendChild(wrapper);
 
-  const origCharts = container.querySelectorAll(".chart-item");
+  // const origCharts = container.querySelectorAll(".chart-item");
   const clonedCharts = clone.querySelectorAll(".chart-item");
-  origCharts.forEach((orig, idx) => {
-    const rect = (orig as HTMLElement).getBoundingClientRect();
-    (clonedCharts[idx] as HTMLElement).style.maxWidth = rect.width + "px";
-    (clonedCharts[idx] as HTMLElement).style.height = "auto";
-    (clonedCharts[idx] as HTMLElement).style.flex = "0 0 auto";
-    (clonedCharts[idx] as HTMLElement).style.alignSelf = "flex-start";
+  clonedCharts.forEach((chart) => {
+    const chartEl = chart as HTMLElement;
+    chartEl.style.width = EXPORT_WIDTH + "px";
+    chartEl.style.maxWidth = EXPORT_WIDTH + "px";
+    chartEl.style.minWidth = EXPORT_WIDTH + "px";
+    chartEl.style.height = "auto";
+    chartEl.style.flex = "0 0 auto";
+    chartEl.style.alignSelf = "flex-start";
+
+    const colorBoxes = chartEl.querySelectorAll(".MuiBox-root");
+    colorBoxes.forEach((box) => {
+      const boxEl = box as HTMLElement;
+      const bgColor = boxEl.style.backgroundColor;
+      if (bgColor) {
+        // Re-apply background color to ensure it's captured
+        boxEl.style.backgroundColor = bgColor;
+        boxEl.style.setProperty("background-color", bgColor, "important");
+      }
+    });
   });
+
+  // Allow time for offscreen rendering
+  await new Promise((resolve) => setTimeout(resolve, 300));
 
   try {
     const pdf = new jsPDF("p", "mm", "letter");
@@ -80,7 +116,7 @@ export const exportAccordionChartsToPdf = async (
 
       // Original size in mm (px * 0.2646)
       const pxToMm = 0.2646;
-      const pixelRatio = 2;
+      const pixelRatio = 4;
 
       // Chart as PNG
       const dataUrl = await htmlToImage.toPng(chartNode, {
@@ -88,6 +124,11 @@ export const exportAccordionChartsToPdf = async (
         backgroundColor: "white",
         skipFonts: true,
         pixelRatio: pixelRatio,
+        cacheBust: true,
+        style: {
+          // Force consistent font rendering
+          fontFamily: window.getComputedStyle(chartNode).fontFamily,
+        },
       });
 
       const img = new Image();

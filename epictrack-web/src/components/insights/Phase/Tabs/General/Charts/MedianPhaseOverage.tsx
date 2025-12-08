@@ -89,14 +89,9 @@ const MedianPhaseOverageChart = ({
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-        <Box
-          sx={{
-            width: 24,
-            height: 8,
-            background: BAR_COLOR,
-            mr: 1,
-          }}
-        />
+        <svg width="24" height="8" style={{ marginRight: 8 }}>
+          <rect width="24" height="8" fill={BAR_COLOR} />
+        </svg>
         <ETCaption2>Median</ETCaption2>
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
