@@ -84,8 +84,8 @@ export const usePhaseTimeline = ({
     const phaseStartDate = new Date(finalPhase.work_phase.start_date);
     const phaseEndDate = new Date(phaseStartDate);
     phaseEndDate.setDate(
-      phaseEndDate.getDate() + finalPhase.total_number_of_days + 1,
-    ); // +1 inclusive
+      phaseEndDate.getDate() + finalPhase.total_number_of_days,
+    );
 
     // Calculate difference between end event and phase legislated end
     const daysDiff = Math.ceil(
