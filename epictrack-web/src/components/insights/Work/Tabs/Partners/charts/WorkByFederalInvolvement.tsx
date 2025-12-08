@@ -70,7 +70,7 @@ const WorkByFederalInvolvementChart = () => {
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
           <ResponsiveContainer width="100%" height={300}>
-            <PieChart width={600} height={300}>
+            <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"

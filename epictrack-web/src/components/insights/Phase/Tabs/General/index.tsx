@@ -20,10 +20,10 @@ const General = () => {
       setViewPhaseUnderage={setViewUnderage}
     >
       <Grid container spacing={2}>
-        <Grid className="chart-item" item xs={8}>
+        <Grid className="chart-item" item xs={12} md={12} lg={8}>
           <MedianPhaseOverageChart isUnderageToggled={viewUnderage} />
         </Grid>
-        <Grid className="chart-item" item xs={4}>
+        <Grid className="chart-item" item xs={12} md={12} lg={4}>
           <OverageResponsibilityChart isUnderageToggled={viewUnderage} />
         </Grid>
         <Grid className="chart-item" item xs={12}>

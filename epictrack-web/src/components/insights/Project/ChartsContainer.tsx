@@ -15,10 +15,10 @@ const ProjectInsights = () => {
       data-cy="project-accordion"
     >
       <Grid container spacing={2}>
-        <Grid className="chart-item" item xs={6}>
+        <Grid className="chart-item" item xs={12} md={12} lg={6}>
           <ProjectByType />
         </Grid>
-        <Grid className="chart-item" item xs={6}>
+        <Grid className="chart-item" item xs={12} md={12} lg={6}>
           <ProjectBySubtype />
         </Grid>
       </Grid>

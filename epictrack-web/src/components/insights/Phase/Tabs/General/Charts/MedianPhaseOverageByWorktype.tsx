@@ -1,4 +1,3 @@
-import { useRef, useLayoutEffect, useState } from "react";
 import { Grid, Box, Tooltip as MuiTooltip } from "@mui/material";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { useInsightsContext } from "components/insights/InsightsContext";
@@ -16,6 +15,7 @@ import {
   Tooltip,
   Bar,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
 import { useGetMedianPhaseOverageByWorktypeQuery } from "services/rtkQuery/phaseInsights";
 import { PhaseChartProps } from "components/insights/type";
@@ -51,15 +51,6 @@ const MedianPhaseOverageByWorktypeChart = ({
   const { loadingWorkPhases } = usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
 
-  const chartContainerRef = useRef<HTMLDivElement>(null);
-  const [chartHeight, setChartHeight] = useState<number | undefined>(undefined);
-
-  useLayoutEffect(() => {
-    if (chartContainerRef.current) {
-      setChartHeight(chartContainerRef.current.offsetHeight);
-    }
-  }, []);
-
   const {
     data: chartData,
     error,
@@ -83,10 +74,7 @@ const MedianPhaseOverageByWorktypeChart = ({
   if (isChartLoading || loadingWorkPhases || !chartData) {
     return (
       <Grid container spacing={2}>
-        <Grid item xs={8}>
-          <BarChartSkeleton loading={isChartLoading} />
-        </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={12}>
           <BarChartSkeleton loading={isChartLoading} />
         </Grid>
       </Grid>
@@ -97,12 +85,7 @@ const MedianPhaseOverageByWorktypeChart = ({
 
   return (
     <Grid container>
-      <Grid
-        item
-        xs={8}
-        ref={chartContainerRef}
-        sx={{ flex: 2, minWidth: 0, display: "flex", flexDirection: "column" }}
-      >
+      <Grid item xs={12}>
         <GrayBox
           sx={{
             flex: 1,
@@ -124,6 +107,7 @@ const MedianPhaseOverageByWorktypeChart = ({
             </Grid>
           </Grid>
           <Box
+            className="median-phase-overage-worktype-chart"
             sx={{
               flex: 1,
               minHeight: 350,
@@ -138,12 +122,13 @@ const MedianPhaseOverageByWorktypeChart = ({
               <ResponsiveContainer
                 width="100%"
                 height={400}
+                maxHeight={600}
                 key={isUnderageToggled ? "underage" : "overage"}
               >
                 <BarChart
                   data={data}
                   layout="vertical"
-                  margin={{ left: 80, bottom: 40 }}
+                  margin={{ left: 80, bottom: 40, right: 20 }}
                   barCategoryGap="35%"
                   barGap={2}
                 >
@@ -165,66 +150,80 @@ const MedianPhaseOverageByWorktypeChart = ({
                     width={40}
                     tick={{ fontSize: 16 }}
                   />
-                  <Tooltip />
+
+                  <Legend
+                    layout="vertical"
+                    align="right"
+                    verticalAlign="bottom"
+                    wrapperStyle={{
+                      paddingLeft: "20px",
+                      fontSize: "13px",
+                      lineHeight: "2",
+                      width: 450,
+                      maxWidth: 450,
+                      overflow: "scroll",
+                      textOverflow: "ellipsis",
+                    }}
+                    iconType="square"
+                    iconSize={20}
+                    formatter={(value) => (
+                      <span style={{ marginLeft: "8px" }}>{value}</span>
+                    )}
+                    content={(props) => {
+                      const { payload } = props;
+                      return (
+                        <div style={{ paddingLeft: "20px" }}>
+                          <div
+                            style={{
+                              fontWeight: "bold",
+                              fontSize: "12px",
+                              letterSpacing: "0.5px",
+                              marginBottom: "0px",
+                            }}
+                          >
+                            PHASES
+                          </div>
+                          {payload?.map((entry, index) => (
+                            <div
+                              key={`item-${index}`}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                marginBottom: "0px",
+                                fontSize: "14px",
+                              }}
+                            >
+                              <svg
+                                width="20"
+                                height="20"
+                                style={{ marginRight: "8px", flexShrink: 0 }}
+                              >
+                                <rect
+                                  width="20"
+                                  height="20"
+                                  fill={entry.color}
+                                  rx="2"
+                                />
+                              </svg>
+                              <span>{entry.value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }}
+                  />
                   {sortedPhases.map((phase, idx) => (
                     <Bar
                       key={phase}
                       dataKey={phase}
                       stackId="a"
                       fill={COLORS[idx % COLORS.length]}
+                      name={phase}
                     />
                   ))}
                 </BarChart>
               </ResponsiveContainer>
             )}
-          </Box>
-        </GrayBox>
-      </Grid>
-      <Grid
-        item
-        xs={4}
-        sx={{
-          flex: 1,
-          minWidth: 0,
-          display: "flex",
-          flexDirection: "column",
-          height: chartHeight ? `${chartHeight}px` : "auto",
-        }}
-      >
-        <GrayBox
-          sx={{
-            flex: 1,
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <ETCaption1 bold>PHASES</ETCaption1>
-          <Box
-            sx={{
-              mt: 2,
-              overflowY: "auto",
-              flex: 1,
-              minHeight: 0,
-            }}
-          >
-            {sortedPhases.map((phase, idx) => (
-              <Box
-                key={phase}
-                sx={{ display: "flex", alignItems: "center", mb: 1 }}
-              >
-                <Box
-                  sx={{
-                    width: 20,
-                    height: 20,
-                    backgroundColor: COLORS[idx % COLORS.length],
-                    mr: 1,
-                    borderRadius: "4px",
-                  }}
-                />
-                <ETCaption1>{phase}</ETCaption1>
-              </Box>
-            ))}
           </Box>
         </GrayBox>
       </Grid>

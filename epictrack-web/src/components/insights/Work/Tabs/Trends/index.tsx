@@ -15,14 +15,14 @@ const Trends = () => {
       defaultExpanded={false}
       data-cy="trend-work-accordion"
     >
-      <Grid container spacing={2}>
-        <Grid className="chart-item" item xs={4}>
+      <Grid container spacing={2} style={{ margin: 0 }}>
+        <Grid className="chart-item" item xs={12} md={12} lg={4}>
           <WorksCreatedEachYear />
         </Grid>
-        <Grid className="chart-item" item xs={4}>
+        <Grid className="chart-item" item xs={12} md={12} lg={4}>
           <WorksCompletedEachYear />
         </Grid>
-        <Grid className="chart-item" item xs={4}>
+        <Grid className="chart-item" item xs={12} md={12} lg={4}>
           <WorksClosedYearlyBreakdown />
         </Grid>
       </Grid>

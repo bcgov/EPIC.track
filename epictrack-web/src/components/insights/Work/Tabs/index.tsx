@@ -1,9 +1,9 @@
+import { Grid } from "@mui/material";
+import { TableFilterProvider } from "components/insights/TableFilterContext";
 import Staff from "./Staff";
 import General from "./General";
 import Partners from "./Partners";
-import { Grid } from "@mui/material";
 import Trends from "./Trends";
-import { TableFilterProvider } from "components/insights/TableFilterContext";
 
 const WorkInsightsTabs = () => {
   return (
