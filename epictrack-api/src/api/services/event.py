@@ -665,17 +665,25 @@ class EventService:
         throw_error: bool = True,
     ):
         """Validate that overages have been dealt with before allowing the last phase to complete"""
-        total_overage_days = 0
-        for work_phase in all_work_phases[:-1]:  # all except last phase
-            if work_phase.legislated:
-                total_overage_days += work_phase.get_overage_days()
-
+        from api.services.work_phase import WorkPhaseService
+        
         if not cls._is_last_phase(current_work_phase, all_work_phases): # not last phase
             return True
         if event.event_configuration.event_position.value != EventPositionEnum.END.value: # not end event
             return True
         if not event.actual_date: # event is not completed
             return True
+
+        work_phases_status = WorkPhaseService.find_work_phases_status(current_work_phase.work_id)
+
+        total_overage_days = 0
+        for wp_status in work_phases_status:
+            wp = wp_status["work_phase"]
+            if wp.legislated and wp.id != current_work_phase.id:
+                days_taken = wp_status.get("days_taken", 0)
+                total_number_of_days = wp_status.get("total_number_of_days", 0)
+                total_overage_days += days_taken - total_number_of_days
+
         # find date difference between event actual and phase end date
         days_difference = (event.actual_date.date() - current_work_phase.end_date.date()).days
         if total_overage_days + days_difference <= 0:
