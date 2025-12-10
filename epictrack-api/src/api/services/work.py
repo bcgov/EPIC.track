@@ -136,7 +136,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         works_statuses = WorkStatus.list_latest_approved_statuses_for_work_ids(work_ids)
         work_id_phase_id_dict = {work.id: work.current_work_phase_id for work in works}
         work_phases = WorkPhaseService.find_multiple_works_phases_status(
-            work_id_phase_id_dict
+            work_id_phase_id_dict, EventService()
         )
         work: Work
         for work in works:

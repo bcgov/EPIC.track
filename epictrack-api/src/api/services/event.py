@@ -49,6 +49,7 @@ from api.models.work_type import WorkType
 from api.schemas.response import EventResponseSchema
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
+from api.services.work_phase import WorkPhaseService
 from api.utils import util
 from api.application_constants import MIN_WORK_START_DATE
 
@@ -665,17 +666,20 @@ class EventService:
         throw_error: bool = True,
     ):
         """Validate that overages have been dealt with before allowing the last phase to complete"""
-        total_overage_days = 0
-        for work_phase in all_work_phases[:-1]:  # all except last phase
-            if work_phase.legislated:
-                total_overage_days += work_phase.get_overage_days()
-
         if not cls._is_last_phase(current_work_phase, all_work_phases): # not last phase
             return True
         if event.event_configuration.event_position.value != EventPositionEnum.END.value: # not end event
             return True
         if not event.actual_date: # event is not completed
             return True
+
+        total_overage_days = 0
+        work_phases = WorkPhaseService.find_work_phases_status(event.work_id, EventService())
+        for phase in work_phases:
+            wp = phase.get("work_phase")
+            if wp.legislated and wp.id != current_work_phase.id:
+                total_overage_days += phase["days_taken"] - phase["total_number_of_days"]
+
         # find date difference between event actual and phase end date
         days_difference = (event.actual_date.date() - current_work_phase.end_date.date()).days
         if total_overage_days + days_difference <= 0:
