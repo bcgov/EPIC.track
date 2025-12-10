@@ -29,7 +29,6 @@ from api.models.staff_work_role import StaffWorkRole
 from api.schemas.work import WorkPhaseSchema
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.event_template import EventPositionEnum
-from api.services.event import EventService
 from api.services.task_template import TaskTemplateService
 from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
 from api.models.work import Work
@@ -67,10 +66,10 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return work_phases
 
     @classmethod
-    def find_by_work_and_phase(cls, work_id: int, phase_id: int) -> WorkPhase:
+    def find_by_work_and_phase(cls, work_id: int, phase_id: int, event_service) -> WorkPhase:
         """Find the workphase status by work_id and work_phase id"""
         work_phases_dict = cls.find_work_phases_by_work_ids([work_id])[0]
-        work_phase = cls.find_work_phase_status(work_id, phase_id, work_phases_dict.get(work_id, []))
+        work_phase = cls.find_work_phase_status(work_id, phase_id, work_phases_dict.get(work_id, []), event_service)
         return work_phase
 
     @classmethod
@@ -103,15 +102,15 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return work_phase
 
     @classmethod
-    def find_work_phases_status(cls, work_id: int):
+    def find_work_phases_status(cls, work_id: int, event_service):
         """Return the work phases with additional information"""
-        return WorkPhaseService.find_multiple_works_phases_status({work_id: None}).get(
+        return WorkPhaseService.find_multiple_works_phases_status({work_id: None}, event_service).get(
             work_id, []
         )
 
     @classmethod
     def find_multiple_works_phases_status(
-        cls, work_params_dict: Dict[str, Union[int, None]]
+        cls, work_params_dict: Dict[str, Union[int, None]], event_service
     ) -> Dict[int, List[Dict[str, Any]]]:
         """Return a dictionary with work_id and its work phases with additional information."""
         result_dict = {}
@@ -121,7 +120,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
 
         for work_id, _work_phase_id in work_params_dict.items():
             result_dict[work_id] = cls.find_work_phase_status(
-                work_id, None, work_phases_dict.get(work_id, [])
+                work_id, None, work_phases_dict.get(work_id, []), event_service
             )
 
         return result_dict
@@ -159,10 +158,10 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return work_phase
 
     @classmethod
-    def find_work_phase_status(cls, work_id, work_phase_id, work_phases):
+    def find_work_phase_status(cls, work_id, work_phase_id, work_phases, event_service):
         """Find work phase status for the work Id.If work_phase_id is passed , only that phase is considered."""
         result = []
-        events = EventService.find_events(work_id, event_categories=PRIMARY_CATEGORIES)
+        events = event_service.find_events(work_id, event_categories=PRIMARY_CATEGORIES)
         if work_phase_id is not None:
             work_phases = [wp for wp in work_phases if wp.id == work_phase_id]
         for index, work_phase in enumerate(work_phases, start=1):
