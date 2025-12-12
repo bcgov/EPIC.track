@@ -4,80 +4,12 @@ from api.models.db import db
 from api.models.work_phase import WorkPhase
 from api.models.work import Work
 from api.models.work_type import WorkType, WorkTypeEnum
-from api.models.project import Project
-from api.models.staff import Staff
-from api.models.staff_work_role import StaffWorkRole
 from api.models.event_configuration import EventConfiguration
 from api.models.event import Event
 from api.models.event_type import EventTypeEnum
-from api.models.phase_code import PhaseCode as Phase
 from api.models.event_category import PRIMARY_CATEGORIES
 
-from sqlalchemy import func, Integer, case, cast, or_, select, Float
-
-
-def get_filtered_work_phases(filter_exprs=None, selected_work_type=None, selected_year=None, staff_id=None):
-    """Fetch filtered work phases with overage calculations."""
-    # Build all necessary subqueries
-    work_subq = get_work_subquery()
-    ext_subq = get_extension_days_subquery()
-    sus_subq = get_suspended_days_subquery()
-    total_days_subq = get_total_days_subquery(ext_subq)
-    days_taken_subq = get_days_taken_subquery(sus_subq)
-    days_left_subq = get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq)
-
-    query = db.session.query(
-        func.max(Phase.name).label("phase_name"),
-        (
-            (cast(func.count(case((days_left_subq.c.days_left < 0, 1))), Float)
-             / cast(func.count(func.distinct(WorkPhase.id)), Float)) * 100
-        ).label("percent_with_overages")
-    ).join(Work, WorkPhase.work_id == Work.id) \
-     .join(Phase, WorkPhase.phase_id == Phase.id)
-
-    if filter_exprs:
-        query = query.join(WorkType, Work.work_type_id == WorkType.id)
-        query = query.join(Project, Work.project_id == Project.id)
-
-    if staff_id:
-        query = query.join(StaffWorkRole, StaffWorkRole.work_id == Work.id)
-        query = query.join(Staff, StaffWorkRole.staff_id == Staff.id)
-        query = query.filter(Staff.id == staff_id)
-        query = query.filter(Staff.is_active.is_(True))
-        query = query.filter(StaffWorkRole.is_active.is_(True))
-
-    query = query.filter(
-        WorkPhase.is_active.is_(True),
-        WorkPhase.is_deleted.is_(False),
-        WorkPhase.legislated.is_(True),
-        *filter_exprs if filter_exprs else [],
-    )
-
-    if selected_work_type:
-        query = query.filter(Work.work_type_id == selected_work_type.id)
-
-    if selected_year:
-        query = query.filter(func.extract('year', WorkPhase.end_date) == selected_year)
-
-    query = query \
-        .outerjoin(ext_subq, ext_subq.c.work_phase_id == WorkPhase.id) \
-        .outerjoin(sus_subq, sus_subq.c.work_phase_id == WorkPhase.id) \
-        .outerjoin(days_taken_subq, days_taken_subq.c.work_phase_id == WorkPhase.id) \
-        .outerjoin(total_days_subq, total_days_subq.c.work_phase_id == WorkPhase.id) \
-        .outerjoin(days_left_subq, days_left_subq.c.work_phase_id == WorkPhase.id) \
-        .outerjoin(work_subq, work_subq.c.work_phase_id == WorkPhase.id) \
-        .group_by(Phase.name)
-
-    # Only include the data where percent is not 0
-    query = query.having(
-        (
-            cast(func.count(case((days_left_subq.c.days_left < 0, 1))), Float)
-            / cast(func.count(func.distinct(WorkPhase.id)), Float)
-        ) > 0
-    )
-
-    return query.all()
-
+from sqlalchemy import func, Integer, case, cast, or_, select
 
 # Extension days subquery
 def get_extension_days_subquery():
@@ -98,7 +30,6 @@ def get_extension_days_subquery():
         .group_by(EventConfiguration.work_phase_id)
         .subquery()
     )
-
 
 # Suspended days subquery
 def get_suspended_days_subquery():
