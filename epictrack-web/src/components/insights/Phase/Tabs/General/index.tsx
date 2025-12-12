@@ -4,10 +4,10 @@ import MedianPhaseOverageChart from "./Charts/MedianPhaseOverage";
 import GeneralWorkPhaseListing from "./Charts/GeneralWorkPhaseListing";
 import OverageResponsibilityChart from "./Charts/OverageResponsibility";
 import MedianPhaseOverageByWorktypeChart from "./Charts/MedianPhaseOverageByWorktype";
-import { useState } from "react";
+import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsightsContext";
 
 const General = () => {
-  const [viewUnderage, setViewUnderage] = useState(false);
+  const { viewUnderage, setViewUnderage } = usePhaseInsightsContext();
   return (
     <InsightAccordion
       title="General Insights"
@@ -21,13 +21,13 @@ const General = () => {
     >
       <Grid container spacing={2}>
         <Grid className="chart-item" item xs={12} md={12} lg={8}>
-          <MedianPhaseOverageChart isUnderageToggled={viewUnderage} />
+          <MedianPhaseOverageChart />
         </Grid>
         <Grid className="chart-item" item xs={12} md={12} lg={4}>
-          <OverageResponsibilityChart isUnderageToggled={viewUnderage} />
+          <OverageResponsibilityChart />
         </Grid>
         <Grid className="chart-item" item xs={12}>
-          <MedianPhaseOverageByWorktypeChart isUnderageToggled={viewUnderage} />
+          <MedianPhaseOverageByWorktypeChart />
         </Grid>
       </Grid>
     </InsightAccordion>

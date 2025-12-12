@@ -31,7 +31,7 @@ from api.models.phase_code import PhaseVisibilityEnum
 from api.models.event_template import EventPositionEnum
 from api.services.task_template import TaskTemplateService
 from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
-from api.models.work import Work
+from api.models.work import Work, WorkStateEnum
 from api.models.phase_code import PhaseCode as Phase
 from api.models.work_type import WorkType, WorkTypeEnum
 from api.models.project import Project
@@ -345,7 +345,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return days_taken
 
     @classmethod
-    def find_all_work_phases_with_additional_info(cls, staff_id: int = None, legislated: bool = None) -> List[WorkPhase]:
+    def find_all_work_phases_with_additional_info(cls, staff_id: int = None, view_underage: bool = False) -> List[WorkPhase]:
         """Return all work phases."""
         work_subq = get_work_subquery()
         ext_subq = get_extension_days_subquery()
@@ -353,6 +353,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         total_days_subq = get_total_days_subquery(ext_subq)
         days_taken_subq = get_days_taken_subquery(sus_subq)
         days_left_subq = get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq)
+        days_over_expr = days_taken_subq.c.days_taken - Phase.number_of_days
 
         query = db.session.query(
             Work.id.label("work_id"),
@@ -362,11 +363,13 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             WorkType.id.label("work_type_id"),
             Phase.name.label("phase_name"),
             Phase.id.label("phase_id"),
+            Phase.number_of_days.label("legislated_length"),
             EAAct.name.label("ea_act_name"),
             WorkPhase.end_date.label("work_phase_end_date"),
             total_days_subq.c.total_days.label("total_days"),
             days_taken_subq.c.days_taken.label("days_taken"),
             days_left_subq.c.days_left.label("days_left"),
+            days_over_expr.label("days_over"),
             func.coalesce(
                 func.array_agg(
                     PhaseOverageResponsibility.responsibility
@@ -393,12 +396,15 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         query = query.filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
-            Phase.is_active.is_(True),
-            Phase.is_deleted.is_(False),
+            Work.work_state.not_in([WorkStateEnum.WITHDRAWN]),
             or_(
-                legislated is None or WorkPhase.legislated == legislated,
-                WorkType.id == WorkTypeEnum.AMENDMENT.value,
-            )
+                WorkPhase.legislated.is_(True),
+                and_(
+                    WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                    WorkPhase.visibility == PhaseVisibilityEnum.REGULAR,
+                ),
+            ),
+            days_over_expr < 0 if view_underage else days_over_expr > 0,
         )
 
         if staff_id:
@@ -450,6 +456,8 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
                 "total_days": row.total_days,
                 "days_taken": row.days_taken,
                 "days_left": row.days_left,
+                "legislated_length": row.legislated_length,
+                "days_over": abs(row.days_over),
             }
             data.append(item)
         return data

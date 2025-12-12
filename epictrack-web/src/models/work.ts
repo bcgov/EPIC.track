@@ -139,4 +139,6 @@ export interface WorkPhaseInsight {
   total_days: number;
   days_taken: number;
   days_left: number;
+  legislated_length: number;
+  days_over: number;
 }

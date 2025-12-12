@@ -11,13 +11,14 @@ import { WorkPhaseInsight } from "models/work";
 
 function buildQueryString(
   base: string,
-  { legislated, staffId }: { legislated?: boolean; staffId?: number } = {},
+  { staffId, viewUnderage }: { staffId?: number; viewUnderage?: boolean } = {},
 ): string {
   const params: string[] = [];
 
-  if (legislated !== undefined) {
-    params.push(`legislated=${legislated}`);
+  if (viewUnderage !== undefined) {
+    params.push(`view_underage=${viewUnderage}`);
   }
+
   if (staffId !== undefined) {
     params.push(`staff_id=${staffId}`);
   }
@@ -34,10 +35,10 @@ export const phaseInsightsApi = createApi({
   endpoints: (builder) => ({
     getWorkPhases: builder.query<
       WorkPhaseInsight[],
-      { legislated?: boolean; staffId?: number } | void
+      { staffId?: number; viewUnderage?: boolean } | void
     >({
-      query: ({ legislated = true, staffId } = {}) =>
-        buildQueryString("work-phases", { legislated, staffId }),
+      query: ({ staffId, viewUnderage } = {}) =>
+        buildQueryString("work-phases", { staffId, viewUnderage }),
     }),
     getPhasesByMedianOverage: builder.query<
       PhasesByMedianOverage[],
