@@ -11,6 +11,7 @@ from api.models.event_category import PRIMARY_CATEGORIES
 
 from sqlalchemy import func, Integer, case, cast, or_, select
 
+
 # Extension days subquery
 def get_extension_days_subquery():
     """Returns a subquery that computes total extension days for each work_phase_id."""
@@ -30,6 +31,7 @@ def get_extension_days_subquery():
         .group_by(EventConfiguration.work_phase_id)
         .subquery()
     )
+
 
 # Suspended days subquery
 def get_suspended_days_subquery():
