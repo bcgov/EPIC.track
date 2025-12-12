@@ -18,7 +18,6 @@ import {
   Legend,
 } from "recharts";
 import { useGetMedianPhaseOverageByWorktypeQuery } from "services/rtkQuery/phaseInsights";
-import { PhaseChartProps } from "components/insights/type";
 
 const formatData = (data: MedianOverageByWorktype[]) => {
   const phaseOrder: { [phase: string]: number } = {};
@@ -44,9 +43,8 @@ const formatData = (data: MedianOverageByWorktype[]) => {
   };
 };
 
-const MedianPhaseOverageByWorktypeChart = ({
-  isUnderageToggled = false,
-}: PhaseChartProps) => {
+const MedianPhaseOverageByWorktypeChart = () => {
+  const { viewUnderage: isUnderageToggled } = usePhaseInsightsContext();
   const { columnFilters } = useTableFilterContext();
   const { loadingWorkPhases } = usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
@@ -154,60 +152,72 @@ const MedianPhaseOverageByWorktypeChart = ({
                   <Legend
                     layout="vertical"
                     align="right"
-                    verticalAlign="bottom"
+                    verticalAlign="middle"
                     wrapperStyle={{
                       paddingLeft: "20px",
+                      paddingRight: "10px",
                       fontSize: "13px",
-                      lineHeight: "2",
-                      width: 450,
-                      maxWidth: 450,
-                      overflow: "scroll",
-                      textOverflow: "ellipsis",
+                      lineHeight: "1.5",
                     }}
                     iconType="square"
-                    iconSize={20}
-                    formatter={(value) => (
-                      <span style={{ marginLeft: "8px" }}>{value}</span>
-                    )}
+                    iconSize={15}
                     content={(props) => {
                       const { payload } = props;
                       return (
-                        <div style={{ paddingLeft: "20px" }}>
+                        <div style={{ paddingLeft: "20px", maxWidth: "400px" }}>
                           <div
                             style={{
                               fontWeight: "bold",
                               fontSize: "12px",
                               letterSpacing: "0.5px",
-                              marginBottom: "0px",
+                              marginBottom: "8px",
                             }}
                           >
                             PHASES
                           </div>
-                          {payload?.map((entry, index) => (
-                            <div
-                              key={`item-${index}`}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                marginBottom: "0px",
-                                fontSize: "14px",
-                              }}
-                            >
-                              <svg
-                                width="20"
-                                height="20"
-                                style={{ marginRight: "8px", flexShrink: 0 }}
+                          <div
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns: "1fr 1fr",
+                              gap: "6px 12px",
+                              alignItems: "start",
+                            }}
+                          >
+                            {payload?.map((entry, index) => (
+                              <div
+                                key={`item-${index}`}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  fontSize: "14px",
+                                  lineHeight: "1.4",
+                                  minWidth: 0,
+                                }}
                               >
-                                <rect
-                                  width="20"
-                                  height="20"
-                                  fill={entry.color}
-                                  rx="2"
-                                />
-                              </svg>
-                              <span>{entry.value}</span>
-                            </div>
-                          ))}
+                                <svg
+                                  width="15"
+                                  height="15"
+                                  style={{ marginRight: "6px", flexShrink: 0 }}
+                                >
+                                  <rect
+                                    width="15"
+                                    height="15"
+                                    fill={entry.color}
+                                    rx="2"
+                                  />
+                                </svg>
+                                <span
+                                  style={{
+                                    wordBreak: "break-word",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
+                                  {entry.value}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       );
                     }}

@@ -21,7 +21,8 @@ const GeneralWorkPhaseListing = () => {
     pageSize: 15,
   });
   const { columnFilters, setColumnFilters } = useTableFilterContext();
-  const { workPhases, loadingWorkPhases } = usePhaseInsightsContext();
+  const { workPhases, loadingWorkPhases, viewUnderage } =
+    usePhaseInsightsContext();
 
   useEffect(() => {
     setPagination((prev) => ({
@@ -146,28 +147,29 @@ const GeneralWorkPhaseListing = () => {
         },
       },
       {
-        header: "Length",
+        header: "Legislated Length",
+        enableColumnFilter: false,
+        Cell: ({ row }) => {
+          return <span>{row.original.legislated_length} days</span>;
+        },
+      },
+      {
+        header: "Days Taken",
         enableColumnFilter: false,
         Cell: ({ row }) => {
           return (
             <span>
-              {row.original.days_taken}/{row.original.total_days} days
+              {row.original.days_taken} day
+              {row.original.days_taken !== 1 ? "s" : ""}
             </span>
           );
         },
       },
       {
-        header: "Overage",
+        id: "days_over",
+        accessorKey: "days_over", // <-- add this line
+        header: viewUnderage ? "Underage" : "Overage",
         enableColumnFilter: false,
-        Cell: ({ row }) => {
-          const overage =
-            row.original.days_left < 0 ? Math.abs(row.original.days_left) : 0;
-          return (
-            <span>
-              {overage} day{overage !== 1 ? "s" : ""}
-            </span>
-          );
-        },
       },
       {
         accessorKey: "overage_responsibility",
@@ -201,7 +203,7 @@ const GeneralWorkPhaseListing = () => {
         },
       },
     ],
-    [phaseOptions, responsibilityOptions, workTypeOptions],
+    [phaseOptions, responsibilityOptions, workTypeOptions, viewUnderage],
   );
   return (
     <MasterTrackTable

@@ -16,13 +16,46 @@ import { BAR_COLOR } from "components/insights/utils";
 import { GrayBox, ETCaption1 } from "components/shared";
 import { showNotification } from "components/shared/notificationProvider";
 import { useGetPercentOfPhasesWithOveragesQuery } from "services/rtkQuery/phaseInsights";
-import { PhaseChartProps } from "components/insights/type";
 
-const PercentOfPhasesWithOveragesChart = ({
-  isUnderageToggled = false,
-}: PhaseChartProps) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+  isUnderageToggled,
+}: {
+  active?: boolean;
+  payload?: any;
+  label?: string;
+  isUnderageToggled: boolean;
+}) => {
+  if (active && payload && payload.length > 0) {
+    const data = payload[0].payload;
+    return (
+      <Box sx={{ background: "#fff", p: 2, border: "1px solid #ccc" }}>
+        <div>
+          <strong>{label}</strong>
+        </div>
+        <div>
+          % of Phases with {isUnderageToggled ? "Underage" : "Overage"}:{" "}
+          <strong>{data.percent_overage}%</strong>
+        </div>
+        <div>
+          {isUnderageToggled ? "Underage" : "Overage"} Count:{" "}
+          <strong>{data.overage_count}</strong>
+        </div>
+        <div>
+          Total Count: <strong>{data.total_count}</strong>
+        </div>
+      </Box>
+    );
+  }
+  return null;
+};
+
+const PercentOfPhasesWithOveragesChart = () => {
   const { columnFilters } = useTableFilterContext();
-  const { loadingWorkPhases } = usePhaseInsightsContext();
+  const { loadingWorkPhases, viewUnderage: isUnderageToggled } =
+    usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
 
   const {
@@ -98,7 +131,7 @@ const PercentOfPhasesWithOveragesChart = ({
                     type="number"
                     allowDecimals={false}
                     label={{
-                      value: "% of Phases with Overage",
+                      value: `% of Phases with ${isUnderageToggled ? "Underage" : "Overage"}`,
                       position: "insideBottom",
                       offset: -5,
                       dy: 20,
@@ -112,10 +145,9 @@ const PercentOfPhasesWithOveragesChart = ({
                     tick={{ fontSize: 12 }}
                   />
                   <Tooltip
-                    formatter={(value: number, name: string) => [
-                      `${value}%`,
-                      name,
-                    ]}
+                    content={
+                      <CustomTooltip isUnderageToggled={isUnderageToggled} />
+                    }
                   />
                   <Bar
                     dataKey="percent_overage"

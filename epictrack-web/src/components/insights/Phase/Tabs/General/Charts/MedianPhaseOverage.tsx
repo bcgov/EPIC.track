@@ -3,7 +3,6 @@ import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { useInsightsContext } from "components/insights/InsightsContext";
 import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsightsContext";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
-import { PhaseChartProps } from "components/insights/type";
 import { BAR_COLOR } from "components/insights/utils";
 import { GrayBox, ETCaption1, ETCaption2 } from "components/shared";
 import { showNotification } from "components/shared/notificationProvider";
@@ -20,9 +19,8 @@ import {
 } from "recharts";
 import { useGetPhasesByMedianOverageQuery } from "services/rtkQuery/phaseInsights";
 
-const MedianPhaseOverageChart = ({
-  isUnderageToggled = false,
-}: PhaseChartProps) => {
+const MedianPhaseOverageChart = () => {
+  const { viewUnderage: isUnderageToggled } = usePhaseInsightsContext();
   const { columnFilters } = useTableFilterContext();
   const { loadingWorkPhases } = usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
@@ -152,7 +150,7 @@ const MedianPhaseOverageChart = ({
                       type="number"
                       allowDecimals={false}
                       label={{
-                        value: "Median Overage (days)",
+                        value: `Median ${isUnderageToggled ? "Underage" : "Overage"} (days)`,
                         position: "insideBottom",
                         offset: -5,
                         dy: 20,
