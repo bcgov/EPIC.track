@@ -349,7 +349,7 @@ const FirstNationList = () => {
         { indigenous_nation_ids: firstNationIds },
       );
       if (result.status === 200) {
-        showNotification("First nations imported", {
+        showNotification("First Nations imported", {
           type: "success",
         });
         getWorkFirstNations();

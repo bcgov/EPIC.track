@@ -60,6 +60,10 @@ const OverageResponsibilityChart = () => {
 
   const chartData = formatData(data);
 
+  if (isUnderageToggled) {
+    return <></>;
+  }
+
   return (
     <GrayBox sx={{ height: "100%" }}>
       <Grid container spacing={1}>

@@ -21,7 +21,8 @@ const TrendWorkPhaseListing = () => {
     pageSize: 15,
   });
   const { columnFilters, setColumnFilters } = useTableFilterContext();
-  const { workPhases, loadingWorkPhases } = usePhaseInsightsContext();
+  const { workPhases, loadingWorkPhases, viewUnderage } =
+    usePhaseInsightsContext();
 
   useEffect(() => {
     setPagination((prev) => ({
@@ -220,25 +221,27 @@ const TrendWorkPhaseListing = () => {
         },
       },
       {
-        header: "Length",
+        header: "Legislated Length",
         enableColumnFilter: false,
         Cell: ({ row }) => {
           return (
             <span>
-              {row.original.days_taken}/{row.original.total_days} days
+              {row.original.legislated_length} day
+              {row.original.legislated_length !== 1 ? "s" : ""}
             </span>
           );
         },
       },
       {
-        header: "Overage",
+        id: "days_over",
+        accessorKey: "days_over",
+        header: viewUnderage ? "Underage" : "Overage",
         enableColumnFilter: false,
         Cell: ({ row }) => {
-          const overage =
-            row.original.days_left < 0 ? Math.abs(row.original.days_left) : 0;
           return (
             <span>
-              {overage} day{overage !== 1 ? "s" : ""}
+              {row.original.days_over} day
+              {row.original.days_over !== 1 ? "s" : ""}
             </span>
           );
         },

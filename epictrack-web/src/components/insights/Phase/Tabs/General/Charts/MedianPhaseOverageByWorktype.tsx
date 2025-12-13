@@ -135,7 +135,7 @@ const MedianPhaseOverageByWorktypeChart = () => {
                   <XAxis
                     type="number"
                     label={{
-                      value: "Median Overage (days)",
+                      value: `Median ${isUnderageToggled ? "Underage" : "Overage"} (days)`,
                       position: "insideBottom",
                       offset: -5,
                       dy: 10,
