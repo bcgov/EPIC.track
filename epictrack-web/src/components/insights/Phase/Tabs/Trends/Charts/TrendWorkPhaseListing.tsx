@@ -247,7 +247,7 @@ const TrendWorkPhaseListing = () => {
         },
       },
     ],
-    [phaseOptions, eaActOptions, yearOptions, workTypeOptions],
+    [phaseOptions, eaActOptions, yearOptions, workTypeOptions, viewUnderage],
   );
   return (
     <MasterTrackTable
