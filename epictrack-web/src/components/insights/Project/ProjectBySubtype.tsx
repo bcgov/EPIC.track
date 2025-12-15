@@ -105,7 +105,8 @@ const ProjectBySubtypeChart = () => {
                 iconSize={16}
                 wrapperStyle={{
                   fontSize: "16px",
-                  maxWidth: "280px",
+                  maxWidth: "300px",
+                  minWidth: "200px",
                   maxHeight: "330px",
                   overflowY: "auto",
                   overflowX: "hidden",

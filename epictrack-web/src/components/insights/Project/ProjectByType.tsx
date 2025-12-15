@@ -92,7 +92,8 @@ const ProjectByTypeChart = () => {
                 iconSize={16}
                 wrapperStyle={{
                   fontSize: "16px",
-                  maxWidth: "220px",
+                  maxWidth: "300px",
+                  minWidth: "200px",
                   overflow: "hidden",
                 }}
               />

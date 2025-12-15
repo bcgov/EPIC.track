@@ -179,6 +179,8 @@ const MedianPhaseOverageByWorktypeChart = () => {
                             style={{
                               display: "grid",
                               gridTemplateColumns: "1fr 1fr",
+                              gridAutoFlow: "column",
+                              gridTemplateRows: `repeat(${Math.ceil((payload?.length || 0) / 2)}, auto)`,
                               gap: "6px 12px",
                               alignItems: "start",
                             }}
@@ -188,7 +190,7 @@ const MedianPhaseOverageByWorktypeChart = () => {
                                 key={`item-${index}`}
                                 style={{
                                   display: "flex",
-                                  alignItems: "center",
+                                  alignItems: "start",
                                   fontSize: "14px",
                                   lineHeight: "1.4",
                                   minWidth: 0,
@@ -197,7 +199,11 @@ const MedianPhaseOverageByWorktypeChart = () => {
                                 <svg
                                   width="15"
                                   height="15"
-                                  style={{ marginRight: "6px", flexShrink: 0 }}
+                                  style={{
+                                    marginRight: "6px",
+                                    flexShrink: 0,
+                                    marginTop: "3px",
+                                  }}
                                 >
                                   <rect
                                     width="15"

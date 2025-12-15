@@ -46,27 +46,27 @@ const PieChartSkeleton: FC<PieChartSkeletonProps> = ({ loading = true }) => {
               <Skeleton
                 animation={loading ? "pulse" : false}
                 variant="rectangular"
-                width={200}
+                width={400}
                 height={20}
               />
               <Skeleton
                 animation={loading ? "pulse" : false}
                 variant="rectangular"
-                width={200}
-                height={20}
-                style={{ marginTop: 8 }}
-              />
-              <Skeleton
-                animation={loading ? "pulse" : false}
-                variant="rectangular"
-                width={200}
+                width={400}
                 height={20}
                 style={{ marginTop: 8 }}
               />
               <Skeleton
                 animation={loading ? "pulse" : false}
                 variant="rectangular"
-                width={200}
+                width={400}
+                height={20}
+                style={{ marginTop: 8 }}
+              />
+              <Skeleton
+                animation={loading ? "pulse" : false}
+                variant="rectangular"
+                width={400}
                 height={20}
                 style={{ marginTop: 8 }}
               />

@@ -92,7 +92,8 @@ const WorkByFederalInvolvementChart = () => {
                 iconSize={16}
                 wrapperStyle={{
                   fontSize: "16px",
-                  maxWidth: "200px", // Add this line to limit the width of the legend
+                  maxWidth: "300px",
+                  minWidth: "200px",
                   overflow: "hidden",
                 }}
               />
