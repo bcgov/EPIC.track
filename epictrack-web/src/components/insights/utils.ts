@@ -33,8 +33,14 @@ export const exportAccordionChartsToPdf = async (
 
   // Clone the charts container
   const clone = container.cloneNode(true) as HTMLDivElement;
-  //Fixed export size for consistency
+
+  // Fixed export dimensions
   const EXPORT_WIDTH = 750;
+  // Use a fixed pixelRatio
+  const FIXED_PIXEL_RATIO = 2;
+
+  // Conversion factor: standard 96 DPI
+  const PX_TO_MM = 25.4 / 96;
 
   // Offscreen wrapper to remove height restrictions
   const wrapper = document.createElement("div");
@@ -45,6 +51,10 @@ export const exportAccordionChartsToPdf = async (
   wrapper.style.display = "block";
   wrapper.classList.add("exporting");
 
+  // Force standard DPI scaling
+  wrapper.style.transform = "scale(1)";
+  wrapper.style.transformOrigin = "top left";
+
   const style = document.createElement("style");
   style.innerHTML = `
     .exporting * {
@@ -54,6 +64,7 @@ export const exportAccordionChartsToPdf = async (
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       font-smoothing: antialiased;
+      transform: none !important;
     }
     .exporting svg {
       overflow: visible !important;
@@ -70,12 +81,9 @@ export const exportAccordionChartsToPdf = async (
       line-height: 1 !important;
     }
     .exporting .median-phase-overage-worktype-chart .recharts-legend-wrapper {
-      transform: scale(0.5) translateX(20%);
-      transform-origin: top right;
-    }
-  }
-
-  `;
+      transform: scale(0.5) translateX(20%) !important;
+      transform-origin: top right !important;
+    }`;
   wrapper.appendChild(style);
   wrapper.appendChild(clone);
   document.body.appendChild(wrapper);
@@ -102,8 +110,8 @@ export const exportAccordionChartsToPdf = async (
     });
   });
 
-  // Allow time for offscreen rendering
-  await new Promise((resolve) => setTimeout(resolve, 300));
+  // Allow more time for offscreen rendering to stabilize
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
   try {
     const pdf = new jsPDF("p", "mm", "letter");
@@ -118,20 +126,26 @@ export const exportAccordionChartsToPdf = async (
     for (let i = 0; i < chartNodes.length; i++) {
       const chartNode = chartNodes[i] as HTMLDivElement;
 
-      // Original size in mm (px * 0.2646)
-      const pxToMm = 0.2646;
-      const pixelRatio = 4;
+      // Get the actual rendered size in logical pixels
+      const rect = chartNode.getBoundingClientRect();
+      const logicalWidth = rect.width;
+      const logicalHeight = rect.height;
 
-      // Chart as PNG
+      // Chart as png with fixed pixel ratio for consistency
       const dataUrl = await htmlToImage.toPng(chartNode, {
         quality: 1,
         backgroundColor: "white",
         skipFonts: true,
-        pixelRatio: pixelRatio,
+        pixelRatio: FIXED_PIXEL_RATIO,
         cacheBust: true,
+        // Explicitly set width/height to avoid browser scaling
+        width: logicalWidth,
+        height: logicalHeight,
         style: {
           // Force consistent font rendering
           fontFamily: window.getComputedStyle(chartNode).fontFamily,
+          margin: "0",
+          padding: "0",
         },
       });
 
@@ -141,40 +155,33 @@ export const exportAccordionChartsToPdf = async (
         img.onload = () => resolve();
       });
 
-      let originalWidth = (img.width / pixelRatio) * pxToMm;
-      let originalHeight = (img.height / pixelRatio) * pxToMm;
+      // Calculate size in mm using the logical pixel dimensions
+      // This ensures consistency regardless of device pixel ratio
+      let widthMm = logicalWidth * PX_TO_MM;
+      let heightMm = logicalHeight * PX_TO_MM;
 
-      let scaledWidth = originalWidth;
-      let scaledHeight = originalHeight;
-
-      // Only scale down if wider than page
-      if (scaledWidth > pageWidth) {
-        const widthScale = pageWidth / scaledWidth;
-        scaledWidth *= widthScale;
-        scaledHeight *= widthScale;
+      // Scale to fit page width if necessary
+      if (widthMm > pageWidth) {
+        const scale = pageWidth / widthMm;
+        widthMm = pageWidth;
+        heightMm *= scale;
       }
-      // Only scale down if taller than page
-      if (scaledHeight > pageHeight) {
-        const heightScale = pageHeight / scaledHeight;
-        scaledWidth *= heightScale;
-        scaledHeight *= heightScale;
+
+      // Scale to fit page height if necessary
+      if (heightMm > pageHeight) {
+        const scale = pageHeight / heightMm;
+        heightMm = pageHeight;
+        widthMm *= scale;
       }
 
       // Start new page if chart doesn't fit remaining space
-      if (currentY + scaledHeight > pageHeight + pageMargin) {
+      if (currentY + heightMm > pageHeight + pageMargin) {
         pdf.addPage();
         currentY = pageMargin;
       }
 
-      pdf.addImage(
-        dataUrl,
-        "PNG",
-        pageMargin,
-        currentY,
-        scaledWidth,
-        scaledHeight,
-      );
-      currentY += scaledHeight + pageSpacing;
+      pdf.addImage(dataUrl, "PNG", pageMargin, currentY, widthMm, heightMm);
+      currentY += heightMm + pageSpacing;
     }
 
     pdf.save(`EPIC-Track-${name}.pdf`);
