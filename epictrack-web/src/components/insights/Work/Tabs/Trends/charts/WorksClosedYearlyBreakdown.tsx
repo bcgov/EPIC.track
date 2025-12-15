@@ -78,7 +78,8 @@ const WorksClosedYearlyBreakdown = () => {
                 iconSize={16}
                 wrapperStyle={{
                   fontSize: "16px",
-                  maxWidth: "190px",
+                  maxWidth: "300px",
+                  minWidth: "200px",
                   overflow: "scroll",
                 }}
                 formatter={(_, entry) => {

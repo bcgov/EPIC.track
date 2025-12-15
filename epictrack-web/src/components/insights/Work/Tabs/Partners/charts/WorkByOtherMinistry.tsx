@@ -96,7 +96,8 @@ const WorkByOtherMinistryChart = () => {
                   iconSize={16}
                   wrapperStyle={{
                     fontSize: "14px",
-                    maxWidth: "250px",
+                    maxWidth: "300px",
+                    minWidth: "200px",
                     overflow: "scroll",
                   }}
                 />

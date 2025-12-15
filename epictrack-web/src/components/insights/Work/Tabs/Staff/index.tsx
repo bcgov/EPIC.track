@@ -16,13 +16,13 @@ const Staff = () => {
       data-cy="staff-work-accordion"
     >
       <Grid container spacing={2} style={{ margin: 0 }}>
-        <Grid className="chart-item" xs={12} md={12} lg={4}>
+        <Grid className="chart-item" item xs={12} md={12} lg={4}>
           <WorkByTeam />
         </Grid>
-        <Grid className="chart-item" xs={12} md={12} lg={4}>
+        <Grid className="chart-item" item xs={12} md={12} lg={4}>
           <WorkByLead />
         </Grid>
-        <Grid className="chart-item" xs={12} md={12} lg={4}>
+        <Grid className="chart-item" item xs={12} md={12} lg={4}>
           <WorkByStaff />
         </Grid>
       </Grid>

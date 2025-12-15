@@ -87,6 +87,8 @@ const WorkByTeamChart = () => {
                 iconSize={16}
                 wrapperStyle={{
                   fontSize: "16px",
+                  maxWidth: "250px",
+                  minWidth: "150px",
                 }}
               />
               <Tooltip />

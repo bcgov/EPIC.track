@@ -58,6 +58,11 @@ export const exportAccordionChartsToPdf = async (
     .exporting svg {
       overflow: visible !important;
     }
+    .exporting .recharts-wrapper {
+      overflow: visible !important;
+      max-width: 650px !important;
+      min-width: 300px !important;
+    }
     /* Recharts does not render legends inside main svg of the chart. 
     Manually set legend font sizes for export */
     .exporting .recharts-legend-wrapper .recharts-legend-item-text {
@@ -66,7 +71,7 @@ export const exportAccordionChartsToPdf = async (
     }
     .exporting .median-phase-overage-worktype-chart .recharts-legend-wrapper {
       transform: scale(0.5) translateX(20%);
-      transform-origin: bottom right;
+      transform-origin: top right;
     }
   }
 
@@ -75,7 +80,6 @@ export const exportAccordionChartsToPdf = async (
   wrapper.appendChild(clone);
   document.body.appendChild(wrapper);
 
-  // const origCharts = container.querySelectorAll(".chart-item");
   const clonedCharts = clone.querySelectorAll(".chart-item");
   clonedCharts.forEach((chart) => {
     const chartEl = chart as HTMLElement;
