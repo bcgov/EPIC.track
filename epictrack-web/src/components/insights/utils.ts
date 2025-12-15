@@ -33,12 +33,12 @@ export const exportAccordionChartsToPdf = async (
 
   // Clone the charts container
   const clone = container.cloneNode(true) as HTMLDivElement;
-  
+
   // Fixed export dimensions
   const EXPORT_WIDTH = 750;
   // Use a fixed pixelRatio
   const FIXED_PIXEL_RATIO = 2;
-  
+
   // Conversion factor: standard 96 DPI
   const PX_TO_MM = 25.4 / 96;
 
@@ -50,7 +50,7 @@ export const exportAccordionChartsToPdf = async (
   wrapper.style.width = EXPORT_WIDTH + "px";
   wrapper.style.display = "block";
   wrapper.classList.add("exporting");
-  
+
   // Force standard DPI scaling
   wrapper.style.transform = "scale(1)";
   wrapper.style.transformOrigin = "top left";
@@ -166,7 +166,7 @@ export const exportAccordionChartsToPdf = async (
         widthMm = pageWidth;
         heightMm *= scale;
       }
-      
+
       // Scale to fit page height if necessary
       if (heightMm > pageHeight) {
         const scale = pageHeight / heightMm;
@@ -180,14 +180,7 @@ export const exportAccordionChartsToPdf = async (
         currentY = pageMargin;
       }
 
-      pdf.addImage(
-        dataUrl,
-        "PNG",
-        pageMargin,
-        currentY,
-        widthMm,
-        heightMm,
-      );
+      pdf.addImage(dataUrl, "PNG", pageMargin, currentY, widthMm, heightMm);
       currentY += heightMm + pageSpacing;
     }
 
