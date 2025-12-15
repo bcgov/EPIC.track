@@ -35,7 +35,7 @@ export const exportAccordionChartsToPdf = async (
   const clone = container.cloneNode(true) as HTMLDivElement;
 
   // Fixed export dimensions
-  const EXPORT_WIDTH = 750;
+  const EXPORT_WIDTH = 900;
   // Use a fixed pixelRatio
   const FIXED_PIXEL_RATIO = 2;
 
@@ -56,7 +56,8 @@ export const exportAccordionChartsToPdf = async (
   wrapper.style.transformOrigin = "top left";
 
   const style = document.createElement("style");
-  style.innerHTML = `
+  style.setAttribute("type", "text/css");
+  const css = `
     .exporting * {
       max-height: none !important;
       height: auto !important;
@@ -64,36 +65,55 @@ export const exportAccordionChartsToPdf = async (
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       font-smoothing: antialiased;
-      transform: none !important;
     }
     .exporting svg {
       overflow: visible !important;
     }
     .exporting .recharts-wrapper {
       overflow: visible !important;
-      max-width: 650px !important;
+      max-width: 800px !important;
       min-width: 300px !important;
+    }
+    /* Fix legend rendering issues */
+    .exporting .recharts-legend-wrapper {
+      height: auto !important;
+      max-height: none !important;
+      width: auto !important;
+      max-width: none !important;
+    }
+    .exporting .recharts-legend-item {
+      white-space: nowrap !important;
+      width: auto !important;
+      min-width: max-content !important;
     }
     /* Recharts does not render legends inside main svg of the chart. 
     Manually set legend font sizes for export */
     .exporting .recharts-legend-wrapper .recharts-legend-item-text {
       font-size: 14px !important;
-      line-height: 1 !important;
+      line-height: 1.4 !important;
+      white-space: nowrap !important;
     }
     .exporting .median-phase-overage-worktype-chart .recharts-legend-wrapper {
       transform: scale(0.5) translateX(20%) !important;
       transform-origin: top right !important;
-    }`;
-  wrapper.appendChild(style);
+    }
+  `;
+
+  // Use textContent for better compatibility
+  style.appendChild(document.createTextNode(css));
+
   wrapper.appendChild(clone);
+  wrapper.appendChild(style);
   document.body.appendChild(wrapper);
+
+  // Force a reflow to ensure styles are applied
+  void wrapper.offsetHeight;
 
   const clonedCharts = clone.querySelectorAll(".chart-item");
   clonedCharts.forEach((chart) => {
     const chartEl = chart as HTMLElement;
-    chartEl.style.width = EXPORT_WIDTH + "px";
+    chartEl.style.width = "max-content";
     chartEl.style.maxWidth = EXPORT_WIDTH + "px";
-    chartEl.style.minWidth = EXPORT_WIDTH + "px";
     chartEl.style.height = "auto";
     chartEl.style.flex = "0 0 auto";
     chartEl.style.alignSelf = "flex-start";
@@ -111,7 +131,7 @@ export const exportAccordionChartsToPdf = async (
   });
 
   // Allow more time for offscreen rendering to stabilize
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  await new Promise((resolve) => setTimeout(resolve, 300));
 
   try {
     const pdf = new jsPDF("p", "mm", "letter");
