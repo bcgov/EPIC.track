@@ -177,7 +177,7 @@ const WorkList = () => {
       },
       {
         accessorKey: "indigenous_works.name",
-        header: "First nations",
+        header: "First Nations",
         size: 200,
         filterVariant: "multi-select",
         filterSelectOptions: indigenousNations,

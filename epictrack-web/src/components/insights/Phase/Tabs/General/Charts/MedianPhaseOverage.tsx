@@ -168,7 +168,7 @@ const MedianPhaseOverageChart = () => {
                       dataKey="median_overage"
                       fill={BAR_COLOR}
                       barSize={20}
-                      name="Median Overage"
+                      name={`Median ${isUnderageToggled ? "Underage" : "Overage"}`}
                     >
                       <ErrorBar
                         dataKey={(e) => [

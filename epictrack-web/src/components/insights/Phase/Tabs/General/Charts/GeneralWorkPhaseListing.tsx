@@ -167,9 +167,17 @@ const GeneralWorkPhaseListing = () => {
       },
       {
         id: "days_over",
-        accessorKey: "days_over", // <-- add this line
+        accessorKey: "days_over",
         header: viewUnderage ? "Underage" : "Overage",
         enableColumnFilter: false,
+        Cell: ({ row }) => {
+          return (
+            <span>
+              {row.original.days_over} day
+              {row.original.days_over !== 1 ? "s" : ""}
+            </span>
+          );
+        },
       },
       {
         accessorKey: "overage_responsibility",
