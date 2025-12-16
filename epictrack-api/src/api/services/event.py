@@ -214,7 +214,7 @@ class EventService:
                 "visibility": PhaseVisibilityEnum.REGULAR.value,
             }
         )
-        
+
         all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order)
 
         # Allow user to enter an actual date from the final END event for a Work Phase even if the Work Phase still has overage to deal with.
