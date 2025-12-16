@@ -215,6 +215,8 @@ class EventService:
             }
         )
 
+        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order)
+
         # Allow user to enter an actual date from the final END event for a Work Phase even if the Work Phase still has overage to deal with.
         # If the Work still has overage in any of the legislated phases the actions will not be run to mark the phase as completed
         if cls._is_last_phase(current_work_phase, all_work_phases) and current_work_phase.is_completed is False and event.event_configuration.event_position is EventPositionEnum.END:
