@@ -123,7 +123,6 @@ class EventService:
                 "visibility": PhaseVisibilityEnum.REGULAR.value,
             }
         )
-        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order)
         # Check if current phase is the last phase, current phase is not yet complete, last event exists that has actual date,
         # and no further extensions are required to complete the work phase.
         # This will occur when the end event for a legislated phase had an actual date entered but the work phase could not be completed as there
@@ -215,6 +214,8 @@ class EventService:
                 "visibility": PhaseVisibilityEnum.REGULAR.value,
             }
         )
+        
+        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order)
 
         # Allow user to enter an actual date from the final END event for a Work Phase even if the Work Phase still has overage to deal with.
         # If the Work still has overage in any of the legislated phases the actions will not be run to mark the phase as completed
