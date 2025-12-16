@@ -14,14 +14,16 @@ class CreateWork(ActionFactory):
         """Create a new WORK: "Minister's Designation" and link to this work's Project"""
         # Importing here to avoid circular imports
         from api.services.work import WorkService  # pylint: disable=import-outside-toplevel
+        from api.models.work_type import WorkType  # pylint: disable=import-outside-toplevel
 
         start_date = source_event.actual_date + timedelta(days=1)
         start_date = start_date.astimezone(timezone('US/Pacific'))
+        work_type = WorkType.find_by_id(params.get('work_type'))
         new_work = {
             "ea_act_id": source_event.work.ea_act_id,
             "work_type_id": params.get("work_type"),
             "start_date": start_date,
-            "simple_title": "",
+            "simple_title": f"{source_event.work.project.name} - {work_type.name} - {start_date.strftime('%Y-%m-%d')}",
             "report_description": "",
             "project_id": source_event.work.project_id,
             "ministry_id": source_event.work.ministry_id,
