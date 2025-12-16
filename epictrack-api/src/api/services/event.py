@@ -123,6 +123,7 @@ class EventService:
                 "visibility": PhaseVisibilityEnum.REGULAR.value,
             }
         )
+        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order)
         # Check if current phase is the last phase, current phase is not yet complete, last event exists that has actual date,
         # and no further extensions are required to complete the work phase.
         # This will occur when the end event for a legislated phase had an actual date entered but the work phase could not be completed as there
