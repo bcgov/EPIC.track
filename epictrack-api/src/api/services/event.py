@@ -507,10 +507,23 @@ class EventService:
         all_work_event_configurations = (
             EventConfigurationService.find_all_configurations_by_work(event.work_id)
         )
-        current_event_index = cls.find_event_index(
-            all_work_events, event_old_copy if event_old_copy else event, current_work_phase
-        )
+
         cls._handle_child_events(all_work_event_configurations, event)
+
+        # At this point, all_work_events includes the updated event's new dates,
+        # temporarily restore the updated event's old values to get the original index
+        if event_old_copy:
+            new_anticipated_date = event.anticipated_date
+            new_actual_date = event.actual_date
+
+            # Temporarily restore old values to find the correct index for push calculation
+            event.anticipated_date = event_old_copy.anticipated_date
+            event.actual_date = event_old_copy.actual_date
+
+        current_event_index = cls.find_event_index(
+            all_work_events, event, current_work_phase
+        )
+
         current_future_work_phases = all_work_phases[current_work_phase_index:]
         # if the phase is legislated, only start event, extension or suspension can push
         # all the subsequent events in all the subsequent phases
@@ -579,6 +592,10 @@ class EventService:
                 current_work_phase,
                 current_event_index,
             )
+        # Restore the updated date values after pushing subsequent events/phases
+        if event_old_copy:
+            event.anticipated_date = new_anticipated_date
+            event.actual_date = new_actual_date
 
     @classmethod
     def _validate_dates(
