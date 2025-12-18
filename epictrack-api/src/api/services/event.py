@@ -33,6 +33,7 @@ from api.models import (
     EventCategoryEnum,
     EventConfiguration,
     EventTypeEnum,
+    OutcomeConfiguration,
     Work,
     WorkCalendarEvent,
     WorkPhase,
@@ -229,7 +230,7 @@ class EventService:
             )
             db.session.commit()
 
-        # Do not process the date logic if the event is already locked(has actual date entered)
+        # Do not process the date logic and actions if the event is already locked(has actual date entered) or an extension is required
         if not event_old_data.get("actual_date") and cls._validate_no_extension_required_to_complete_work(event, current_work_phase, all_work_phases, throw_error=False):
             if not current_app.config["SKIP_EVENT_LOGIC"]:
                 cls._process_events(
@@ -677,6 +678,35 @@ class EventService:
         return all_work_phases[-1].id == current_work_phase.id
 
     @classmethod
+    def _will_action_add_a_phase(cls, event: Event) -> bool:
+        """Determine if processing the event's actions will add an upcoming phase
+
+        If processing this event's action will add a phase, this current phase
+        is not the last phase.
+        """
+        # Actions won't run without an actual_date
+        if not event.actual_date:
+            return False
+
+        # Check if an ADD_PHASE action exists for this event's outcomes
+        has_add_phase_action = (
+            db.session.query(ActionConfiguration.id)
+            .join(
+                OutcomeConfiguration,
+                ActionConfiguration.outcome_configuration_id == OutcomeConfiguration.id
+            )
+            .filter(
+                OutcomeConfiguration.event_configuration_id == event.event_configuration_id,
+                ActionConfiguration.action_id == ActionEnum.ADD_PHASE.value,
+                ActionConfiguration.is_active.is_(True),
+                ActionConfiguration.is_deleted.is_(False)
+            )
+            .limit(1)
+            .scalar() is not None
+        )
+        return has_add_phase_action
+
+    @classmethod
     def _validate_no_extension_required_to_complete_work(
         cls,
         event: Event,
@@ -685,7 +715,7 @@ class EventService:
         throw_error: bool = True,
     ):
         """Validate that overages have been dealt with before allowing the last phase to complete"""
-        if not cls._is_last_phase(current_work_phase, all_work_phases): # not last phase
+        if not cls._is_last_phase(current_work_phase, all_work_phases) or cls._will_action_add_a_phase(event): # not last phase
             return True
         if event.event_configuration.event_position.value != EventPositionEnum.END.value: # not end event
             return True
@@ -1314,22 +1344,22 @@ class EventService:
 
     @classmethod
     def _post_process_actions(cls, source_event: Event, work_id: int = None):
-        """Things to happen after the actions are being processed"""
-        all_work_phases = WorkPhase.find_by_params(
+        """After regular actions, update the work's current phase if needed and the work's state"""
+        current_and_upcoming_work_phases = WorkPhase.find_by_params(
             {
                 "work_id": work_id if work_id else source_event.event_configuration.work_phase.work_id,
                 "visibility": PhaseVisibilityEnum.REGULAR.value,
                 "is_completed": False,
             }
         )
-        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order or 0)
+        current_and_upcoming_work_phases = sorted(current_and_upcoming_work_phases, key=lambda x: x.sort_order or 0)
         work = source_event.work
         # if it is same, no need to do unwanted update
         if (
-            len(all_work_phases) > 0
-            and work.current_work_phase_id != all_work_phases[0].id
+            len(current_and_upcoming_work_phases) > 0
+            and work.current_work_phase_id != current_and_upcoming_work_phases[0].id
         ):
-            work.current_work_phase_id = all_work_phases[0].id
+            work.current_work_phase_id = current_and_upcoming_work_phases[0].id
             work.work_state = WorkStateEnum.IN_PROGRESS
 
     @classmethod
