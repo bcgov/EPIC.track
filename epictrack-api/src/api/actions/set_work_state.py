@@ -28,12 +28,14 @@ class SetWorkState(ActionFactory):
             }
             change_phase_end_event.run(source_event, change_phase_end_event_param)
         is_active = True
+        is_completed = False
         work_decision_date = None
         if work_state in [state.value for state in EndingWorkStateEnum]:
             is_active = False
+            is_completed = True
             work_decision_date = source_event.actual_date
         db.session.query(Work).filter(Work.id == source_event.work_id).update(
-            {Work.work_state: work_state, Work.is_active: is_active, Work.work_decision_date: work_decision_date}
+            {Work.work_state: work_state, Work.is_active: is_active, Work.is_completed: is_completed, Work.work_decision_date: work_decision_date}
         )
         work_state_special_field_data = {
             "entity": EntityEnum.WORK.value,
