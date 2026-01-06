@@ -1,4 +1,4 @@
-import { useContext, useMemo } from "react";
+import { useContext, useMemo, useState } from "react";
 import { Button, Grid } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import Icons from "components/icons";
@@ -8,6 +8,7 @@ import MasterTrackTable from "components/shared/MasterTrackTable";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { Ministry } from "models/ministry";
 import { SpecialHistoryContext } from "./SpecialHistorySettingsContext";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 const AddIcon: React.FC<IconProps> = Icons["AddIcon"];
 
@@ -15,6 +16,7 @@ const SpecialHistorySettings = () => {
   const { setCreateMinistryDialogOpen, ministries, setMinistry } = useContext(
     SpecialHistoryContext,
   );
+  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
 
   const columns = useMemo<MRT_ColumnDef<Ministry>[]>(
     () => [
@@ -109,6 +111,10 @@ const SpecialHistorySettings = () => {
         <MasterTrackTable
           data={ministries}
           columns={columns}
+          state={{
+            columnFilters,
+          }}
+          onColumnFiltersChange={setColumnFilters}
           initialState={{
             sorting: [
               {
