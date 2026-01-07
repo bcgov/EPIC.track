@@ -433,7 +433,7 @@ class EventService:
             all_work_phases, current_work_phase
         )
         cls._validate_dates(event, current_work_phase, all_work_phases)
-        cls._validate_no_extension_required_to_complete_work(event, current_work_phase, all_work_phases)
+        cls._validate_no_extension_required_to_complete_work(event, current_work_phase, all_work_phases, event.outcome_id)
         cls._previous_event_actual_date_rule(
             all_work_events, all_work_phases, current_work_phase_index, event, event_old_data
         )
