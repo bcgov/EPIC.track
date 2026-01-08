@@ -1,11 +1,8 @@
-import { SyntheticEvent, useContext, useState } from "react";
+import { useContext } from "react";
 import { Button, Grid } from "@mui/material";
 import { ETHeading3 } from "../../shared";
-import { tabPanelStyle, tabStyle, titleStyle } from "../common/styles";
+import { titleStyle } from "../common/styles";
 import { Palette } from "../../../styles/theme";
-import { ETTabs, ETTab } from "../../shared/tab/Tab";
-import TabPanel from "../../shared/tab/TabPanel";
-import ComingSoon from "../../../routes/ComingSoon";
 import AboutDetails from "./aboutDetails";
 import WorkResources from "./workResources";
 import { IconProps } from "components/icons/type";
@@ -15,40 +12,20 @@ import { AboutContext } from "./AboutContext";
 const AddIcon: React.FC<IconProps> = Icons["AddIcon"];
 
 const AboutContainer = () => {
-  const [selectedTabIndex, setSelectedTabIndex] = useState(0);
-
-  const handleTabSelected = (event: SyntheticEvent, index: number) => {
-    setSelectedTabIndex(index);
-  };
-
   const { setShowCreateDialog } = useContext(AboutContext);
 
   return (
     <Grid container columnSpacing={1.5}>
       <Grid item xs={8}>
-        <ETTabs
+        <ETHeading3
           sx={{
-            gap: "2rem",
-            minHeight: "0px",
-            height: "100%",
+            ...titleStyle,
+            paddingBottom: 1.5,
           }}
-          onChange={handleTabSelected}
-          value={selectedTabIndex}
+          color={Palette.primary.main}
         >
-          <ETTab
-            sx={{
-              paddingLeft: 0,
-              ...tabStyle,
-            }}
-            label="Details"
-          />
-          <ETTab
-            label="Calendar"
-            sx={{
-              ...tabStyle,
-            }}
-          />
-        </ETTabs>
+          Details
+        </ETHeading3>
       </Grid>
       <Grid item xs={4}>
         <ETHeading3
@@ -82,25 +59,7 @@ const AboutContainer = () => {
           pt: "2rem",
         }}
       >
-        <TabPanel
-          index={0}
-          value={selectedTabIndex}
-          sx={{
-            ...tabPanelStyle,
-            padding: "0 0 2rem 0",
-          }}
-        >
-          <AboutDetails />
-        </TabPanel>
-        <TabPanel
-          index={1}
-          value={selectedTabIndex}
-          sx={{
-            ...tabPanelStyle,
-          }}
-        >
-          <ComingSoon />
-        </TabPanel>
+        <AboutDetails />
       </Grid>
       <Grid
         item
