@@ -1,31 +1,36 @@
 import { WorkPhaseInsight } from "models/work";
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 import { useGetWorkPhasesQuery } from "services/rtkQuery/phaseInsights";
 import { useInsightsContext } from "../InsightsContext";
 
 interface PhaseInsightsContextState {
   workPhases: WorkPhaseInsight[];
   loadingWorkPhases: boolean;
+  viewUnderage: boolean;
+  setViewUnderage: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const PhaseInsightsContext = createContext<
   PhaseInsightsContextState | undefined
->({
-  workPhases: [],
-  loadingWorkPhases: false,
-});
+>(undefined);
 
 type PhaseInsightsContextProviderProps = {
   children: React.ReactNode;
 };
+
 export const PhaseInsightsContextProvider: React.FC<
   PhaseInsightsContextProviderProps
 > = ({ children }) => {
   const { isUserInsights, staffId } = useInsightsContext();
 
+  const [viewUnderage, setViewUnderage] = useState(false);
+
   const queryArg = useMemo(
-    () => ({ legislated: true, staffId: isUserInsights ? staffId : undefined }),
-    [isUserInsights, staffId],
+    () => ({
+      staffId: isUserInsights ? staffId : undefined,
+      viewUnderage,
+    }),
+    [isUserInsights, staffId, viewUnderage],
   );
 
   const { data: workPhasesData, isLoading: loadingWorkPhases } =
@@ -37,8 +42,10 @@ export const PhaseInsightsContextProvider: React.FC<
     () => ({
       workPhases: workPhasesData ?? [],
       loadingWorkPhases,
+      viewUnderage,
+      setViewUnderage,
     }),
-    [workPhasesData, loadingWorkPhases],
+    [workPhasesData, loadingWorkPhases, viewUnderage],
   );
   return (
     <PhaseInsightsContext.Provider value={contextValue}>

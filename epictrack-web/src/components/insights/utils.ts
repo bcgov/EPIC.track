@@ -34,36 +34,104 @@ export const exportAccordionChartsToPdf = async (
   // Clone the charts container
   const clone = container.cloneNode(true) as HTMLDivElement;
 
+  // Fixed export dimensions
+  const EXPORT_WIDTH = 900;
+  // Use a fixed pixelRatio
+  const FIXED_PIXEL_RATIO = 2;
+
+  // Conversion factor: standard 96 DPI
+  const PX_TO_MM = 25.4 / 96;
+
   // Offscreen wrapper to remove height restrictions
   const wrapper = document.createElement("div");
   wrapper.style.position = "absolute";
   wrapper.style.top = "-9999px";
   wrapper.style.left = "-9999px";
-  wrapper.style.width = container.offsetWidth + "px";
+  wrapper.style.width = EXPORT_WIDTH + "px";
   wrapper.style.display = "block";
   wrapper.classList.add("exporting");
 
+  // Force standard DPI scaling
+  wrapper.style.transform = "scale(1)";
+  wrapper.style.transformOrigin = "top left";
+
   const style = document.createElement("style");
-  style.innerHTML = `
+  style.setAttribute("type", "text/css");
+  const css = `
     .exporting * {
       max-height: none !important;
       height: auto !important;
       overflow: visible !important;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-smoothing: antialiased;
+    }
+    .exporting svg {
+      overflow: visible !important;
+    }
+    .exporting .recharts-wrapper {
+      overflow: visible !important;
+      max-width: 800px !important;
+      min-width: 300px !important;
+    }
+    /* Fix legend rendering issues */
+    .exporting .recharts-legend-wrapper {
+      height: auto !important;
+      max-height: none !important;
+      width: auto !important;
+      max-width: none !important;
+    }
+    .exporting .recharts-legend-item {
+      white-space: nowrap !important;
+      width: auto !important;
+      min-width: max-content !important;
+    }
+    /* Recharts does not render legends inside main svg of the chart. 
+    Manually set legend font sizes for export */
+    .exporting .recharts-legend-wrapper .recharts-legend-item-text {
+      font-size: 14px !important;
+      line-height: 1.4 !important;
+      white-space: nowrap !important;
+    }
+    .exporting .median-phase-overage-worktype-chart .recharts-legend-wrapper {
+      transform: scale(0.5) translateX(20%) !important;
+      transform-origin: top right !important;
     }
   `;
-  wrapper.appendChild(style);
+
+  // Use textContent for better compatibility
+  style.appendChild(document.createTextNode(css));
+
   wrapper.appendChild(clone);
+  wrapper.appendChild(style);
   document.body.appendChild(wrapper);
 
-  const origCharts = container.querySelectorAll(".chart-item");
+  // Force a reflow to ensure styles are applied
+  void wrapper.offsetHeight;
+
   const clonedCharts = clone.querySelectorAll(".chart-item");
-  origCharts.forEach((orig, idx) => {
-    const rect = (orig as HTMLElement).getBoundingClientRect();
-    (clonedCharts[idx] as HTMLElement).style.maxWidth = rect.width + "px";
-    (clonedCharts[idx] as HTMLElement).style.height = "auto";
-    (clonedCharts[idx] as HTMLElement).style.flex = "0 0 auto";
-    (clonedCharts[idx] as HTMLElement).style.alignSelf = "flex-start";
+  clonedCharts.forEach((chart) => {
+    const chartEl = chart as HTMLElement;
+    chartEl.style.width = "max-content";
+    chartEl.style.maxWidth = EXPORT_WIDTH + "px";
+    chartEl.style.height = "auto";
+    chartEl.style.flex = "0 0 auto";
+    chartEl.style.alignSelf = "flex-start";
+
+    const colorBoxes = chartEl.querySelectorAll(".MuiBox-root");
+    colorBoxes.forEach((box) => {
+      const boxEl = box as HTMLElement;
+      const bgColor = boxEl.style.backgroundColor;
+      if (bgColor) {
+        // Re-apply background color to ensure it's captured
+        boxEl.style.backgroundColor = bgColor;
+        boxEl.style.setProperty("background-color", bgColor, "important");
+      }
+    });
   });
+
+  // Allow more time for offscreen rendering to stabilize
+  await new Promise((resolve) => setTimeout(resolve, 300));
 
   try {
     const pdf = new jsPDF("p", "mm", "letter");
@@ -78,16 +146,27 @@ export const exportAccordionChartsToPdf = async (
     for (let i = 0; i < chartNodes.length; i++) {
       const chartNode = chartNodes[i] as HTMLDivElement;
 
-      // Original size in mm (px * 0.2646)
-      const pxToMm = 0.2646;
-      const pixelRatio = 2;
+      // Get the actual rendered size in logical pixels
+      const rect = chartNode.getBoundingClientRect();
+      const logicalWidth = rect.width;
+      const logicalHeight = rect.height;
 
-      // Chart as PNG
+      // Chart as png with fixed pixel ratio for consistency
       const dataUrl = await htmlToImage.toPng(chartNode, {
         quality: 1,
         backgroundColor: "white",
         skipFonts: true,
-        pixelRatio: pixelRatio,
+        pixelRatio: FIXED_PIXEL_RATIO,
+        cacheBust: true,
+        // Explicitly set width/height to avoid browser scaling
+        width: logicalWidth,
+        height: logicalHeight,
+        style: {
+          // Force consistent font rendering
+          fontFamily: window.getComputedStyle(chartNode).fontFamily,
+          margin: "0",
+          padding: "0",
+        },
       });
 
       const img = new Image();
@@ -96,40 +175,33 @@ export const exportAccordionChartsToPdf = async (
         img.onload = () => resolve();
       });
 
-      let originalWidth = (img.width / pixelRatio) * pxToMm;
-      let originalHeight = (img.height / pixelRatio) * pxToMm;
+      // Calculate size in mm using the logical pixel dimensions
+      // This ensures consistency regardless of device pixel ratio
+      let widthMm = logicalWidth * PX_TO_MM;
+      let heightMm = logicalHeight * PX_TO_MM;
 
-      let scaledWidth = originalWidth;
-      let scaledHeight = originalHeight;
-
-      // Only scale down if wider than page
-      if (scaledWidth > pageWidth) {
-        const widthScale = pageWidth / scaledWidth;
-        scaledWidth *= widthScale;
-        scaledHeight *= widthScale;
+      // Scale to fit page width if necessary
+      if (widthMm > pageWidth) {
+        const scale = pageWidth / widthMm;
+        widthMm = pageWidth;
+        heightMm *= scale;
       }
-      // Only scale down if taller than page
-      if (scaledHeight > pageHeight) {
-        const heightScale = pageHeight / scaledHeight;
-        scaledWidth *= heightScale;
-        scaledHeight *= heightScale;
+
+      // Scale to fit page height if necessary
+      if (heightMm > pageHeight) {
+        const scale = pageHeight / heightMm;
+        heightMm = pageHeight;
+        widthMm *= scale;
       }
 
       // Start new page if chart doesn't fit remaining space
-      if (currentY + scaledHeight > pageHeight + pageMargin) {
+      if (currentY + heightMm > pageHeight + pageMargin) {
         pdf.addPage();
         currentY = pageMargin;
       }
 
-      pdf.addImage(
-        dataUrl,
-        "PNG",
-        pageMargin,
-        currentY,
-        scaledWidth,
-        scaledHeight,
-      );
-      currentY += scaledHeight + pageSpacing;
+      pdf.addImage(dataUrl, "PNG", pageMargin, currentY, widthMm, heightMm);
+      currentY += heightMm + pageSpacing;
     }
 
     pdf.save(`EPIC-Track-${name}.pdf`);

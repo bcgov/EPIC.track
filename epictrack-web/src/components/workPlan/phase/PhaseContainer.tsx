@@ -1,11 +1,4 @@
-import {
-  FC,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { FC, useCallback, useContext, useEffect, useState } from "react";
 import { Box, FormControl, FormControlLabel, Grid } from "@mui/material";
 import { When } from "react-if";
 import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
@@ -18,9 +11,10 @@ import Icons from "components/icons";
 import TrackSelect from "components/shared/TrackSelect";
 import WarningBox from "components/shared/warningBox";
 import { Palette } from "../../../styles/theme";
-import { WorkPhaseAdditionalInfo } from "../../../models/work";
 import { WorkplanContext } from "../WorkPlanContext";
 import PhaseAccordion from "./PhaseAccordion";
+import { usePhaseTimeline } from "hooks/usePhaseTimeline";
+import { REPORT_ISSUE_LINKS } from "constants/application-constant";
 
 const CalendarIcon: FC<IconProps> = Icons["CalendarIcon"];
 
@@ -43,37 +37,16 @@ const PhaseContainer = () => {
   const [showCompletedAnticipated, setShowCompletedAnticipated] =
     useState<boolean>(false);
 
-  const currentAndFuturePhases: WorkPhaseAdditionalInfo[] = useMemo(
-    () => ctx.workPhases.filter((p) => !p.work_phase.is_completed),
-    [ctx.workPhases],
-  );
-  const completedPhases: WorkPhaseAdditionalInfo[] = useMemo(
-    () => ctx.workPhases.filter((p) => p.work_phase.is_completed),
-    [ctx.workPhases],
-  );
-
-  const overduePhases: WorkPhaseAdditionalInfo[] = useMemo(
-    () =>
-      ctx.workPhases.filter(
-        (p) =>
-          p.work_phase.is_completed &&
-          p.work_phase.legislated &&
-          p.total_number_of_days - p.days_taken < 0,
-      ),
-    [ctx.workPhases],
-  );
-
-  const daysOverdue = useMemo(() => {
-    const overdue = overduePhases.reduce(
-      (sum, p) => sum + (p.total_number_of_days - p.days_taken),
-      0,
-    );
-    const finalPhase = ctx.workPhases.find((phase) => phase.is_last_phase);
-    const finalRemaining = finalPhase
-      ? finalPhase.total_number_of_days - finalPhase.days_taken
-      : 0;
-    return Math.abs(overdue) - finalRemaining;
-  }, [ctx.workPhases, overduePhases]);
+  const {
+    currentAndFuturePhases,
+    completedPhases,
+    overduePhases,
+    numberOfExtensionDaysRecommended,
+    isDecisionComplete,
+  } = usePhaseTimeline({
+    workPhases: ctx.workPhases,
+    currentWorkPhaseId: ctx.work?.current_work_phase_id,
+  });
 
   const handleExpand = (phaseId: number) => {
     setCachedExpandedPhase(cachedExpandedPhase === phaseId ? null : phaseId);
@@ -232,7 +205,7 @@ const PhaseContainer = () => {
           />
         </Grid>
       ))}
-      {!!overduePhases.length && daysOverdue > 0 && (
+      {numberOfExtensionDaysRecommended > 0 && (
         <Box
           sx={{
             display: "flex",
@@ -241,18 +214,42 @@ const PhaseContainer = () => {
             padding: "1rem",
           }}
         >
-          <WarningBox
-            title={`You've exceeded the legislated timeline in phase${
-              overduePhases.length > 1 ? "s" : ""
-            }: ${overduePhases.map((p) => p.work_phase.name).join(", ")}.`}
-            subTitle={
-              <>
-                You must add an <b>Extension Milestone</b> of{" "}
-                <b>{daysOverdue} days</b> to complete this Work.
-              </>
-            }
-            isTitleBold={true}
-          />
+          {isDecisionComplete && ctx.work?.is_completed ? (
+            <WarningBox
+              title="Date Miscalculation"
+              subTitle={
+                <>
+                  This Work was completed with a date miscalculation. Please{" "}
+                  <a
+                    href={REPORT_ISSUE_LINKS.JSM_PORTAL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    submit a Data Fix request
+                  </a>{" "}
+                  to rectify this alert.
+                </>
+              }
+              isTitleBold={true}
+            />
+          ) : (
+            <WarningBox
+              title={`You've exceeded the legislated timeline in phase${
+                overduePhases.length > 1 ? "s" : ""
+              }: ${overduePhases.map((p) => p.work_phase.name).join(", ")}.`}
+              subTitle={
+                <>
+                  You must add an <b>Extension Milestone</b> of{" "}
+                  <b>
+                    {numberOfExtensionDaysRecommended} day
+                    {numberOfExtensionDaysRecommended > 1 ? "s" : ""}
+                  </b>{" "}
+                  to complete this Work.
+                </>
+              }
+              isTitleBold={true}
+            />
+          )}
         </Box>
       )}
     </Grid>

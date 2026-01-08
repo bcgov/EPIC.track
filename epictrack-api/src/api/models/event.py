@@ -197,4 +197,5 @@ class Event(BaseModelVersioned):
     @property
     def event_position(self):
         """Returns the event position of the event"""
-        return self.event_configuration.event_position.value
+        pos = self.event_configuration.event_position
+        return pos.value if hasattr(pos, 'value') else pos

@@ -326,14 +326,13 @@ class WorkQueryParameterSchema(RequestQueryParameterSchema):
 class WorkPhaseQueryParameterSchema(RequestQueryParameterSchema):
     """Work Phase Query parameters"""
 
-    legislated = fields.Bool(
-        metadata={"description": "query legislated or non-legislated ones"},
-        default=None,
-        allow_none=True
-    )
-
     staff_id = fields.Int(
         metadata={"description": "The staff_id to filter by"},
         required=False,
         missing=None
+    )
+
+    view_underage = fields.Bool(
+        metadata={"description": "Indicate if we are to show overage or underage phases"},
+        default=False
     )

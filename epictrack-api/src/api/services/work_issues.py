@@ -107,7 +107,11 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
             sort_key = pagination_options.sort_key
             reverse = pagination_options.sort_order == "desc"
             filtered.sort(
-                key=lambda item: getattr(item[1], sort_key, None) if item[1] else datetime.min.replace(tzinfo=timezone.utc),
+                key=lambda item: (
+                    getattr(item[1].updates[0], sort_key, None)
+                    if item[1] and item[1].updates
+                    else datetime.min.replace(tzinfo=timezone.utc)
+                ),
                 reverse=reverse
             )
         total = len(filtered)

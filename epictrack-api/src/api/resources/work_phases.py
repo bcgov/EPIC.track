@@ -39,5 +39,8 @@ class WorkPhases(Resource):
     def get():
         """Return all work phases."""
         request_args = req.WorkPhaseQueryParameterSchema().load(request.args)
-        data = WorkPhaseService.find_all_work_phases_with_additional_info(legislated=request_args.get("legislated"), staff_id=request_args.get("staff_id"))
+        data = WorkPhaseService.find_all_work_phases_with_additional_info(
+            staff_id=request_args.get("staff_id"),
+            view_underage=request_args.get("view_underage")
+        )
         return jsonify(data), HTTPStatus.OK

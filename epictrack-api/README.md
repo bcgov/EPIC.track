@@ -27,7 +27,7 @@ Steps to get a local instance of the EPIC.Track backend setup on a local machine
 
 1. Inside the base project directory, navigate to `/epictrack-api/`
 1. Create `.env` file. Sample content is in `sample.env`
-1. Run `make install`. This will setup the api environment
+1. Run `make setup`. This will setup the api environment
 1. Run `docker compose up --build` - See **troubleshooting** below for common issues.
 1. Populate your local database with data from the online test environment. See **database setup** below.
 

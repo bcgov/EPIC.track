@@ -78,6 +78,10 @@ class MilestoneEventBodyParameterSchema(RequestBodyParameterSchema):
         metadata={"description": "Number of responses for PCP"}, allow_none=True
     )
 
+    start_at = fields.Str(
+        metadata={"description": "Days after to start"}, allow_none=True
+    )
+
     topic = fields.Str(metadata={"description": "PCP topic"}, allow_none=True)
 
     @pre_load

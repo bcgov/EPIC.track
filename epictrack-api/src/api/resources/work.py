@@ -26,6 +26,7 @@ from api.schemas.response.phase_overage_responsibility_response import PhaseOver
 from api.services import WorkService
 from api.services.work_phase import WorkPhaseService
 from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
+from api.services.event import EventService
 from api.utils import auth, constants, profiletime
 from api.utils.caching import AppCache
 from api.utils.datetime_helper import get_start_of_day
@@ -114,7 +115,7 @@ class Works(Resource):
             augmented_works = []
             for work in works:
                 work_data = works_schema.dump([work])[0]
-                work_phase_statuses = res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(WorkPhaseService.find_work_phases_status(work.id))
+                work_phase_statuses = res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(WorkPhaseService.find_work_phases_status(work.id, EventService()))
                 work_data['work_phase_status'] = work_phase_statuses
                 augmented_works.append(work_data)
             return jsonify(augmented_works), HTTPStatus.OK
@@ -213,7 +214,7 @@ class WorkPhases(Resource):
     def get(work_id):
         """Return a phase details based on id."""
         req.WorkIdPathParameterSchema().load(request.view_args)
-        work_phases = WorkPhaseService.find_work_phases_status(work_id)
+        work_phases = WorkPhaseService.find_work_phases_status(work_id, EventService())
         return (
             res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(work_phases), HTTPStatus.OK)
 
@@ -229,7 +230,7 @@ class WorkPhase(Resource):
     @profiletime
     def get(work_id, phase_id):
         """Return additional work_phase details based on id + work_id."""
-        work_phase = WorkPhaseService.find_by_work_and_phase(work_id, phase_id)
+        work_phase = WorkPhaseService.find_by_work_and_phase(work_id, phase_id, EventService())
         return (
             res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(work_phase), HTTPStatus.OK
         )

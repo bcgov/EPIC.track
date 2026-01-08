@@ -70,7 +70,7 @@ const WorkByFederalInvolvementChart = () => {
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
           <ResponsiveContainer width="100%" height={300}>
-            <PieChart width={600} height={300}>
+            <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"
@@ -92,7 +92,8 @@ const WorkByFederalInvolvementChart = () => {
                 iconSize={16}
                 wrapperStyle={{
                   fontSize: "16px",
-                  maxWidth: "200px", // Add this line to limit the width of the legend
+                  maxWidth: "300px",
+                  minWidth: "200px",
                   overflow: "hidden",
                 }}
               />

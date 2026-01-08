@@ -21,6 +21,7 @@ import { useAppSelector } from "hooks";
 import { Restricted, hasPermission } from "components/shared/restricted";
 import { unEditableTeamMembers } from "./constants";
 import { getStatusFilter } from "components/shared/filterSelect/utils";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 const TeamList = () => {
   const [roles, setRoles] = useState<string[]>([]);
@@ -33,6 +34,7 @@ const TeamList = () => {
   const { roles: givenUserAuthRoles } = useAppSelector(
     (state) => state.user.userDetail,
   );
+  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
 
   const teamMembers = useMemo(() => ctx.team, [ctx.team]);
 
@@ -186,8 +188,9 @@ const TeamList = () => {
               state={{
                 isLoading: loading,
                 showGlobalFilter: true,
+                columnFilters: columnFilters,
               }}
-              tableName="team-listing"
+              onColumnFiltersChange={setColumnFilters}
               enableExport
               renderTopToolbarCustomActions={({ table }) => (
                 <Grid container rowSpacing={1}>

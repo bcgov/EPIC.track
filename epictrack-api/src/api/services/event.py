@@ -33,6 +33,7 @@ from api.models import (
     EventCategoryEnum,
     EventConfiguration,
     EventTypeEnum,
+    OutcomeConfiguration,
     Work,
     WorkCalendarEvent,
     WorkPhase,
@@ -49,6 +50,7 @@ from api.models.work_type import WorkType
 from api.schemas.response import EventResponseSchema
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
+from api.services.work_phase import WorkPhaseService
 from api.utils import util
 from api.application_constants import MIN_WORK_START_DATE
 
@@ -84,6 +86,13 @@ class EventService:
         data["work_id"] = current_work_phase.work_id
         event = Event(**data)
         event.flush()
+
+        event = (
+            db.session.query(Event)
+            .options(joinedload(Event.event_configuration))
+            .filter_by(id=event.id)
+            .one()
+        )
         if not current_app.config["SKIP_EVENT_LOGIC"]:
             cls._process_events(
                 current_work_phase, event, all_work_events, push_events, None
@@ -207,20 +216,10 @@ class EventService:
             }
         )
 
-        # Allow user to enter an actual date from the final END event for a Work Phase even if the Work Phase still has overage to deal with.
-        # If the Work still has overage in any of the legislated phases the actions will not be run to mark the phase as completed
-        if cls._is_last_phase(current_work_phase, all_work_phases) and current_work_phase.is_completed is False and event.event_configuration.event_position is EventPositionEnum.END:
-            current_work_phase_index = util.find_index_in_array(
-                all_work_phases, current_work_phase
-            )
-            cls._validate_dates(event, current_work_phase, all_work_phases)
-            cls._previous_event_actual_date_rule(
-                all_work_events, all_work_phases, current_work_phase_index, event, event_old_data
-            )
-            db.session.commit()
+        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order)
 
-        # Do not process the date logic if the event is already locked(has actual date entered)
-        if not event_old_data.get("actual_date") and cls._validate_no_extension_required_to_complete_work(event, current_work_phase, all_work_phases, throw_error=False):
+        # Do not process the date logic and actions if the event is already locked (has actual date entered) or an extension is required
+        if not event_old_data.get("actual_date") and cls._validate_no_extension_required_to_complete_work(event, current_work_phase, all_work_phases, data.get("outcome_id"), throw_error=False):
             if not current_app.config["SKIP_EVENT_LOGIC"]:
                 cls._process_events(
                     current_work_phase,
@@ -434,7 +433,7 @@ class EventService:
             all_work_phases, current_work_phase
         )
         cls._validate_dates(event, current_work_phase, all_work_phases)
-        cls._validate_no_extension_required_to_complete_work(event, current_work_phase, all_work_phases)
+        cls._validate_no_extension_required_to_complete_work(event, current_work_phase, all_work_phases, event.outcome_id)
         cls._previous_event_actual_date_rule(
             all_work_events, all_work_phases, current_work_phase_index, event, event_old_data
         )
@@ -497,10 +496,23 @@ class EventService:
         all_work_event_configurations = (
             EventConfigurationService.find_all_configurations_by_work(event.work_id)
         )
-        current_event_index = cls.find_event_index(
-            all_work_events, event_old_copy if event_old_copy else event, current_work_phase
-        )
+
         cls._handle_child_events(all_work_event_configurations, event)
+
+        # At this point, all_work_events includes the updated event's new dates,
+        # temporarily restore the updated event's old values to get the original index
+        if event_old_copy:
+            new_anticipated_date = event.anticipated_date
+            new_actual_date = event.actual_date
+
+            # Temporarily restore old values to find the correct index for push calculation
+            event.anticipated_date = event_old_copy.anticipated_date
+            event.actual_date = event_old_copy.actual_date
+
+        current_event_index = cls.find_event_index(
+            all_work_events, event, current_work_phase
+        )
+
         current_future_work_phases = all_work_phases[current_work_phase_index:]
         # if the phase is legislated, only start event, extension or suspension can push
         # all the subsequent events in all the subsequent phases
@@ -569,6 +581,10 @@ class EventService:
                 current_work_phase,
                 current_event_index,
             )
+        # Restore the updated date values after pushing subsequent events/phases
+        if event_old_copy:
+            event.anticipated_date = new_anticipated_date
+            event.actual_date = new_actual_date
 
     @classmethod
     def _validate_dates(
@@ -650,27 +666,77 @@ class EventService:
         return all_work_phases[-1].id == current_work_phase.id
 
     @classmethod
-    def _validate_no_extension_required_to_complete_work(
+    def _will_action_add_a_phase(cls, event: Event, outcome_id: int = None) -> bool:
+        """Determine if processing the event's actions will add an upcoming phase
+
+        If processing this event's action will add a phase, this current phase
+        is not the last phase.
+        """
+        # Actions won't run without an actual_date
+        if not event.actual_date:
+            return False
+
+        if outcome_id is None:
+            outcomes = OutcomeConfigurationService.find_by_configuration_id(
+                event.event_configuration_id
+            )
+            if not outcomes or outcomes[0] is None:
+                return
+            outcome_id = outcomes[0].id
+
+        has_add_phase_action = False
+        # Check if an ADD_PHASE action exists for this event's outcomes
+        has_add_phase_action = (
+            db.session.query(ActionConfiguration.id)
+            .join(
+                OutcomeConfiguration,
+                ActionConfiguration.outcome_configuration_id == OutcomeConfiguration.id
+            )
+            .filter(
+                OutcomeConfiguration.event_configuration_id == event.event_configuration_id,
+                ActionConfiguration.outcome_configuration_id == outcome_id,
+                ActionConfiguration.action_id == ActionEnum.ADD_PHASE.value,
+                ActionConfiguration.is_active.is_(True),
+                ActionConfiguration.is_deleted.is_(False)
+            )
+            .limit(1)
+            .scalar() is not None
+        )
+        return has_add_phase_action
+
+    @classmethod
+    def _validate_no_extension_required_to_complete_work( # pylint: disable=too-many-arguments
         cls,
         event: Event,
         current_work_phase: WorkPhase,
         all_work_phases: List[WorkPhase],
+        outcome_id: int = None,
         throw_error: bool = True,
     ):
         """Validate that overages have been dealt with before allowing the last phase to complete"""
-        total_overage_days = 0
-        for work_phase in all_work_phases[:-1]:  # all except last phase
-            if work_phase.legislated:
-                total_overage_days += work_phase.get_overage_days()
-
-        if not cls._is_last_phase(current_work_phase, all_work_phases): # not last phase
+        if not cls._is_last_phase(current_work_phase, all_work_phases) or cls._will_action_add_a_phase(event, outcome_id): # not last phase
             return True
         if event.event_configuration.event_position.value != EventPositionEnum.END.value: # not end event
             return True
         if not event.actual_date: # event is not completed
             return True
-        # find date difference between event actual and phase end date
-        days_difference = (event.actual_date.date() - current_work_phase.end_date.date()).days
+
+        total_overage_days = 0
+        current_phase_with_status = None
+        work_phases_with_status = WorkPhaseService.find_work_phases_status(event.work_id, EventService())
+        for phase_status in work_phases_with_status:
+            wp = phase_status.get("work_phase")
+            if wp.id == current_work_phase.id:
+                current_phase_with_status = phase_status
+                break
+            if wp.legislated:
+                total_overage_days += phase_status["days_taken"] - phase_status["total_number_of_days"]
+        # find date difference between event actual and phase start date + phase total number of days
+        phase_end_date = (
+            current_work_phase.start_date.date()
+            + timedelta(days=current_phase_with_status["total_number_of_days"])
+        )
+        days_difference = (event.actual_date.date() - phase_end_date).days
         if total_overage_days + days_difference <= 0:
             return True  # all good, no overage
         if throw_error:
@@ -1284,23 +1350,24 @@ class EventService:
 
     @classmethod
     def _post_process_actions(cls, source_event: Event, work_id: int = None):
-        """Things to happen after the actions are being processed"""
-        all_work_phases = WorkPhase.find_by_params(
+        """After regular actions, update the work's current phase and state"""
+        current_and_upcoming_work_phases = WorkPhase.find_by_params(
             {
                 "work_id": work_id if work_id else source_event.event_configuration.work_phase.work_id,
                 "visibility": PhaseVisibilityEnum.REGULAR.value,
                 "is_completed": False,
             }
         )
-        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order or 0)
+        current_and_upcoming_work_phases = sorted(current_and_upcoming_work_phases, key=lambda x: x.sort_order or 0)
         work = source_event.work
         # if it is same, no need to do unwanted update
         if (
-            len(all_work_phases) > 0
-            and work.current_work_phase_id != all_work_phases[0].id
+            len(current_and_upcoming_work_phases) > 0
+            and work.current_work_phase_id != current_and_upcoming_work_phases[0].id
         ):
-            work.current_work_phase_id = all_work_phases[0].id
+            work.current_work_phase_id = current_and_upcoming_work_phases[0].id
             work.work_state = WorkStateEnum.IN_PROGRESS
+            work.is_completed = False
 
     @classmethod
     def find_events_by_date(cls, from_date: datetime) -> List[Event]:

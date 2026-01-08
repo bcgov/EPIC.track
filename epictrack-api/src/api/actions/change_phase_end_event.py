@@ -16,8 +16,6 @@ class ChangePhaseEndEvent(ActionFactory):
 
     def run(self, source_event: Event, params) -> None:  # pylint: disable=too-many-locals
         """Change the phase end event to another one"""
-        from api.services.event import (EventService)  # pylint: disable=import-outside-toplevel
-
         new_end_event_configuration = find_configuration(source_event, params)
         # find the work phase of the future end event as per the params
         if source_event.event_configuration_id == new_end_event_configuration.id:
@@ -62,10 +60,24 @@ class ChangePhaseEndEvent(ActionFactory):
                 new_end_event_configuration.as_dict(recursive=False), commit=False
             )
 
-        # In case if the source event was already an end event and we are making a new event as end event,
-        # updating the actual would have already
-        # completed the phase and updated the work state. Since there is going to be a new end event
-        # we should revert those changes
+        self._handle_phase_completion_state(new_end_event)
+
+        all_work_phases = WorkPhase.find_by_params(
+            {
+                "work_id": source_event.event_configuration.work_phase.work_id,
+                "visibility": PhaseVisibilityEnum.REGULAR.value,
+            }
+        )
+        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order)
+        current_work_phase_index = util.find_index_in_array(
+            all_work_phases, new_end_event.event_configuration.work_phase
+        )
+
+        self._update_work_state(new_end_event, all_work_phases, current_work_phase_index)
+        self._update_next_phase_start_event(new_end_event, all_work_phases, current_work_phase_index)
+
+    def _handle_phase_completion_state(self, new_end_event: Event):
+        """Handle phase and work completion state based on the new end event"""
         work = new_end_event.event_configuration.work_phase.work
         new_end_event_work_phase = new_end_event.event_configuration.work_phase
         if new_end_event_work_phase.is_completed and not new_end_event.actual_date:
@@ -91,31 +103,23 @@ class ChangePhaseEndEvent(ActionFactory):
                 new_end_event_work_phase.as_dict(recursive=False), commit=False
             )
 
-        all_work_phases = WorkPhase.find_by_params(
-            {
-                "work_id": source_event.event_configuration.work_phase.work_id,
-                "visibility": PhaseVisibilityEnum.REGULAR.value,
-            }
-        )
-        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order)
-        current_work_phase_index = util.find_index_in_array(
-            all_work_phases, new_end_event.event_configuration.work_phase
-        )
-        # update the current_work_phase_id in the work model
+    def _update_work_state(self, new_end_event: Event, all_work_phases: list, current_work_phase_index: int):
+        """Update the current_work_phase_id in the work model"""
         work = new_end_event.event_configuration.work_phase.work
         if current_work_phase_index == len(all_work_phases) - 1:
             work.work_state = WorkStateEnum.COMPLETED
         elif new_end_event.actual_date:
-            work.current_work_phase_id = all_work_phases[
-                current_work_phase_index + 1
-            ].id
+            work.current_work_phase_id = all_work_phases[current_work_phase_index + 1].id
+
         work.update(work.as_dict(recursive=False), commit=False)
+
+    def _update_next_phase_start_event(self, new_end_event: Event, all_work_phases: list, current_work_phase_index: int):
+        """Update the next phase's start event to cascade the date change"""
+        from api.services.event import (EventService)  # pylint: disable=import-outside-toplevel
 
         if len(all_work_phases) > current_work_phase_index + 1:
             next_work_phase = all_work_phases[current_work_phase_index + 1]
-            work_phase_events = Event.find_milestone_events_by_work_phase(
-                next_work_phase.id
-            )
+            work_phase_events = Event.find_milestone_events_by_work_phase(next_work_phase.id)
             next_work_phase_start_event = next(
                 iter(
                     [
@@ -127,12 +131,12 @@ class ChangePhaseEndEvent(ActionFactory):
                 ),
                 None,
             )
-            next_work_phase_start_event.anticipated_date = (
-                find_event_date(new_end_event) + timedelta(days=1)
-            )
+            new_start_date = find_event_date(new_end_event) + timedelta(days=1)
+            next_work_start_event_data = next_work_phase_start_event.as_dict(recursive=False)
+            next_work_start_event_data['anticipated_date'] = new_start_date
             EventService.update_event(
-                next_work_phase_start_event.as_dict(recursive=False),
-                next_work_phase_start_event.id,
+                next_work_start_event_data,
+                next_work_start_event_data['id'],
                 True,
                 commit=False,
             )

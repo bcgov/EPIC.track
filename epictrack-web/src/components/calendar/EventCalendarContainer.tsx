@@ -116,11 +116,16 @@ export const EventCalendarContainer = ({
   const handlePrevYear = () => setSelectedYear((y: number) => y - 1);
   const handleNextYear = () => setSelectedYear((y: number) => y + 1);
 
+  const getScrollbarWidth = () => {
+    return window.innerWidth - document.documentElement.clientWidth;
+  };
+
   useEffect(() => {
     const resize = () => {
       if (!containerRef.current) return;
 
-      const containerWidth = containerRef.current.offsetWidth;
+      const scrollbarWidth = getScrollbarWidth();
+      const containerWidth = containerRef.current.offsetWidth - scrollbarWidth;
       const cellGap = 4;
       const totalGap = daysInRow * cellGap;
 

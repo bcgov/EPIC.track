@@ -29,6 +29,7 @@ import { searchFilter } from "../../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../../hooks";
 import { hasPermission, Restricted } from "../../shared/restricted";
 import { TemplateStatus } from "models/work";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 const LockIcon: React.FC<IconProps> = Icons["LockIcon"];
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
@@ -70,6 +71,7 @@ const EventListTable = ({
   const { roles } = useAppSelector((state) => state?.user.userDetail);
   const canEdit =
     hasPermission({ roles, allowed: [ROLES.EDIT] }) || userIsActiveTeamMember;
+  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -513,7 +515,9 @@ const EventListTable = ({
         showGlobalFilter: true,
         rowSelection,
         pagination,
+        columnFilters,
       }}
+      onColumnFiltersChange={setColumnFilters}
       muiSelectCheckboxProps={({ row }) => ({
         indeterminateIcon: <LockIcon />,
         disabled:

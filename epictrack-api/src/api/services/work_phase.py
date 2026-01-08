@@ -29,10 +29,9 @@ from api.models.staff_work_role import StaffWorkRole
 from api.schemas.work import WorkPhaseSchema
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.event_template import EventPositionEnum
-from api.services.event import EventService
 from api.services.task_template import TaskTemplateService
 from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
-from api.models.work import Work
+from api.models.work import Work, WorkStateEnum
 from api.models.phase_code import PhaseCode as Phase
 from api.models.work_type import WorkType, WorkTypeEnum
 from api.models.project import Project
@@ -67,10 +66,10 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return work_phases
 
     @classmethod
-    def find_by_work_and_phase(cls, work_id: int, phase_id: int) -> WorkPhase:
+    def find_by_work_and_phase(cls, work_id: int, phase_id: int, event_service) -> WorkPhase:
         """Find the workphase status by work_id and work_phase id"""
         work_phases_dict = cls.find_work_phases_by_work_ids([work_id])[0]
-        work_phase = cls.find_work_phase_status(work_id, phase_id, work_phases_dict.get(work_id, []))
+        work_phase = cls.find_work_phase_status(work_id, phase_id, work_phases_dict.get(work_id, []), event_service)
         return work_phase
 
     @classmethod
@@ -103,15 +102,15 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return work_phase
 
     @classmethod
-    def find_work_phases_status(cls, work_id: int):
+    def find_work_phases_status(cls, work_id: int, event_service):
         """Return the work phases with additional information"""
-        return WorkPhaseService.find_multiple_works_phases_status({work_id: None}).get(
+        return WorkPhaseService.find_multiple_works_phases_status({work_id: None}, event_service).get(
             work_id, []
         )
 
     @classmethod
     def find_multiple_works_phases_status(
-        cls, work_params_dict: Dict[str, Union[int, None]]
+        cls, work_params_dict: Dict[str, Union[int, None]], event_service
     ) -> Dict[int, List[Dict[str, Any]]]:
         """Return a dictionary with work_id and its work phases with additional information."""
         result_dict = {}
@@ -121,7 +120,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
 
         for work_id, _work_phase_id in work_params_dict.items():
             result_dict[work_id] = cls.find_work_phase_status(
-                work_id, None, work_phases_dict.get(work_id, [])
+                work_id, None, work_phases_dict.get(work_id, []), event_service
             )
 
         return result_dict
@@ -159,10 +158,10 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return work_phase
 
     @classmethod
-    def find_work_phase_status(cls, work_id, work_phase_id, work_phases):
+    def find_work_phase_status(cls, work_id, work_phase_id, work_phases, event_service):
         """Find work phase status for the work Id.If work_phase_id is passed , only that phase is considered."""
         result = []
-        events = EventService.find_events(work_id, event_categories=PRIMARY_CATEGORIES)
+        events = event_service.find_events(work_id, event_categories=PRIMARY_CATEGORIES)
         if work_phase_id is not None:
             work_phases = [wp for wp in work_phases if wp.id == work_phase_id]
         for index, work_phase in enumerate(work_phases, start=1):
@@ -346,7 +345,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return days_taken
 
     @classmethod
-    def find_all_work_phases_with_additional_info(cls, staff_id: int = None, legislated: bool = None) -> List[WorkPhase]:
+    def find_all_work_phases_with_additional_info(cls, staff_id: int = None, view_underage: bool = False) -> List[WorkPhase]:
         """Return all work phases."""
         work_subq = get_work_subquery()
         ext_subq = get_extension_days_subquery()
@@ -354,6 +353,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         total_days_subq = get_total_days_subquery(ext_subq)
         days_taken_subq = get_days_taken_subquery(sus_subq)
         days_left_subq = get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq)
+        days_over_expr = days_taken_subq.c.days_taken - Phase.number_of_days
 
         query = db.session.query(
             Work.id.label("work_id"),
@@ -363,11 +363,13 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             WorkType.id.label("work_type_id"),
             Phase.name.label("phase_name"),
             Phase.id.label("phase_id"),
+            Phase.number_of_days.label("legislated_length"),
             EAAct.name.label("ea_act_name"),
             WorkPhase.end_date.label("work_phase_end_date"),
             total_days_subq.c.total_days.label("total_days"),
             days_taken_subq.c.days_taken.label("days_taken"),
             days_left_subq.c.days_left.label("days_left"),
+            days_over_expr.label("days_over"),
             func.coalesce(
                 func.array_agg(
                     PhaseOverageResponsibility.responsibility
@@ -394,12 +396,15 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         query = query.filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
-            Phase.is_active.is_(True),
-            Phase.is_deleted.is_(False),
+            Work.work_state.not_in([WorkStateEnum.WITHDRAWN]),
             or_(
-                legislated is None or WorkPhase.legislated == legislated,
-                WorkType.id == WorkTypeEnum.AMENDMENT.value,
-            )
+                WorkPhase.legislated.is_(True),
+                and_(
+                    WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                    WorkPhase.visibility == PhaseVisibilityEnum.REGULAR,
+                ),
+            ),
+            days_over_expr < 0 if view_underage else days_over_expr > 0,
         )
 
         if staff_id:
@@ -451,6 +456,8 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
                 "total_days": row.total_days,
                 "days_taken": row.days_taken,
                 "days_left": row.days_left,
+                "legislated_length": row.legislated_length,
+                "days_over": abs(row.days_over),
             }
             data.append(item)
         return data

@@ -49,6 +49,7 @@ import { useAppSelector } from "../../../hooks";
 import { debounce } from "lodash";
 import { basePIPUrl } from "../../../constants/application-constant";
 import { getStatusFilter } from "components/shared/filterSelect/utils";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 const ImportFileIcon: FC<IconProps> = Icons["ImportFileIcon"];
@@ -81,6 +82,7 @@ const FirstNationList = () => {
   const [firstNationAvailable, setFirstNationAvailable] =
     useState<boolean>(false);
   const menuHoverRef = useRef(false);
+  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
 
   useEffect(() => {
     if (workFirstNationId === undefined) {
@@ -349,7 +351,7 @@ const FirstNationList = () => {
         { indigenous_nation_ids: firstNationIds },
       );
       if (result.status === 200) {
-        showNotification("First nations imported", {
+        showNotification("First Nations imported", {
           type: "success",
         });
         getWorkFirstNations();
@@ -432,7 +434,9 @@ const FirstNationList = () => {
               state={{
                 isLoading: loading,
                 showGlobalFilter: true,
+                columnFilters: columnFilters,
               }}
+              onColumnFiltersChange={setColumnFilters}
             />
           </Grid>
         </Grid>

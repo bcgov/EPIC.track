@@ -13,7 +13,7 @@ export interface Work extends MasterBase {
   epic_description: string;
   is_cac_recommended: boolean;
   is_active: boolean;
-  is_complete: boolean;
+  is_completed: boolean;
   is_high_priority: boolean;
   is_deleted: boolean;
   start_date: string;
@@ -139,4 +139,6 @@ export interface WorkPhaseInsight {
   total_days: number;
   days_taken: number;
   days_left: number;
+  legislated_length: number;
+  days_over: number;
 }

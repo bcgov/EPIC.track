@@ -3,7 +3,6 @@ import { useInsightsContext } from "components/insights/InsightsContext";
 import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsightsContext";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
-import { PhaseChartProps } from "components/insights/type";
 import { getChartColor } from "components/insights/utils";
 import { GrayBox, ETCaption1 } from "components/shared";
 import { showNotification } from "components/shared/notificationProvider";
@@ -18,9 +17,8 @@ import {
 } from "recharts";
 import { useGetOverageResponsibilityQuery } from "services/rtkQuery/phaseInsights";
 
-const OverageResponsibilityChart = ({
-  isUnderageToggled = false,
-}: PhaseChartProps) => {
+const OverageResponsibilityChart = () => {
+  const { viewUnderage: isUnderageToggled } = usePhaseInsightsContext();
   const { columnFilters } = useTableFilterContext();
   const { loadingWorkPhases } = usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
@@ -61,6 +59,10 @@ const OverageResponsibilityChart = ({
   };
 
   const chartData = formatData(data);
+
+  if (isUnderageToggled) {
+    return <></>;
+  }
 
   return (
     <GrayBox sx={{ height: "100%" }}>

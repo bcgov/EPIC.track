@@ -77,7 +77,8 @@ class IssuesDashboard(Resource):
         pagination_options = PaginationOptions(
             page=args.get('page', None, int),
             size=args.get('size', None, int),
-            sort_key=args.get('sort_key', 'name', str),
+            # sort key must be a field on WorkIssueUpdate
+            sort_key=args.get('sort_key', 'posted_date', str),
             sort_order=args.get('sort_order', 'asc', str),
         )
         search_options = IssuesDashboardSearchOptions(
