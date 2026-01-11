@@ -36,3 +36,5 @@ wc-lib
 data
 /epictrack-web/.env
 /epictrack-web/cypress/screenshots/
+deployment/charts/epictrack-web/values.prod.yaml
+deployment/charts/epictrack-api/values.prod.yaml

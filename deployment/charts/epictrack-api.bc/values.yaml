@@ -1,0 +1,10 @@
+app: epictrack-api  # Replace with your desired application name
+githubRepo: https://github.com/bcgov/EPIC.track.git  # Replace with your actual repo URL
+githubContextDir: /epictrack-api
+resources:
+  limits:
+    cpu: 1500m
+    memory: 4Gi
+  requests:
+    cpu: 500m
+    memory: 2Gi

@@ -1,0 +1,216 @@
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.openshift.io/v1","kind":"DeploymentConfig","metadata":{"annotations":{},"creationTimestamp":null,"labels":{"app":"forms-flow-api"},"name":"forms-flow-api","namespace":"e69aae-prod"},"spec":{"replicas":1,"selector":{"app":"forms-flow-api"},"strategy":{"activeDeadlineSeconds":21600,"resources":{},"rollingParams":{"intervalSeconds":1,"maxSurge":"25%","maxUnavailable":"25%","timeoutSeconds":600,"updatePeriodSeconds":1},"type":"Rolling"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"forms-flow-api","app-group":"forms-flow-ai"}},"spec":{"containers":[{"env":[{"name":"INSIGHT_API_URL","valueFrom":{"secretKeyRef":{"key":"INSIGHT_API_URL","name":"forms-flow-ai"}}},{"name":"INSIGHT_API_KEY","valueFrom":{"secretKeyRef":{"key":"INSIGHT_API_KEY","name":"forms-flow-ai"}}},{"name":"DATABASE_URL","valueFrom":{"secretKeyRef":{"key":"API_DATABASE_URL","name":"forms-flow-ai"}}},{"name":"BPM_TOKEN_API","valueFrom":{"secretKeyRef":{"key":"BPM_TOKEN_API","name":"forms-flow-ai"}}},{"name":"BPM_CLIENT_ID","valueFrom":{"secretKeyRef":{"key":"FFA_BPM_CLIENT_ID","name":"forms-flow-ai"}}},{"name":"BPM_CLIENT_SECRET","valueFrom":{"secretKeyRef":{"key":"FFA_BPM_CLIENT_SECRET","name":"forms-flow-ai"}}},{"name":"BPM_API_BASE","valueFrom":{"secretKeyRef":{"key":"BPM_API_BASE","name":"forms-flow-ai"}}},{"name":"FORMSFLOW_API_CORS_ORIGINS","value":"*"},{"name":"JWT_OIDC_WELL_KNOWN_CONFIG","valueFrom":{"secretKeyRef":{"key":"JWT_OIDC_WELL_KNOWN_CONFIG","name":"forms-flow-ai"}}},{"name":"JWT_OIDC_JWKS_URI","valueFrom":{"secretKeyRef":{"key":"JWT_OIDC_JWKS_URI","name":"forms-flow-ai"}}},{"name":"JWT_OIDC_ISSUER","valueFrom":{"secretKeyRef":{"key":"JWT_OIDC_ISSUER","name":"forms-flow-ai"}}},{"name":"JWT_OIDC_AUDIENCE","valueFrom":{"secretKeyRef":{"key":"JWT_OIDC_AUDIENCE","name":"forms-flow-ai"}}},{"name":"JWT_OIDC_CACHING_ENABLED","valueFrom":{"secretKeyRef":{"key":"JWT_OIDC_CACHING_ENABLED","name":"forms-flow-ai"}}},{"name":"JWT_OIDC_ALGORITHMS","valueFrom":{"secretKeyRef":{"key":"JWT_OIDC_ALGORITHMS","name":"forms-flow-ai"}}},{"name":"JWT_OIDC_JWKS_CACHE_TIMEOUT","valueFrom":{"secretKeyRef":{"key":"JWT_OIDC_JWKS_CACHE_TIMEOUT","name":"forms-flow-ai"}}},{"name":"WEB_API_BASE_URL","valueFrom":{"secretKeyRef":{"key":"WEB_API_BASE_URL","name":"forms-flow-ai"}}},{"name":"KEYCLOAK_URL","valueFrom":{"secretKeyRef":{"key":"KEYCLOAK_URL","name":"forms-flow-ai"}}},{"name":"KEYCLOAK_URL_REALM","valueFrom":{"secretKeyRef":{"key":"KEYCLOAK_REALM","name":"forms-flow-ai"}}},{"name":"BPM_GRANT_TYPE","value":"client_credentials"}],"image":"e69aae-tools/forms-flow-api:prod","name":"forms-flow-api","ports":[{"containerPort":5000}],"resources":{"limits":{"cpu":"750m","memory":"2Gi"},"requests":{"cpu":"100m","memory":"100Mi"}}}],"restartPolicy":"Always","stdin":true,"tty":true}},"test":false,"triggers":[{"type":"ConfigChange"},{"imageChangeParams":{"automatic":true,"containerNames":["forms-flow-api"],"from":{"kind":"ImageStreamTag","name":"forms-flow-api:prod","namespace":"e69aae-tools"}},"type":"ImageChange"}]}}
+  resourceVersion: '16582008832'
+  name: forms-flow-api
+spec:
+  strategy:
+    type: Rolling
+    rollingParams:
+      updatePeriodSeconds: 1
+      intervalSeconds: 1
+      timeoutSeconds: 600
+      maxUnavailable: 25%
+      maxSurge: 25%
+    resources:
+      limits:
+        cpu: 200m
+        memory: 1Gi
+      requests:
+        cpu: 50m
+        memory: 512Mi
+    activeDeadlineSeconds: 21600
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - forms-flow-api
+        from:
+          kind: ImageStreamTag
+          namespace: e69aae-tools
+          name: 'forms-flow-api:prod'
+        lastTriggeredImage: 'image-registry.openshift-image-registry.svc:5000/e69aae-tools/forms-flow-api@sha256:297cdec0e7106279bdbeef6cab509b8f3fc59298fd0c01a64fc20df553d1a728'
+  replicas: 2
+  revisionHistoryLimit: 10
+  test: false
+  selector:
+    app: forms-flow-api
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: forms-flow-api
+        app-group: forms-flow-ai
+    spec:
+      volumes:
+        - name: bpm-ca-certs
+          configMap:
+            name: bpm-ca-certs
+      containers:
+        - name: forms-flow-api
+          image: 'image-registry.openshift-image-registry.svc:5000/e69aae-tools/forms-flow-api@sha256:297cdec0e7106279bdbeef6cab509b8f3fc59298fd0c01a64fc20df553d1a728'
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+          env:
+            - name: INSIGHT_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: INSIGHT_API_URL
+            - name: INSIGHT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: INSIGHT_API_KEY
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: API_DATABASE_URL
+            - name: BPM_TOKEN_API
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: BPM_TOKEN_API
+            - name: BPM_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: FFA_BPM_CLIENT_ID
+            - name: BPM_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: FFA_BPM_CLIENT_SECRET
+            - name: BPM_API_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: BPM_API_BASE
+            - name: FORMSFLOW_API_CORS_ORIGINS
+              value: '*'
+            - name: JWT_OIDC_WELL_KNOWN_CONFIG
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: JWT_OIDC_WELL_KNOWN_CONFIG
+            - name: JWT_OIDC_JWKS_URI
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: JWT_OIDC_JWKS_URI
+            - name: JWT_OIDC_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: JWT_OIDC_ISSUER
+            - name: JWT_OIDC_AUDIENCE
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: JWT_OIDC_AUDIENCE
+            - name: JWT_OIDC_CACHING_ENABLED
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: JWT_OIDC_CACHING_ENABLED
+            - name: JWT_OIDC_ALGORITHMS
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: JWT_OIDC_ALGORITHMS
+            - name: JWT_OIDC_JWKS_CACHE_TIMEOUT
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: JWT_OIDC_JWKS_CACHE_TIMEOUT
+            - name: WEB_API_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: WEB_API_BASE_URL
+            - name: KEYCLOAK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: KEYCLOAK_URL
+            - name: KEYCLOAK_URL_REALM
+              valueFrom:
+                secretKeyRef:
+                  name: forms-flow-ai
+                  key: KEYCLOAK_REALM
+            - name: BPM_GRANT_TYPE
+              value: client_credentials
+          resources:
+            limits:
+              cpu: 750m
+              memory: 2Gi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          volumeMounts:
+            - name: bpm-ca-certs
+              mountPath: /ca-certs
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    set -e
+                    if [ -d /ca-certs ]; then
+                      CERTIFI_PATH=$(python -c "import certifi; print(certifi.where())" 2>/dev/null || echo "/etc/ssl/certs/ca-certificates.crt")
+                      for cert in /ca-certs/*.crt; do
+                        if [ -f "$cert" ]; then
+                          echo "Appending certificate: $cert"
+                          cat "$cert" >> "$CERTIFI_PATH" || true
+                        fi
+                      done
+                      echo "SSL_CERT_FILE=$CERTIFI_PATH" >> /etc/environment || true
+                      export SSL_CERT_FILE="$CERTIFI_PATH"
+                      export REQUESTS_CA_BUNDLE="$CERTIFI_PATH"
+                    fi
+                    echo "Certificate import completed"
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+status:
+  observedGeneration: 69
+  details:
+    message: image change
+    causes:
+      - type: ImageChange
+        imageTrigger:
+          from:
+            kind: DockerImage
+            name: 'image-registry.openshift-image-registry.svc:5000/e69aae-tools/forms-flow-api@sha256:297cdec0e7106279bdbeef6cab509b8f3fc59298fd0c01a64fc20df553d1a728'
+  availableReplicas: 2
+  unavailableReplicas: 0
+  latestVersion: 18
+  updatedReplicas: 2
+  conditions:
+    - type: Progressing
+      status: 'True'
+      lastUpdateTime: '2022-05-27T00:04:10Z'
+      lastTransitionTime: '2022-05-27T00:04:08Z'
+      reason: NewReplicationControllerAvailable
+      message: replication controller "forms-flow-api-18" successfully rolled out
+    - type: Available
+      status: 'True'
+      lastUpdateTime: '2025-10-17T00:06:43Z'
+      lastTransitionTime: '2025-10-17T00:06:43Z'
+      message: Deployment config has minimum availability.
+  replicas: 2
+  readyReplicas: 2

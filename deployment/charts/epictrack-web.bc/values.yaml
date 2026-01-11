@@ -9,7 +9,7 @@ resources:
     limit: 4Gi
 repository:
   ref: develop
-  url: https://github.com/bcgov/EPIC-FLOW.git
+  url: https://github.com/bcgov/EPIC.track.git
 context:
   dir: /epictrack-web
 
