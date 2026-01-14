@@ -1,0 +1,28 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: {{ .Values.app }}
+  labels:
+    app: {{ .Values.app }}
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: ImageStreamTag
+      name: '{{ .Values.app }}:latest'
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  postCommit: {}
+  source:
+    type: Git
+    git:
+      uri: {{ .Values.githubRepo }}
+      ref: develop  # Can be overridden during install
+    contextDir: {{ .Values.githubContextDir }}
+  triggers:
+  - type: ConfigChange
+runPolicy: Serial

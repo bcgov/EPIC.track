@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "epictrack-web.name" -}}
+{{- define "compliance-api-bc.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "epictrack-web.fullname" -}}
+{{- define "compliance-api-bc.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "epictrack-web.chart" -}}
+{{- define "compliance-api-bc.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "epictrack-web.labels" -}}
-helm.sh/chart: {{ include "epictrack-web.chart" . }}
-{{ include "epictrack-web.selectorLabels" . }}
+{{- define "compliance-api-bc.labels" -}}
+helm.sh/chart: {{ include "compliance-api-bc.chart" . }}
+{{ include "compliance-api-bc.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,34 +45,18 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "epictrack-web.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "epictrack-web.name" . }}
+{{- define "compliance-api-bc.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "compliance-api-bc.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "epictrack-web.serviceAccountName" -}}
+{{- define "compliance-api-bc.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "epictrack-web.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "compliance-api-bc.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
-{{/*
-Calculate image hash
-*/}}
-{{- define "epictrack-web.imageHash" -}}
-{{- $imageString := printf "%s%s:%s" .Values.image.repository (tpl .Values.image.name .) .Values.image.tag -}}
-{{- $imageString | sha256sum -}}
-{{- end -}}
-
-{{/*
-Calculate config hash
-*/}}
-{{- define "epictrack-web.configHash" -}}
-{{- $configMap := include (print .Template.BasePath "/configmap.yaml") . -}}
-{{- $configMap | sha256sum -}}
-{{- end -}}
-
