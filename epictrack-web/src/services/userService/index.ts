@@ -134,7 +134,7 @@ const getToken = () =>
 
 const doLogin = () => {
   if (KeycloakData) {
-    KeycloakData.login();
+    KeycloakData.login({idpHint: "idir"});
   }
 };
 
