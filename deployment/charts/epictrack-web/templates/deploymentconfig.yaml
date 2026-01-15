@@ -1,62 +1,48 @@
-apiVersion: apps.openshift.io/v1
-kind: DeploymentConfig
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  annotations: null
-  creationTimestamp: null
   labels:
     app: {{ .Values.app.name }}
   name: {{ .Chart.Name }}
+  annotations:
+    deployment.kubernetes.io/revision: "{{ .Release.Revision }}"
+    checksum/image: {{ include "epictrack-web.imageHash" . }}
+    checksum/config: {{ include "epictrack-web.configHash" . }}
 spec:
-  replicas: {{ .Values.replicas.count}}
+  replicas: {{ .Values.replicas.count }}
   selector:
-    app: {{ .Values.app.name }}
+    matchLabels:
+      app: {{ .Values.app.name }}
   strategy:
-    activeDeadlineSeconds: 21600
-    resources:
-      limits:
-        cpu: {{ .Values.resources.cpu.limit }}
-        memory: {{ .Values.resources.memory.limit }}
-      requests:
-        cpu: {{ .Values.resources.cpu.request}}
-        memory: {{ .Values.resources.memory.request }}
-    rollingParams:
-      intervalSeconds: 1
+    type: RollingUpdate
+    rollingUpdate:
       maxSurge: 25%
       maxUnavailable: 25%
-      timeoutSeconds: 600
-      updatePeriodSeconds: 1
-    type: Rolling
-  triggers:
-    - type: ImageChange
-      imageChangeParams:
-        automatic: true
-        containerNames:
-          - {{ .Chart.Name }}
-        from:
-          kind: ImageStreamTag
-          namespace: c72cba-tools
-          name: "{{ tpl .Values.image.name . }}:{{ .Values.image.tag }}"
-    - type: ConfigChange
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: {{ .Values.app.name }}
+      annotations:
+        checksum/image: {{ include "epictrack-web.imageHash" . }}
+        checksum/config: {{ include "epictrack-web.configHash" . }}
     spec:
       containers:
-      - env: null
-        image: "{{ .Values.image.repository}}{{ tpl .Values.image.name . }}:{{ .Values.image.tag }}"
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}/{{ tpl .Values.image.name . }}:{{ .Values.image.tag }}"
         imagePullPolicy: Always
-        name: {{ .Chart.Name }}
+        resources:
+          limits:
+            cpu: {{ .Values.resources.cpu.limit }}
+            memory: {{ .Values.resources.memory.limit }}
+          requests:
+            cpu: {{ .Values.resources.cpu.request }}
+            memory: {{ .Values.resources.memory.request }}
         ports:
         - containerPort: 8080
-        resources: {}
-        tty: true
         volumeMounts:
         - mountPath: {{ .Values.mountPath }}
           name: {{ .Chart.Name }}
           readOnly: true
-      restartPolicy: Always
       volumes:
       - configMap:
           defaultMode: 420
