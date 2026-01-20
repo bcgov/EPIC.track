@@ -35,5 +35,5 @@ jobs:
           oc tag epictrack-api:latest epictrack-api:test
           oc tag epictrack-web:latest epictrack-web:test
           
-          oc rollout status dc/epictrack-api -n ${{ secrets.OPENSHIFT_REPOSITORY }}-test -w
-          oc rollout status dc/epictrack-web -n ${{ secrets.OPENSHIFT_REPOSITORY }}-test -w
+          oc rollout restart deployment/epictrack-api -n ${{ secrets.OPENSHIFT_REPOSITORY }}-test
+          oc rollout restart deployment/epictrack-web -n ${{ secrets.OPENSHIFT_REPOSITORY }}-test
