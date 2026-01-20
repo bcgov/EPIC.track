@@ -66,4 +66,4 @@ jobs:
       - name: Rollout
         shell: bash
         run: |
-          oc rollout status dc/${{ env.APP_NAME }} -n ${{ secrets.OPENSHIFT_REPOSITORY }}-${{ env.TAG_NAME }} -w
+          oc rollout restart deployment/${{ env.APP_NAME }} -n ${{ secrets.OPENSHIFT_REPOSITORY }}-${{ env.TAG_NAME }} -w
