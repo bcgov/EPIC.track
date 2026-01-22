@@ -160,6 +160,16 @@ class ProjectIdPathParameterSchema(RequestPathParameterSchema):
     )
 
 
+class ProjectSpecialHistoryQueryParamSchema(RequestQueryParameterSchema):
+    """Project special history date query parameters"""
+
+    as_of_date = fields.Date(
+        metadata={"description": "The date to query the project special history as of, in ISO 8601 format"},
+        allow_none=True,
+        required=False
+    )
+
+
 class ProjectFirstNationsQueryParamSchema(RequestQueryParameterSchema):
     """Project first nations query parameters"""
 

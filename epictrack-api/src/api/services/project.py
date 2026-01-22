@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Project."""
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from typing import IO, List
 
 import numpy as np
@@ -47,13 +47,15 @@ class ProjectService:
     """Service to manage project related operations."""
 
     @classmethod
-    def find(cls, project_id, exclude_deleted=False):
+    def find(cls, project_id, exclude_deleted=False, as_of_date: date = None):
         """Find by project id."""
         query = db.session.query(Project).filter(Project.id == project_id)
         if exclude_deleted:
             query = query.filter(Project.is_deleted.is_(False))
         project = query.one_or_none()
         if project:
+            if as_of_date:
+                project = cls._get_project_with_special_fields(project, as_of_date)
             return project
         raise ResourceNotFoundError(f"Project with id '{project_id}' not found.")
 
@@ -490,6 +492,51 @@ class ProjectService:
         SpecialFieldService.create_special_field_entry(
           project_state_special_field_data, commit=False
         )
+
+    @classmethod
+    def _get_project_with_special_fields(cls, project: Project, as_of_date: date):
+        """Get the project along with its special fields as of given date"""
+        # Setup date range for the day
+        start_dt = datetime.combine(as_of_date, datetime.min.time())
+        end_dt = start_dt + timedelta(days=1)
+
+        # Update project name
+        project_name = SpecialFieldService.get_special_field_value(
+            entity=EntityEnum.PROJECT.value,
+            field_name="name",
+            entity_id=project.id,
+            start_dt=start_dt,
+            end_dt=end_dt,
+            default=project.name
+        )
+        project.name = project_name
+
+        # Update proponent
+        proponent_id = SpecialFieldService.get_special_field_value(
+            entity=EntityEnum.PROJECT.value,
+            field_name="proponent_id",
+            entity_id=project.id,
+            start_dt=start_dt,
+            end_dt=end_dt,
+            default=project.proponent_id
+        )
+
+        if proponent_id:
+            project.proponent_id = int(proponent_id)
+            project.proponent.id = int(proponent_id)
+
+            # Update proponent name
+            proponent_name = SpecialFieldService.get_special_field_value(
+                entity=EntityEnum.PROPONENT.value,
+                field_name="name",
+                entity_id=proponent_id,
+                start_dt=start_dt,
+                end_dt=end_dt,
+                default=project.proponent.name
+            )
+            project.proponent.name = proponent_name
+
+        return project
 
     @classmethod
     def _check_auth(cls, one_of_roles):
