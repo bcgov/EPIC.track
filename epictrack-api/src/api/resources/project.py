@@ -78,7 +78,9 @@ class Project(Resource):
     def get(project_id):
         """Return details of a project."""
         req.ProjectIdPathParameterSchema().load(request.view_args)
-        project = ProjectService.find(project_id, exclude_deleted=True)
+        args = req.ProjectSpecialHistoryQueryParamSchema().load(request.args)
+        date = args.get("as_of_date", None)
+        project = ProjectService.find(project_id, exclude_deleted=True, as_of_date=date)
         return res.ProjectResponseSchema().dump(project), HTTPStatus.OK
 
     @staticmethod
