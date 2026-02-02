@@ -11,6 +11,7 @@ data:
         "ENV": "dev",
         "NODE_ENV": "production",
         "REACT_APP_API_URL": "{{ .Values.app.api}}",
+        "REACT_APP_CENTRE_API_URL": "{{ .Values.app.centreApiUrl }}",
         "REACT_APP_KEYCLOAK_URL": "{{ .Values.keycloak.url }}",
         "REACT_APP_KEYCLOAK_CLIENT": "{{ .Values.keycloak.client }}",
         "REACT_APP_KEYCLOAK_REALM": "{{ .Values.keycloak.realm }}",

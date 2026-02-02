@@ -3,6 +3,7 @@
   "version": "1.0.6",
   "private": true,
   "dependencies": {
+    "@epic/centre-analytics": "file:../../EPIC.analytics",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@hookform/resolvers": "^2.9.11",

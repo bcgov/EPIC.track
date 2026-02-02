@@ -2,6 +2,7 @@ app:
   name: epictrack
   url: epictrack-web-{{ .Release.Namespace }}.apps.gold.devops.gov.bc.ca
   api: https://epictrack-api-{{ .Release.Namespace }}.apps.gold.devops.gov.bc.ca
+  centreApiUrl: ""  # EPIC.centre API base URL for analytics (optional)
   env: dev
 resources:
   cpu:
