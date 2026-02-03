@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import Header from "./components/layout/Header/Header";
 import UserService from "./services/userService";
@@ -12,12 +12,44 @@ import { Loader } from "./components/shared/loader";
 import Confetti from "components/confetti/Confetti";
 import { TrackErrorBoundary } from "TrackErrorBoundary";
 import AppHelpButton from "components/AppHelpButton";
+import { recordAnalytics } from "@epic/centre-analytics";
+import { AppConfig } from "./config";
 
 export function App() {
   const dispatch = useAppDispatch();
   const isLoggedIn = useAppSelector(
     (state) => state.user?.authentication.authenticated,
   );
+
+  const bearerToken = useAppSelector((state) => state.user?.bearerToken);
+  const userDetail = useAppSelector((state) => state.user?.userDetail);
+
+  useEffect(() => {
+    if (!AppConfig.centreApiUrl || !isLoggedIn || !bearerToken || !userDetail)
+      return;
+    recordAnalytics({
+      appName: "epic_track",
+      centreApiUrl: AppConfig.centreApiUrl,
+      enabled: true,
+      authState: {
+        user: {
+          access_token: bearerToken,
+          profile: {
+            preferred_username: userDetail.preferred_username,
+            sub: userDetail.sub,
+          },
+        },
+        isAuthenticated: true,
+      },
+    }).catch((error) => {
+      console.log("Failed to record analytics:", error);
+    });
+  }, [
+    isLoggedIn,
+    bearerToken,
+    userDetail?.preferred_username,
+    userDetail?.sub,
+  ]);
 
   const isMediumScreen = useMediaQuery((theme: Theme) =>
     theme.breakpoints.up("md"),
