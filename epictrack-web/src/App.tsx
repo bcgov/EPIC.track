@@ -44,12 +44,7 @@ export function App() {
     }).catch((error) => {
       console.log("Failed to record analytics:", error);
     });
-  }, [
-    isLoggedIn,
-    bearerToken,
-    userDetail?.preferred_username,
-    userDetail?.sub,
-  ]);
+  }, [isLoggedIn, bearerToken, userDetail]);
 
   const isMediumScreen = useMediaQuery((theme: Theme) =>
     theme.breakpoints.up("md"),
