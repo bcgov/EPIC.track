@@ -251,6 +251,24 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
                 )
 
     @classmethod
+    def get_special_field_value(cls, entity: str, field_name: str, entity_id: int,
+                                start_dt: datetime, end_dt: datetime, default=None):
+        """Helper method to get a special field value or return default"""
+        special_fields = cls.find_special_history_by_date_range(
+            entity=entity,
+            field_name=field_name,
+            from_date=start_dt,
+            to_date=end_dt,
+            entity_ids=[entity_id],
+        )
+
+        if special_fields and len(special_fields) > 0:
+            value = special_fields[0].field_value
+            return value
+
+        return default
+
+    @classmethod
     def find_special_history_by_date_range(
         cls,
         entity: EntityEnum,
@@ -260,7 +278,6 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         entity_ids: Optional[List[int]] = None,
     ) -> List[SpecialField]:
         """Find special field entries of given entity within given date range."""
-        # time_range = DateRange(from_date, to_date)
         time_range = DateTimeTZRange(from_date, to_date)
         query = db.session.query(SpecialField).filter(
             SpecialField.entity == entity,
