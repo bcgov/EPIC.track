@@ -9,6 +9,7 @@ declare global {
       REACT_APP_KEYCLOAK_REALM: string;
       REACT_APP_ENV: string;
       REACT_APP_VERSION: string;
+      REACT_APP_CENTRE_API_URL: string;
     };
   }
 }
@@ -28,11 +29,16 @@ const APP_ENVIRONMENT =
   window._env_?.REACT_APP_ENV || process.env.REACT_APP_ENV || "";
 const APP_VERSION =
   window._env_?.REACT_APP_VERSION || process.env.REACT_APP_VERSION || "";
+const CENTRE_API_URL =
+  window._env_?.REACT_APP_CENTRE_API_URL ||
+  process.env.REACT_APP_CENTRE_API_URL ||
+  "";
 
 export const AppConfig = {
   apiUrl: `${API_URL}/api/v1/`,
   environment: APP_ENVIRONMENT,
   version: APP_VERSION,
+  centreApiUrl: CENTRE_API_URL,
   keycloak: {
     url: KC_URL || "",
     clientId: KC_CLIENT || "",

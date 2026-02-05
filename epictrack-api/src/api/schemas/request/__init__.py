@@ -56,6 +56,7 @@ from .phase_overage_responsibility_request import (
 from .project_request import (
     ProjectAbbreviationParameterSchema,
     ProjectBodyParameterSchema,
+    ProjectSpecialHistoryQueryParamSchema,
     ProjectExistenceQueryParamSchema,
     ProjectFirstNationsQueryParamSchema,
     ProjectIdPathParameterSchema,
