@@ -57,7 +57,7 @@ export function App() {
   return (
     <AxiosErrorHandler>
       {isLoggedIn && (
-        <Router>
+        <Router basename="/track">
           <TrackErrorBoundary>
             {uiState.showConfetti && <Confetti />}
             <Box sx={{ display: "flex" }}>

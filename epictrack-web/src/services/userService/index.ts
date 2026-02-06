@@ -74,6 +74,7 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
       onLoad: "login-required",
       pkceMethod: "S256",
       checkLoginIframe: false,
+      redirectUri: `${AppConfig.appUrl}/track`,
     });
     if (!authenticated) {
       console.warn("not authenticated!");
