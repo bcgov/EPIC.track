@@ -21,6 +21,7 @@ RUN mkdir -p node_modules/.cache && chmod -R 777 node_modules/.cache
 # add app files
 COPY . ./
 
+ENV PUBLIC_URL=/track
 RUN npm run build
 
 # Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx

@@ -2,6 +2,7 @@ declare global {
   interface Window {
     _env_: {
       REACT_APP_API_URL: string;
+      REACT_APP_URL: string;
 
       // Keycloak
       REACT_APP_KEYCLOAK_URL: string;
@@ -14,6 +15,8 @@ declare global {
 }
 const API_URL =
   window._env_?.REACT_APP_API_URL || process.env.REACT_APP_API_URL || "";
+const APP_URL =
+  window._env_?.REACT_APP_URL || process.env.REACT_APP_URL || "";
 
 // Keycloak Environment Variables
 const KC_URL =
@@ -31,6 +34,7 @@ const APP_VERSION =
 
 export const AppConfig = {
   apiUrl: `${API_URL}/api/v1/`,
+  appUrl: APP_URL,
   environment: APP_ENVIRONMENT,
   version: APP_VERSION,
   keycloak: {
