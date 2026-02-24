@@ -142,7 +142,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     # JWT_OIDC_ISSUER = _get_config('JWT_OIDC_TEST_ISSUER')
     JWT_OIDC_TEST_AUDIENCE = _get_config('JWT_OIDC_TEST_AUDIENCE')
     JWT_OIDC_TEST_CLIENT_SECRET = _get_config('JWT_OIDC_TEST_CLIENT_SECRET')
-    JWT_OIDC_TEST_ISSUER = _get_config('JWT_OIDC_TEST_ISSUER')
+    JWT_OIDC_TEST_ISSUER = _get_config('JWT_OIDC_TEST_ISSUER', default="test-issuer")
     JWT_OIDC_WELL_KNOWN_CONFIG = _get_config('JWT_OIDC_WELL_KNOWN_CONFIG')
     JWT_OIDC_TEST_ALGORITHMS = _get_config('JWT_OIDC_TEST_ALGORITHMS')
     JWT_OIDC_TEST_JWKS_URI = _get_config('JWT_OIDC_TEST_JWKS_URI', default=None)
