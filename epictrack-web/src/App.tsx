@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import Header from "./components/layout/Header/Header";
 import UserService from "./services/userService";
@@ -51,9 +51,19 @@ export function App() {
   );
   const uiState = useAppSelector((state) => state.uiState);
   const drawerWidth = isMediumScreen ? uiState.drawerWidth : 0;
-  React.useEffect(() => {
+
+  useEffect(() => {
+    const redirectUrl = window.sessionStorage.getItem("redirectUrl");
+    if (!redirectUrl) {
+      const cleanPathname = window.location.pathname.replace(/^\/track/, "");
+      window.sessionStorage.setItem(
+        "redirectUrl",
+        cleanPathname + window.location.search,
+      );
+    }
     UserService.initKeycloak(dispatch);
   }, [dispatch]);
+
   return (
     <AxiosErrorHandler>
       {isLoggedIn && (

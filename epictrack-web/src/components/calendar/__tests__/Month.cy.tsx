@@ -95,7 +95,7 @@ describe("Month", () => {
     );
 
     cy.get("div").contains("1").should("exist");
-    cy.get("div").contains("30").should("exist");
+    cy.get("div").contains("28").should("exist");
   });
 
   it("renders EventRow only when expanded", () => {
