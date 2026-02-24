@@ -34,6 +34,12 @@ const AuthenticatedRoutes = () => {
     return <Navigate to="/unauthorized" replace />;
   }
 
+  const redirectUrl = window.sessionStorage.getItem("redirectUrl");
+  if (redirectUrl) {
+    window.sessionStorage.removeItem("redirectUrl");
+    return <Navigate to={redirectUrl} replace />;
+  }
+
   return (
     <Routes>
       <Route
