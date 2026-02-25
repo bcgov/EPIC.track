@@ -230,7 +230,6 @@ export default function AnticipatedEAOSchedule() {
             .map((group, index) => {
               const groupName = group.group;
               const items = group.items;
-              console.log(items);
               return (
                 <>
                   <Accordion
