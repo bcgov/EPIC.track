@@ -105,7 +105,7 @@ describe("UserManagementList", () => {
     cy.get("table").contains("tr", staff3.full_name).should("not.exist");
   });
 
-  it("should filter the user management list by default position input (IPE)", () => {
+  it("should filter the user management list by default position input (REL)", () => {
     cy.get("table").contains("tr", staff1.position.name).should("be.visible");
     cy.get("table").contains("tr", staff3.position.name).should("be.visible");
     cy.get("table").contains("tr", staff2.position.name).should("not.exist");
