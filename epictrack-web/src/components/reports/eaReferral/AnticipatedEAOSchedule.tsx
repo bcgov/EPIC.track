@@ -32,6 +32,7 @@ import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETReportContainer } from "../../shared";
 import { staleLevel } from "utils/uiUtils";
 import { Palette } from "styles/theme";
+import { EventCategory } from "models/event";
 
 interface Group {
   group: string;
@@ -132,7 +133,6 @@ export default function AnticipatedEAOSchedule() {
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
   };
-
   interface TabPanelProps {
     children?: React.ReactNode;
     dir?: string;
@@ -314,7 +314,9 @@ export default function AnticipatedEAOSchedule() {
                                         Decision to be made by
                                       </TableCell>
                                       <TableCell>
-                                        {item["minister"]
+                                        {item["category_type"] ===
+                                          EventCategory.DECISION &&
+                                        item["minister"]
                                           ? item["decision_by"] +
                                             ", " +
                                             item["minister"]
