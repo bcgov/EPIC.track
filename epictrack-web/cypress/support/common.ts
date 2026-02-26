@@ -19,7 +19,7 @@ export const mockStaffs: Staff[] = [
     email: "email@example.com",
     is_active: true,
     position_id: 2 /* add more missing properties here */,
-    position: { name: "IPE", id: 1, sort_order: 0 },
+    position: { name: "REL", id: 1, sort_order: 0 },
     idir_user_id: ""
   },
   {
@@ -43,7 +43,7 @@ export const mockStaffs: Staff[] = [
     email: "test.test@example.com",
     is_active: true,
     position_id: 1,
-    position: { name: "IPE", id: 1, sort_order: 0 },
+    position: { name: "REL", id: 1, sort_order: 0 },
     idir_user_id: ""
   },
   // Add more mock Staff objects as needed
@@ -54,9 +54,9 @@ export const generateMockEvent = (overrides?: Partial<EventsGridModel>): EventsG
   const endOfMonth = dayjs().endOf("month").toDate();
 
   const start = faker.date.between({ from: startOfMonth, to: endOfMonth });
-  const end = faker.date.between({ 
-    from: dayjs(start).add(1, "day").toDate(), 
-    to: dayjs(start).add(5, "day").toDate() 
+  const end = faker.date.between({
+    from: dayjs(start).add(1, "day").toDate(),
+    to: dayjs(start).add(5, "day").toDate()
   });
   const number_of_days = dayjs(end).diff(dayjs(start), "day") + 1;
 
@@ -66,7 +66,7 @@ export const generateMockEvent = (overrides?: Partial<EventsGridModel>): EventsG
     start_date: start.toISOString(),
     end_date: end.toISOString(),
     event_configuration_id: faker.number.int(),
-    event_configuration: { 
+    event_configuration: {
       id: faker.number.int(),
       name: faker.lorem.words(3),
       event_category_id: faker.number.int(),
@@ -238,7 +238,7 @@ export type CypressStubFunction =
   | Cypress.Agent<sinon.SinonStub>
   | (() => void)
   | undefined;
- 
+
 export const makeWorkplanContextStub = (
     overrides: Partial<WorkplanContextProps> = {}
   ): WorkplanContextProps => ({

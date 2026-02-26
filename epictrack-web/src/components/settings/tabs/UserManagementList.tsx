@@ -37,7 +37,7 @@ const UserManagementList = () => {
     [
       {
         id: "position.name",
-        value: ["IPE"],
+        value: ["REL"],
       },
       {
         id: "is_active",
