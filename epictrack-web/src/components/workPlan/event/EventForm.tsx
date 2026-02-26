@@ -195,10 +195,10 @@ const EventForm = ({
       isFormFieldsLocked ||
       Boolean(
         selectedConfiguration?.id &&
-        selectedWorkPhase?.legislated &&
-        workPhaseAdditionalInfo &&
-        workPhaseAdditionalInfo?.milestone_progress === 0 &&
-        selectedConfiguration?.event_position === EventPosition.END,
+          selectedWorkPhase?.legislated &&
+          workPhaseAdditionalInfo &&
+          workPhaseAdditionalInfo?.milestone_progress === 0 &&
+          selectedConfiguration?.event_position === EventPosition.END,
       ),
     [
       isFormFieldsLocked,
