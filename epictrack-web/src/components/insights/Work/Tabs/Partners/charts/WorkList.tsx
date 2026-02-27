@@ -112,9 +112,7 @@ const WorkList = () => {
   const workTypes = useMemo(() => {
     return Array.from(
       new Set(
-        [...works]
-          .filter((w) => w.work_type)
-          .map((w) => w.work_type.name),
+        [...works].filter((w) => w.work_type).map((w) => w.work_type.name),
       ),
     ).sort();
   }, [works]);
@@ -248,7 +246,9 @@ const WorkList = () => {
         filterVariant: "multi-select",
         filterSelectOptions: relStaff,
         accessorFn: (row) => {
-          return row.rel_staff?.map((staff) => staff.full_name).join(", ") || "";
+          return (
+            row.rel_staff?.map((staff) => staff.full_name).join(", ") || ""
+          );
         },
         Cell: ({ row }) => {
           return (
