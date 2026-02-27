@@ -58,9 +58,8 @@ const NoDataComponent = ({ ...props }) => {
   );
 };
 
-export interface MaterialReactTableProps<
-  TData extends MRT_RowData,
-> extends MRT_TableOptions<TData> {
+export interface MaterialReactTableProps<TData extends MRT_RowData>
+  extends MRT_TableOptions<TData> {
   columns: MRT_ColumnDef<TData>[];
   data: TData[];
   enableExport?: boolean;
