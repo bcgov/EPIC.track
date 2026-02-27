@@ -63,6 +63,12 @@ export type WorkByStaff = {
   staff_id: number;
 };
 
+export type WorkByRel = {
+  count: number;
+  rel_staff: string;
+  rel_staff_id: number;
+};
+
 export type ProjectByType = {
   count: number;
   type: string;

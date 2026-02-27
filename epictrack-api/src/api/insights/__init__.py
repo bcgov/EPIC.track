@@ -10,6 +10,7 @@ from api.insights.work_federal_involvement_insight import WorkFederalInvolvement
 from api.insights.work_first_nation_insight import WorkFirstNationInsightGenerator
 from api.insights.work_lead_insight import WorkLeadInsightGenerator
 from api.insights.work_ministry_insight import WorkMinistryInsightGenerator
+from api.insights.work_rel_insight import WorkRelInsightGenerator
 from api.insights.work_staff_insight import WorkStaffInsightGenerator
 from api.insights.work_team_insight import WorkTeamInsightGenerator
 from api.insights.work_type_insight import WorkByTypeInsightGenerator
@@ -32,6 +33,7 @@ def get_insight_generator(resource: str, group_by: str) -> InsightGenerator:
             "federal_involvement": WorkFederalInvolvementInsightGenerator,
             "first_nation": WorkFirstNationInsightGenerator,
             "type": WorkByTypeInsightGenerator,
+            "rel": WorkRelInsightGenerator,
             "assessment_by_phase": AssessmentWorksByPhaseInsightGenerator,
             "year_opened": WorkByYearOpenedInsightGenerator,
             "year_completed": WorkByYearCompletedInsightGenerator,

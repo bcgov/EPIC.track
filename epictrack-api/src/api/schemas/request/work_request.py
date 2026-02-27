@@ -316,6 +316,11 @@ class WorkQueryParameterSchema(RequestQueryParameterSchema):
         metadata={"description": "Indicate if the result should have indigenous nations"}
     )
 
+    include_rel_staff = fields.Bool(
+        load_default=False,
+        metadata={"description": "Indicate if the result should include REL staff for each work"}
+    )
+
     staff_id = fields.Int(
         metadata={"description": "Staff ID to filter by (optional)"},
         required=False,

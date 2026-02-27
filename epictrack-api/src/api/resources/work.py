@@ -103,14 +103,36 @@ class Works(Resource):
         is_active = request_args.get("is_active", None)
         staff_id = request_args.get("staff_id", None)
         include_indigenous_nations = request_args.get('include_indigenous_nations')
+        include_rel_staff = request_args.get('include_rel_staff', False)
+
         if staff_id is not None:
             works = WorkService.get_works_by_staff(staff_id)
         else:
             works = WorkService.find_all_works(is_active)
+
         exclude = [] if include_indigenous_nations else ['indigenous_works']
+        if not include_rel_staff:
+            exclude.append('rel_staff')
+
         works_schema = res.WorkResponseSchema(many=True, exclude=exclude)
 
         include_phase_status = request_args.get('include_phase_status', False)
+
+        # Augment works with REL staff if requested
+        if include_rel_staff:
+            work_ids = [work.id for work in works]
+            staff_for_works = WorkService.find_staff_for_works(work_ids, is_active=True)
+
+            # Add rel_staff to each work object
+            for work in works:
+                rel_staff = []
+                if work.id in staff_for_works:
+                    for staff_work_role in staff_for_works[work.id]:
+                        # Filter by REL position
+                        if staff_work_role.staff.position.name == 'REL':
+                            rel_staff.append(staff_work_role.staff)
+                work.rel_staff = rel_staff
+
         if include_phase_status:
             augmented_works = []
             for work in works:
