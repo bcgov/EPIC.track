@@ -8,6 +8,7 @@ import {
   WorkByFederalInvolvement,
   WorkByNation,
   WorkByStaff,
+  WorkByRel,
   AssessmentByPhase,
   WorkByYear,
   WorkStateByYear,
@@ -58,6 +59,7 @@ export const workInsightsApi = createApi({
     "WorksByMinistry",
     "WorksByFederalInvolvement",
     "WorksByNation",
+    "WorksByRel",
     "WorksWithNations",
     "AssessmentsByPhase",
     "WorksByYearOpened",
@@ -149,7 +151,7 @@ export const workInsightsApi = createApi({
     getWorksWithNations: builder.query<Work[], { staffId?: number } | void>({
       query: (args) =>
         buildQueryString("works", { ...args, is_active: true }) +
-        "&include_indigenous_nations=true",
+        "&include_indigenous_nations=true&include_rel_staff=true",
       providesTags: (result) =>
         result
           ? [
@@ -273,6 +275,24 @@ export const workInsightsApi = createApi({
           : [{ type: "WorksByStaff", id: "LIST" }],
     }),
 
+    getWorksByRel: builder.query<WorkByRel[], InsightQueryArgs>({
+      query: (args) => ({
+        url: `insights/works`,
+        method: "POST",
+        body: buildInsightBody("rel", args),
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ rel_staff_id }) => ({
+                type: "WorksByRel" as const,
+                id: rel_staff_id,
+              })),
+              { type: "WorksByRel", id: "LIST" },
+            ]
+          : [{ type: "WorksByRel", id: "LIST" }],
+    }),
+
     getWorksByYearOpened: builder.query<WorkByYear[], InsightQueryArgs>({
       query: (args) => ({
         url: `insights/works`,
@@ -311,6 +331,7 @@ export const {
   useGetWorksByFederalInvolvementQuery,
   useGetWorksByNationQuery,
   useGetWorksByStaffQuery,
+  useGetWorksByRelQuery,
   useGetWorksWithNationsQuery,
   useGetAssessmentsByPhaseQuery,
   useGetWorksByYearOpenedQuery,

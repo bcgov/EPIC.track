@@ -96,6 +96,27 @@ const WorkList = () => {
     return uniqueNations;
   }, [works]);
 
+  const relStaff = useMemo(() => {
+    const staff = works
+      .map((work) => work.rel_staff || [])
+      .flat()
+      .filter((s) => s);
+
+    const uniqueStaff = Array.from(
+      new Set(staff.map((s) => s.full_name)),
+    ).sort();
+
+    return uniqueStaff;
+  }, [works]);
+
+  const workTypes = useMemo(() => {
+    return Array.from(
+      new Set(
+        [...works].filter((w) => w.work_type).map((w) => w.work_type.name),
+      ),
+    ).sort();
+  }, [works]);
+
   const columns = useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
@@ -218,8 +239,86 @@ const WorkList = () => {
           );
         },
       },
+      {
+        accessorKey: "rel_staff",
+        header: "REL",
+        size: 200,
+        filterVariant: "multi-select",
+        filterSelectOptions: relStaff,
+        accessorFn: (row) => {
+          return (
+            row.rel_staff?.map((staff) => staff.full_name).join(", ") || ""
+          );
+        },
+        Cell: ({ row }) => {
+          return (
+            <div style={{ wordWrap: "break-word", whiteSpace: "pre-wrap" }}>
+              {row.original.rel_staff
+                ?.map((staff) => staff.full_name)
+                .join(", ") || ""}
+            </div>
+          );
+        },
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValues) => {
+          if (
+            !filterValues.length ||
+            filterValues.length > relStaff.length // select all is selected
+          ) {
+            return true;
+          }
+
+          // list of REL staff associated with the work
+          const workRelStaff: string[] =
+            row.original.rel_staff?.map((staff) => staff.full_name) || [];
+
+          return filterValues.some((filterValue: string) =>
+            workRelStaff.includes(filterValue),
+          );
+        },
+      },
+      {
+        accessorKey: "work_type.name",
+        header: "Work Type",
+        size: 150,
+        filterVariant: "multi-select",
+        filterSelectOptions: workTypes,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValues) => {
+          if (
+            !filterValues.length ||
+            filterValues.length > workTypes.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValues.includes(value);
+        },
+      },
     ],
-    [federalInvolvements, indigenousNations, ministries],
+    [federalInvolvements, indigenousNations, ministries, relStaff, workTypes],
   );
   return (
     <MasterTrackTable

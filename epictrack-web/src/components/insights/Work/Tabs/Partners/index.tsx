@@ -3,6 +3,7 @@ import InsightAccordion from "components/insights/InsightsAccordion";
 import WorkByOtherMinistryChart from "./charts/WorkByOtherMinistry";
 import WorkByFederalInvolvementChart from "./charts/WorkByFederalInvolvement";
 import WorkByNationChart from "./charts/WorkByNation";
+import WorkByREL from "./charts/WorkByREL";
 import WorkList from "./charts/WorkList";
 
 const Partners = () => {
@@ -24,6 +25,9 @@ const Partners = () => {
         </Grid>
         <Grid className="chart-item" item xs={12} md={12} lg={6}>
           <WorkByNationChart />
+        </Grid>
+        <Grid className="chart-item" item xs={12} md={12} lg={6}>
+          <WorkByREL />
         </Grid>
       </Grid>
     </InsightAccordion>

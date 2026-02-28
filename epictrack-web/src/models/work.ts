@@ -67,6 +67,7 @@ export interface Work extends MasterBase {
     id: number;
     name: string;
   }[];
+  rel_staff?: Staff[];
   work_phase_status?: WorkPhaseAdditionalInfo[];
 }
 
