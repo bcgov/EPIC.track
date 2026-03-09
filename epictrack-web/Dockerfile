@@ -1,6 +1,6 @@
 # "build-stage", based on Node.js, to build and compile the frontend
 # pull official base image
-FROM node:18-alpine as build-stage
+FROM node:24-alpine as build-stage
 
 # set working directory
 WORKDIR /app
