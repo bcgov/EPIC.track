@@ -42,8 +42,8 @@ class KeycloakService:
 
     @staticmethod
     def get_users():
-        """Get users"""
-        response = KeycloakService._request_keycloak('users?max=2000')
+        """Get IDIR users"""
+        response = KeycloakService._request_keycloak('users?max=2000&idpAlias=idir')
         return response.json()
 
     @staticmethod
