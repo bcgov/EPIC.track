@@ -5,6 +5,10 @@ import { mockEventsGrid } from "../../../../cypress/support/common";
 import { EVENT_TYPE } from "components/workPlan/phase/type";
 
 describe("Month", () => {
+  beforeEach(() => {
+    cy.viewport(1920, 1080);
+  });
+
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth();
@@ -45,7 +49,7 @@ describe("Month", () => {
       </Router>,
     );
 
-    cy.contains("September 2025").should("exist");
+    cy.contains("September 2025").scrollIntoView().should("exist");
     cy.get("button").should("contain.text", "September 2025");
     cy.get("svg").should("exist");
     cy.get("button").click();
@@ -94,8 +98,8 @@ describe("Month", () => {
       </Router>,
     );
 
-    cy.get("div").contains("1").should("exist");
-    cy.get("div").contains("28").should("exist");
+    cy.get("div").contains("1").scrollIntoView().should("exist");
+    cy.get("div").contains("28").scrollIntoView().should("exist");
   });
 
   it("renders EventRow only when expanded", () => {
