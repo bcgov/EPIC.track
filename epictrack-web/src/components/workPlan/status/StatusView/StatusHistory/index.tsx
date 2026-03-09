@@ -166,7 +166,8 @@ const StatusHistory = ({
               </TimelineSeparator>
               <TimelineContent sx={{ minWidth: "88px" }}>
                 <ETCaption3 color={Palette.neutral.main}>
-                  {status.end_date ? (
+                  {status.end_date &&
+                  !moment(status.end_date).isSame(status.posted_date, "day") ? (
                     <>
                       {moment(status.end_date).format(MONTH_DAY_YEAR)}
                       <br />-{" "}
