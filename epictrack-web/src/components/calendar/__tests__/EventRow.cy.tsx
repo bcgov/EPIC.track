@@ -37,6 +37,10 @@ const generateDaysForMonth = (
 };
 
 describe("EventRow Component", () => {
+  beforeEach(() => {
+    cy.viewport(1920, 1080);
+  });
+
   const days = generateDaysForMonth();
 
   it("renders a Task and Milestone event", () => {
@@ -50,7 +54,6 @@ describe("EventRow Component", () => {
         />
       </EventCalendarProvider>,
     );
-    cy.viewport(1920, 1080);
 
     cy.wrap(mockEventsGrid).each((calendarItem: any) => {
       const title =
@@ -193,7 +196,6 @@ describe("EventRow Component", () => {
         />
       </EventCalendarProvider>,
     );
-    cy.viewport(1920, 1080);
     cy.get("div").contains(taskEvent.name).scrollIntoView().should("exist");
   });
 
