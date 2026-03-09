@@ -711,8 +711,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return file_buffer.getvalue()
 
     @classmethod
-    def find_first_nations(cls, work_id: int, is_active) -> List[IndigenousNation]:
-        """Active first nations assigned on a work"""
+    def find_active_first_nations(cls, work_id: int) -> List[IndigenousNation]:
+        """Find active first nations assigned on a work"""
         query = (
             db.session.query(IndigenousWork)
             .join(
@@ -727,8 +727,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
             )
             .order_by(IndigenousNation.name)
         )
-        if is_active is not None:
-            query = query.filter(IndigenousWork.is_active.is_(is_active))
         return query.all()
 
     @classmethod
@@ -840,7 +838,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
     ):  # pylint: disable=unsupported-assignment-operation,unsubscriptable-object
         """Generate the workplan excel file for given work and phase"""
         cls._check_can_edit_or_team_member_auth(work_id)
-        first_nations = cls.find_first_nations(work_id, None)
+        first_nations = cls.find_active_first_nations(work_id)
         schema = WorkFirstNationSchema(many=True)
         data = schema.dump(first_nations)
 

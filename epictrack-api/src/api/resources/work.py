@@ -450,8 +450,7 @@ class WorkFirstNations(Resource):
     def get(work_id):
         """Get all the active first nations allocated to the work"""
         req.WorkIdPathParameterSchema().load(request.view_args)
-        args = req.BasicRequestQueryParameterSchema().load(request.args)
-        first_nations = WorkService.find_first_nations(work_id, args.get("is_active"))
+        first_nations = WorkService.find_active_first_nations(work_id)
         return (
             res.WorkIndigenousNationResponseSchema(many=True).dump(first_nations),
             HTTPStatus.OK,
