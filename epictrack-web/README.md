@@ -12,7 +12,7 @@ Steps to setup a local instance of the EPIC.Track frontend on a local machine
 
 ## Required Software
 
-* ``NodeJS v18.20.8``
+* ``NodeJS v24.x``
 * `npm`
 
 
