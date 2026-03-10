@@ -40,7 +40,6 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
   headingBackgroundColor = "",
 }) => {
   const isCompact = variant === "compact";
-
   return (
     <Box
       sx={{
@@ -48,7 +47,7 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
         flexDirection: "column",
         width: "100%",
         height: "100%",
-        maxHeight: "100vh",
+        maxHeight: "100%",
         backgroundColor: Palette.neutral.bg.light,
         border: `1px solid ${Palette.neutral.bg.dark}`,
         borderRadius: "4px",
