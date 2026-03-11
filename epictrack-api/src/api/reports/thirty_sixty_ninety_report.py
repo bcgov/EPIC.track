@@ -297,23 +297,33 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 work["oldest_update"] = result_item["oldest_update"]
         return data
 
-    def generate_report(
-        self, report_date: datetime, return_type, include_first_phase
-    ):  # pylint: disable=too-many-locals
-        """Generates a report and returns it"""
-        self.report_date = report_date.astimezone(utc)
-        data = self._fetch_data(report_date + timedelta(days=-3), include_first_phase)
-        data = self._format_data(data)
-        data = self._update_staleness(data, report_date)
-        if return_type == "json" or not data:
-            return process_data(data, return_type)
-        pdf_stream = BytesIO()
-        current_directory = path.dirname(path.abspath(__file__))  # TODO CJK: refactor to pull out style setup TRACK-527
+    def _setup_pdf_styles(self):
+        """Setup and return PDF styles."""
+        current_directory = path.dirname(path.abspath(__file__))
         font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Regular_2f.ttf")
         bold_font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Bold_2f.ttf")
         pdfmetrics.registerFont(TTFont('BCSans', font_path))
         pdfmetrics.registerFont(TTFont('BCSans-Bold', bold_font_path))
         stylesheet = getSampleStyleSheet()
+        normal_style = stylesheet["Normal"]
+        normal_style.fontSize = 6.5
+        normal_style.fontName = 'BCSans'
+        subheading_style = ParagraphStyle(
+            "subheadings",
+            parent=normal_style,
+            fontName="BCSans-Bold",
+            fontSize=9
+        )
+        title_style = stylesheet["Heading2"]
+        title_style.fontName = 'BCSans'
+        title_style.alignment = TA_CENTER
+        heading_style = stylesheet["Heading3"]
+        heading_style.fontName = 'BCSans'
+        heading_style.alignment = TA_CENTER
+        return heading_style, normal_style, subheading_style, title_style
+
+    def _setup_pdf_document(self, pdf_stream):
+        """Setup and return PDF document."""
         doc = BaseDocTemplate(pdf_stream, pagesize=A4)
         doc.page_width = doc.width + doc.leftMargin * 2
         doc.page_height = doc.height + doc.bottomMargin * 2
@@ -328,48 +338,36 @@ class ThirtySixtyNinetyReport(ReportFactory):
             id="LaterPages", frames=[page_table_frame], onPage=self.add_default_info
         )
         doc.addPageTemplates(page_template)
-        title_style = stylesheet["Heading2"]
-        title_style.fontName = 'BCSans'
-        title_style.alignment = TA_CENTER
-        heading_style = stylesheet["Heading3"]
-        heading_style.fontName = 'BCSans'
-        heading_style.alignment = TA_CENTER
+        return doc
+
+    def generate_report(
+        self, report_date: datetime, return_type, include_first_phase
+    ):  # pylint: disable=too-many-locals
+        """Generates a report and returns it"""
+        self.report_date = report_date.astimezone(utc)
+        data = self._fetch_data(report_date + timedelta(days=-3), include_first_phase)
+        data = self._format_data(data)
+        data = self._update_staleness(data, report_date)
+        if return_type == "json" or not data:
+            return process_data(data, return_type)
+        pdf_stream = BytesIO()
+        heading_style, normal_style, subheading_style, title_style = self._setup_pdf_styles()
+
+        doc = self._setup_pdf_document(pdf_stream)
+
         story = [NextPageTemplate(["*", "LaterPages"])]
         story.append(Paragraph("30-60-90", title_style))
         story.append(Paragraph("Environmental Assessment Office", heading_style))
         story.append(
             Paragraph(f"Submitted for: {report_date:%B %d, %Y}", heading_style)
         )
-        normal_style = stylesheet["Normal"]
-        normal_style.fontSize = 6.5
-        normal_style.fontName = 'BCSans'
-        subheading_style = ParagraphStyle(
-            "subheadings",
-            parent=normal_style,
-            fontName="BCSans-Bold",
-            fontSize=9
-        )
         table_data = [[Paragraph("Issue", subheading_style), Paragraph("Status/Key Milestones/Next Steps", subheading_style)]]
 
-        data, styles = self._get_table_data_and_styles(data, normal_style, subheading_style)
+        data, table_styles = self._get_table_data_and_styles(data, normal_style, subheading_style)
         table_data.extend(data)
         max_column_width = 4 * inch
         table = Table(table_data, colWidths=[None, max_column_width])
-        table.setStyle(
-            TableStyle(
-                [
-                    ("BOX", (0, 0), (-1, -1), 0.25, colors.black),
-                    ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.black),
-                    ("FONTSIZE", (0, 0), (-1, -1), 6.5),
-                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                    ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                    ("FONTNAME", (0, 2), (-1, -1), "BCSans"),
-                    ("FONTNAME", (0, 0), (-1, 1), "BCSans-Bold"),
-                    ("WORDWRAP", (0, 0), (-1, -1)),
-                ]
-                + styles
-            )
-        )
+        table.setStyle(table_styles)
         story.append(table)
         doc.build(story)
         pdf_stream.seek(0)
@@ -678,7 +676,20 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 groups, row_index, normal_style
             )
             table_data.extend(period_data)
-        return table_data, styles
+        table_style = TableStyle(
+                [
+                    ("BOX", (0, 0), (-1, -1), 0.25, colors.black),
+                    ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.black),
+                    ("FONTSIZE", (0, 0), (-1, -1), 6.5),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                    ("FONTNAME", (0, 2), (-1, -1), "BCSans"),
+                    ("FONTNAME", (0, 0), (-1, 1), "BCSans-Bold"),
+                    ("WORDWRAP", (0, 0), (-1, -1)),
+                ]
+                + styles
+            )
+        return table_data, table_style
 
     def _get_project_special_history_id(
         self, project_id: int, data: List[dict], date: datetime
