@@ -1,10 +1,16 @@
-import { Grid, Box, Tooltip as MuiTooltip } from "@mui/material";
+import {
+  Grid,
+  Box,
+  Tooltip as MuiTooltip,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { useInsightsContext } from "components/insights/InsightsContext";
 import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsightsContext";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
 import { COLORS } from "components/insights/utils";
-import { GrayBox, ETCaption1 } from "components/shared";
+import { GrayBox, ETCaption1, ETCaption3 } from "components/shared";
 import { showNotification } from "components/shared/notificationProvider";
 import { MedianOverageByWorktype } from "models/insights";
 import {
@@ -48,6 +54,8 @@ const MedianPhaseOverageByWorktypeChart = () => {
   const { columnFilters } = useTableFilterContext();
   const { loadingWorkPhases } = usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const {
     data: chartData,
@@ -108,7 +116,7 @@ const MedianPhaseOverageByWorktypeChart = () => {
             className="median-phase-overage-worktype-chart"
             sx={{
               flex: 1,
-              minHeight: 350,
+              minHeight: isMobile ? 250 : 350,
               mt: 1,
               display: "flex",
               alignItems: "center",
@@ -126,7 +134,12 @@ const MedianPhaseOverageByWorktypeChart = () => {
                 <BarChart
                   data={data}
                   layout="vertical"
-                  margin={{ left: 80, bottom: 40, right: 20 }}
+                  margin={{
+                    left: isMobile ? 10 : 80,
+                    bottom: 40,
+                    right: isMobile ? 10 : 20,
+                    top: 10,
+                  }}
                   barCategoryGap="35%"
                   barGap={2}
                 >
@@ -139,95 +152,99 @@ const MedianPhaseOverageByWorktypeChart = () => {
                       position: "insideBottom",
                       offset: -5,
                       dy: 10,
-                      style: { fontSize: 16 },
+                      style: { fontSize: isMobile ? 11 : 16 },
                     }}
                   />
                   <YAxis
                     dataKey="work_type"
                     type="category"
-                    width={40}
-                    tick={{ fontSize: 16 }}
+                    width={isMobile ? 80 : 40}
+                    tick={{ fontSize: isMobile ? 10 : 16 }}
                   />
 
-                  <Legend
-                    layout="vertical"
-                    align="right"
-                    verticalAlign="middle"
-                    wrapperStyle={{
-                      paddingLeft: "20px",
-                      paddingRight: "10px",
-                      fontSize: "13px",
-                      lineHeight: "1.5",
-                    }}
-                    iconType="square"
-                    iconSize={15}
-                    content={(props) => {
-                      const { payload } = props;
-                      return (
-                        <div style={{ paddingLeft: "20px", maxWidth: "400px" }}>
+                  {!isMobile && (
+                    <Legend
+                      layout="vertical"
+                      align="right"
+                      verticalAlign="middle"
+                      wrapperStyle={{
+                        paddingLeft: "20px",
+                        paddingRight: "10px",
+                        fontSize: "12px",
+                        lineHeight: "1.5",
+                      }}
+                      iconType="square"
+                      iconSize={15}
+                      content={(props) => {
+                        const { payload } = props;
+                        return (
                           <div
-                            style={{
-                              fontWeight: "bold",
-                              fontSize: "12px",
-                              letterSpacing: "0.5px",
-                              marginBottom: "8px",
-                            }}
+                            style={{ paddingLeft: "20px", maxWidth: "400px" }}
                           >
-                            PHASES
-                          </div>
-                          <div
-                            style={{
-                              display: "grid",
-                              gridTemplateColumns: "1fr 1fr",
-                              gridAutoFlow: "column",
-                              gridTemplateRows: `repeat(${Math.ceil((payload?.length || 0) / 2)}, auto)`,
-                              gap: "6px 12px",
-                              alignItems: "start",
-                            }}
-                          >
-                            {payload?.map((entry, index) => (
-                              <div
-                                key={`item-${index}`}
-                                style={{
-                                  display: "flex",
-                                  alignItems: "start",
-                                  fontSize: "14px",
-                                  lineHeight: "1.4",
-                                  minWidth: 0,
-                                }}
-                              >
-                                <svg
-                                  width="15"
-                                  height="15"
+                            <div
+                              style={{
+                                fontWeight: "bold",
+                                fontSize: "12px",
+                                letterSpacing: "0.5px",
+                                marginBottom: "8px",
+                              }}
+                            >
+                              PHASES
+                            </div>
+                            <div
+                              style={{
+                                display: "grid",
+                                gridTemplateColumns: "1fr 1fr",
+                                gridAutoFlow: "column",
+                                gridTemplateRows: `repeat(${Math.ceil((payload?.length || 0) / 2)}, auto)`,
+                                gap: "6px 12px",
+                                alignItems: "start",
+                              }}
+                            >
+                              {payload?.map((entry, index) => (
+                                <div
+                                  key={`item-${index}`}
                                   style={{
-                                    marginRight: "6px",
-                                    flexShrink: 0,
-                                    marginTop: "3px",
+                                    display: "flex",
+                                    alignItems: "start",
+                                    fontSize: "14px",
+                                    lineHeight: "1.4",
+                                    minWidth: 0,
                                   }}
                                 >
-                                  <rect
+                                  <svg
                                     width="15"
                                     height="15"
-                                    fill={entry.color}
-                                    rx="2"
-                                  />
-                                </svg>
-                                <span
-                                  style={{
-                                    wordBreak: "break-word",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                  }}
-                                >
-                                  {entry.value}
-                                </span>
-                              </div>
-                            ))}
+                                    style={{
+                                      marginRight: "6px",
+                                      flexShrink: 0,
+                                      marginTop: "3px",
+                                    }}
+                                  >
+                                    <rect
+                                      width="15"
+                                      height="15"
+                                      fill={entry.color}
+                                      rx="2"
+                                    />
+                                  </svg>
+                                  <span
+                                    style={{
+                                      wordBreak: "break-word",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                    }}
+                                  >
+                                    {entry.value}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    }}
-                  />
+                        );
+                      }}
+                    />
+                  )}
                   {sortedPhases.map((phase, idx) => (
                     <Bar
                       key={phase}
@@ -241,6 +258,36 @@ const MedianPhaseOverageByWorktypeChart = () => {
               </ResponsiveContainer>
             )}
           </Box>
+          {isMobile && sortedPhases.length > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "6px 12px",
+                justifyContent: "center",
+                pt: 1,
+                pb: 1,
+              }}
+            >
+              {sortedPhases.map((phase, idx) => (
+                <Box
+                  key={phase}
+                  sx={{ display: "flex", alignItems: "center", gap: "4px" }}
+                >
+                  <Box
+                    sx={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: "2px",
+                      flexShrink: 0,
+                      backgroundColor: COLORS[idx % COLORS.length],
+                    }}
+                  />
+                  <ETCaption3>{phase}</ETCaption3>
+                </Box>
+              ))}
+            </Box>
+          )}
         </GrayBox>
       </Grid>
     </Grid>

@@ -1,4 +1,10 @@
-import { Grid, Box, Tooltip as MuiTooltip } from "@mui/material";
+import {
+  Grid,
+  Box,
+  Tooltip as MuiTooltip,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { useInsightsContext } from "components/insights/InsightsContext";
 import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsightsContext";
@@ -24,6 +30,8 @@ const MedianPhaseOverageChart = () => {
   const { columnFilters } = useTableFilterContext();
   const { loadingWorkPhases } = usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const {
     data: chartData,
@@ -82,8 +90,8 @@ const MedianPhaseOverageChart = () => {
         flexDirection: "column",
         alignItems: "flex-start",
         gap: 2,
-        pl: 2,
-        pt: 3,
+        pl: isMobile ? 0 : 2,
+        pt: isMobile ? 1 : 3,
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
@@ -106,7 +114,7 @@ const MedianPhaseOverageChart = () => {
   return (
     <GrayBox sx={{ height: "100%" }}>
       <Grid container spacing={1}>
-        <Grid item xs={6}>
+        <Grid item xs={12} sm={6}>
           <MuiTooltip title="Includes Legislated Phases plus Amendment Phases">
             <span>
               <ETCaption1 bold>
@@ -115,22 +123,13 @@ const MedianPhaseOverageChart = () => {
             </span>
           </MuiTooltip>
         </Grid>
-        <Grid
-          item
-          xs={10}
-          container
-          justifyContent={"center"}
-          sx={{ flex: 1, minHeight: 350 }}
-        >
+        <Grid item xs={12} sm={10} container sx={{ minHeight: 350 }}>
           <Box
             sx={{
               width: "100%",
               height: "100%",
               minHeight: 350,
               overflowY: "auto",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
               pb: 4,
             }}
           >
@@ -143,7 +142,7 @@ const MedianPhaseOverageChart = () => {
                   <BarChart
                     layout="vertical"
                     data={chartData}
-                    margin={{ left: 80, bottom: 40, top: 20 }}
+                    margin={{ left: 10, bottom: 40, top: 20 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
@@ -154,14 +153,14 @@ const MedianPhaseOverageChart = () => {
                         position: "insideBottom",
                         offset: -5,
                         dy: 20,
-                        style: { fontSize: 16 },
+                        style: { fontSize: isMobile ? 11 : 16 },
                       }}
                     />
                     <YAxis
                       dataKey="phase"
                       type="category"
-                      width={40}
-                      tick={{ fontSize: 12 }}
+                      width={isMobile ? 80 : 120}
+                      tick={{ fontSize: isMobile ? 10 : 12 }}
                     />
                     <Tooltip content={<CustomTooltip />} />
                     <Bar
@@ -186,7 +185,7 @@ const MedianPhaseOverageChart = () => {
             )}
           </Box>
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={12} sm={2}>
           <CustomLegend />
         </Grid>
       </Grid>

@@ -77,14 +77,18 @@ const InsightAccordion: React.FC<InsightAccordionProps> = ({
               xs={12}
               container
               justifyContent="space-between"
-              alignItems="center"
+              alignItems={{ xs: "flex-start", sm: "center" }}
+              sx={{
+                flexDirection: { xs: "column", sm: "row" },
+                gap: { xs: "8px", sm: 0 },
+              }}
               style={{ paddingTop: 0, paddingBottom: "8px" }}
             >
               <Stack
                 direction="row"
                 spacing={1}
                 alignItems="center"
-                sx={{ paddingLeft: "18px" }}
+                sx={{ paddingLeft: { xs: 0, sm: "18px" } }}
               >
                 {phaseInsights && (
                   <>
@@ -135,10 +139,11 @@ const InsightAccordion: React.FC<InsightAccordionProps> = ({
               flexWrap: "wrap",
               gap: "16px",
               alignItems: "flex-start",
+              width: "100%",
             }}
           >
             {Children.map(children, (child) => (
-              <div style={{ flex: "1 1 auto", minWidth: 300 }}>{child}</div>
+              <div style={{ flex: "1 1 auto", minWidth: 0 }}>{child}</div>
             ))}
           </div>
           {showMoreContent && (

@@ -33,40 +33,47 @@ const PieChartSkeleton: FC<PieChartSkeletonProps> = ({ loading = true }) => {
           justifyContent={"center"}
           sx={{ marginTop: "2em" }}
         >
-          <Grid container justifyContent="center">
+          <Grid container justifyContent="center" flexWrap="wrap">
             <Grid item>
               <Skeleton
                 animation={loading ? "pulse" : false}
                 variant="circular"
-                width={200}
-                height={200}
+                width={160}
+                height={160}
               />
             </Grid>
-            <Grid item style={{ marginLeft: 16 }}>
+            <Grid
+              item
+              sx={{
+                ml: { xs: 0, sm: 2 },
+                mt: { xs: 2, sm: 0 },
+                width: { xs: "100%", sm: "auto" },
+              }}
+            >
               <Skeleton
                 animation={loading ? "pulse" : false}
                 variant="rectangular"
-                width={400}
+                width="100%"
                 height={20}
               />
               <Skeleton
                 animation={loading ? "pulse" : false}
                 variant="rectangular"
-                width={400}
+                width="100%"
                 height={20}
                 style={{ marginTop: 8 }}
               />
               <Skeleton
                 animation={loading ? "pulse" : false}
                 variant="rectangular"
-                width={400}
+                width="100%"
                 height={20}
                 style={{ marginTop: 8 }}
               />
               <Skeleton
                 animation={loading ? "pulse" : false}
                 variant="rectangular"
-                width={400}
+                width="100%"
                 height={20}
                 style={{ marginTop: 8 }}
               />

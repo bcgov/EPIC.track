@@ -63,7 +63,10 @@ export const ETPageContainer = (props: PageContainerProps) => {
       {...props}
       sx={{
         ...props.sx,
-        padding: `${state.showEnvBanner ? "9" : "7"}rem 2rem 1rem 2.5rem`,
+        pt: state.showEnvBanner ? "9rem" : "7rem",
+        pb: "1rem",
+        pl: { xs: "0.75rem", sm: "2.5rem" },
+        pr: { xs: "0.75rem", sm: "2rem" },
         justifyContent: "flex-start",
         alignItems: "flex-start",
       }}
@@ -462,7 +465,7 @@ export const GrayBox = ({ children, sx, ...rest }: GrayBoxProps) => {
       {...rest}
       sx={{
         backgroundColor: Palette.neutral.bg.light,
-        padding: "16px 24px",
+        padding: { xs: "12px", sm: "16px 24px" },
         ...sx,
       }}
     >
