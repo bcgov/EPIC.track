@@ -1,4 +1,10 @@
-import { Grid, Box, Tooltip as MuiTooltip } from "@mui/material";
+import {
+  Grid,
+  Box,
+  Tooltip as MuiTooltip,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import {
   BarChart,
   CartesianGrid,
@@ -57,6 +63,8 @@ const PercentOfPhasesWithOveragesChart = () => {
   const { loadingWorkPhases, viewUnderage: isUnderageToggled } =
     usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const {
     data: chartData,
@@ -97,22 +105,13 @@ const PercentOfPhasesWithOveragesChart = () => {
             </span>
           </MuiTooltip>
         </Grid>
-        <Grid
-          item
-          xs={12}
-          container
-          justifyContent={"center"}
-          sx={{ flex: 1, minHeight: 350 }}
-        >
+        <Grid item xs={12} container sx={{ minHeight: 350 }}>
           <Box
             sx={{
               width: "100%",
               height: "100%",
               minHeight: 350,
               overflowY: "auto",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
               pb: 4,
             }}
           >
@@ -124,7 +123,7 @@ const PercentOfPhasesWithOveragesChart = () => {
                 <BarChart
                   layout="vertical"
                   data={chartData}
-                  margin={{ left: 80, bottom: 40 }}
+                  margin={{ left: isMobile ? 10 : 80, bottom: 40, top: 10 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
@@ -135,14 +134,14 @@ const PercentOfPhasesWithOveragesChart = () => {
                       position: "insideBottom",
                       offset: -5,
                       dy: 20,
-                      style: { fontSize: 16 },
+                      style: { fontSize: isMobile ? 11 : 16 },
                     }}
                   />
                   <YAxis
                     dataKey="phase"
                     type="category"
-                    width={40}
-                    tick={{ fontSize: 12 }}
+                    width={isMobile ? 80 : 40}
+                    tick={{ fontSize: isMobile ? 10 : 12 }}
                   />
                   <Tooltip
                     content={

@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Box, Grid, useMediaQuery, useTheme } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import {
   PieChart,
@@ -20,6 +20,8 @@ const WorkByFederalInvolvementChart = () => {
   const { isUserInsights, staffId } = useInsightsContext();
 
   const { columnFilters } = useTableFilterContext();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const {
     data,
     error,
@@ -68,12 +70,12 @@ const WorkByFederalInvolvementChart = () => {
             Federal Government
           </ETCaption3>
         </Grid>
-        <Grid item xs={12} container justifyContent={"center"}>
-          <ResponsiveContainer width="100%" height={300}>
+        <Grid item xs={12}>
+          <ResponsiveContainer width="100%" height={isMobile ? 230 : 330}>
             <PieChart>
               <Pie
                 data={chartData}
-                cx="50%"
+                cx={isMobile ? "50%" : "35%"}
                 cy="50%"
                 outerRadius={80}
                 fill="#8884d8"
@@ -85,22 +87,57 @@ const WorkByFederalInvolvementChart = () => {
                   <Cell key={`cell-${entry.id}`} fill={getChartColor(index)} />
                 ))}
               </Pie>
-              <Legend
-                layout="vertical"
-                verticalAlign="middle"
-                align="right"
-                iconSize={16}
-                wrapperStyle={{
-                  fontSize: "16px",
-                  maxWidth: "300px",
-                  minWidth: "200px",
-                  overflow: "hidden",
-                }}
-              />
+              {!isMobile && (
+                <Legend
+                  layout="vertical"
+                  verticalAlign="middle"
+                  align="right"
+                  iconSize={14}
+                  wrapperStyle={{
+                    fontSize: "13px",
+                    maxWidth: "45%",
+                    maxHeight: "300px",
+                    overflowY: "auto",
+                    overflowX: "hidden",
+                  }}
+                />
+              )}
               <Tooltip />
             </PieChart>
           </ResponsiveContainer>
         </Grid>
+        {isMobile && chartData.length > 0 && (
+          <Grid item xs={12}>
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "6px 12px",
+                justifyContent: "center",
+                overflowY: "auto",
+                pt: 0.5,
+              }}
+            >
+              {chartData.map((entry, index) => (
+                <Box
+                  key={entry.id}
+                  sx={{ display: "flex", alignItems: "center", gap: "4px" }}
+                >
+                  <Box
+                    sx={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                      backgroundColor: getChartColor(index),
+                    }}
+                  />
+                  <ETCaption3>{entry.name}</ETCaption3>
+                </Box>
+              ))}
+            </Box>
+          </Grid>
+        )}
       </Grid>
     </GrayBox>
   );

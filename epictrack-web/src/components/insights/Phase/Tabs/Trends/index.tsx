@@ -2,10 +2,10 @@ import InsightAccordion from "components/insights/InsightsAccordion";
 import { Grid } from "@mui/material";
 import TrendWorkPhaseListing from "./Charts/TrendWorkPhaseListing";
 import PercentOfPhasesWithOveragesChart from "./Charts/PercentOfPhasesWithOverages";
-import { useState } from "react";
+import { usePhaseInsightsContext } from "../../PhaseInsightsContext";
 
 const Trends = () => {
-  const [viewUnderage, setViewUnderage] = useState(false);
+  const { viewUnderage, setViewUnderage } = usePhaseInsightsContext();
   return (
     <InsightAccordion
       title="Trends Insights"
@@ -19,7 +19,7 @@ const Trends = () => {
     >
       <Grid container spacing={2}>
         <Grid className="chart-item" item xs={12}>
-          <PercentOfPhasesWithOveragesChart isUnderageToggled={viewUnderage} />
+          <PercentOfPhasesWithOveragesChart />
         </Grid>
       </Grid>
     </InsightAccordion>

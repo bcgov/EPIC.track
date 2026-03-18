@@ -34,11 +34,11 @@ const BarChartSkeleton: FC<BarChartSkeletonProps> = ({ loading = true }) => {
           sx={{ marginTop: "2em" }}
         >
           <Grid container justifyContent="center">
-            <Grid item>
+            <Grid item sx={{ width: "100%" }}>
               <Skeleton
                 animation={loading ? "pulse" : false}
                 variant="rectangular"
-                width={400}
+                width="100%"
                 height={300}
               />
             </Grid>

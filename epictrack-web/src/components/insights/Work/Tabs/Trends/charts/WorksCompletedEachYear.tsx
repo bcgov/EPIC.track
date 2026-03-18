@@ -6,7 +6,15 @@ import { getChartColor } from "components/insights/utils";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { showNotification } from "components/shared/notificationProvider";
 import { WorkByYear } from "models/insights";
-import { Cell, Tooltip, BarChart, Bar, XAxis, YAxis } from "recharts";
+import {
+  Cell,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+} from "recharts";
 import { useGetWorksByYearCompletedQuery } from "services/rtkQuery/workInsights";
 
 const WorksCompletedEachYear = () => {
@@ -57,31 +65,35 @@ const WorksCompletedEachYear = () => {
           <ETCaption3>The number of Works closed each year</ETCaption3>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <Box style={{ width: "100%", height: "300px", overflowY: "scroll" }}>
+          <Box style={{ width: "100%", height: "300px", overflowY: "auto" }}>
             {chartData.length > 0 && (
-              <BarChart
-                layout="vertical"
-                width={350}
+              <ResponsiveContainer
+                width="100%"
                 height={chartData.length * 30 + 100}
-                data={formatData(chartData)}
               >
-                <XAxis allowDecimals={false} type={"number"} />
-                <YAxis
-                  dataKey={"name"}
-                  type={"category"}
-                  width={40}
-                  tick={{ fontSize: 12 }}
-                />
-                <Bar dataKey="value">
-                  {formatData(chartData).map((entry, index: number) => (
-                    <Cell
-                      key={`cell-${entry.id}`}
-                      fill={getChartColor(index)}
-                    />
-                  ))}
-                </Bar>
-                <Tooltip />
-              </BarChart>
+                <BarChart
+                  layout="vertical"
+                  data={formatData(chartData)}
+                  margin={{ top: 10 }}
+                >
+                  <XAxis allowDecimals={false} type={"number"} />
+                  <YAxis
+                    dataKey={"name"}
+                    type={"category"}
+                    width={40}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Bar dataKey="value">
+                    {formatData(chartData).map((entry, index: number) => (
+                      <Cell
+                        key={`cell-${entry.id}`}
+                        fill={getChartColor(index)}
+                      />
+                    ))}
+                  </Bar>
+                  <Tooltip />
+                </BarChart>
+              </ResponsiveContainer>
             )}
           </Box>
         </Grid>

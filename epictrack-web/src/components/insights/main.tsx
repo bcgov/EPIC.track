@@ -11,7 +11,7 @@ import { Palette } from "styles/theme";
 import PhaseInsights from "./Phase";
 
 const InsightBoxWrapperStyle = {
-  padding: "16px",
+  padding: { xs: "8px", sm: "16px" },
   border: `1px solid ${Palette.neutral.bg.dark}`,
   borderRadius: `5px !important`,
   ".MuiAccordionSummary-root": {
@@ -29,7 +29,8 @@ const InsightHeaderStyle = {
   backgroundColor: Palette.neutral.bg.light,
   border: `1px solid ${Palette.neutral.bg.dark}`,
   borderRadius: 1,
-  height: "60px",
+  minHeight: "60px",
+  py: { xs: "12px", sm: 0 },
   textAlign: "center",
   flexDirection: "row",
   alignItems: "center",

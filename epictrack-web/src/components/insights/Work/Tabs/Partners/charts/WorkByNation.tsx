@@ -1,6 +1,14 @@
 import { Grid, Box } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { BAR_COLOR } from "components/insights/utils";
 import { WorkByNation } from "models/insights";
 import { useGetWorksByNationQuery } from "services/rtkQuery/workInsights";
@@ -60,29 +68,30 @@ const WorkByNationChart = () => {
           </ETCaption3>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <Box style={{ width: "100%", height: "300px", overflowY: "scroll" }}>
+          <Box style={{ width: "100%", height: "300px", overflowY: "auto" }}>
             {chartData.length > 0 && (
-              <BarChart
-                layout="vertical"
-                data={chartData}
-                margin={{
-                  left: 40, // Increase left margin if names are getting cut off
-                }}
+              <ResponsiveContainer
+                width="100%"
                 height={chartData.length * 30 + 100}
-                width={600} // Adjust this value as needed
               >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" allowDecimals={false} />
-                <YAxis
-                  dataKey="nation"
-                  interval={0}
-                  tick={{ fontSize: 12 }}
-                  type="category"
-                  width={100}
-                />
-                <Tooltip />
-                <Bar dataKey="count" fill={BAR_COLOR} barSize={20} />
-              </BarChart>
+                <BarChart
+                  layout="vertical"
+                  data={chartData}
+                  margin={{ left: 10, top: 10 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" allowDecimals={false} />
+                  <YAxis
+                    dataKey="nation"
+                    interval={0}
+                    tick={{ fontSize: 12 }}
+                    type="category"
+                    width={100}
+                  />
+                  <Tooltip />
+                  <Bar dataKey="count" fill={BAR_COLOR} barSize={20} />
+                </BarChart>
+              </ResponsiveContainer>
             )}
           </Box>
         </Grid>

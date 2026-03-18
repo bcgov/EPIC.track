@@ -1,10 +1,16 @@
-import { Grid, Tooltip as MuiTooltip } from "@mui/material";
+import {
+  Box,
+  Grid,
+  Tooltip as MuiTooltip,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import { useInsightsContext } from "components/insights/InsightsContext";
 import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsightsContext";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
 import { getChartColor } from "components/insights/utils";
-import { GrayBox, ETCaption1 } from "components/shared";
+import { GrayBox, ETCaption1, ETCaption3 } from "components/shared";
 import { showNotification } from "components/shared/notificationProvider";
 import { ResponsibilityByWorktypePhase } from "models/insights";
 import {
@@ -22,6 +28,8 @@ const OverageResponsibilityChart = () => {
   const { columnFilters } = useTableFilterContext();
   const { loadingWorkPhases } = usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const {
     data,
@@ -76,7 +84,7 @@ const OverageResponsibilityChart = () => {
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
           {!isUnderageToggled && (
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={isMobile ? 230 : 330}>
               <PieChart width={400} height={350}>
                 <Pie
                   data={chartData}
@@ -95,20 +103,58 @@ const OverageResponsibilityChart = () => {
                     />
                   ))}
                 </Pie>
-                <Legend
-                  layout="vertical"
-                  verticalAlign="middle"
-                  align="right"
-                  iconSize={16}
-                  wrapperStyle={{
-                    fontSize: "16px",
-                  }}
-                />
+                {!isMobile && (
+                  <Legend
+                    layout="vertical"
+                    verticalAlign="middle"
+                    align="right"
+                    iconSize={14}
+                    wrapperStyle={{
+                      fontSize: "13px",
+                      maxWidth: "45%",
+                      maxHeight: "300px",
+                      overflowY: "auto",
+                      overflowX: "hidden",
+                    }}
+                  />
+                )}
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
           )}
         </Grid>
+        {isMobile && !isUnderageToggled && chartData.length > 0 && (
+          <Grid item xs={12}>
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "6px 12px",
+                justifyContent: "center",
+                overflowY: "auto",
+                pt: 0.5,
+              }}
+            >
+              {chartData.map((entry, index) => (
+                <Box
+                  key={entry.id}
+                  sx={{ display: "flex", alignItems: "center", gap: "4px" }}
+                >
+                  <Box
+                    sx={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                      backgroundColor: getChartColor(index),
+                    }}
+                  />
+                  <ETCaption3>{entry.name}</ETCaption3>
+                </Box>
+              ))}
+            </Box>
+          </Grid>
+        )}
       </Grid>
     </GrayBox>
   );

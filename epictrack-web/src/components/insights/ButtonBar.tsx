@@ -8,7 +8,7 @@ const ButtonBar = () => {
   const { activeTab, setActiveTab, isUserInsights, setIsUserInsights } =
     useInsightsContext();
   return (
-    <Stack direction={"column"} width="100%" alignItems={"end"} spacing={2}>
+    <Stack direction={"column"} width="100%" alignItems="end" spacing={2}>
       <InsightsAssigneeToggle
         handleToggle={setIsUserInsights}
         isUserInsights={isUserInsights}
@@ -19,6 +19,7 @@ const ButtonBar = () => {
         alignItems={"center"}
         justifyContent={"flex-end"}
         width="100%"
+        flexWrap="wrap"
       >
         <TabButton
           active={activeTab === INSIGHTS_TAB.Work}
