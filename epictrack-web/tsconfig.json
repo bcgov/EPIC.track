@@ -15,7 +15,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "types": ["cypress", "node"],
+    "types": ["cypress", "node", "vite/client"],
     "jsx": "react-jsx",
     "baseUrl": "./src"
   },

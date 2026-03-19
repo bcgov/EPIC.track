@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import * as Moment from "moment";
+import moment from "moment";
 import { extendMoment } from "moment-range";
 import { Box, SxProps } from "@mui/material";
 import Month from "./components/Month";
@@ -9,7 +9,7 @@ import TrackDialog from "../shared/TrackDialog";
 import EventDetails from "./components/EventDetails";
 import ReportService from "../../services/reportService";
 
-const extendedMoment = extendMoment(Moment);
+const extendedMoment = extendMoment(moment);
 
 const titleStyle: SxProps = {
   gridColumn: "span 7",

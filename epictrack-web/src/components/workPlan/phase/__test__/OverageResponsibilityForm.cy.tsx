@@ -1,4 +1,4 @@
-import { mount } from "cypress/react18";
+import { mount } from "cypress/react";
 import OverageResponsibilityForm from "../overageResponsibility/OverageResponsibilityForm";
 import { WorkplanContext } from "components/workPlan/WorkPlanContext";
 import { OverageResponsibilityEnum } from "models/phaseOverageResponsibilities";

@@ -24,11 +24,11 @@ Steps to setup a local instance of the EPIC.Track frontend on a local machine
 
 1. Create a `.env` file with the same contents as `sample.env`.
 
-1. Inside `.../EPIC.track/epictrack-web/` use `npm run install` to install the dependancies.
+1. Inside `.../EPIC.track/epictrack-web/` run `npm install` to install dependencies.
 
 ### Running + Development
 
-Inside `/epictrack-web/` use `npm run start` to launch the front end. Changes to React files will automatically update.
+Inside `/epictrack-web/` run `npm run dev` (or `npm run start`) to launch the front end. Changes to React files will automatically update.
 
 #### linting + Tests
 

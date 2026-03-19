@@ -5,11 +5,12 @@ export default defineConfig({
   component: {
     supportFile: "cypress/support/component.tsx",
     devServer: {
-      framework: "create-react-app",
-      bundler: "webpack",
+      framework: "react",
+      bundler: "vite",
     },
     specPattern: "**/*.cy.{js,jsx,ts,tsx}",
     experimentalMemoryManagement: true,
     numTestsKeptInMemory: 0,
+    allowCypressEnv: false,
   },
 });

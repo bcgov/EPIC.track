@@ -53,6 +53,11 @@ export function App() {
   const drawerWidth = isMediumScreen ? uiState.drawerWidth : 0;
 
   useEffect(() => {
+    if (window.location.pathname === "/") {
+      window.location.replace(`/track${window.location.search}${window.location.hash}`);
+      return;
+    }
+
     const redirectUrl = window.sessionStorage.getItem("redirectUrl");
     if (!redirectUrl) {
       const cleanPathname = window.location.pathname.replace(/^\/track/, "");
