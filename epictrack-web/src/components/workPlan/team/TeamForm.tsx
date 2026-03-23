@@ -17,6 +17,7 @@ import { getErrorMessage } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import { roleService } from "services/roleService";
 import { unEditableTeamMembers } from "./constants";
+import { WorkStaffRole as WorkStaffRoleEnum } from "../../../models/role";
 
 interface TeamFormProps {
   workStaffId?: number;
@@ -50,6 +51,7 @@ const schema = yup.object().shape({
 const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
   const [staff, setStaff] = React.useState<Staff[]>([]);
   const [roles, setRoles] = React.useState<ListType[]>([]);
+  const [selectedStaffPosition, setSelectedStaffPosition] = React.useState<string>("");
   const emailRef = React.useRef(null);
   const phoneRef = React.useRef(null);
   const ctx = React.useContext(WorkplanContext);
@@ -89,6 +91,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
         if (result.status === 200) {
           const staff = result.data as StaffWorkRole;
           setSelectedStaff(staff);
+          setSelectedStaffPosition(staff?.staff?.position?.name || "");
         }
       } catch (e) {
         showNotification(COMMON_ERROR_MESSAGE, {
@@ -107,6 +110,10 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
       reset(staffWorkRole);
     }
   }, [reset, staffWorkRole]);
+
+  React.useEffect(() => {
+    getAllRoles();
+  }, [selectedStaffPosition]);
 
   const getAllStaff = async () => {
     try {
@@ -127,9 +134,14 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
       const result = await roleService.getAll();
       if (result.status === 200) {
         const roles = result.data as ListType[];
-        const filteredRoles = roles.filter(
+        let filteredRoles = roles.filter(
           (role) => !unEditableTeamMembers.includes(role.id),
         );
+        if (selectedStaffPosition !== "REL") {
+          filteredRoles = filteredRoles.filter(
+            (role) => role.id !== WorkStaffRoleEnum.REL,
+          );
+        }
         setRoles(sort(filteredRoles, "name"));
       }
     } catch (e) {
@@ -171,6 +183,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
     (phoneRef?.current as any)["value"] = selectedStaff
       ? selectedStaff.phone
       : "";
+    setSelectedStaffPosition(selectedStaff?.position?.name || "");
   };
   return (
     <FormProvider {...methods}>

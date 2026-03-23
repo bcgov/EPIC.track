@@ -7,6 +7,7 @@ from sqlalchemy import func
 from api.models import db
 from api.models.position import Position
 from api.models.project import Project
+from api.models.role import Role
 from api.models.staff import Staff
 from api.models.staff_work_role import StaffWorkRole
 from api.models.work import Work
@@ -35,6 +36,7 @@ class WorkRelInsightGenerator:
 
         query = query.join(Staff, StaffWorkRole.staff_id == Staff.id)
         query = query.join(Position, Staff.position_id == Position.id)
+        query = query.join(Role, StaffWorkRole.role_id == Role.id)
 
         query = query.filter(
             Work.is_active.is_(True),
@@ -43,6 +45,7 @@ class WorkRelInsightGenerator:
             Staff.is_active.is_(True),
             Staff.is_deleted.is_(False),
             Position.name == 'REL',
+            Role.name == 'REL',
             *filter_exprs if filter_exprs else [],
         )
 
