@@ -51,7 +51,8 @@ const schema = yup.object().shape({
 const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
   const [staff, setStaff] = React.useState<Staff[]>([]);
   const [roles, setRoles] = React.useState<ListType[]>([]);
-  const [selectedStaffPosition, setSelectedStaffPosition] = React.useState<string>("");
+  const [selectedStaffPosition, setSelectedStaffPosition] =
+    React.useState<string>("");
   const emailRef = React.useRef(null);
   const phoneRef = React.useRef(null);
   const ctx = React.useContext(WorkplanContext);
@@ -71,10 +72,46 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
     reset,
   } = methods;
 
+  const getAllStaff = React.useCallback(async () => {
+    try {
+      const result = await staffService.getAll(true);
+      if (result.status === 200) {
+        const staff = result.data as Staff[];
+        setStaff(sort(staff, "full_name"));
+      }
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+    }
+  }, []);
+
+  const getAllRoles = React.useCallback(async () => {
+    try {
+      const result = await roleService.getAll();
+      if (result.status === 200) {
+        const roles = result.data as ListType[];
+        let filteredRoles = roles.filter(
+          (role) => !unEditableTeamMembers.includes(role.id),
+        );
+        if (selectedStaffPosition !== "REL") {
+          filteredRoles = filteredRoles.filter(
+            (role) => role.id !== WorkStaffRoleEnum.REL,
+          );
+        }
+        setRoles(sort(filteredRoles, "name"));
+      }
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+    }
+  }, [selectedStaffPosition]);
+
   React.useEffect(() => {
     getAllStaff();
     getAllRoles();
-  }, []);
+  }, [getAllStaff, getAllRoles]);
 
   React.useEffect(() => {
     reset({
@@ -113,43 +150,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
 
   React.useEffect(() => {
     getAllRoles();
-  }, [selectedStaffPosition]);
-
-  const getAllStaff = async () => {
-    try {
-      const result = await staffService.getAll(true);
-      if (result.status === 200) {
-        const staff = result.data as Staff[];
-        setStaff(sort(staff, "full_name"));
-      }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
-
-  const getAllRoles = async () => {
-    try {
-      const result = await roleService.getAll();
-      if (result.status === 200) {
-        const roles = result.data as ListType[];
-        let filteredRoles = roles.filter(
-          (role) => !unEditableTeamMembers.includes(role.id),
-        );
-        if (selectedStaffPosition !== "REL") {
-          filteredRoles = filteredRoles.filter(
-            (role) => role.id !== WorkStaffRoleEnum.REL,
-          );
-        }
-        setRoles(sort(filteredRoles, "name"));
-      }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
+  }, [getAllRoles]);
 
   const saveTeamMember = (data: StaffWorkRole) => {
     if (workStaffId) {
