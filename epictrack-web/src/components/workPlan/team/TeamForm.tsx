@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useRef, useContext, useCallback, useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -49,13 +49,13 @@ const schema = yup.object().shape({
 });
 
 const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
-  const [staff, setStaff] = React.useState<Staff[]>([]);
-  const [roles, setRoles] = React.useState<ListType[]>([]);
+  const [staff, setStaff] = useState<Staff[]>([]);
+  const [roles, setRoles] = useState<ListType[]>([]);
   const [selectedStaffPosition, setSelectedStaffPosition] =
-    React.useState<string>("");
-  const emailRef = React.useRef(null);
-  const phoneRef = React.useRef(null);
-  const ctx = React.useContext(WorkplanContext);
+    useState<string>("");
+  const emailRef = useRef(null);
+  const phoneRef = useRef(null);
+  const ctx = useContext(WorkplanContext);
   const staffWorkRole = ctx.selectedStaff;
   const { setSelectedStaff } = ctx;
 
@@ -72,7 +72,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
     reset,
   } = methods;
 
-  const getAllStaff = React.useCallback(async () => {
+  const getAllStaff = useCallback(async () => {
     try {
       const result = await staffService.getAll(true);
       if (result.status === 200) {
@@ -86,7 +86,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
     }
   }, []);
 
-  const getAllRoles = React.useCallback(async () => {
+  const getAllRoles = useCallback(async () => {
     try {
       const result = await roleService.getAll();
       if (result.status === 200) {
@@ -108,12 +108,12 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
     }
   }, [selectedStaffPosition]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getAllStaff();
     getAllRoles();
   }, [getAllStaff, getAllRoles]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     reset({
       ...staffWorkRole,
       work_id: ctx.work?.id,
@@ -121,7 +121,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
     });
   }, [ctx.work?.id, staffWorkRole, reset]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const getTeamMember = async () => {
       try {
         const result = await workService.getWorkTeamMember(Number(workStaffId));
@@ -142,13 +142,13 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
     }
   }, [setSelectedStaff, workStaffId]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (staffWorkRole) {
       reset(staffWorkRole);
     }
   }, [reset, staffWorkRole]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getAllRoles();
   }, [getAllRoles]);
 
