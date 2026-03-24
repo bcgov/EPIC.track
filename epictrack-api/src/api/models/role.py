@@ -28,6 +28,7 @@ class RoleEnum(enum.Enum):
     FN_CAIRT = 4
     OTHER = 5
     TEAM_CO_LEAD = 6
+    REL = 7
 
 
 class Role(db.Model, CodeTableVersioned):
