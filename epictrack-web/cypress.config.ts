@@ -1,9 +1,13 @@
 import { defineConfig } from "cypress";
+import codeCoverageTask from "@cypress/code-coverage/task";
 
 export default defineConfig({
-  supportFolder: "cypress/support",
   component: {
     supportFile: "cypress/support/component.tsx",
+    setupNodeEvents(on, config) {
+      codeCoverageTask(on, config);
+      return config;
+    },
     devServer: {
       framework: "react",
       bundler: "vite",

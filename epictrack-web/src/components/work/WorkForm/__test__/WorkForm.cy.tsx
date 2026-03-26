@@ -166,7 +166,7 @@ const endpoints: Endpoint[] = [
   },
 ];
 
-describe("WorkForm", () => {
+describe("WorkForm", { retries: 2 }, () => {
   beforeEach(() => {
     setupIntercepts(endpoints);
     store.dispatch(

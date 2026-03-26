@@ -20,8 +20,8 @@ describe("ControlledDatePicker", () => {
   it("should set the date", () => {
     cy.mount(<TestComponent />);
     cy.get('input[type="text"]').first().as("dateInput");
-    cy.get("@dateInput").click();
-    cy.get(".MuiPickersDay-root:not(.Mui-disabled)").first().click();
+    cy.get('[aria-label="Choose date"]').click();
+    cy.get('[aria-current="date"]').click();
     cy.get("@dateInput").invoke("val").should("not.equal", "");
   });
 });
