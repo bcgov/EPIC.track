@@ -291,14 +291,14 @@ const endpoints: Endpoint[] = [
 describe("WorkList", () => {
   beforeEach(() => {
     setupIntercepts(endpoints);
+  });
+
+  it("should display the work list", () => {
     cy.mount(
       <Router>
         <WorkList />
       </Router>,
     );
-  });
-
-  it("should display the work list", () => {
     cy.get("table").should("exist").and("be.visible");
   });
 });

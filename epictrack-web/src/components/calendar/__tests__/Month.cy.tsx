@@ -1,7 +1,7 @@
 import { MemoryRouter as Router } from "react-router-dom";
 import Month from "../Month";
 import { EventCalendarProvider } from "../EventCalendarContext";
-import { mockEventsGrid } from "../../../../cypress/support/common";
+import { generateMockEvent } from "../../../../cypress/support/common";
 import { EVENT_TYPE } from "components/workPlan/phase/type";
 
 describe("Month", () => {
@@ -21,6 +21,35 @@ describe("Month", () => {
   const labelWidth = 120;
   const cellSizePx = 40;
   const daysInRow = 30;
+
+  const stableEvents = [
+    {
+      event: generateMockEvent({
+        id: 2001,
+        name: "Stable Milestone",
+        type: EVENT_TYPE.MILESTONE,
+        start_date: new Date(year, month, 5).toISOString(),
+        end_date: new Date(year, month, 6).toISOString(),
+      }),
+      phase_name: "Phase A",
+      phase_id: 1,
+      work_name: "Work A",
+      work_id: 11,
+    },
+    {
+      event: generateMockEvent({
+        id: 2002,
+        name: "Stable Task",
+        type: EVENT_TYPE.TASK,
+        start_date: new Date(year, month, 10).toISOString(),
+        end_date: new Date(year, month, 11).toISOString(),
+      }),
+      phase_name: "Phase B",
+      phase_id: 2,
+      work_name: "Work B",
+      work_id: 12,
+    },
+  ];
 
   const getBaseProps = (overrides = {}) => ({
     monthLabel: "September 2025",
@@ -43,7 +72,7 @@ describe("Month", () => {
               throw new Error("Function not implemented.");
             }}
             {...getBaseProps({ isCollapsed: true, toggleCollapsed })}
-            milestoneEvents={mockEventsGrid}
+            milestoneEvents={stableEvents}
           />
         </EventCalendarProvider>
       </Router>,
@@ -72,7 +101,7 @@ describe("Month", () => {
               toggleCollapsed,
               showWorkLegend: true,
             })}
-            milestoneEvents={mockEventsGrid}
+            milestoneEvents={stableEvents}
           />
         </EventCalendarProvider>
       </Router>,
@@ -112,12 +141,12 @@ describe("Month", () => {
               throw new Error("Function not implemented.");
             }}
             {...getBaseProps({ isCollapsed: true, toggleCollapsed: () => {} })}
-            milestoneEvents={mockEventsGrid}
+            milestoneEvents={stableEvents}
           />
         </EventCalendarProvider>
       </Router>,
     );
-    cy.contains(mockEventsGrid[0].event.name).should("not.exist");
+    cy.contains(stableEvents[0].event.name).should("not.exist");
 
     cy.mount(
       <Router>
@@ -128,23 +157,23 @@ describe("Month", () => {
               throw new Error("Function not implemented.");
             }}
             {...getBaseProps({ isCollapsed: false, toggleCollapsed: () => {} })}
-            milestoneEvents={mockEventsGrid}
+            milestoneEvents={stableEvents}
           />
         </EventCalendarProvider>
       </Router>,
     );
-    cy.contains(mockEventsGrid[0].event.name).scrollIntoView().should("exist");
+    cy.contains(stableEvents[0].event.name).scrollIntoView().should("exist");
   });
 
   it("renders multiple event types correctly", () => {
     const mixedEvents = [
       {
-        ...mockEventsGrid[0],
-        event: { ...mockEventsGrid[0].event, type: EVENT_TYPE.TASK },
+        ...stableEvents[0],
+        event: { ...stableEvents[0].event, type: EVENT_TYPE.TASK },
       },
       {
-        ...mockEventsGrid[1],
-        event: { ...mockEventsGrid[1].event, type: EVENT_TYPE.MILESTONE },
+        ...stableEvents[1],
+        event: { ...stableEvents[1].event, type: EVENT_TYPE.MILESTONE },
       },
     ];
 
@@ -164,9 +193,26 @@ describe("Month", () => {
     );
 
     mixedEvents.forEach((calendarItem) => {
-      cy.contains(new RegExp(calendarItem.event.name))
-        .scrollIntoView()
-        .should("exist");
+      cy.contains(calendarItem.event.name).scrollIntoView().should("exist");
     });
+  });
+
+  it("renders safely when milestone events are undefined", () => {
+    cy.mount(
+      <Router>
+        <EventCalendarProvider>
+          <Month
+            isCollapsed={false}
+            toggleCollapsed={function (): void {
+              throw new Error("Function not implemented.");
+            }}
+            {...getBaseProps({ isCollapsed: false, toggleCollapsed: () => {} })}
+          />
+        </EventCalendarProvider>
+      </Router>,
+    );
+
+    cy.contains("September 2025").should("exist");
+    cy.get("div").contains("1").should("exist");
   });
 });

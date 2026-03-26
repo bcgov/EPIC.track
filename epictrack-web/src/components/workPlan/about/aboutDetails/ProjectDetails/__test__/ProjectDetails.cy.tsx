@@ -24,6 +24,7 @@ const initContextWrapper = () => {
         <WorkplanContext.Provider
           value={{
             ...initialWorkPlanContext,
+            isActiveTeamMember: true,
             work: mockWork,
           }}
         >
@@ -58,5 +59,29 @@ describe("About Project", () => {
     cy.get("p")
       .contains(dayjs(mockWork.project.created_at).format(MONTH_DAY_YEAR))
       .should("be.visible");
+  });
+
+  it("opens project dialog when edit is clicked", () => {
+    cy.contains("button", "Edit").click();
+    cy.get('[role="dialog"]').should("exist");
+  });
+
+  it("renders nothing when work is not available", () => {
+    cy.mount(
+      <BrowserRouter>
+        <WorkplanContext.Provider
+          value={{
+            ...initialWorkPlanContext,
+            work: undefined,
+          }}
+        >
+          <AboutContext.Provider value={{} as any}>
+            <ProjectDetails />
+          </AboutContext.Provider>
+        </WorkplanContext.Provider>
+      </BrowserRouter>,
+    );
+
+    cy.contains("PROJECT CREATION DATE").should("not.exist");
   });
 });

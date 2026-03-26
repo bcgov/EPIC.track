@@ -54,13 +54,14 @@
   "scripts": {
     "start": "vite --open /track",
     "dev": "vite --open /track",
-    "build": "REACT_APP_VERSION=$npm_package_version vite build",
+    "build": "VITE_APP_VERSION=$npm_package_version vite build",
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
     "lint": "prettier --check \"./src/**/*.{js,jsx,ts,tsx}\"",
     "lintfix": "prettier --write \"./src/**/*.{js,jsx,tsx,ts}\"",
     "format": "prettier --write .",
-    "cypress": "NODE_OPTIONS='--max-old-space-size=4096' npx cypress run --component --headless --browser chrome"
+    "cypress": "NODE_OPTIONS='--max-old-space-size=4096' npx cypress run --component --headless --browser chrome",
+    "coverage:cypress": "rm -rf .nyc_output coverage/cypress && npm run cypress && npx nyc report --reporter=text-summary --reporter=html --report-dir coverage/cypress"
   },
   "browserslist": {
     "production": [
@@ -75,7 +76,6 @@
     ]
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^5.0.0",
     "@cypress/code-coverage": "^4.0.2",
     "@faker-js/faker": "^8.4.1",
     "@testing-library/cypress": "^10.0.2",
@@ -84,6 +84,7 @@
     "@types/node": "^24.1.0",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
+    "@vitejs/plugin-react": "^5.0.0",
     "cypress": "^15.12.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
@@ -92,6 +93,7 @@
     "prettier-eslint": "^16.3.0",
     "ts-node": "^10.9.2",
     "vite": "^6.3.5",
+    "vite-plugin-istanbul": "^8.0.0",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   },

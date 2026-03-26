@@ -54,7 +54,9 @@ export function App() {
 
   useEffect(() => {
     if (window.location.pathname === "/") {
-      window.location.replace(`/track${window.location.search}${window.location.hash}`);
+      window.location.replace(
+        `/track${window.location.search}${window.location.hash}`,
+      );
       return;
     }
 
