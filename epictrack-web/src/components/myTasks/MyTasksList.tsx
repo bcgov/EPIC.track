@@ -217,6 +217,7 @@ export default function MyTasksList() {
     myTasks,
     "work",
     (value) => value?.title || BLANK_OPTION,
+    (value) => value?.title || "",
   );
 
   const assigneeOptions = Array.from(
