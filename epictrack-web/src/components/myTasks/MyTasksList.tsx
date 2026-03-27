@@ -216,7 +216,7 @@ export default function MyTasksList() {
   const workFilterOptions = getSelectFilterOptions(
     myTasks,
     "work",
-    (value) => value || BLANK_OPTION,
+    (value) => value?.title || BLANK_OPTION,
   );
 
   const assigneeOptions = Array.from(
