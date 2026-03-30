@@ -143,12 +143,17 @@ export const EventCalendarProvider = ({
   const getEvents = useCallback(async () => {
     setLoading(true);
     try {
-      const eventPromise = eventService.getCalendarEvents({
-        ...searchOptions,
-        event_types: searchOptions.event_types.filter(
-          (t) => t !== "include_tasks:true",
-        ),
-      });
+      const filteredEventTypes = searchOptions.event_types.filter(
+        (t) => t !== "include_tasks:true",
+      );
+
+      const eventPromise =
+        filteredEventTypes.length > 0
+          ? eventService.getCalendarEvents({
+              ...searchOptions,
+              event_types: filteredEventTypes,
+            })
+          : Promise.resolve({ data: { items: [] } });
 
       let taskPromise: Promise<any> | null = null;
 

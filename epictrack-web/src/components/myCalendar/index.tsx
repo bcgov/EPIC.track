@@ -17,9 +17,13 @@ const MyCalendar = () => {
 
   const [isMyCalendar, setIsMyCalendar] = useState(true);
 
-  const defaultEventTypes = EVENT_TYPE_OPTIONS.map((option) => option.value);
-  const defaultEaoEventTypes = EAO_EVENT_TYPE_OPTIONS.map(
-    (option) => option.value,
+  const defaultEventTypes = useMemo(
+    () => EVENT_TYPE_OPTIONS.map((option) => option.value),
+    [],
+  );
+  const defaultEaoEventTypes = useMemo(
+    () => EAO_EVENT_TYPE_OPTIONS.map((option) => option.value),
+    [],
   );
 
   const initialSearchOptions = useMemo(() => {

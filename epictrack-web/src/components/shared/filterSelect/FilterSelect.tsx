@@ -115,7 +115,7 @@ const FilterSelect = (props: SelectProps) => {
     const currentValues = isMulti
       ? selectValue.map((v: OptionType) => v.value)
       : selectValue.value;
-    setSelectedOptions(currentValues || isMulti ? [] : "");
+    setSelectedOptions(currentValues || (isMulti ? [] : ""));
     setMenuIsOpen(false);
     selectRef.current?.blur();
   };
