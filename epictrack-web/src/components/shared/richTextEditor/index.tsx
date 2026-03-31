@@ -31,7 +31,18 @@ import "./RichEditorStyles.css";
 import { editorExtensions, EMPTY_DOC, getTipTapContentFromRaw } from "./utils";
 import { Palette } from "../../../styles/theme";
 
-const FONT_SIZE_OPTIONS = ["8px", "9px", "10px", "11px", "12px", "14px", "16px", "18px", "20px", "24px"];
+const FONT_SIZE_OPTIONS = [
+  "8px",
+  "9px",
+  "10px",
+  "11px",
+  "12px",
+  "14px",
+  "16px",
+  "18px",
+  "20px",
+  "24px",
+];
 const EMOJI_PICKER_WIDTH = 352;
 const EMOJI_PICKER_HEIGHT = 435;
 const COLOR_OPTIONS = [
