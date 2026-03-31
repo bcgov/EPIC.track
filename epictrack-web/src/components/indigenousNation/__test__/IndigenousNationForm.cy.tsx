@@ -66,7 +66,9 @@ describe("IndigenousNationForm", () => {
   });
 
   it("renders the rich text editor", () => {
-    cy.get(".DraftEditor-editorContainer");
+    cy.get(
+      '[role="textbox"][aria-multiline="true"].track-rich-editor__content',
+    ).should("exist");
   });
 
   it("renders the relationship holder field", () => {
