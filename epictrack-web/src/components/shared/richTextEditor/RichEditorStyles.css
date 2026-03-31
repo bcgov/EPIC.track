@@ -1,3 +1,46 @@
-.rdw-option-active {
-  box-shadow: 1px 1px 0px #bfbdbd inset !important;
+.track-rich-editor__content {
+  max-height: 485px;
+  min-height: 200px;
+  overflow-y: auto;
+  padding: 8px;
+  margin-bottom: 8px;
+  font-size: 16px;
+  line-height: 1.5;
+  outline: none;
+}
+
+.track-rich-editor__content p {
+  margin: 0;
+}
+
+.track-rich-editor__content p + p,
+.track-rich-editor__content ul + p,
+.track-rich-editor__content ol + p,
+.track-rich-editor__content p + ul,
+.track-rich-editor__content p + ol {
+  margin-top: 0.6rem;
+}
+
+.track-rich-editor__content ul,
+.track-rich-editor__content ol {
+  padding-left: 1.5rem;
+  margin: 0;
+}
+
+.track-rich-editor__content a {
+  color: #0053a6;
+  text-decoration: underline;
+}
+
+.track-rich-editor__content .is-editor-empty:first-child::before {
+  color: #6f7275;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.track-rich-editor__select {
+  background: #ffffff;
+  min-height: 32px;
 }
