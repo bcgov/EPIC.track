@@ -25,5 +25,6 @@ flask-marshmallow==0.15.0
 marshmallow-sqlalchemy==0.29.0
 pandas==2.0.2
 openpyxl==3.0.10
+odfpy
 matplotlib==3.7.4
 natsort==8.4.0
