@@ -14,7 +14,7 @@ jobs:
     environment:
       name: prod
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
 
       - name: Install OpenShift CLI
         run: |
