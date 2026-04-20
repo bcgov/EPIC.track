@@ -73,7 +73,7 @@ class PercentPhaseOverageInsightGenerator:
             or_(
                 WorkPhase.legislated.is_(True),
                 and_(
-                    WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                    or_(WorkType.id == WorkTypeEnum.AMENDMENT.value, WorkType.id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value),
                     WorkPhase.visibility == PhaseVisibilityEnum.REGULAR,
                 ),
             ),

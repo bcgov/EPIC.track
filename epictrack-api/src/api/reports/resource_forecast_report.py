@@ -586,6 +586,9 @@ class EAResourceForeCastReport(ReportFactory):
         amendments = self._sort_data_by_work_type(
             data, WorkTypeEnum.AMENDMENT.value, second_phases
         )
+        joint_complex_amendments = self._sort_data_by_work_type(
+            data, WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value, second_phases
+        )
         order_transfers = self._sort_data_by_work_type(
             data, WorkTypeEnum.EAC_ORDER_TRANSFER.value
         )
@@ -619,6 +622,7 @@ class EAResourceForeCastReport(ReportFactory):
             assessments
             + exemption_orders
             + amendments
+            + joint_complex_amendments
             + order_transfers
             + minister_designations
         )

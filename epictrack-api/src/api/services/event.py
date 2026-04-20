@@ -195,7 +195,7 @@ class EventService:
             if phase_start_event and phase_start_event.actual_date:
                 days_taken = (data.get("actual_date").date() - phase_start_event.actual_date.date()).days
                 work: Work = Work.find_by_id(work_id)
-                if (current_work_phase.legislated or work.work_type_id == WorkTypeEnum.AMENDMENT.value) \
+                if (current_work_phase.legislated or work.work_type_id == WorkTypeEnum.AMENDMENT.value or work.work_type_id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value) \
                         and (current_work_phase.number_of_days - days_taken < 0):
                     responsibilities = PhaseOverageResponsibilityService.find_by_work_phase_id(
                         current_work_phase.id, is_deleted=False
