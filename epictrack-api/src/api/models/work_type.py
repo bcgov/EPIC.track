@@ -40,6 +40,7 @@ class WorkTypeEnum(enum.Enum):
     EAC_ORDER_CANCELLATION = 13
     OTHER = 14
     MATERIAL_ALTERATION = 15
+    JOINT_COMPLEX_AMENDMENT = 16
 
 
 class WorkType(db.Model, CodeTableVersioned):
