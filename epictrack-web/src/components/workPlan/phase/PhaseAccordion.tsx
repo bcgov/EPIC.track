@@ -119,7 +119,9 @@ const PhaseAccordion = ({
   const isCompleted = phase.work_phase.is_completed;
   const isLegislated = phase.work_phase.legislated;
   const isOverageResponsibilityRequired =
-    isLegislated || work?.work_type_id === WorkTypeEnum.AMENDMENT;
+    isLegislated ||
+    work?.work_type_id === WorkTypeEnum.AMENDMENT ||
+    work?.work_type_id === WorkTypeEnum.JOINT_COMPLEX_AMENDMENT;
   const responsibilitiesText = overageResponsibilities
     ?.map((r) => r.responsibility)
     .join(", ");
