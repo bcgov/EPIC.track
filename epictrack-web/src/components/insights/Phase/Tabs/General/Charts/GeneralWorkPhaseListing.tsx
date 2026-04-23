@@ -203,11 +203,12 @@ const GeneralWorkPhaseListing = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          const containsAll = filterValue.every((value: any) =>
+          if (!filterValue.length) {
+            return true;
+          }
+          return filterValue.some((value: any) =>
             row.original.phase_overage_responsibilities.includes(value),
           );
-
-          return containsAll;
         },
       },
     ],
