@@ -8,10 +8,6 @@ export interface UserState {
   isAuthorized: boolean;
   userDetail: UserDetail;
 }
-export interface UserGroupUpdate {
-  existing_group_id: string | undefined | null;
-  group_id_to_update: string;
-}
 export class UserDetail {
   sub: string;
   preferred_username: string;
