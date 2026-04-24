@@ -9,7 +9,7 @@ import {
 import { AppConfig } from "../../config";
 import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
-import { UserDetail, UserGroupUpdate } from "./type";
+import { UserDetail } from "./type";
 import staffService from "../staffService/staffService";
 import { Staff } from "../../models/staff";
 
@@ -139,24 +139,6 @@ const doLogin = () => {
   }
 };
 
-// User management service methods
-const getUsers = async () => {
-  return await http.GetRequest(Endpoints.Users.USERS);
-};
-
-const getGroups = async () => {
-  return await http.GetRequest(Endpoints.Users.GET_USER_GROUPS);
-};
-
-const updateUserGroup = async (
-  userId: string,
-  updateUserGroup: UserGroupUpdate,
-) => {
-  return await http.PutRequest(
-    Endpoints.Users.UPDATE_USER_GROUPS.replace(":userId", userId),
-    JSON.stringify(updateUserGroup),
-  );
-};
 const updateLastActiveTime = async (userId: number) => {
   try {
     await http.PatchRequest(
@@ -173,9 +155,6 @@ const UserService = {
   getToken,
   doLogin,
   doLogout,
-  getUsers,
-  getGroups,
-  updateUserGroup,
 };
 
 export default UserService;

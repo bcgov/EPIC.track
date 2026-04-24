@@ -54,7 +54,6 @@ class KeycloakService:
         users = response.json()
         if not users:
             raise ValueError(f"No user found with email: {email}")
-        print(users)
         return users
 
     @staticmethod
@@ -62,16 +61,6 @@ class KeycloakService:
         """Get the members of a group"""
         response = KeycloakService._request_keycloak(f'groups/{group_id}/members')
         return response.json()
-
-    @staticmethod
-    def update_user_group(user_id, group_id):
-        """Update the group of user"""
-        return KeycloakService._request_keycloak(f'users/{user_id}/groups/{group_id}', HttpMethod.PUT)
-
-    @staticmethod
-    def delete_user_group(user_id, group_id):
-        """Delete user-group mapping"""
-        return KeycloakService._request_keycloak(f'users/{user_id}/groups/{group_id}', HttpMethod.DELETE)
 
     @staticmethod
     def get_user_groups(user_id):
