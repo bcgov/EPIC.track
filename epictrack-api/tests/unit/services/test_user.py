@@ -1,11 +1,10 @@
 """Unit tests for User Service."""
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 from api.services.user import UserService
-from api.exceptions import BusinessError
 
 
 class TestGetAllUsers:
