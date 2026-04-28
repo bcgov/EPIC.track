@@ -20,6 +20,7 @@ import {
   DEFAULT_DAYS_IN_ROW,
   DEFAULT_MIN_CELL_SIZE_PX,
   DEFAULT_LABEL_WIDTH,
+  RESIZE_BUFFER_PX,
 } from "./constants";
 import MyCalendarLegend from "./Legends/FullCalendarLegend";
 import { getWorkColour } from "./Legends/utils";
@@ -131,8 +132,18 @@ export const EventCalendarContainer = ({
 
       const availableWidth = containerWidth - labelWidth - totalGap;
       const calculatedCellSize = Math.floor(availableWidth / daysInRow);
-      const cellSizePx = Math.max(calculatedCellSize, DEFAULT_MIN_CELL_SIZE_PX);
-      setCellSizePx(cellSizePx);
+      const newCellSizePx = Math.max(
+        calculatedCellSize,
+        DEFAULT_MIN_CELL_SIZE_PX,
+      );
+      // Only update if the change exceeds the buffer threshold. This prevents
+      // the scrollbar feedback loop where a scrollbar appearing/disappearing
+      // causes the calendar to oscillate between two sizes indefinitely.
+      setCellSizePx((prev) =>
+        Math.abs(newCellSizePx - prev) > RESIZE_BUFFER_PX
+          ? newCellSizePx
+          : prev,
+      );
     };
 
     resize();
