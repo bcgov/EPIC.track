@@ -148,6 +148,7 @@ const GeneralWorkPhaseListing = () => {
       },
       {
         header: "Legislated Length",
+        accessorKey: "legislated_length",
         enableColumnFilter: false,
         Cell: ({ row }) => {
           return <span>{row.original.legislated_length} days</span>;
@@ -155,6 +156,7 @@ const GeneralWorkPhaseListing = () => {
       },
       {
         header: "Days Taken",
+        accessorKey: "days_taken",
         enableColumnFilter: false,
         Cell: ({ row }) => {
           return (

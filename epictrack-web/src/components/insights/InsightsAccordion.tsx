@@ -1,5 +1,5 @@
 import { Children, FC, useEffect, useRef, useState } from "react";
-import { Grid, Collapse, Link, Button, Stack } from "@mui/material";
+import { Grid, Collapse, Link, Button, Stack, Tooltip } from "@mui/material";
 import { ETParagraph, ETDescription, ETCaption2 } from "components/shared";
 import ETAccordion from "components/shared/accordion/Accordion";
 import ETAccordionDetails from "components/shared/accordion/components/AccordionDetails";
@@ -22,6 +22,8 @@ interface InsightAccordionProps {
   phaseInsights?: boolean;
   viewPhaseUnderage?: boolean;
   setViewPhaseUnderage?: React.Dispatch<React.SetStateAction<boolean>>;
+  onExportAllData?: () => void;
+  isExportingAllData?: boolean;
 }
 
 const InsightAccordion: React.FC<InsightAccordionProps> = ({
@@ -34,6 +36,8 @@ const InsightAccordion: React.FC<InsightAccordionProps> = ({
   phaseInsights = false,
   viewPhaseUnderage = false,
   setViewPhaseUnderage,
+  onExportAllData,
+  isExportingAllData = false,
 }) => {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [showMore, setShowMore] = useState(false);
@@ -105,6 +109,29 @@ const InsightAccordion: React.FC<InsightAccordionProps> = ({
               </Stack>
               {/* Right side: Button + Show More/Less Link */}
               <Stack direction="row" spacing={1} alignItems="center">
+                {onExportAllData && (
+                  <Tooltip
+                    title={
+                      isExportingAllData
+                        ? "Exporting..."
+                        : "Export all overage and underage data to CSV"
+                    }
+                  >
+                    <span>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={onExportAllData}
+                        disabled={isExportingAllData}
+                        sx={{ m: "0.5rem", p: "0.275rem 0.5rem" }}
+                      >
+                        {isExportingAllData
+                          ? "Exporting..."
+                          : "Export all to CSV"}
+                      </Button>
+                    </span>
+                  </Tooltip>
+                )}
                 <Button
                   variant="outlined"
                   size="small"

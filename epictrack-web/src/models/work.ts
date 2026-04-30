@@ -134,6 +134,7 @@ export interface WorkPhaseInsight {
   work_type_name: string;
   phase_name: string;
   phase_id: number;
+  work_phase_start_date: string;
   work_phase_end_date: string;
   ea_act_name: string;
   phase_overage_responsibilities: string[];
@@ -142,4 +143,5 @@ export interface WorkPhaseInsight {
   days_left: number;
   legislated_length: number;
   days_over: number;
+  work_is_active: boolean;
 }
