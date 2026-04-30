@@ -125,5 +125,6 @@ export const {
   useGetPercentOfPhasesWithOveragesQuery,
   useGetOverageResponsibilityQuery,
   useGetWorkPhasesQuery,
+  useLazyGetWorkPhasesQuery,
   useGetMedianPhaseOverageByWorktypeQuery,
 } = phaseInsightsApi;

@@ -7,7 +7,8 @@ import MedianPhaseOverageByWorktypeChart from "./Charts/MedianPhaseOverageByWork
 import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsightsContext";
 
 const General = () => {
-  const { viewUnderage, setViewUnderage } = usePhaseInsightsContext();
+  const { viewUnderage, setViewUnderage, exportAllPhaseData, isExporting } =
+    usePhaseInsightsContext();
   return (
     <InsightAccordion
       title="General Insights"
@@ -18,6 +19,8 @@ const General = () => {
       phaseInsights={true}
       viewPhaseUnderage={viewUnderage}
       setViewPhaseUnderage={setViewUnderage}
+      onExportAllData={exportAllPhaseData}
+      isExportingAllData={isExporting}
     >
       <Grid container spacing={2}>
         <Grid className="chart-item" item xs={12} md={12} lg={8}>
