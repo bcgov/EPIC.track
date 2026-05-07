@@ -34,7 +34,8 @@ class MedianPhaseOverageInsightGenerator:
         # Build all necessary subqueries
         sus_subq = get_suspended_days_subquery()
         days_taken_subq = get_days_taken_subquery(sus_subq)
-        days_over_expr = days_taken_subq.c.days_taken - Phase.number_of_days
+        # Use WorkPhase number_of_days to take into account extensions
+        days_over_expr = days_taken_subq.c.days_taken - WorkPhase.number_of_days
 
         query = (
             db.session.query(
