@@ -99,8 +99,10 @@ export const PhaseInsightsContextProvider: React.FC<
           work_title: row.work_title,
           work_type_name: row.work_type_name,
           phase_name: row.phase_name,
-          work_phase_start_date: row.work_phase_start_date,
-          work_phase_end_date: row.work_phase_end_date,
+          work_phase_start_date: dateUtils.formatDate(
+            row.work_phase_start_date,
+          ),
+          work_phase_end_date: dateUtils.formatDate(row.work_phase_end_date),
           legislated_length: row.legislated_length,
           days_taken: row.days_taken,
           overage: isOverage ? row.days_over : "",
