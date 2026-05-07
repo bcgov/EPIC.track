@@ -356,7 +356,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         total_days_subq = get_total_days_subquery(ext_subq)
         days_taken_subq = get_days_taken_subquery(sus_subq)
         days_left_subq = get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq)
-        days_over_expr = days_taken_subq.c.days_taken - Phase.number_of_days
+        days_over_expr = days_taken_subq.c.days_taken - WorkPhase.number_of_days
 
         query = db.session.query(
             Work.id.label("work_id"),
@@ -367,7 +367,8 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             WorkType.id.label("work_type_id"),
             Phase.name.label("phase_name"),
             Phase.id.label("phase_id"),
-            Phase.number_of_days.label("legislated_length"),
+            # Legislated length with extensions, not PhaseCode original length
+            WorkPhase.number_of_days.label("legislated_length"),
             EAAct.name.label("ea_act_name"),
             WorkPhase.start_date.label("work_phase_start_date"),
             WorkPhase.end_date.label("work_phase_end_date"),
