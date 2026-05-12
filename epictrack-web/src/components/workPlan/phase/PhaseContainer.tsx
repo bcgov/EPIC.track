@@ -66,7 +66,14 @@ const PhaseContainer = () => {
       ctx.setSelectedWorkPhase(phase);
       setCachedExpandedPhase(phase?.work_phase.id ?? null);
     }
-  }, [cachedExpandedPhase, ctx, setCachedExpandedPhase]);
+  }, [
+    cachedExpandedPhase,
+    ctx.work?.current_work_phase_id,
+    ctx.workPhases,
+    ctx.selectedWorkPhase,
+    ctx.setSelectedWorkPhase,
+    setCachedExpandedPhase,
+  ]);
 
   useEffect(() => {
     if (ctx.selectedWorkPhase) {

@@ -100,6 +100,8 @@ const EventList = () => {
   const { handleHighlightRows } = useContext(EventContext);
 
   const notificationId = useRef<SnackbarKey | null>(null);
+  const fetchAbortControllerRef = useRef<AbortController | null>(null);
+  const prevCurrentPhaseIdRef = useRef<number | undefined>();
 
   const endEvent = useMemo(
     () =>
@@ -180,7 +182,8 @@ const EventList = () => {
           });
         }
       } catch (e) {
-        setLoading(false);
+        // Error handling deferred to getCombinedEvents to avoid
+        // premature setLoading(false) while parallel requests are in-flight
       }
       return Promise.resolve(result);
     },
@@ -217,7 +220,8 @@ const EventList = () => {
           });
         }
       } catch (e) {
-        setLoading(false);
+        // Error handling deferred to getCombinedEvents to avoid
+        // premature setLoading(false) while parallel requests are in-flight
       }
       return Promise.resolve(result);
     },
@@ -225,13 +229,24 @@ const EventList = () => {
   );
 
   const getCombinedEvents = useCallback(() => {
+    // Abort any in-flight request to prevent stale state updates
+    if (fetchAbortControllerRef.current) {
+      fetchAbortControllerRef.current.abort();
+    }
+    const abortController = new AbortController();
+    fetchAbortControllerRef.current = abortController;
+
     let result: EventsGridModel[] = [];
     const phaseId = selectedWorkPhase?.work_phase.id;
 
     if (work?.id && phaseId) {
       setLoading(true);
-      Promise.all([getMilestoneEvents(phaseId), getTaskEvents(phaseId)]).then(
-        (data: Array<EventsGridModel[]>) => {
+      Promise.all([getMilestoneEvents(phaseId), getTaskEvents(phaseId)])
+        .then((data: Array<EventsGridModel[]>) => {
+          // Skip state updates if this request was superseded by a newer one
+          if (abortController.signal.aborted) {
+            return;
+          }
           data.forEach((array: EventsGridModel[]) => {
             result = result.concat(array);
           });
@@ -325,8 +340,12 @@ const EventList = () => {
           });
           setEvents(result);
           setLoading(false);
-        },
-      );
+        })
+        .catch(() => {
+          if (!abortController.signal.aborted) {
+            setLoading(false);
+          }
+        });
     }
     setRowSelection({});
   }, [
@@ -338,10 +357,22 @@ const EventList = () => {
 
   useEffect(() => {
     getCombinedEvents();
+    return () => {
+      // Cancel in-flight request when phase/work changes or component unmounts
+      if (fetchAbortControllerRef.current) {
+        fetchAbortControllerRef.current.abort();
+      }
+    };
   }, [getCombinedEvents, work?.id, selectedWorkPhase?.work_phase.id]);
 
   const updateSelectedWorkPhaseState = useCallback(() => {
     if (work?.current_work_phase_id && workPhases.length > 0) {
+      // Only override selection when current_work_phase_id actually changes,
+      // not on every workPhases array refresh — prevents overriding user selection
+      if (prevCurrentPhaseIdRef.current === work.current_work_phase_id) {
+        return;
+      }
+      prevCurrentPhaseIdRef.current = work.current_work_phase_id;
       const selectedWp = workPhases.find(
         (p) => p.work_phase.id === work.current_work_phase_id,
       );
@@ -351,10 +382,10 @@ const EventList = () => {
     }
   }, [setSelectedWorkPhase, work?.current_work_phase_id, workPhases]);
 
-  // update the selectedworkphase state in the context when the state of the work or workphases changes
+  // update the selectedworkphase state in the context when current_work_phase_id changes
   useEffect(() => {
     updateSelectedWorkPhaseState();
-  }, [updateSelectedWorkPhaseState, workPhases, work?.current_work_phase_id]);
+  }, [updateSelectedWorkPhaseState]);
 
   const getWorkPhases = useCallback(async () => {
     if (work?.id) {
