@@ -73,6 +73,7 @@ const PhaseContainer = () => {
     ctx.selectedWorkPhase,
     ctx.setSelectedWorkPhase,
     setCachedExpandedPhase,
+    ctx,
   ]);
 
   useEffect(() => {
