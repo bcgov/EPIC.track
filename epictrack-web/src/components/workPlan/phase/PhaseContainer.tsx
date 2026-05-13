@@ -24,12 +24,8 @@ const dateStyleOptions = [
 ];
 
 const PhaseContainer = () => {
-  const {
-    selectedWorkPhase,
-    setSelectedWorkPhase,
-    work,
-    workPhases,
-  } = useContext(WorkplanContext);
+  const { selectedWorkPhase, setSelectedWorkPhase, work, workPhases } =
+    useContext(WorkplanContext);
   const WORKPLAN_EXPANDED_PHASE_CACHE_KEY = `workplan-work-id-${work?.id}-expanded-phase`;
   const [cachedExpandedPhase, setCachedExpandedPhase] = useCachedState<
     number | null
@@ -210,9 +206,7 @@ const PhaseContainer = () => {
             phase={phase}
             showAnticipated={true}
             showActual={false}
-            isCurrentPhase={
-              work?.current_work_phase_id === phase.work_phase.id
-            }
+            isCurrentPhase={work?.current_work_phase_id === phase.work_phase.id}
           />
         </Grid>
       ))}
