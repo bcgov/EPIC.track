@@ -13,6 +13,7 @@ from api.models.project import Project
 from api.insights.insights_table_filters import build_insights_filters
 from api.insights.utils import (
     get_days_taken_subquery,
+    get_extension_days_subquery,
     get_suspended_days_subquery,
 )
 from api.utils.helpers import filter_query_by_staff
@@ -34,8 +35,11 @@ class MedianPhaseOverageInsightGenerator:
         # Build all necessary subqueries
         sus_subq = get_suspended_days_subquery()
         days_taken_subq = get_days_taken_subquery(sus_subq)
-        # Use WorkPhase number_of_days to take into account extensions
-        days_over_expr = days_taken_subq.c.days_taken - WorkPhase.number_of_days
+        days_extension_subq = get_extension_days_subquery()
+        # Use WorkPhase number_of_days and extensions
+        days_over_expr = days_taken_subq.c.days_taken - (
+            WorkPhase.number_of_days + func.coalesce(days_extension_subq.c.extension_days, 0)
+        )
 
         query = (
             db.session.query(
@@ -73,6 +77,7 @@ class MedianPhaseOverageInsightGenerator:
 
         query = query \
             .outerjoin(days_taken_subq, days_taken_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(days_extension_subq, days_extension_subq.c.work_phase_id == WorkPhase.id) \
             .group_by(Phase.name)
 
         work_phases = query.all()
