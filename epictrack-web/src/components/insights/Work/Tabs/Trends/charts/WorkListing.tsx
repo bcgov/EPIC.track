@@ -9,7 +9,7 @@ import {
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { useGetAllWorksQuery } from "services/rtkQuery/workInsights";
+import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { Tooltip, Box, Grid } from "@mui/material";
 import { ETCaption1, ETGridTitle, IButton } from "components/shared";
@@ -40,7 +40,7 @@ const WorkList = () => {
     };
   }, [isUserInsights, staffId]);
 
-  const { data, error, isLoading } = useGetAllWorksQuery(queryArg, {
+  const { data, error, isLoading } = useGetWorksQuery(queryArg, {
     refetchOnMountOrArgChange: true,
   });
 

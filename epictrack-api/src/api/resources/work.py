@@ -110,9 +110,13 @@ class Works(Resource):
         else:
             works = WorkService.find_all_works(is_active)
 
+        context = request_args.get("context", None)
+
         exclude = [] if include_indigenous_nations else ['indigenous_works']
         if not include_rel_staff:
             exclude.append('rel_staff')
+        if context == "insights":
+            exclude.extend(['ea_act', 'responsible_epd', 'eac_decision_by', 'decision_by', 'substitution_act', 'eao_team'])
 
         works_schema = res.WorkResponseSchema(many=True, exclude=exclude)
 

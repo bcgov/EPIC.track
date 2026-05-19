@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { Work } from "models/work";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { ETGridTitle, IButton } from "components/shared";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
@@ -11,7 +10,6 @@ import { useGetWorkStaffsQuery } from "services/rtkQuery/workStaffInsights";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { Tooltip, Box } from "@mui/material";
 import { sort } from "utils";
-import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
@@ -20,57 +18,33 @@ import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
-type WorkStaffWithWork = WorkStaff & { work: Work };
-
 const WorkList = () => {
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 15,
   });
-  const [workData, setWorkData] = React.useState<WorkStaffWithWork[]>([]);
+  const [workData, setWorkData] = React.useState<WorkStaff[]>([]);
   const { columnFilters, setColumnFilters } = useTableFilterContext();
   const { isUserInsights, staffId } = useInsightsContext();
-
-  const queryArg = useMemo(() => {
-    return {
-      is_active: true,
-      ...(isUserInsights && staffId ? { staffId } : {}),
-    };
-  }, [isUserInsights, staffId]);
-
-  const { data: works } = useGetWorksQuery(queryArg, {
-    refetchOnMountOrArgChange: true,
-  });
 
   const { data: workStaffs, isLoading } = useGetWorkStaffsQuery();
 
   useEffect(() => {
-    if (workStaffs && works) {
-      const mergedData = workStaffs
-        .filter((workStaff) =>
-          isUserInsights
-            ? workStaff.staff
-                .map((staff) => staff.id)
-                ?.includes(staffId ? staffId : -1)
-            : true,
-        )
-        .map((workStaff) => {
-          const work = works.find(
-            (w) => w.eao_team_id === workStaff.eao_team.id,
-          );
-          if (!work) {
-            return null;
-          }
-          return { ...workStaff, work };
-        })
-        .filter(Boolean) as WorkStaffWithWork[];
-      setWorkData(sort(mergedData, "work.title"));
+    if (workStaffs) {
+      const filtered = workStaffs.filter((workStaff) =>
+        isUserInsights
+          ? workStaff.staff
+              .map((staff) => staff.id)
+              ?.includes(staffId ? staffId : -1)
+          : true,
+      );
+      setWorkData(sort(filtered, "title"));
       setPagination((prev) => ({
         ...prev,
-        pageSize: workStaffs.length,
+        pageSize: filtered.length,
       }));
     }
-  }, [isUserInsights, staffId, works, workStaffs]);
+  }, [isUserInsights, staffId, workStaffs]);
 
   const workLeads = useMemo(() => {
     return Array.from(
@@ -149,7 +123,7 @@ const WorkList = () => {
   );
 
   useEffect(() => {
-    const cols: Array<MRT_ColumnDef<WorkStaffWithWork>> = [];
+    const cols: Array<MRT_ColumnDef<WorkStaff>> = [];
     if (workStaffs && workStaffs.length > 0) {
       const roles = [WorkStaffRole.TEAM_CO_LEAD, WorkStaffRole.OFFICER_ANALYST];
       roles.forEach((role, index) => {
@@ -191,7 +165,7 @@ const WorkList = () => {
     }
   }, [getRolefilterOptions, roleFilterFunction, workStaffs]);
 
-  const columns = React.useMemo<MRT_ColumnDef<WorkStaffWithWork>[]>(() => {
+  const columns = React.useMemo<MRT_ColumnDef<WorkStaff>[]>(() => {
     return [
       {
         accessorKey: "title",
