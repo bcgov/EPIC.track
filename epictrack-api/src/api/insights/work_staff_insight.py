@@ -21,28 +21,31 @@ class WorkStaffInsightGenerator:
     def generate_partition_query(self, filters: List = None, staff_id: int = None):
         """Generates the group by subquery."""
         filter_exprs = build_insights_filters(filters, "works") if filters else []
-        query = db.session.query(
-            StaffWorkRole.staff_id,
-            func.count(func.distinct(Work.id)).label("count"),
-        ).join(Work, StaffWorkRole.work_id == Work.id)
+        query = (
+            db.session.query(
+                StaffWorkRole.staff_id,
+                func.count(func.distinct(Work.id)).label("count"),
+            )
+            .join(Work, StaffWorkRole.work_id == Work.id)
+            .join(Staff, Staff.id == StaffWorkRole.staff_id)
+        )
 
         # Join necessary tables for filters
         if filters:
-            query = query.join(WorkType, Work.work_type_id == WorkType.id)
-            query = query.join(Project, Work.project_id == Project.id)
-            query = query.join(WorkPhase, Work.current_work_phase_id == WorkPhase.id)
-
-        query = query.join(Staff, Staff.id == StaffWorkRole.staff_id)
+            query = (
+                query.join(WorkType, Work.work_type_id == WorkType.id)
+                .join(Project, Work.project_id == Project.id)
+                .join(WorkPhase, Work.current_work_phase_id == WorkPhase.id)
+            )
 
         if staff_id:
             query = query.filter(Staff.id == staff_id)
-            query = query.filter(Staff.is_active.is_(True))
-            query = query.filter(StaffWorkRole.is_active.is_(True))
 
         query = query.filter(
             Work.is_active.is_(True),
             Work.is_deleted.is_(False),
             Work.is_completed.is_(False),
+            Staff.is_active.is_(True),
             StaffWorkRole.is_active.is_(True),
             StaffWorkRole.role_id == RoleEnum.OFFICER_ANALYST.value,
             *filter_exprs if filter_exprs else [],

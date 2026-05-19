@@ -35,7 +35,11 @@ function buildInsightBody(
 
 function buildQueryString(
   base: string,
-  { is_active, staffId }: { is_active?: boolean; staffId?: number } = {},
+  {
+    is_active,
+    staffId,
+    context,
+  }: { is_active?: boolean; staffId?: number; context?: string } = {},
 ): string {
   const params: string[] = [];
 
@@ -44,6 +48,9 @@ function buildQueryString(
   }
   if (staffId !== undefined) {
     params.push(`staff_id=${staffId}`);
+  }
+  if (context !== undefined) {
+    params.push(`context=${context}`);
   }
 
   return params.length ? `${base}?${params.join("&")}` : base;
@@ -92,32 +99,13 @@ export const workInsightsApi = createApi({
       },
     ),
 
-    getAllWorks: builder.query<
-      Work[],
-      { is_active?: boolean; staffId?: number } | void
-    >({
-      query: (
-        args: { is_active?: boolean; staffId?: number } = { is_active: true },
-      ) => buildQueryString("works", args),
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.map(({ id }) => ({
-                type: "Works" as const,
-                id,
-              })),
-              { type: "Works", id: "LIST" },
-            ]
-          : [{ type: "Works", id: "LIST" }],
-    }),
-
     getWorks: builder.query<
       Work[],
       { is_active?: boolean; staffId?: number } | void
     >({
       query: (
         args: { is_active?: boolean; staffId?: number } = { is_active: true },
-      ) => buildQueryString("works", args),
+      ) => buildQueryString("works", { ...args, context: "insights" }),
       providesTags: (result) =>
         result
           ? [
@@ -150,8 +138,11 @@ export const workInsightsApi = createApi({
 
     getWorksWithNations: builder.query<Work[], { staffId?: number } | void>({
       query: (args) =>
-        buildQueryString("works", { ...args, is_active: true }) +
-        "&include_indigenous_nations=true&include_rel_staff=true",
+        buildQueryString("works", {
+          ...args,
+          is_active: true,
+          context: "insights",
+        }) + "&include_indigenous_nations=true&include_rel_staff=true",
       providesTags: (result) =>
         result
           ? [
@@ -337,5 +328,4 @@ export const {
   useGetWorksByYearOpenedQuery,
   useGetWorksByYearCompletedQuery,
   useGetWorkClosureBreakdownQuery,
-  useGetAllWorksQuery,
 } = workInsightsApi;
