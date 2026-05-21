@@ -37,3 +37,11 @@ jobs:
           
           oc rollout restart deployment/epictrack-api -n ${{ secrets.OPENSHIFT_REPOSITORY }}-test
           oc rollout restart deployment/epictrack-web -n ${{ secrets.OPENSHIFT_REPOSITORY }}-test
+          oc rollout status deployment/epictrack-api -n ${{ secrets.OPENSHIFT_REPOSITORY }}-test --timeout=5m
+
+  update_event_templates:
+    needs: deployment
+    uses: ./.github/workflows/deploy-event-templates.yml
+    with:
+      environment: "test"
+    secrets: inherit

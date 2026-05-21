@@ -24,6 +24,29 @@ env:
   TAG_NAME: "${{ github.event.inputs.environment || 'dev' }}" # If the environment type is manually selected, use the input value; otherwise, use 'dev' as default
 
 jobs:
+  check_template_changes:
+    runs-on: ubuntu-latest
+    if: github.repository == 'bcgov/EPIC.track'
+    outputs:
+      templates_changed: ${{ steps.check.outputs.templates_changed }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - name: Detect xlsx changes
+        id: check
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            # Manual trigger — always upload so the user gets a full sync
+            echo "templates_changed=true" >> $GITHUB_OUTPUT
+          elif git diff --name-only HEAD~1 HEAD -- epictrack-api/src/api/templates/event_templates/ | grep -q "\.xlsx$"; then
+            echo "templates_changed=true" >> $GITHUB_OUTPUT
+            echo "Template files changed in this push"
+          else
+            echo "templates_changed=false" >> $GITHUB_OUTPUT
+            echo "No template files changed, skipping upload"
+          fi
+
   api-cd:
     runs-on: ubuntu-24.04
 
@@ -67,3 +90,12 @@ jobs:
         shell: bash
         run: |
           oc rollout restart deployment/${{ env.APP_NAME }} -n ${{ secrets.OPENSHIFT_REPOSITORY }}-${{ env.TAG_NAME }}
+          oc rollout status deployment/${{ env.APP_NAME }} -n ${{ secrets.OPENSHIFT_REPOSITORY }}-${{ env.TAG_NAME }} --timeout=5m
+
+  update_event_templates:
+    needs: [api-cd, check_template_changes]
+    if: needs.check_template_changes.outputs.templates_changed == 'true'
+    uses: ./.github/workflows/deploy-event-templates.yml
+    with:
+      environment: "dev"
+    secrets: inherit

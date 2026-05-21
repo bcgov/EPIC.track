@@ -1,0 +1,126 @@
+name: Deploy Event Templates
+
+on:
+  # Manual trigger with environment selection
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment (dev/test/prod)"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - test
+          - prod
+
+  # Called from deploy workflows after a successful deployment
+  workflow_call:
+    inputs:
+      environment:
+        description: "Environment"
+        required: true
+        type: string
+
+env:
+  TEMPLATE_DIR: epictrack-api/src/api/templates/event_templates
+
+jobs:
+  update-event-templates:
+    runs-on: ubuntu-latest
+    # Selects the correct GitHub environment so env-specific secrets are used
+    environment: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.environment) || (github.event_name == 'push' && 'dev') || (github.event_name == 'workflow_call' && inputs.environment) }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Determine environment and API host
+        id: setup
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            ENVIRONMENT="dev"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            ENVIRONMENT="${{ github.event.inputs.environment }}"
+          elif [[ "${{ github.event_name }}" == "workflow_call" ]]; then
+            ENVIRONMENT="${{ inputs.environment }}"
+          else
+            echo "Unknown trigger type"
+            exit 1
+          fi
+
+          case $ENVIRONMENT in
+            dev)
+              API_HOST="epictrack-api-c8b80a-dev.apps.gold.devops.gov.bc.ca"
+              KC_TOKEN_URL="https://dev.loginproxy.gov.bc.ca/auth/realms/eao-epic/protocol/openid-connect/token"
+              ;;
+            test)
+              API_HOST="epictrack-api-c8b80a-test.apps.gold.devops.gov.bc.ca"
+              KC_TOKEN_URL="https://test.loginproxy.gov.bc.ca/auth/realms/eao-epic/protocol/openid-connect/token"
+              ;;
+            prod)
+              API_HOST="epictrack-api-c8b80a-prod.apps.gold.devops.gov.bc.ca"
+              KC_TOKEN_URL="https://loginproxy.gov.bc.ca/auth/realms/eao-epic/protocol/openid-connect/token"
+              ;;
+            *)
+              echo "Invalid environment: $ENVIRONMENT"
+              exit 1
+              ;;
+          esac
+
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+          echo "api_host=$API_HOST" >> $GITHUB_OUTPUT
+          echo "kc_token_url=$KC_TOKEN_URL" >> $GITHUB_OUTPUT
+          echo "Deploying templates to $ENVIRONMENT ($API_HOST)"
+
+      - name: Get Keycloak token and upload event templates
+        env:
+          KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
+          KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
+          API_HOST: ${{ steps.setup.outputs.api_host }}
+          KC_TOKEN_URL: ${{ steps.setup.outputs.kc_token_url }}
+        run: |
+          TOKEN=$(curl -sf -X POST "${KC_TOKEN_URL}" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "client_id=${KEYCLOAK_CLIENT_ID}&client_secret=${KEYCLOAK_CLIENT_SECRET}&grant_type=client_credentials" \
+            | jq -r '.access_token')
+
+          if [[ -z "$TOKEN" || "$TOKEN" == "null" ]]; then
+            echo "Failed to obtain Keycloak token"
+            exit 1
+          fi
+          echo "Keycloak token obtained"
+
+          echo "Uploading latest version of each event template from: ${TEMPLATE_DIR}"
+
+          # For each event type subdirectory, upload only the highest-versioned xlsx
+          for type_dir in $(find "${TEMPLATE_DIR}" -mindepth 1 -maxdepth 1 -type d | sort); do
+            type_name=$(basename "$type_dir")
+            latest_file=$(find "$type_dir" -name "*.xlsx" | sort -V | tail -1)
+
+            if [[ -z "$latest_file" ]]; then
+              echo "No xlsx files found in $type_name, skipping"
+              continue
+            fi
+
+            template_name=$(basename "$latest_file")
+            echo "Uploading $type_name: $template_name"
+
+            response=$(curl -s -w "\n%{http_code}" -X POST \
+              "https://${API_HOST}/api/v1/event-templates" \
+              -H "Authorization: Bearer ${TOKEN}" \
+              -F "event_template=@${latest_file}")
+
+            http_code=$(echo "$response" | tail -n1)
+
+            if [[ $http_code -ge 200 && $http_code -lt 300 ]]; then
+              echo "Uploaded $template_name (HTTP $http_code)"
+            else
+              echo "Failed to upload $template_name (HTTP $http_code)"
+              echo "$response" | head -n -1
+              exit 1
+            fi
+            echo "---"
+          done
+
+          echo "All event templates uploaded to ${{ steps.setup.outputs.environment }}"
