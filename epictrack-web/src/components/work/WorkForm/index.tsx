@@ -38,6 +38,7 @@ import { IconProps } from "../../icons/type";
 import icons from "../../icons";
 import { WorkFormSpecialField } from "./WorkFormSpecialField";
 import { useIsActiveTeamMember } from "components/workPlan/utils";
+import { defaultWorkTypeReportDescriptions } from "models/workType";
 
 const maxTitleLength = 150;
 const schema = yup.object<Work>().shape({
@@ -162,6 +163,17 @@ export default function WorkForm({
       setDisableDialogSave(isSpecialFieldUnlocked);
     }
   }, [isSpecialFieldUnlocked, setDisableDialogSave]);
+
+  useEffect(() => {
+    if (work?.id || !workTypeId) return;
+
+    // Get template based on work type, otherwise use default work description
+    const template =
+      defaultWorkTypeReportDescriptions[Number(workTypeId)] ||
+      defaultWork.report_description;
+
+    setValue("report_description", template);
+  }, [workTypeId, setValue, work?.id]);
 
   useEffect(() => {
     const noneFederalInvolvement = federalInvolvements.find(
