@@ -195,8 +195,19 @@ class EventService:
             if phase_start_event and phase_start_event.actual_date:
                 days_taken = (data.get("actual_date").date() - phase_start_event.actual_date.date()).days
                 work: Work = Work.find_by_id(work_id)
-                if (current_work_phase.legislated or work.work_type_id == WorkTypeEnum.AMENDMENT.value) \
-                        and (current_work_phase.number_of_days - days_taken < 0):
+                #  Find extension events to calculate total number of days
+                extension_events = [
+                    e for e in current_phase_events
+                    if e.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_EXTENSION.value
+                ]
+                extension_days = sum(e.number_of_days for e in extension_events)
+                total_days = 0
+                if current_work_phase.number_of_days:
+                    total_days = current_work_phase.number_of_days + extension_days
+                else:
+                    total_days = (current_work_phase.end_date.date() - current_work_phase.start_date.date()).days
+                if (current_work_phase.legislated or work.work_type_id == WorkTypeEnum.AMENDMENT.value or work.work_type_id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value) \
+                        and (total_days - days_taken < 0):
                     responsibilities = PhaseOverageResponsibilityService.find_by_work_phase_id(
                         current_work_phase.id, is_deleted=False
                     )

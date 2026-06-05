@@ -34,7 +34,7 @@ import {
 } from "models/phaseOverageResponsibilities";
 import { WorkTypeEnum } from "models/workType";
 import OverageResponsibilityForm from "./overageResponsibility/OverageResponsibilityForm";
-import { useUserHasRole } from "../utils";
+import { useIsActiveTeamMember } from "../utils";
 import WarningBox from "components/shared/warningBox";
 
 const GoToIcon: FC<IconProps> = Icons["GoToIcon"];
@@ -115,12 +115,13 @@ const PhaseAccordion = ({
   const { getWorkPhases, selectedWorkPhase, setSelectedWorkPhase, work } =
     useContext(WorkplanContext);
 
-  const userHasRole = useUserHasRole();
-
+  const isActiveTeamMember = useIsActiveTeamMember();
   const isCompleted = phase.work_phase.is_completed;
   const isLegislated = phase.work_phase.legislated;
   const isOverageResponsibilityRequired =
-    isLegislated || work?.work_type_id === WorkTypeEnum.AMENDMENT;
+    isLegislated ||
+    work?.work_type_id === WorkTypeEnum.AMENDMENT ||
+    work?.work_type_id === WorkTypeEnum.JOINT_COMPLEX_AMENDMENT;
   const responsibilitiesText = overageResponsibilities
     ?.map((r) => r.responsibility)
     .join(", ");
@@ -409,7 +410,7 @@ const PhaseAccordion = ({
                         <Restricted
                           allowed={[ROLES.EXTENDED_EDIT]}
                           errorProps={{ disabled: true }}
-                          exception={userHasRole}
+                          exception={isActiveTeamMember}
                         >
                           <IconButton
                             color="primary"
@@ -434,7 +435,7 @@ const PhaseAccordion = ({
                       <Restricted
                         allowed={[ROLES.EXTENDED_EDIT]}
                         errorProps={{ disabled: true }}
-                        exception={userHasRole}
+                        exception={isActiveTeamMember}
                       >
                         <Button
                           variant="text"

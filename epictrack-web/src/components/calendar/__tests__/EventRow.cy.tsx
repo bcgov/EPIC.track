@@ -38,6 +38,9 @@ describe("EventRow Component", () => {
     cy.viewport(1920, 1080);
   });
 
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
   const days = generateDaysForMonth();
 
   it("renders a Task and Milestone event", () => {
@@ -47,8 +50,8 @@ describe("EventRow Component", () => {
           id: 2001,
           name: "Task event",
           type: EVENT_TYPE.TASK,
-          start_date: new Date(2026, 2, 3).toISOString(),
-          end_date: new Date(2026, 2, 5).toISOString(),
+          start_date: new Date(currentYear, currentMonth, 3).toISOString(),
+          end_date: new Date(currentYear, currentMonth, 5).toISOString(),
         }),
         phase_name: "Phase A",
         phase_id: 1,
@@ -60,8 +63,8 @@ describe("EventRow Component", () => {
           id: 2002,
           name: "Milestone event",
           type: EVENT_TYPE.MILESTONE,
-          start_date: new Date(2026, 2, 6).toISOString(),
-          end_date: new Date(2026, 2, 7).toISOString(),
+          start_date: new Date(currentYear, currentMonth, 6).toISOString(),
+          end_date: new Date(currentYear, currentMonth, 7).toISOString(),
         }),
         phase_name: "Phase B",
         phase_id: 2,
@@ -205,8 +208,8 @@ describe("EventRow Component", () => {
       id: 7771,
       name: "Legend task",
       type: EVENT_TYPE.TASK,
-      start_date: new Date(2026, 2, 5).toISOString(),
-      end_date: new Date(2026, 2, 7).toISOString(),
+      start_date: new Date(currentYear, currentMonth, 5).toISOString(),
+      end_date: new Date(currentYear, currentMonth, 7).toISOString(),
     });
     const events = [
       {

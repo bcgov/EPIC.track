@@ -75,6 +75,7 @@ def get_total_days_subquery(ext_subq):
             or_(
                 WorkPhase.legislated.is_(True),
                 WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                WorkType.id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value
             ),
         )
         .join(Work, WorkPhase.work_id == Work.id)
@@ -157,7 +158,8 @@ def get_days_taken_subquery(sus_subq):
             WorkPhase.is_deleted.is_(False),
             or_(
                 WorkPhase.legislated.is_(True),
-                WorkType.id == WorkTypeEnum.AMENDMENT.value
+                WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                WorkType.id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value
             ),
         )
         .outerjoin(start_event_date_subq, start_event_date_subq.c.work_phase_id == WorkPhase.id)
@@ -193,7 +195,8 @@ def get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq
             WorkPhase.is_deleted.is_(False),
             or_(
                 WorkPhase.legislated.is_(True),
-                WorkType.id == WorkTypeEnum.AMENDMENT.value
+                WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                WorkType.id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value
             ),
         )
         .join(Work, WorkPhase.work_id == Work.id)
@@ -222,7 +225,8 @@ def get_work_subquery():
             WorkPhase.is_deleted.is_(False),
             or_(
                 WorkPhase.legislated.is_(True),
-                WorkType.id == WorkTypeEnum.AMENDMENT.value
+                WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                WorkType.id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value
             ),
         )
         .join(Work, WorkPhase.work_id == Work.id)

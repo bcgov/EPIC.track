@@ -346,25 +346,31 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
 
     @classmethod
     def find_all_work_phases_with_additional_info(cls, staff_id: int = None, view_underage: bool = False) -> List[WorkPhase]:
-        """Return all work phases."""
+        """Return all work phases.
+
+        Work phase insights and overage/underage data.
+        """
         work_subq = get_work_subquery()
         ext_subq = get_extension_days_subquery()
         sus_subq = get_suspended_days_subquery()
         total_days_subq = get_total_days_subquery(ext_subq)
         days_taken_subq = get_days_taken_subquery(sus_subq)
         days_left_subq = get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq)
-        days_over_expr = days_taken_subq.c.days_taken - Phase.number_of_days
+        days_over_expr = days_taken_subq.c.days_taken - total_days_subq.c.total_days
 
         query = db.session.query(
             Work.id.label("work_id"),
             WorkPhase.id.label("work_phase_id"),
             Work.title.label("work_title"),
+            Work.is_active.label("work_is_active"),
             WorkType.name.label("work_type_name"),
             WorkType.id.label("work_type_id"),
             Phase.name.label("phase_name"),
             Phase.id.label("phase_id"),
-            Phase.number_of_days.label("legislated_length"),
+            # Legislated length with extensions
+            (WorkPhase.number_of_days + func.coalesce(ext_subq.c.extension_days, 0)).label("legislated_length"),
             EAAct.name.label("ea_act_name"),
+            WorkPhase.start_date.label("work_phase_start_date"),
             WorkPhase.end_date.label("work_phase_end_date"),
             total_days_subq.c.total_days.label("total_days"),
             days_taken_subq.c.days_taken.label("days_taken"),
@@ -389,6 +395,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
          .outerjoin(PhaseOverageResponsibility, PhaseOverageResponsibility.work_phase_id == WorkPhase.id)
 
         query = query \
+            .outerjoin(ext_subq, ext_subq.c.work_phase_id == WorkPhase.id) \
             .outerjoin(total_days_subq, total_days_subq.c.work_phase_id == WorkPhase.id) \
             .outerjoin(days_taken_subq, days_taken_subq.c.work_phase_id == WorkPhase.id) \
             .outerjoin(days_left_subq, days_left_subq.c.work_phase_id == WorkPhase.id)
@@ -396,11 +403,12 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         query = query.filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
+            WorkPhase.is_completed.is_(True),  # Only show data for completed phases
             Work.work_state.not_in([WorkStateEnum.WITHDRAWN]),
             or_(
                 WorkPhase.legislated.is_(True),
                 and_(
-                    WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                    or_(WorkType.id == WorkTypeEnum.AMENDMENT.value, WorkType.id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value),
                     WorkPhase.visibility == PhaseVisibilityEnum.REGULAR,
                 ),
             ),
@@ -429,10 +437,11 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             Phase.id,
             EAAct.name,
             WorkPhase.end_date,
+            ext_subq.c.extension_days,
             total_days_subq.c.total_days,
             days_taken_subq.c.days_taken,
             days_left_subq.c.days_left
-        )
+        ).order_by(Work.title)
 
         data = cls._serialize_work_phases(query)
         return data
@@ -450,6 +459,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
                 "work_type_name": row.work_type_name,
                 "phase_name": row.phase_name,
                 "phase_id": row.phase_id,
+                "work_phase_start_date": row.work_phase_start_date,
                 "work_phase_end_date": row.work_phase_end_date,
                 "ea_act_name": row.ea_act_name,
                 "phase_overage_responsibilities": [p.value if hasattr(p, 'value') else p for p in row.phase_overage_responsibilities],
@@ -458,6 +468,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
                 "days_left": row.days_left,
                 "legislated_length": row.legislated_length,
                 "days_over": abs(row.days_over),
+                "work_is_active": row.work_is_active,
             }
             data.append(item)
         return data

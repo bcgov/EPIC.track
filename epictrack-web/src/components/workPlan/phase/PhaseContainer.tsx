@@ -24,13 +24,14 @@ const dateStyleOptions = [
 ];
 
 const PhaseContainer = () => {
-  const ctx = useContext(WorkplanContext);
-  const WORKPLAN_EXPANDED_PHASE_CACHE_KEY = `workplan-work-id-${ctx.work?.id}-expanded-phase`;
+  const { selectedWorkPhase, setSelectedWorkPhase, work, workPhases } =
+    useContext(WorkplanContext);
+  const WORKPLAN_EXPANDED_PHASE_CACHE_KEY = `workplan-work-id-${work?.id}-expanded-phase`;
   const [cachedExpandedPhase, setCachedExpandedPhase] = useCachedState<
     number | null
   >(
     WORKPLAN_EXPANDED_PHASE_CACHE_KEY,
-    ctx.selectedWorkPhase?.work_phase.id ?? null,
+    selectedWorkPhase?.work_phase.id ?? null,
   );
   const [showCompletedPhases, setShowCompletedPhases] = useState<boolean>(true);
   const [showCompletedActual, setShowCompletedActual] = useState<boolean>(true);
@@ -44,8 +45,8 @@ const PhaseContainer = () => {
     numberOfExtensionDaysRecommended,
     isDecisionComplete,
   } = usePhaseTimeline({
-    workPhases: ctx.workPhases,
-    currentWorkPhaseId: ctx.work?.current_work_phase_id,
+    workPhases,
+    currentWorkPhaseId: work?.current_work_phase_id,
   });
 
   const handleExpand = (phaseId: number) => {
@@ -55,28 +56,34 @@ const PhaseContainer = () => {
   useEffect(() => {
     if (
       !cachedExpandedPhase &&
-      ctx.work?.current_work_phase_id &&
-      ctx.workPhases.length > 0 &&
-      !ctx.selectedWorkPhase
+      work?.current_work_phase_id &&
+      workPhases.length > 0 &&
+      !selectedWorkPhase
     ) {
-      const phase = ctx.workPhases.find(
-        (workPhase) =>
-          workPhase.work_phase.id === ctx.work?.current_work_phase_id,
+      const phase = workPhases.find(
+        (wp) => wp.work_phase.id === work?.current_work_phase_id,
       );
-      ctx.setSelectedWorkPhase(phase);
+      setSelectedWorkPhase(phase);
       setCachedExpandedPhase(phase?.work_phase.id ?? null);
     }
-  }, [cachedExpandedPhase, ctx, setCachedExpandedPhase]);
+  }, [
+    cachedExpandedPhase,
+    work?.current_work_phase_id,
+    workPhases,
+    selectedWorkPhase,
+    setSelectedWorkPhase,
+    setCachedExpandedPhase,
+  ]);
 
   useEffect(() => {
-    if (ctx.selectedWorkPhase) {
-      setCachedExpandedPhase(ctx.selectedWorkPhase.work_phase.id);
+    if (selectedWorkPhase) {
+      setCachedExpandedPhase(selectedWorkPhase.work_phase.id);
     }
-  }, [ctx.selectedWorkPhase, setCachedExpandedPhase]);
+  }, [selectedWorkPhase, setCachedExpandedPhase]);
 
   const callback = useCallback(() => {
-    return ctx.work?.work_type?.name ?? undefined;
-  }, [ctx.work?.work_type?.name]);
+    return work?.work_type?.name ?? undefined;
+  }, [work?.work_type?.name]);
 
   useRouterLocationStateForHelpPage(callback);
 
@@ -99,7 +106,7 @@ const PhaseContainer = () => {
     );
   };
 
-  if (ctx.workPhases.length === 0) {
+  if (workPhases.length === 0) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         <ETHeading4>This work has no phases to be displayed</ETHeading4>
@@ -199,9 +206,7 @@ const PhaseContainer = () => {
             phase={phase}
             showAnticipated={true}
             showActual={false}
-            isCurrentPhase={
-              ctx.work?.current_work_phase_id === phase.work_phase.id
-            }
+            isCurrentPhase={work?.current_work_phase_id === phase.work_phase.id}
           />
         </Grid>
       ))}
@@ -214,7 +219,7 @@ const PhaseContainer = () => {
             padding: "1rem",
           }}
         >
-          {isDecisionComplete && ctx.work?.is_completed ? (
+          {isDecisionComplete && work?.is_completed ? (
             <WarningBox
               title="Date Miscalculation"
               subTitle={

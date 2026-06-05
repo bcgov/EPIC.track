@@ -327,6 +327,13 @@ class WorkQueryParameterSchema(RequestQueryParameterSchema):
         missing=None
     )
 
+    context = fields.Str(
+        metadata={"description": "Request context; use 'insights' for a lean response excluding unused nested objects"},
+        required=False,
+        missing=None,
+        allow_none=True,
+    )
+
 
 class WorkPhaseQueryParameterSchema(RequestQueryParameterSchema):
     """Work Phase Query parameters"""

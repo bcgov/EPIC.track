@@ -4,6 +4,7 @@ import { Icon } from "components/icons/type";
 export const DEFAULT_MIN_CELL_SIZE_PX = 24;
 export const DEFAULT_LABEL_WIDTH = 95;
 export const DEFAULT_DAYS_IN_ROW = 37;
+export const RESIZE_BUFFER_PX = 20;
 
 export const LEGEND_COLOURS = {
   border: {

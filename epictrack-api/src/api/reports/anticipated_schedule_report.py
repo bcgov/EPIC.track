@@ -327,7 +327,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
                 ),
                 and_(
-                    Work.work_type_id == WorkTypeEnum.AMENDMENT.value,
+                    or_(Work.work_type_id == WorkTypeEnum.AMENDMENT.value,
+                        Work.work_type_id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value),
                     EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                     EventConfiguration.name != "Delegation of Amendment Decision",
                     EventConfiguration.event_type_id.in_([
@@ -592,7 +593,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
     def _get_ea_type_column(self, formatted_phase_name):
         return case(
                 (
-                    WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                    or_(WorkType.id == WorkTypeEnum.AMENDMENT.value, WorkType.id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value),
                     case(
                         (
                             FederalInvolvement.id != FederalInvolvementEnum.NONE.value,
@@ -634,7 +635,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 ),
             ),
             (
-                WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                or_(WorkType.id == WorkTypeEnum.AMENDMENT.value, WorkType.id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value),
                 "Amendment Decisions"
             ),
             else_=func.concat(formatted_work_type, "s")
@@ -683,7 +684,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         """Returns an expression for the reformatted PhaseCode.name"""
         return case(
                 (
-                    WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                    or_(WorkType.id == WorkTypeEnum.AMENDMENT.value, WorkType.id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value),
                     case(
                         # Case for 32.5
                         (
@@ -700,7 +701,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         """Returns an expression for the reformatted workType.name"""
         return case(
                 (
-                    WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                    or_(WorkType.id == WorkTypeEnum.AMENDMENT.value, WorkType.id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value),
                     case(
                         # Case for 32.5
                         (

@@ -9,7 +9,6 @@ import IndigenousNationList from "../components/indigenousNation/IndigenousNatio
 import ProponentList from "../components/proponent/ProponentList";
 import WorkList from "../components/work/WorkList";
 import ProjectList from "../components/project/ProjectList";
-import UserList from "../components/user/UserList";
 import TemplateList from "../components/task/template/TemplateList";
 import { MasterProvider } from "../components/shared/MasterContext";
 import WorkPlan from "../components/workPlan";
@@ -93,7 +92,6 @@ const AuthenticatedRoutes = () => {
       />
       <Route path="/work-plan" element={<WorkPlan />} />
       <Route element={<AuthGate allowed={[ROLES.MANAGE_USERS]} />}>
-        <Route path="/admin/users" element={<UserList />} />
         <Route path="/admin/settings" element={<Settings />} />
       </Route>
       <Route path="/" element={<MyWorkPlans />} />

@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useRef, useContext, useCallback, useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -17,6 +17,7 @@ import { getErrorMessage } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import { roleService } from "services/roleService";
 import { unEditableTeamMembers } from "./constants";
+import { WorkStaffRole as WorkStaffRoleEnum } from "../../../models/role";
 
 interface TeamFormProps {
   workStaffId?: number;
@@ -48,11 +49,13 @@ const schema = yup.object().shape({
 });
 
 const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
-  const [staff, setStaff] = React.useState<Staff[]>([]);
-  const [roles, setRoles] = React.useState<ListType[]>([]);
-  const emailRef = React.useRef(null);
-  const phoneRef = React.useRef(null);
-  const ctx = React.useContext(WorkplanContext);
+  const [staff, setStaff] = useState<Staff[]>([]);
+  const [roles, setRoles] = useState<ListType[]>([]);
+  const [selectedStaffPosition, setSelectedStaffPosition] =
+    useState<string>("");
+  const emailRef = useRef(null);
+  const phoneRef = useRef(null);
+  const ctx = useContext(WorkplanContext);
   const staffWorkRole = ctx.selectedStaff;
   const { setSelectedStaff } = ctx;
 
@@ -69,12 +72,48 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
     reset,
   } = methods;
 
-  React.useEffect(() => {
-    getAllStaff();
-    getAllRoles();
+  const getAllStaff = useCallback(async () => {
+    try {
+      const result = await staffService.getAll(true);
+      if (result.status === 200) {
+        const staff = result.data as Staff[];
+        setStaff(sort(staff, "full_name"));
+      }
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+    }
   }, []);
 
-  React.useEffect(() => {
+  const getAllRoles = useCallback(async () => {
+    try {
+      const result = await roleService.getAll();
+      if (result.status === 200) {
+        const roles = result.data as ListType[];
+        let filteredRoles = roles.filter(
+          (role) => !unEditableTeamMembers.includes(role.id),
+        );
+        if (selectedStaffPosition !== "REL") {
+          filteredRoles = filteredRoles.filter(
+            (role) => role.id !== WorkStaffRoleEnum.REL,
+          );
+        }
+        setRoles(sort(filteredRoles, "name"));
+      }
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+    }
+  }, [selectedStaffPosition]);
+
+  useEffect(() => {
+    getAllStaff();
+    getAllRoles();
+  }, [getAllStaff, getAllRoles]);
+
+  useEffect(() => {
     reset({
       ...staffWorkRole,
       work_id: ctx.work?.id,
@@ -82,13 +121,14 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
     });
   }, [ctx.work?.id, staffWorkRole, reset]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const getTeamMember = async () => {
       try {
         const result = await workService.getWorkTeamMember(Number(workStaffId));
         if (result.status === 200) {
           const staff = result.data as StaffWorkRole;
           setSelectedStaff(staff);
+          setSelectedStaffPosition(staff?.staff?.position?.name || "");
         }
       } catch (e) {
         showNotification(COMMON_ERROR_MESSAGE, {
@@ -102,42 +142,15 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
     }
   }, [setSelectedStaff, workStaffId]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (staffWorkRole) {
       reset(staffWorkRole);
     }
   }, [reset, staffWorkRole]);
 
-  const getAllStaff = async () => {
-    try {
-      const result = await staffService.getAll(true);
-      if (result.status === 200) {
-        const staff = result.data as Staff[];
-        setStaff(sort(staff, "full_name"));
-      }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
-
-  const getAllRoles = async () => {
-    try {
-      const result = await roleService.getAll();
-      if (result.status === 200) {
-        const roles = result.data as ListType[];
-        const filteredRoles = roles.filter(
-          (role) => !unEditableTeamMembers.includes(role.id),
-        );
-        setRoles(sort(filteredRoles, "name"));
-      }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
+  useEffect(() => {
+    getAllRoles();
+  }, [getAllRoles]);
 
   const saveTeamMember = (data: StaffWorkRole) => {
     if (workStaffId) {
@@ -171,6 +184,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
     (phoneRef?.current as any)["value"] = selectedStaff
       ? selectedStaff.phone
       : "";
+    setSelectedStaffPosition(selectedStaff?.position?.name || "");
   };
   return (
     <FormProvider {...methods}>

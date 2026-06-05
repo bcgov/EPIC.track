@@ -118,7 +118,11 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
 
         # Delete middle entry
         elif to_delete.time_range.upper and next_entry:
-            new_lower = previous_entry.time_range.upper + timedelta(days=1)
+            if previous_entry:
+                new_lower = previous_entry.time_range.upper + timedelta(days=1)
+            else:
+                new_lower = to_delete.time_range.lower
+
             next_entry.time_range = DateTimeTZRange(
                 new_lower,
                 next_entry.time_range.upper,

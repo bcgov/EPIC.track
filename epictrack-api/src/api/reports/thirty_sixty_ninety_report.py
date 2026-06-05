@@ -467,7 +467,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 EventConfiguration.name.in_(["EAC Referral Package sent to Ministers", "Termination Package Referred to Minister"])
             ),
             and_(
-                Work.work_type_id == WorkTypeEnum.AMENDMENT.value,
+                or_(Work.work_type_id == WorkTypeEnum.AMENDMENT.value, Work.work_type_id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value),
                 EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
                 EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
                 EventConfiguration.name == "Amendment Decision Package Referred to Decision Maker"

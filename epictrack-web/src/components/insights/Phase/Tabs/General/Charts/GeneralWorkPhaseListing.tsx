@@ -148,6 +148,7 @@ const GeneralWorkPhaseListing = () => {
       },
       {
         header: "Legislated Length",
+        accessorKey: "legislated_length",
         enableColumnFilter: false,
         Cell: ({ row }) => {
           return <span>{row.original.legislated_length} days</span>;
@@ -155,6 +156,7 @@ const GeneralWorkPhaseListing = () => {
       },
       {
         header: "Days Taken",
+        accessorKey: "days_taken",
         enableColumnFilter: false,
         Cell: ({ row }) => {
           return (
@@ -203,11 +205,12 @@ const GeneralWorkPhaseListing = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          const containsAll = filterValue.every((value: any) =>
+          if (!filterValue.length) {
+            return true;
+          }
+          return filterValue.some((value: any) =>
             row.original.phase_overage_responsibilities.includes(value),
           );
-
-          return containsAll;
         },
       },
     ],

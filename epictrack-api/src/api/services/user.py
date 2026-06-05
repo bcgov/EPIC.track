@@ -15,9 +15,7 @@
 from flask import current_app
 import sys
 
-from api.exceptions import BusinessError, PermissionDeniedError
 from api.services import authorisation
-from api.utils import TokenInfo
 from api.utils.roles import Role as KeycloakRole
 from .keycloak import KeycloakService
 
@@ -79,70 +77,6 @@ class UserService:
 
         current_app.logger.debug(f"filtered_groups: {filtered_groups}")
         return filtered_groups
-
-    @classmethod
-    def update_user_group(cls, user_id, user_group_request):
-        """
-        Updates the user's group based on the provided user group request.
-
-        Args:
-          cls: The class instance.
-          user_id (str): The ID of the user to update.
-          user_group_request (dict): A dictionary containing the group update request details.
-            Expected keys:
-              - "group_id_to_update" (str): The ID of the group to update.
-        Raises:
-          PermissionDeniedError: If the requester does not have permission to update the group.
-        Returns:
-          dict: The result of the group update operation from KeycloakService.
-        """
-        cls._check_auth()
-        token_groups = TokenInfo.get_user_data()["groups"]
-        groups = cls.get_groups()
-        requesters_group = next(
-            (
-                group
-                for group in groups
-                if group["name"] in token_groups
-            ),
-            None,
-        )
-        updating_group = next(
-            (
-                group
-                for group in groups
-                if group["id"] == user_group_request.get("group_id_to_update")
-            ),
-            None,
-        )
-        if (
-            not requesters_group
-            and not updating_group
-            and int(UserService._get_level(requesters_group))
-            < int(UserService._get_level(updating_group))
-        ):
-            raise PermissionDeniedError("Permission denied")
-
-        UserService._delete_from_all_epictrack_subgroups(user_id)
-
-        result = KeycloakService.update_user_group(
-            user_id, user_group_request["group_id_to_update"]
-        )
-        return result
-
-    @staticmethod
-    def _delete_from_all_epictrack_subgroups(user_id):
-        """Delete all subgroups of 'epictrack' for a user"""
-        groups = KeycloakService.get_user_groups(user_id)
-
-        # Find the main group 'epictrack' and get its subgroups
-        track_subgroups = [group for group in groups if 'track/' in group['path'].lower()]
-
-        for subgroup in track_subgroups:
-            result = KeycloakService.delete_user_group(user_id, subgroup['id'])
-
-            if result.status_code != 204:
-                raise BusinessError("Error removing group", 500)
 
     @classmethod
     def _get_level(cls, group):

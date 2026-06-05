@@ -221,6 +221,7 @@ const TrendWorkPhaseListing = () => {
         },
       },
       {
+        accessorKey: "legislated_length",
         header: "Legislated Length",
         enableColumnFilter: false,
         Cell: ({ row }) => {
@@ -284,7 +285,7 @@ const TrendWorkPhaseListing = () => {
                 exportToCsv({
                   table,
                   downloadDate: new Date().toISOString(),
-                  filenamePrefix: "general-insights-listing",
+                  filenamePrefix: "trends-insights-listing",
                 })
               }
             >

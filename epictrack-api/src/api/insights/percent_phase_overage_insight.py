@@ -13,6 +13,7 @@ from api.models.staff_work_role import StaffWorkRole
 from api.insights.insights_table_filters import build_insights_filters
 from api.insights.utils import (
     get_days_taken_subquery,
+    get_extension_days_subquery,
     get_suspended_days_subquery
 )
 from sqlalchemy import and_, func, Float, cast, or_, case
@@ -30,7 +31,11 @@ class PercentPhaseOverageInsightGenerator:
         # Build all necessary subqueries
         sus_subq = get_suspended_days_subquery()
         days_taken_subq = get_days_taken_subquery(sus_subq)
-        days_over_expr = days_taken_subq.c.days_taken - Phase.number_of_days
+        days_extension_subq = get_extension_days_subquery()
+        # Use WorkPhase number_of_days and extensions
+        days_over_expr = days_taken_subq.c.days_taken - (
+            WorkPhase.number_of_days + func.coalesce(days_extension_subq.c.extension_days, 0)
+        )
 
         if is_underage_toggled:
             numerator = func.sum(
@@ -73,7 +78,7 @@ class PercentPhaseOverageInsightGenerator:
             or_(
                 WorkPhase.legislated.is_(True),
                 and_(
-                    WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                    or_(WorkType.id == WorkTypeEnum.AMENDMENT.value, WorkType.id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value),
                     WorkPhase.visibility == PhaseVisibilityEnum.REGULAR,
                 ),
             ),
@@ -82,6 +87,7 @@ class PercentPhaseOverageInsightGenerator:
 
         query = query \
             .outerjoin(days_taken_subq, days_taken_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(days_extension_subq, days_extension_subq.c.work_phase_id == WorkPhase.id) \
             .group_by(Phase.name)
 
         query = query.having(percent_expr > 0)
