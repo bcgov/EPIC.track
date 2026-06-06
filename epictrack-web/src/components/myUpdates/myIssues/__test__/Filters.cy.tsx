@@ -1,4 +1,4 @@
-import { mount } from "cypress/react18";
+import { mount } from "cypress/react";
 import Filters from "../Filters";
 import { MyIssuesContext } from "../MyIssuesContext";
 import { issuesContextValue } from "../../../../../cypress/support/common";

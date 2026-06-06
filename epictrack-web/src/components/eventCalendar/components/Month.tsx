@@ -1,11 +1,11 @@
 import { memo } from "react";
-import * as Moment from "moment";
+import moment from "moment";
 import { extendMoment } from "moment-range";
 import * as _ from "lodash";
 import { Box, Tooltip } from "@mui/material";
 import { ETParagraph } from "../../shared";
 
-const extendedMoment = extendMoment(Moment);
+const extendedMoment = extendMoment(moment);
 
 const Month = ({
   month,
