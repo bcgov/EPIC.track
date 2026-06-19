@@ -305,6 +305,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         if issue_update.is_approved:
             one_of_roles = (
                 KeycloakRole.EXTENDED_EDIT.value,
+                Membership.TEAM_MEMBER.value,
             )
             authorisation.check_auth(one_of_roles=one_of_roles)
         else:
