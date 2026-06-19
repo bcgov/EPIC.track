@@ -19,8 +19,8 @@ from urllib.parse import urljoin
 from api.config import get_named_config
 from werkzeug.datastructures import FileStorage
 
-from tests.utilities.factory_scenarios import TestStaffInfo
-from tests.utilities.factory_utils import factory_staff_model
+from tests.utilities.factory_scenarios import TestJwtClaims, TestStaffInfo
+from tests.utilities.factory_utils import factory_auth_header, factory_staff_model
 
 
 API_BASE_URL = "/api/v1/"
@@ -57,8 +57,9 @@ def test_get_staff_details(client, auth_header):
     assert staff.position_id == response_json["position_id"]
 
 
-def test_create_staff(client, auth_header):
+def test_create_staff(client, jwt):
     """Test create staff"""
+    auth_header = factory_auth_header(jwt=jwt, claims=TestJwtClaims.manage_user_role)
     staff_data = TestStaffInfo.staff1.value
     url = urljoin(API_BASE_URL, "staffs")
     response = client.post(url, json=staff_data, headers=auth_header)
@@ -73,8 +74,9 @@ def test_create_staff(client, auth_header):
     assert staff_data["position_id"] == response_json["position_id"]
 
 
-def test_delete_staff(client, auth_header):
+def test_delete_staff(client, jwt):
     """Test delete staff"""
+    auth_header = factory_auth_header(jwt=jwt, claims=TestJwtClaims.manage_user_role)
     staff = factory_staff_model()
     url = urljoin(API_BASE_URL, f"staffs/{staff.id}")
     response = client.delete(url, headers=auth_header)
@@ -84,8 +86,9 @@ def test_delete_staff(client, auth_header):
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
-def test_update_staff(client, auth_header):
+def test_update_staff(client, jwt):
     """Test update staff"""
+    auth_header = factory_auth_header(jwt=jwt, claims=TestJwtClaims.manage_user_role)
     staff = factory_staff_model()
 
     staff_data = TestStaffInfo.staff1.value
@@ -145,8 +148,9 @@ def test_get_staff_by_email(client, auth_header):
     assert staff.position_id == response_json["position_id"]
 
 
-def test_import_staff(client, auth_header):
+def test_import_staff(client, jwt):
     """Test import staff"""
+    auth_header = factory_auth_header(jwt=jwt, claims=TestJwtClaims.manage_user_role)
     url = urljoin(API_BASE_URL, "staffs/import")
     file_path = Path("./src/api/templates/master_templates/Staffs.xlsx")
     file_path = file_path.resolve()
