@@ -234,8 +234,9 @@ class TestCreateWork:
     @patch("api.services.work.WorkService._check_duplicate_title")
     @patch("api.services.work.Work")
     @patch("api.services.work.db")
+    @patch("api.services.work.authorisation.check_auth")
     def test_creates_work_with_phases_and_events(
-        self, mock_db, mock_work_model, mock_check_duplicate,
+        self, mock_check_auth, mock_db, mock_work_model, mock_check_duplicate,
         mock_phase_service, mock_event_template_service, mock_schema,
         mock_create_fields, mock_create_events
     ):
@@ -277,8 +278,9 @@ class TestCreateWork:
     @patch("api.services.work.PhaseService")
     @patch("api.services.work.WorkService._check_duplicate_title")
     @patch("api.services.work.Work")
+    @patch("api.services.work.authorisation.check_auth")
     def test_raises_when_no_configuration_found(
-        self, mock_work_model, mock_check_duplicate, mock_phase_service
+        self, mock_check_auth, mock_work_model, mock_check_duplicate, mock_phase_service
     ):
         """Test raises error when no phase configuration found."""
         payload = {

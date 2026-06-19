@@ -270,6 +270,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
     def create_work(cls, payload, commit: bool = True):
         # pylint: disable=too-many-locals
         """Create a new work"""
+        authorisation.check_auth(one_of_roles=(KeycloakRole.CREATE.value,))
         cls._check_duplicate_title(payload)
         work = Work(**payload)
         work.work_state = WorkStateEnum.IN_PROGRESS
@@ -686,6 +687,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
     @classmethod
     def update_work(cls, work_id: int, payload: dict):
         """Update existing work."""
+        cls._check_can_edit_or_team_member_auth(work_id)
         cls._check_duplicate_title(payload, work_id)
         work = Work.find_by_id(work_id)
         if not work:
@@ -761,9 +763,16 @@ class WorkService:  # pylint: disable=too-many-public-methods
         )
         return query.all()
 
+    # Columns that save_notes is allowed to write.  Any note_type not in this
+    # set or its alias map is rejected to prevent IDOR attribute-write.
+    _ALLOWED_NOTE_COLUMNS = frozenset(
+        {"first_nation_notes", "status_notes", "issue_notes"}
+    )
+
     @classmethod
     def save_first_nation_notes(cls, work_id: int, notes: str) -> Work:
         """Save first nation note to given work"""
+        cls._check_can_edit_or_team_member_auth(work_id)
         work = cls.find_by_id(work_id)
         work.first_nation_notes = notes
         work.save()
@@ -772,7 +781,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
     @classmethod
     def save_notes(cls, work_id: int, notes_payload: dict) -> Work:
         """Save notes to the given column in the work."""
-        # if column name cant map the type in the UI , add it here..
+        cls._check_can_edit_or_team_member_auth(work_id)
+
+        # Alias map for UI-friendly note_type names that differ from column names.
         note_type_mapping = {
             "first_nation": "first_nation_notes",
         }
@@ -781,16 +792,13 @@ class WorkService:  # pylint: disable=too-many-public-methods
         notes = notes_payload.get("notes")
         note_type = notes_payload.get("note_type")
 
-        if hasattr(work, note_type):
-            setattr(work, note_type, notes)
-        else:
-            mapped_column = note_type_mapping.get(note_type)
-            if mapped_column is None:
-                raise ResourceExistsError(
-                    f"No work note type {note_type} nation association found"
-                )
-            setattr(work, mapped_column, notes)
-
+        # Resolve alias first, then validate against the strict allowlist.
+        column = note_type_mapping.get(note_type, note_type)
+        if column not in cls._ALLOWED_NOTE_COLUMNS:
+            raise ResourceExistsError(
+                f"No work note type {note_type!r} found"
+            )
+        setattr(work, column, notes)
         work.save()
         return work
 
