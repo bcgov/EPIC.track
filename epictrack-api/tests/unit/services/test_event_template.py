@@ -520,11 +520,12 @@ class TestFindStartAtValueSecurity:
         """Any Python expression beyond the allowed forms must be rejected."""
         svc = self._svc()
         for bad in [
-            "number_of_days * 2",
-            "number_of_days + 1 + 1",
-            "1 + 1",
-            "number_of_days+0; import os",
-            "eval('1')",
+            "number_of_days + 1 + 1",   # chained operations
+            "number_of_days ** 2",       # exponentiation not allowed
+            "1 + 1",                     # no number_of_days reference
+            "number_of_days+0; import os",  # semicolon injection attempt
+            "eval('1')",                 # direct eval attempt
+            "__import__('os').system('id') or number_of_days",  # RCE payload
         ]:
             with pytest.raises(ValueError, match="Invalid start_at"):
                 svc._find_start_at_value(bad, 30)
