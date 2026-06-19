@@ -1305,10 +1305,36 @@ class EventService:
 
     @classmethod
     def bulk_delete_milestones(cls, milestone_ids: List):
-        """Mark milestones as deleted"""
-        db.session.query(Event).filter(
-            or_(Event.id.in_(milestone_ids), Event.source_event_id.in_(milestone_ids))
-        ).update({"is_active": False, "is_deleted": True})
+        """Mark milestones as deleted.
+
+        Enforces the same DELETE/TEAM_MEMBER check that delete_event applies,
+        once per unique work to avoid per-row overhead.
+        """
+        events = (
+            db.session.query(Event)
+            .filter(
+                or_(
+                    Event.id.in_(milestone_ids),
+                    Event.source_event_id.in_(milestone_ids),
+                )
+            )
+            .all()
+        )
+        one_of_roles = (
+            Membership.TEAM_MEMBER.value,
+            KeycloakRole.DELETE.value,
+        )
+        checked_work_ids: set = set()
+        for event in events:
+            if event.work_id not in checked_work_ids:
+                authorisation.check_auth(
+                    one_of_roles=one_of_roles, work_id=event.work_id
+                )
+                checked_work_ids.add(event.work_id)
+
+        for event in events:
+            event.is_active = False
+            event.is_deleted = True
         db.session.commit()
         return "Deleted successfully"
 
