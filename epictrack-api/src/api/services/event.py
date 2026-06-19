@@ -14,6 +14,7 @@
 """Service to manage Event."""
 import copy
 import functools
+import re
 from datetime import datetime, timedelta
 from typing import Dict, List
 from flask import current_app
@@ -1256,14 +1257,42 @@ class EventService:
 
     @classmethod
     def _find_start_at_value(cls, start_at: str, number_of_days: int) -> int:
-        """Calculate the start at value"""
-        # pylint: disable=eval-used
-        start_at_value = (
-            eval(start_at.replace("number_of_days", str(number_of_days)))
-            if "number_of_days" in start_at
-            else int(start_at)
+        """Calculate the start at value.
+
+        Accepts a plain integer string or one of:
+          number_of_days
+          number_of_days [+|-|*|/] <positive integer>
+
+        Anything that doesn't match these forms is rejected to prevent code
+        injection via a template-supplied expression.
+        """
+        plain_int_re = re.compile(r"^\s*-?\d+\s*$")
+        nod_expr_re = re.compile(
+            r"^\s*number_of_days\s*([+\-*/])\s*(\d+)\s*$"
         )
-        return start_at_value
+
+        if plain_int_re.match(start_at):
+            return int(start_at)
+
+        m = nod_expr_re.match(start_at)
+        if m:
+            op, operand = m.group(1), int(m.group(2))
+            if op == "+":
+                return number_of_days + operand
+            if op == "-":
+                return number_of_days - operand
+            if op == "*":
+                return number_of_days * operand
+            # op == "/"
+            return number_of_days / operand
+
+        if start_at.strip() == "number_of_days":
+            return number_of_days
+
+        raise ValueError(
+            f"Invalid start_at expression {start_at!r}. "
+            "Only plain integers or 'number_of_days [+|-|*|/] N' are allowed."
+        )
 
     @classmethod
     def _prepare_regular_event(  # pylint: disable=too-many-arguments

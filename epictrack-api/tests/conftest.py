@@ -94,7 +94,11 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
 def _load_templates():
     # Call the import_events_template method after database setup to populate init data
     templates_folder = os.path.join(os.path.dirname(__file__), '../../epictrack-api/src/api/templates/event_templates')
+    # Both g.jwt_oidc_token_info and g.token_info must be set: auth.require normally
+    # copies jwt_oidc_token_info → token_info at request time, but here we call the
+    # service directly so we must set token_info ourselves.
     g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
+    g.token_info = TestJwtClaims.staff_admin_role
     for root, dirs, files in os.walk(templates_folder):
         for file_name in files:
             file_path = os.path.join(root, file_name)

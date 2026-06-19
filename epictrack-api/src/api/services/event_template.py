@@ -35,7 +35,9 @@ from api.models import (
 )
 from api.schemas import request as req
 from api.schemas import response as res
+from api.services import authorisation
 from api.services.phaseservice import PhaseService
+from api.utils.roles import Role as KeycloakRole
 from api.utils.str import escape_characters
 
 
@@ -46,8 +48,14 @@ class EventTemplateService:
     """Service to manage configurations"""
 
     @classmethod
+    def _check_auth(cls):
+        """Require extended_edit role for template authoring operations."""
+        authorisation.check_auth(one_of_roles=(KeycloakRole.EXTENDED_EDIT.value,))
+
+    @classmethod
     def import_events_template(cls, configuration_file):
         """Import event configurations in to database"""
+        cls._check_auth()
 
         def _process(excel_dict: dict, app_context):
             """Process the incoming excel"""

