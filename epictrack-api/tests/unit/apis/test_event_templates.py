@@ -14,6 +14,7 @@
 """Security tests for the POST /api/v1/tasks (event-template upload) endpoint."""
 from http import HTTPStatus
 from io import BytesIO
+from unittest.mock import patch
 
 import pandas as pd
 
@@ -94,10 +95,15 @@ class TestEventTemplateUploadAuth:
                 jwt=jwt, claims=TestJwtClaims.staff_admin_role
             )
             data = {"event_template": (_minimal_template_file(), "template.xlsx")}
-            response = client.post(
-                API_BASE_URL,
-                data=data,
-                content_type="multipart/form-data",
-                headers=headers,
-            )
+            # Prevent the background thread from starting: it would call
+            # db.session.commit() after the test's savepoint is rolled back,
+            # leaving the connection in an aborted state for the next test.
+            # The auth check still executes (it runs before Thread.start).
+            with patch("threading.Thread.start"):
+                response = client.post(
+                    API_BASE_URL,
+                    data=data,
+                    content_type="multipart/form-data",
+                    headers=headers,
+                )
             assert response.status_code == HTTPStatus.CREATED
