@@ -65,7 +65,7 @@ class IndigenousNation(Resource):
         req.IndigenousNationIdPathParameterSchema().load(request.view_args)
         indigenous_nation = IndigenousNationService.find(indigenous_nation_id, exclude_deleted=True)
         return (
-            res.IndigenousResponseNationSchema().dump(indigenous_nation),
+            res.IndigenousNationDetailsResponseSchema().dump(indigenous_nation),
             HTTPStatus.OK,
         )
 
@@ -81,7 +81,7 @@ class IndigenousNation(Resource):
             indigenous_nation_id, request_json
         )
         return (
-            res.IndigenousResponseNationSchema().dump(indigenous_nation),
+            res.IndigenousNationDetailsResponseSchema().dump(indigenous_nation),
             HTTPStatus.OK,
         )
 
@@ -111,7 +111,30 @@ class IndigenousNations(Resource):
         indigenous_nations = IndigenousNationService.find_all_indigenous_nations(
             args.get("is_active")
         )
-        response = res.IndigenousResponseNationSchema(many=True).dump(indigenous_nations)
+        response = res.IndigenousNationResponseSchema(many=True).dump(indigenous_nations)
+        response = natural_sort(response, "name")
+        return (
+            jsonify(response),
+            HTTPStatus.OK,
+        )
+
+
+@cors_preflight("GET,POST")
+@API.route("/details", methods=["GET", "POST", "OPTIONS"])
+class IndigenousNationsDetails(Resource):
+    """Endpoint resource to return indigenous nations."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get():
+        """Return all indigenous nations."""
+        args = req.BasicRequestQueryParameterSchema().load(request.args)
+        indigenous_nations = IndigenousNationService.find_all_indigenous_nations(
+            args.get("is_active")
+        )
+        response = res.IndigenousNationDetailsResponseSchema(many=True).dump(indigenous_nations)
         response = natural_sort(response, "name")
         return (
             jsonify(response),
@@ -123,13 +146,13 @@ class IndigenousNations(Resource):
     @auth.require
     @profiletime
     def post():
-        """Create new staff"""
+        """Create new indigenous nation"""
         request_json = req.IndigenousNationBodyParameterSchema().load(API.payload)
         indigenous_nation = IndigenousNationService.create_indigenous_nation(
             request_json
         )
         return (
-            res.IndigenousResponseNationSchema().dump(indigenous_nation),
+            res.IndigenousNationDetailsResponseSchema().dump(indigenous_nation),
             HTTPStatus.CREATED,
         )
 

@@ -22,6 +22,7 @@ import MyTasksList from "components/myTasks/MyTasksList";
 import Settings from "components/settings";
 import MyUpdates from "components/myUpdates";
 import MyCalendar from "components/myCalendar";
+import { ElevatedRoleEnum } from "models/elevated_role";
 
 const AuthenticatedRoutes = () => {
   const isAuthorized = useAppSelector((state) => state.user.isAuthorized);
@@ -41,22 +42,26 @@ const AuthenticatedRoutes = () => {
 
   return (
     <Routes>
-      <Route
-        path="/list-management/staffs"
-        element={
-          <MasterProvider key={"/list-management/staffs"}>
-            <StaffList />
-          </MasterProvider>
-        }
-      />
-      <Route
-        path="/list-management/projects"
-        element={
-          <MasterProvider key={"/list-management/projects"}>
-            <ProjectList />
-          </MasterProvider>
-        }
-      />
+      <Route element={<AuthGate allowed={[ROLES.EXTENDED_EDIT]} />}>
+        <Route
+          path="/list-management/staffs"
+          element={
+            <MasterProvider key={"/list-management/staffs"}>
+              <StaffList />
+            </MasterProvider>
+          }
+        />
+      </Route>
+      <Route element={<AuthGate allowed={[ROLES.EXTENDED_EDIT]} />}>
+        <Route
+          path="/list-management/projects"
+          element={
+            <MasterProvider key={"/list-management/projects"}>
+              <ProjectList />
+            </MasterProvider>
+          }
+        />
+      </Route>
       <Route
         path="/reports/referral-schedule"
         element={<AnticipatedEAOSchedule />}
@@ -67,21 +72,32 @@ const AuthenticatedRoutes = () => {
       <Route path="/reports/event-calendar" element={<EventCalendar />} />
       <Route path="/templates" element={<TemplateList />} />
       <Route
-        path="/list-management/first-nations"
         element={
-          <MasterProvider key={"/list-management/first-nations"}>
-            <IndigenousNationList />
-          </MasterProvider>
+          <AuthGate
+            allowed={[ROLES.EXTENDED_EDIT]}
+            elevatedAllowed={[ElevatedRoleEnum.MANAGE_FIRST_NATIONS]}
+          />
         }
-      />
-      <Route
-        path="/list-management/proponents"
-        element={
-          <MasterProvider key={"/list-management/proponents"}>
-            <ProponentList />
-          </MasterProvider>
-        }
-      />
+      >
+        <Route
+          path="/list-management/first-nations"
+          element={
+            <MasterProvider key={"/list-management/first-nations"}>
+              <IndigenousNationList />
+            </MasterProvider>
+          }
+        />
+      </Route>
+      <Route element={<AuthGate allowed={[ROLES.EXTENDED_EDIT]} />}>
+        <Route
+          path="/list-management/proponents"
+          element={
+            <MasterProvider key={"/list-management/proponents"}>
+              <ProponentList />
+            </MasterProvider>
+          }
+        />
+      </Route>
       <Route
         path="/works"
         element={

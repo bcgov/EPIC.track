@@ -49,6 +49,7 @@ class ProjectService:
     @classmethod
     def find(cls, project_id, exclude_deleted=False, as_of_date: date = None):
         """Find by project id."""
+        cls._check_auth(one_of_roles=[KeycloakRole.VIEW])
         query = db.session.query(Project).filter(Project.id == project_id)
         if exclude_deleted:
             query = query.filter(Project.is_deleted.is_(False))
@@ -62,6 +63,7 @@ class ProjectService:
     @classmethod
     def find_all(cls, with_works=False, is_active=None, staff_id=None):
         """Find all projects, optionally filtered by staff_id."""
+        cls._check_auth(one_of_roles=[KeycloakRole.VIEW])
         projects_query = db.session.query(Project)
 
         if with_works:

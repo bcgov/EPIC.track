@@ -35,6 +35,7 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
     @classmethod
     def find_all_by_params(cls, args: dict):
         """Find special fields by params"""
+        cls._check_can_view()
         current_app.logger.debug(f"find act sections by params {args}")
         return SpecialField.find_by_params(args)
 
@@ -137,6 +138,7 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
     @classmethod
     def find_by_id(cls, _id):
         """Find special field entry by id."""
+        cls._check_can_view()
         special_field = SpecialField.find_by_id(_id)
         return special_field
 
@@ -291,6 +293,14 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         if entity_ids:
             query = query.filter(SpecialField.entity_id.in_(entity_ids))
         return query.all()
+
+    @classmethod
+    def _check_can_view(cls):
+        """Check if user has view role or has elevated role"""
+        one_of_roles = (
+            KeycloakRole.VIEW.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles)
 
     @classmethod
     def _check_auth(cls, special_field=None, work_id=None):

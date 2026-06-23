@@ -24,7 +24,9 @@ from api.exceptions import ResourceExistsError, ResourceNotFoundError
 from api.models import Proponent, db
 from api.models.special_field import EntityEnum, SpecialField, FieldTypeEnum
 from api.models.staff import Staff
+from api.services import authorisation
 from api.services.special_field import SpecialFieldService
+from api.utils.roles import Role as KeycloakRole
 from api.utils.token_info import TokenInfo
 
 
@@ -39,12 +41,14 @@ class ProponentService:
     @classmethod
     def find_all_proponents(cls):
         """Find all active proponent"""
+        cls._check_auth(one_of_roles=[KeycloakRole.VIEW])
         proponents = Proponent.find_all(default_filters=False)
         return proponents
 
     @classmethod
     def find_by_id(cls, proponent_id, exclude_deleted=False):
         """Find by proponent id."""
+        cls._check_auth(one_of_roles=[KeycloakRole.VIEW])
         query = db.session.query(Proponent).filter(Proponent.id == proponent_id)
         if exclude_deleted:
             query = query.filter(Proponent.is_deleted.is_(False))
@@ -56,6 +60,7 @@ class ProponentService:
     @classmethod
     def create_proponent(cls, payload: dict):
         """Create a new proponent."""
+        cls._check_auth(one_of_roles=[KeycloakRole.EXTENDED_EDIT])
         exists = cls.check_existence(payload["name"])
         if exists:
             raise ResourceExistsError("Proponent with same name exists")
@@ -76,6 +81,7 @@ class ProponentService:
     @classmethod
     def update_proponent(cls, proponent_id: int, payload: dict):
         """Update existing proponent."""
+        cls._check_auth(one_of_roles=[KeycloakRole.EXTENDED_EDIT])
         exists = cls.check_existence(payload["name"], proponent_id)
         if exists:
             raise ResourceExistsError("Proponent with same name exists")
@@ -90,6 +96,7 @@ class ProponentService:
     @classmethod
     def delete_proponent(cls, proponent_id: int):
         """Delete proponent by id."""
+        cls._check_auth(one_of_roles=[KeycloakRole.EXTENDED_EDIT])
         proponent = Proponent.find_by_id(proponent_id)
         proponent.is_deleted = True
         proponent.save()
@@ -98,6 +105,7 @@ class ProponentService:
     @classmethod
     def import_proponents(cls, file: IO):
         """Import proponents"""
+        cls._check_auth(one_of_roles=[KeycloakRole.EXTENDED_EDIT])
         data = cls._read_excel(file)
         data["relationship_holder_id"] = data.apply(
             lambda x: x["relationship_holder_id"].lower()
@@ -190,3 +198,8 @@ class ProponentService:
         current_app.logger.info(f"Enabled {enabled_count} Proponents")
         # Remove updated proponents to avoid creating duplicates
         return data[~data["name"].isin(to_update)]
+
+    @classmethod
+    def _check_auth(cls, one_of_roles):
+        """Check if user has one of the given roles"""
+        authorisation.check_auth(one_of_roles=one_of_roles)

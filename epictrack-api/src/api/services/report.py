@@ -13,6 +13,8 @@
 # limitations under the License.
 """Service to manage Reports."""
 from api.reports import get_report_generator
+from api.services import authorisation
+from api.utils.roles import Role as KeycloakRole
 
 
 class ReportService:  # pylint: disable=too-few-public-methods, too-many-arguments
@@ -21,8 +23,14 @@ class ReportService:  # pylint: disable=too-few-public-methods, too-many-argumen
     @classmethod
     def generate_report(cls, report_type, report_date, return_type='json', filters=None, color_intensity=None, include_first_phase=False):
         """Generate a report"""
+        cls._check_auth(one_of_roles=[KeycloakRole.VIEW])
         report_generator = get_report_generator(report_type, filters, color_intensity)
         report, file_name = report_generator.generate_report(report_date, return_type, include_first_phase)
         if return_type == 'json':
             return report
         return report, file_name
+
+    @classmethod
+    def _check_auth(cls, one_of_roles):
+        """Check if user has one of the given roles"""
+        authorisation.check_auth(one_of_roles=one_of_roles)

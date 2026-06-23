@@ -13,7 +13,8 @@ class TestFindAllByParams:
     """Tests for find_all_by_params method."""
 
     @patch("api.services.special_field.SpecialField")
-    def test_finds_special_fields_by_params(self, mock_model):
+    @patch("api.services.special_field.authorisation.check_auth")
+    def test_finds_special_fields_by_params(self, mock_check_auth, mock_model):
         """Test finding special fields by parameters."""
         params = {"entity": "WORK", "entity_id": 10}
         mock_fields = [MagicMock(id=1), MagicMock(id=2)]
@@ -288,7 +289,8 @@ class TestFindById:
     """Tests for find_by_id method."""
 
     @patch("api.services.special_field.SpecialField")
-    def test_finds_special_field_by_id(self, mock_model):
+    @patch("api.services.special_field.authorisation.check_auth")
+    def test_finds_special_field_by_id(self, mock_check_auth, mock_model):
         """Test finding special field by ID."""
         special_field_id = 5
         mock_field = MagicMock(id=special_field_id)

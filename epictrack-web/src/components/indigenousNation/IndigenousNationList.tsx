@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { debounce, isEqual } from "lodash";
-import { AxiosError } from "axios";
 import { Avatar, Button, Grid, Stack, Typography } from "@mui/material";
 import { ElevatedRoleEnum } from "models/elevated_role";
 import { FirstNation } from "models/firstNation";
@@ -16,7 +15,6 @@ import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { showNotification } from "components/shared/notificationProvider";
 import UserMenu from "components/shared/userMenu/UserMenu";
 import { ETCaption2, ETGridTitle, ETPageContainer } from "../shared";
-import staffElevatedRoleService from "services/staffElevatedRoleService/staffElevatedRoleService";
 import staffService from "services/staffService/staffService";
 import IndigenousNationService from "services/indigenousNationService/indigenousNationService";
 import {
@@ -36,7 +34,6 @@ const FirstNationList = () => {
     firstNationListColumnFiltersCacheKey,
     [],
   );
-  const [elevatedRoles, setElevatedRoles] = useState<number[]>([]);
   const [firstNationId, setFirstNationId] = useState<number>();
   const [firstNations, setFirstNations] = useState<FirstNation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +44,8 @@ const FirstNationList = () => {
     null,
   );
 
-  const { roles, staffId } = useAppSelector((state) => state.user.userDetail);
+  const { roles } = useAppSelector((state) => state.user.userDetail);
+  const elevatedRoles = useAppSelector((state) => state.user.elevatedRoles);
   const canEdit = hasPermission({
     roles,
     elevatedRoles,
@@ -59,7 +57,7 @@ const FirstNationList = () => {
   const fetchFirstNations = async () => {
     setLoading(true);
     try {
-      const response = await IndigenousNationService.getAll();
+      const response = await IndigenousNationService.getAllWithDetails();
       setFirstNations(response.data || []);
       setLoading(false);
     } catch (error) {
@@ -70,33 +68,6 @@ const FirstNationList = () => {
   useEffect(() => {
     fetchFirstNations();
   }, []);
-
-  useEffect(() => {
-    if (!staffId) {
-      setElevatedRoles([]);
-      return;
-    }
-
-    const fetchStaffElevatedRoles = async () => {
-      try {
-        const response =
-          await staffElevatedRoleService.getActiveStaffElevatedRoleByStaffId(
-            String(staffId),
-          );
-        setElevatedRoles(response.data.map((role) => role.elevated_role_id));
-      } catch (error) {
-        if ((error as AxiosError).response?.status === 404) {
-          setElevatedRoles([]);
-        } else {
-          showNotification("Could not load Additional Roles", {
-            type: "error",
-          });
-        }
-      }
-    };
-
-    fetchStaffElevatedRoles();
-  }, [staffId]);
 
   const orgTypes = useMemo(
     () =>

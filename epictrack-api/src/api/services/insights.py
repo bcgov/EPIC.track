@@ -16,6 +16,8 @@ from flask import current_app
 
 from api.insights import get_insight_generator
 from api.insights.insight_protocol import InsightGenerator
+from api.services import authorisation
+from api.utils.roles import Role as KeycloakRole
 
 
 class InsightService:  # pylint:disable=too-few-public-methods
@@ -24,6 +26,7 @@ class InsightService:  # pylint:disable=too-few-public-methods
     @classmethod
     def fetch_work_insights(cls, group_by: str, filters: list = None, staff_id: int = None):
         """Fetch work insights"""
+        cls._check_auth(one_of_roles=[KeycloakRole.VIEW])
         current_app.logger.debug(f"Fetch work insights {group_by = } {filters = } {staff_id = }")
         insight_generator: InsightGenerator = get_insight_generator(
             resource="works", group_by=group_by
@@ -34,6 +37,7 @@ class InsightService:  # pylint:disable=too-few-public-methods
     @classmethod
     def fetch_assessment_work_insights(cls, group_by: str, staff_id: int = None):
         """Fetch assessment work insights"""
+        cls._check_auth(one_of_roles=[KeycloakRole.VIEW])
         current_app.logger.debug(f"Fetch assessment work insights {group_by = }")
         insight_generator: InsightGenerator = get_insight_generator(
             resource="works", group_by=f"assessment_by_{group_by}"
@@ -44,6 +48,7 @@ class InsightService:  # pylint:disable=too-few-public-methods
     @classmethod
     def fetch_project_insights(cls, group_by: str, filters: list = None, staff_id: int = None):
         """Fetch project insights"""
+        cls._check_auth(one_of_roles=[KeycloakRole.VIEW])
         current_app.logger.debug(f"Fetch project insights {group_by = } {filters = } {staff_id = }")
         insight_generator: InsightGenerator = get_insight_generator(
             resource="projects", group_by=group_by
@@ -55,9 +60,15 @@ class InsightService:  # pylint:disable=too-few-public-methods
     # pylint: disable=too-many-arguments
     def fetch_phase_insights(cls, group_by: str, filters: list = None, staff_id: int = None, is_underage_toggled: bool = False):
         """Fetch phase insights"""
+        cls._check_auth(one_of_roles=[KeycloakRole.VIEW])
         current_app.logger.debug(f"Fetch phase insights {group_by = } {filters = } {staff_id = } {is_underage_toggled = }")
         insight_generator: InsightGenerator = get_insight_generator(
             resource="phases", group_by=group_by
         )
         insights = insight_generator().fetch_data(filters=filters, staff_id=staff_id, is_underage_toggled=is_underage_toggled)
         return insights
+
+    @classmethod
+    def _check_auth(cls, one_of_roles):
+        """Check if user has one of the given roles"""
+        authorisation.check_auth(one_of_roles=one_of_roles)

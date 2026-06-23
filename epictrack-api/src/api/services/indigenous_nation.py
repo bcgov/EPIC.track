@@ -35,17 +35,20 @@ class IndigenousNationService:
     @classmethod
     def check_existence(cls, name, indigenous_nation_id=None):
         """Checks if an indigenous nation exists with given name"""
+        cls._check_can_view()
         return IndigenousNation.check_existence(name, indigenous_nation_id)
 
     @classmethod
     def find_all_indigenous_nations(cls, is_active):
         """Find all active indigenous nations"""
+        cls._check_can_view()
         indigenous_nations = IndigenousNation.find_all(default_filters=is_active)
         return indigenous_nations
 
     @classmethod
     def find(cls, indigenous_nation_id, exclude_deleted=False):
         """Find by indigenous nation id."""
+        cls._check_can_view()
         query = db.session.query(IndigenousNation).filter(IndigenousNation.id == indigenous_nation_id)
         if exclude_deleted:
             query = query.filter(IndigenousNation.is_deleted.is_(False))
@@ -188,6 +191,15 @@ class IndigenousNationService:
         return data[~data["name"].isin(to_update)]
 
     @classmethod
+    def _check_can_view(cls):
+        """Check if user has view role or has elevated role"""
+        one_of_roles = (
+            ElevatedRole.MANAGE_FIRST_NATIONS.value,
+            KeycloakRole.VIEW.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles)
+
+    @classmethod
     def _check_can_edit(cls):
         """Check if user has edit role or has elevated role"""
         one_of_roles = (
@@ -207,7 +219,7 @@ class IndigenousNationService:
 
     @classmethod
     def _check_can_delete(cls):
-        """Check if user has create role or has elevated role"""
+        """Check if user has delete role or has elevated role"""
         one_of_roles = (
             ElevatedRole.MANAGE_FIRST_NATIONS.value,
             KeycloakRole.DELETE.value,

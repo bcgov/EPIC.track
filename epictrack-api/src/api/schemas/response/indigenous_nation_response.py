@@ -8,10 +8,23 @@ from api.schemas.response.pip_org_type import PIPOrgTypeSchema
 from api.schemas.staff import StaffSchema
 
 
-class IndigenousResponseNationSchema(
+class IndigenousNationResponseSchema(
     AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Indigenous nation schema class"""
+
+    class Meta(AutoSchemaBase.Meta):
+        """Meta information"""
+
+        model = IndigenousNation
+        include_fk = False
+        unknown = EXCLUDE
+
+
+class IndigenousNationDetailsResponseSchema(
+    AutoSchemaBase
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """Indigenous nation details schema class"""
 
     class Meta(AutoSchemaBase.Meta):
         """Meta information"""
@@ -54,5 +67,5 @@ class WorkIndigenousNationResponseSchema(
         include_fk = True
         unknown = EXCLUDE
 
-    indigenous_nation = fields.Nested(IndigenousResponseNationSchema, dump_only=True)
+    indigenous_nation = fields.Nested(IndigenousNationResponseSchema, dump_only=True)
     indigenous_consultation_level = fields.Nested(IndigenousNationConsultationResponseSchema, dump_only=True)

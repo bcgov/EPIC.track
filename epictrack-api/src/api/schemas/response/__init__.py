@@ -22,7 +22,8 @@ from .event_response import (
 )
 from .event_template_response import EventTemplateResponseSchema
 from .indigenous_nation_response import (
-    IndigenousResponseNationSchema,
+    IndigenousNationResponseSchema,
+    IndigenousNationDetailsResponseSchema,
     WorkIndigenousNationResponseSchema,
     IndigenousNationConsultationResponseSchema,
 )

@@ -12,6 +12,13 @@ class IndigenousNationService implements ServiceBase {
     );
   }
 
+  async getAllWithDetails(is_active = false) {
+    return await http.GetRequest<FirstNation[]>(
+      Endpoints.IndigenousNations.INDIGENOUS_NATIONS_DETAILS,
+      { is_active },
+    );
+  }
+
   async getById(id: string) {
     return await http.GetRequest<FirstNation>(
       Endpoints.IndigenousNations.INDIGENOUS_NATIONS + `/${id}`,
@@ -20,7 +27,7 @@ class IndigenousNationService implements ServiceBase {
 
   async create(data: MasterBase) {
     return await http.PostRequest(
-      Endpoints.IndigenousNations.INDIGENOUS_NATIONS,
+      Endpoints.IndigenousNations.INDIGENOUS_NATIONS_DETAILS,
       JSON.stringify(data),
     );
   }
