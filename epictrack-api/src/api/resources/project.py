@@ -160,7 +160,7 @@ class ProjectFirstNations(Resource):
             project_id, work_id, work_type_id
         )
         return (
-            res.IndigenousResponseNationSchema(many=True).dump(first_nations),
+            res.IndigenousNationDetailsResponseSchema(many=True).dump(first_nations),
             HTTPStatus.OK,
         )
 

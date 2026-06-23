@@ -13,7 +13,8 @@ class TestCheckExistence:
     """Tests for check_existence method."""
 
     @patch("api.services.work.Work")
-    def test_checks_work_existence_by_title(self, mock_work_model):
+    @patch("api.services.work.authorisation.check_auth")
+    def test_checks_work_existence_by_title(self, mock_check_auth, mock_work_model):
         """Test checking if work exists by title."""
         title = "Test Work"
         work_id = None
@@ -29,7 +30,8 @@ class TestFindAllWorks:
     """Tests for find_all_works method."""
 
     @patch("api.services.work.Work")
-    def test_finds_all_non_deleted_works(self, mock_work_model):
+    @patch("api.services.work.authorisation.check_auth")
+    def test_finds_all_non_deleted_works(self, mock_check_auth, mock_work_model):
         """Test finding all non-deleted works."""
         mock_works = [MagicMock(id=1), MagicMock(id=2)]
         mock_work_model.find_all.return_value = mock_works
@@ -40,7 +42,8 @@ class TestFindAllWorks:
         mock_work_model.find_all.assert_called_once_with(False)
 
     @patch("api.services.work.Work")
-    def test_finds_only_active_works(self, mock_work_model):
+    @patch("api.services.work.authorisation.check_auth")
+    def test_finds_only_active_works(self, mock_check_auth, mock_work_model):
         """Test finding only active works."""
         mock_works = [MagicMock(id=1, is_active=True)]
         mock_work_model.find_all.return_value = mock_works
@@ -55,7 +58,8 @@ class TestGetWorksByStaff:
     """Tests for get_works_by_staff method."""
 
     @patch("api.services.work.Work")
-    def test_gets_all_works_when_no_staff_id(self, mock_work_model):
+    @patch("api.services.work.authorisation.check_auth")
+    def test_gets_all_works_when_no_staff_id(self, mock_check_auth, mock_work_model):
         """Test getting all active works when no staff filter."""
         mock_query = MagicMock()
         mock_work_model.query = mock_query
@@ -68,7 +72,8 @@ class TestGetWorksByStaff:
         mock_query.join.assert_not_called()
 
     @patch("api.services.work.Work")
-    def test_filters_works_by_staff_id(self, mock_work_model):
+    @patch("api.services.work.authorisation.check_auth")
+    def test_filters_works_by_staff_id(self, mock_check_auth, mock_work_model):
         """Test filtering works by staff ID."""
         staff_id = 5
         mock_query = MagicMock()
@@ -187,7 +192,8 @@ class TestFindAllocatedResources:
     @patch("api.services.work.aliased")
     @patch("api.services.work.Staff")
     @patch("api.services.work.Work")
-    def test_finds_allocated_resources_active(self, mock_work_model, mock_staff_model, mock_aliased):
+    @patch("api.services.work.authorisation.check_auth")
+    def test_finds_allocated_resources_active(self, mock_check_auth, mock_work_model, mock_staff_model, mock_aliased):
         """Test finding allocated resources for active works."""
         # Mock aliased to return mock staff objects
         mock_lead = MagicMock()

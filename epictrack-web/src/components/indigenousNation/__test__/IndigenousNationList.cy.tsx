@@ -37,7 +37,7 @@ const endpoints: Endpoint[] = [
   {
     name: "getFirstNations",
     method: "GET",
-    url: `${AppConfig.apiUrl}indigenous-nations?is_active=*`,
+    url: `${AppConfig.apiUrl}indigenous-nations/details?is_active=*`,
     response: {
       body: firstNations,
     },
@@ -45,7 +45,7 @@ const endpoints: Endpoint[] = [
   {
     name: "getFirstNationsOptions",
     method: "OPTIONS",
-    url: `${AppConfig.apiUrl}indigenous-nations?is_active=*`,
+    url: `${AppConfig.apiUrl}indigenous-nations/details?is_active=*`,
   },
   {
     name: "getActiveStaffsOptions",

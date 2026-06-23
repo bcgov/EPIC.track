@@ -93,17 +93,20 @@ class WorkService:  # pylint: disable=too-many-public-methods
     @classmethod
     def check_existence(cls, title, work_id=None):
         """Checks if a work exists for a given title"""
+        cls._check_can_view()
         return Work.check_existence(title=title, work_id=work_id)
 
     @classmethod
     def find_all_works(cls, is_active=False):
         """Find all non-deleted works"""
+        cls._check_can_view()
         works = Work.find_all(is_active)
         return works
 
     @classmethod
     def get_works_by_staff(cls, staff_id: Optional[int] = None) -> List[Work]:
         """Fetch all active, non-deleted works and filter by staff_id if provided."""
+        cls._check_can_view()
         query = Work.query.filter(
             Work.is_active.is_(True),
             Work.is_deleted.is_(False)
@@ -218,6 +221,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
     @classmethod
     def find_allocated_resources(cls, is_active=None):
         """Find all allocated resources"""
+        cls._check_can_view()
         lead = aliased(Staff)
         epd = aliased(Staff)
         if is_active is None:
@@ -1116,6 +1120,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
         """Get all work types"""
         work_types = WorkType.find_all()
         return WorkTypeSchema(many=True).dump(work_types)
+
+    @classmethod
+    def _check_can_view(cls):
+        """Check if user has view role"""
+        one_of_roles = [KeycloakRole.VIEW.value]
+        authorisation.check_auth(one_of_roles=one_of_roles)
 
     @classmethod
     def _check_can_edit_or_team_member_auth(cls, work_id: int):

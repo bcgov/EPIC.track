@@ -28,6 +28,7 @@ const Endpoints = {
   },
   IndigenousNations: {
     INDIGENOUS_NATIONS: "indigenous-nations",
+    INDIGENOUS_NATIONS_DETAILS: "indigenous-nations/details",
   },
   IndigenousNationsConsultationLevels: {
     GET_ALL: "indigenous-nations-consultation-levels",

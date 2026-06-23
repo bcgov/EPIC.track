@@ -9,7 +9,8 @@ class TestGenerateReport:
     """Tests for generate_report method."""
 
     @patch("api.services.report.get_report_generator")
-    def test_generates_json_report(self, mock_get_generator):
+    @patch("api.services.report.ReportService._check_auth")
+    def test_generates_json_report(self, mock_check_auth, mock_get_generator):
         """Test generating JSON report."""
         report_type = "work_status"
         report_date = "2024-01-15"
@@ -26,7 +27,8 @@ class TestGenerateReport:
         mock_generator.generate_report.assert_called_once_with(report_date, "json", False)
 
     @patch("api.services.report.get_report_generator")
-    def test_generates_excel_report(self, mock_get_generator):
+    @patch("api.services.report.ReportService._check_auth")
+    def test_generates_excel_report(self, mock_check_auth, mock_get_generator):
         """Test generating Excel report."""
         report_type = "project_summary"
         report_date = "2024-01-15"
@@ -44,7 +46,8 @@ class TestGenerateReport:
         assert filename == "report.xlsx"
 
     @patch("api.services.report.get_report_generator")
-    def test_passes_filters_to_generator(self, mock_get_generator):
+    @patch("api.services.report.ReportService._check_auth")
+    def test_passes_filters_to_generator(self, mock_check_auth, mock_get_generator):
         """Test passing filters to report generator."""
         report_type = "work_status"
         report_date = "2024-01-15"
@@ -59,7 +62,8 @@ class TestGenerateReport:
         mock_get_generator.assert_called_once_with(report_type, filters, None)
 
     @patch("api.services.report.get_report_generator")
-    def test_passes_color_intensity(self, mock_get_generator):
+    @patch("api.services.report.ReportService._check_auth")
+    def test_passes_color_intensity(self, mock_check_auth, mock_get_generator):
         """Test passing color intensity to report generator."""
         report_type = "timeline"
         report_date = "2024-01-15"
@@ -76,7 +80,8 @@ class TestGenerateReport:
         mock_get_generator.assert_called_once_with(report_type, None, color_intensity)
 
     @patch("api.services.report.get_report_generator")
-    def test_passes_include_first_phase_flag(self, mock_get_generator):
+    @patch("api.services.report.ReportService._check_auth")
+    def test_passes_include_first_phase_flag(self, mock_check_auth, mock_get_generator):
         """Test passing include_first_phase flag to generator."""
         report_type = "phase_report"
         report_date = "2024-01-15"
@@ -92,7 +97,8 @@ class TestGenerateReport:
         mock_generator.generate_report.assert_called_once_with(report_date, "json", True)
 
     @patch("api.services.report.get_report_generator")
-    def test_default_return_type_is_json(self, mock_get_generator):
+    @patch("api.services.report.ReportService._check_auth")
+    def test_default_return_type_is_json(self, mock_check_auth, mock_get_generator):
         """Test default return type is JSON."""
         report_type = "summary"
         report_date = "2024-01-15"
@@ -108,8 +114,9 @@ class TestGenerateReport:
         assert result == mock_report_data
         mock_generator.generate_report.assert_called_once_with(report_date, "json", False)
 
+    @patch("api.services.report.ReportService._check_auth")
     @patch("api.services.report.get_report_generator")
-    def test_generates_pdf_report(self, mock_get_generator):
+    def test_generates_pdf_report(self, mock_get_generator, mock_check_auth):
         """Test generating PDF report."""
         report_type = "detailed_report"
         report_date = "2024-01-15"
@@ -127,7 +134,8 @@ class TestGenerateReport:
         assert filename == "report.pdf"
 
     @patch("api.services.report.get_report_generator")
-    def test_all_parameters_combined(self, mock_get_generator):
+    @patch("api.services.report.ReportService._check_auth")
+    def test_all_parameters_combined(self, mock_check_auth, mock_get_generator):
         """Test with all parameters provided."""
         report_type = "comprehensive"
         report_date = "2024-06-01"

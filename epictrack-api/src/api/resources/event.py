@@ -110,7 +110,7 @@ class Event(Resource):
     @auth.require
     @profiletime
     def get(event_id):
-        """Endpoint to update a milestone event"""
+        """Endpoint to get a milestone event"""
         req.MilestoneEventPathParameterSchema().load(request.view_args)
         milestone_event = EventService.find_milestone_event(event_id)
         return res.EventResponseSchema().dump(milestone_event), HTTPStatus.OK

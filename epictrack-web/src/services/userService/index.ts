@@ -1,10 +1,13 @@
 import Keycloak from "keycloak-js";
-import { Action, AnyAction, Dispatch } from "redux";
+import { Action, Dispatch } from "redux";
+import { AppDispatch } from "../../store";
 import {
   userToken,
   userAuthentication,
   userDetails,
   userAuthorization,
+  fetchElevatedRoles,
+  noElevatedRoles,
 } from "./userSlice";
 import { AppConfig } from "../../config";
 import http from "../../apiManager/http-request-handler";
@@ -60,7 +63,7 @@ const refreshToken = (dispatch: Dispatch<Action>) => {
 /**
  *  Initializes Keycloak instance.
  */
-const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
+const initKeycloak = async (dispatch: AppDispatch) => {
   if (!KeycloakData) {
     // Initialize Keycloak only if it's not already initialized
     KeycloakData = new Keycloak({
@@ -84,6 +87,7 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
 
     const userInfo: UserInfo = (await KeycloakData.loadUserInfo()) as UserInfo;
     let staffProfile;
+    let hasStaffProfile = true;
     try {
       const staffResult = await staffService.getByEmail(userInfo["email"]);
       if (staffResult.status === 200) {
@@ -92,6 +96,7 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
     } catch (e) {
       if ((e as any).response?.status === 404) {
         console.log("Staff profile not found for current user.");
+        hasStaffProfile = false;
       } else console.log(e);
     }
     const realmAccessRoles =
@@ -122,6 +127,12 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
     dispatch(userDetails(userDetail));
     dispatch(userToken(KeycloakData.token));
     dispatch(userAuthentication(Boolean(KeycloakData.authenticated)));
+    // only fetch if we actually found a staff profile
+    if (hasStaffProfile && userDetail.staffId) {
+      dispatch(fetchElevatedRoles(String(userDetail.staffId)));
+    } else {
+      dispatch(noElevatedRoles());
+    }
     refreshToken(dispatch);
     updateLastActiveTime(userDetail.staffId);
   } catch (err) {

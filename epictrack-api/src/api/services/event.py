@@ -398,6 +398,10 @@ class EventService:
     @classmethod
     def find_milestone_event(cls, event_id: int) -> Event:
         """Get the milestone event"""
+        one_of_roles = (
+            KeycloakRole.VIEW.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles)
         m_event = Event.find_by_id(event_id)
         if not m_event or not m_event.is_active:
             raise ResourceNotFoundError("Milestone event either not found or inactive")
@@ -406,6 +410,10 @@ class EventService:
     @classmethod
     def find_milestone_progress_by_work_phase_id(cls, work_phase_id: int) -> float:
         """Find the percentage of milestone events completed for given work_id"""
+        one_of_roles = (
+            KeycloakRole.VIEW.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles)
         events_query = Event.query.join(
             EventConfiguration,
             and_(

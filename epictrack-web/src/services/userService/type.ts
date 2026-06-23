@@ -7,6 +7,8 @@ export interface UserState {
   authentication: UserAuthentication;
   isAuthorized: boolean;
   userDetail: UserDetail;
+  elevatedRoles: number[];
+  elevatedRolesStatus: "idle" | "loading" | "succeeded" | "failed";
 }
 export class UserDetail {
   sub: string;

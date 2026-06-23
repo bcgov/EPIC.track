@@ -10,7 +10,7 @@ const endpoints: Endpoint[] = [
   {
     name: "getAllFirstNations",
     method: "GET",
-    url: `${AppConfig.apiUrl}indigenous-nations*`,
+    url: `${AppConfig.apiUrl}indigenous-nations/details*`,
     response: {
       body: [
         {

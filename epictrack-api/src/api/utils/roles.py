@@ -19,6 +19,7 @@ class Role(Enum):
     """User Role."""
 
     # Keycloak Based roles
+    VIEW = 'view'
     CREATE = 'create'
     DELETE = 'delete'
     EDIT = 'edit'
