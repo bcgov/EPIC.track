@@ -38,7 +38,8 @@ class TestEventServiceInit:
 class TestEventServiceFindMilestoneEvent:
     """Test find_milestone_event method."""
 
-    def test_find_milestone_event_not_found(self, app, db):
+    @patch("api.services.event.authorisation.check_auth")
+    def test_find_milestone_event_not_found(self, app, db, mock_check_auth):
         """Test finding non-existent milestone event raises error."""
         with app.app_context():
             g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
@@ -48,7 +49,8 @@ class TestEventServiceFindMilestoneEvent:
 
             assert "not found or inactive" in str(exc_info.value)
 
-    def test_find_milestone_event_inactive(self, app, db):
+    @patch("api.services.event.authorisation.check_auth")
+    def test_find_milestone_event_inactive(self, app, db, mock_check_auth):
         """Test finding inactive milestone event raises error."""
         with app.app_context():
             g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
@@ -61,7 +63,8 @@ class TestEventServiceFindMilestoneEvent:
                 with pytest.raises(ResourceNotFoundError):
                     EventService.find_milestone_event(1)
 
-    def test_find_milestone_event_success(self, app, db):
+    @patch("api.services.event.authorisation.check_auth")
+    def test_find_milestone_event_success(self, app, db, mock_check_auth):
         """Test finding active milestone event succeeds."""
         with app.app_context():
             g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
@@ -177,7 +180,8 @@ class TestEventServiceIsLastPhase:
 class TestEventServiceFindMilestoneProgress:
     """Test find_milestone_progress_by_work_phase_id method."""
 
-    def test_find_milestone_progress_no_events(self, app, db):
+    @patch("api.services.event.authorisation.check_auth")
+    def test_find_milestone_progress_no_events(self, mock_check_auth, app, db):
         """Test returns 0 or error when no events exist."""
         with app.app_context():
             g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role

@@ -17,7 +17,6 @@ from copy import copy
 from http import HTTPStatus
 from pathlib import Path
 from urllib.parse import urljoin
-import pytest
 
 
 from werkzeug.datastructures import FileStorage
@@ -25,8 +24,6 @@ from werkzeug.datastructures import FileStorage
 from tests.utilities.factory_scenarios import TestFirstNation, TestJwtClaims
 from tests.utilities.factory_utils import factory_auth_header, factory_first_nation_model, factory_pip_org_type_model, factory_staff_model
 
-
-pytestmark = pytest.mark.usefixtures("mock_check_auth")
 
 API_BASE_URL = "/api/v1/"
 
