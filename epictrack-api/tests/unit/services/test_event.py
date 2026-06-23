@@ -39,7 +39,7 @@ class TestEventServiceFindMilestoneEvent:
     """Test find_milestone_event method."""
 
     @patch("api.services.event.authorisation.check_auth")
-    def test_find_milestone_event_not_found(self, app, db, mock_check_auth):
+    def test_find_milestone_event_not_found(self, mock_check_auth, app, db):
         """Test finding non-existent milestone event raises error."""
         with app.app_context():
             g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
@@ -50,7 +50,7 @@ class TestEventServiceFindMilestoneEvent:
             assert "not found or inactive" in str(exc_info.value)
 
     @patch("api.services.event.authorisation.check_auth")
-    def test_find_milestone_event_inactive(self, app, db, mock_check_auth):
+    def test_find_milestone_event_inactive(self, mock_check_auth, app, db, ):
         """Test finding inactive milestone event raises error."""
         with app.app_context():
             g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
@@ -64,7 +64,7 @@ class TestEventServiceFindMilestoneEvent:
                     EventService.find_milestone_event(1)
 
     @patch("api.services.event.authorisation.check_auth")
-    def test_find_milestone_event_success(self, app, db, mock_check_auth):
+    def test_find_milestone_event_success(self, mock_check_auth, app, db):
         """Test finding active milestone event succeeds."""
         with app.app_context():
             g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
