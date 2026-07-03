@@ -21,6 +21,7 @@ from api.schemas import request as req
 from api.schemas import response as res
 from api.services import IndigenousNationService
 from api.utils import auth, profiletime
+from api.utils.file_upload import validate_excel_upload
 from api.utils.str import natural_sort
 from api.utils.util import cors_preflight
 
@@ -168,6 +169,6 @@ class ImportIndigenousNations(Resource):
     @profiletime
     def post():
         """Import indigenous nations"""
-        file = request.files["file"]
+        file = validate_excel_upload(request.files["file"])
         response = IndigenousNationService.import_indigenous_nations(file)
         return response, HTTPStatus.CREATED

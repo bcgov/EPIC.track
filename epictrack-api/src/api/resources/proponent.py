@@ -21,6 +21,7 @@ from api.schemas import request as req
 from api.schemas import response as res
 from api.services import ProponentService
 from api.utils import auth, profiletime
+from api.utils.file_upload import validate_excel_upload
 from api.utils.util import cors_preflight
 
 
@@ -121,6 +122,6 @@ class ImportProponents(Resource):
     @profiletime
     def post():
         """Import proponents"""
-        file = request.files["file"]
+        file = validate_excel_upload(request.files["file"])
         response = ProponentService.import_proponents(file)
         return response, HTTPStatus.CREATED

@@ -18,6 +18,7 @@ from flask_restx import Namespace, Resource, cors
 
 from api.services import EventTemplateService
 from api.utils import auth, profiletime
+from api.utils.file_upload import validate_excel_upload
 from api.utils.util import cors_preflight
 
 
@@ -35,6 +36,6 @@ class EventTemplates(Resource):
     @profiletime
     def post():
         """Create new task template"""
-        template_file = request.files["event_template"]
+        template_file = validate_excel_upload(request.files["event_template"])
         EventTemplateService.import_events_template(template_file)
         return "Event template processing started", HTTPStatus.CREATED
