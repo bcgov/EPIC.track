@@ -108,6 +108,10 @@ class _Config():  # pylint: disable=too-few-public-methods
     TESTING = False
     DEBUG = True
 
+    # Reject oversized request bodies before they reach any handler; the Excel
+    # import endpoints buffer uploads fully into memory, so this must stay bounded.
+    MAX_CONTENT_LENGTH = int(_get_config('MAX_CONTENT_LENGTH', default=str(20 * 1024 * 1024)))
+
     CACHE_TYPE = constants.CACHE_TYPE
     CACHE_DEFAULT_TIMEOUT = constants.CACHE_DEFAULT_TIMEOUT
 

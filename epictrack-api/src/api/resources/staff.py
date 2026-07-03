@@ -22,6 +22,7 @@ from api.schemas import request as req
 from api.schemas import response as res
 from api.services import StaffService
 from api.utils import auth, profiletime
+from api.utils.file_upload import validate_excel_upload
 from api.utils.util import cors_preflight
 
 API = Namespace("staffs", description="Staffs")
@@ -170,6 +171,6 @@ class ImportStaffs(Resource):
     @profiletime
     def post():
         """Import staffs"""
-        file = request.files["file"]
+        file = validate_excel_upload(request.files["file"])
         response = StaffService.import_staffs(file)
         return response, HTTPStatus.CREATED

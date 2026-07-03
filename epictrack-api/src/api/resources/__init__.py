@@ -21,6 +21,8 @@ All services have 2 defaults sets of endpoints:
 That are used to expose operational health information about the service, and meta information.
 """
 
+import os
+
 from flask import Blueprint
 
 from .act_section import API as ACT_SECTION_API
@@ -81,29 +83,41 @@ __all__ = ("API_BLUEPRINT", "OPS_BLUEPRINT")
 # This will add the Authorize button to the swagger docs
 AUTHORIZATIONS = {"apikey": {"type": "apiKey", "in": "header", "name": "Authorization"}}
 
+# Swagger UI/spec exposes the entire API surface with no auth of its own, so only
+# serve it in development/testing; production and staging must not leak this.
+# Note: flask-restx's Api.__init__ calls self.init_app(app) WITHOUT forwarding
+# **kwargs, so `add_specs` passed to the constructor is silently ignored - it
+# only takes effect when passed to init_app() directly. `doc` alone would only
+# hide the HTML UI page and leave /swagger.json reachable. `doc` must be a URL
+# path string (its default is "/") when enabled - passing True crashes routing.
+SWAGGER_UI_ENABLED = os.getenv('FLASK_ENV', 'production') in ('development', 'testing')
+SWAGGER_DOC_PATH = "/" if SWAGGER_UI_ENABLED else False
+
 OPS_BLUEPRINT = Blueprint("API_OPS", __name__, url_prefix="/ops")
 
 API_OPS = Api(
-    OPS_BLUEPRINT,
     title="Service OPS API",
     version="1.0",
     description="The Core API for the Reports System",
     security=["apikey"],
     authorizations=AUTHORIZATIONS,
+    doc=SWAGGER_DOC_PATH,
 )
+API_OPS.init_app(OPS_BLUEPRINT, add_specs=SWAGGER_UI_ENABLED)
 
 API_OPS.add_namespace(OPS_API, path="/")
 
 API_BLUEPRINT = Blueprint("API", __name__, url_prefix="/api/v1")
 
 API = Api(
-    API_BLUEPRINT,
     title="EAO Reports API",
     version="1.0",
     description="The Core API for the Reports System",
     security=["apikey"],
     authorizations=AUTHORIZATIONS,
+    doc=SWAGGER_DOC_PATH,
 )
+API.init_app(API_BLUEPRINT, add_specs=SWAGGER_UI_ENABLED)
 
 API.add_namespace(META_API, path="/meta")
 API.add_namespace(CODES_API, path="/codes")

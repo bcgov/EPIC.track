@@ -22,6 +22,7 @@ from api.schemas import request as req
 from api.schemas import response as res
 from api.services import TaskService
 from api.utils import auth, profiletime
+from api.utils.file_upload import validate_excel_upload
 from api.utils.util import cors_preflight
 
 
@@ -164,7 +165,7 @@ class Templates(Resource):
     @profiletime
     def post(work_phase_id):
         """Create new task template"""
-        template_file = request.files["template_file"]
+        template_file = validate_excel_upload(request.files["template_file"])
         task_template = TaskService.create_task_events_from_sheet(work_phase_id, template_file)
         return res.TaskTemplateResponseSchema().dump(task_template), HTTPStatus.CREATED
 

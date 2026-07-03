@@ -22,6 +22,7 @@ from api.schemas import response as res
 from api.services import TaskTemplateService
 from api.utils import auth, constants, profiletime
 from api.utils.caching import AppCache
+from api.utils.file_upload import validate_excel_upload
 from api.utils.util import cors_preflight
 
 
@@ -53,7 +54,7 @@ class Templates(Resource):
     def post():
         """Create new task template"""
         request_json = req.TaskTemplateBodyParameterSchema().load(request.form)
-        template_file = request.files["template_file"]
+        template_file = validate_excel_upload(request.files["template_file"])
         task_template = TaskTemplateService.create_task_template(request_json, template_file)
         return res.TaskTemplateResponseSchema().dump(task_template), HTTPStatus.CREATED
 

@@ -23,6 +23,7 @@ from api.schemas.work_type import WorkTypeSchema
 from api.services import ProjectService
 from api.utils import auth, constants, profiletime
 from api.utils.caching import AppCache
+from api.utils.file_upload import validate_excel_upload
 from api.utils.util import cors_preflight
 
 
@@ -196,7 +197,7 @@ class ImportProjects(Resource):
     @profiletime
     def post():
         """Import projects"""
-        file = request.files["file"]
+        file = validate_excel_upload(request.files["file"])
         response = ProjectService.import_projects(file)
         return response, HTTPStatus.CREATED
 
