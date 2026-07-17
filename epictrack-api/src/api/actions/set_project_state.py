@@ -49,5 +49,5 @@ class SetProjectState(ActionFactory):
             "field_type": FieldTypeEnum.INTEGER.value,
         }
         SpecialFieldService.create_special_field_entry(
-            project_state_special_field_data, commit=False
+            project_state_special_field_data, commit=False, work_id=source_event.work_id
         )
