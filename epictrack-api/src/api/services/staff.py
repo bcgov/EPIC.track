@@ -24,13 +24,20 @@ from api.models import Staff, db
 from api.models.position import Position
 from api.models.special_field import EntityEnum, FieldTypeEnum, SpecialField
 from api.schemas.response import StaffResponseSchema
+from api.services import authorisation
 from api.services.special_field import SpecialFieldService
+from api.utils.roles import Role
 from api.utils.token_info import TokenInfo
 from api.services.keycloak import KeycloakService
 
 
 class StaffService:
     """Service to manage Staff related operations."""
+
+    @classmethod
+    def _check_auth(cls):
+        """Check if user has manage users role."""
+        authorisation.check_auth(one_of_roles=(Role.MANAGE_USERS.value,))
 
     @classmethod
     def find_by_position_id(cls, position_id):
@@ -65,6 +72,7 @@ class StaffService:
     @classmethod
     def create_staff(cls, payload: dict):
         """Create a new staff."""
+        cls._check_auth()
         # Normalize the email and check for existence in the local database
         email = payload["email"].lower()
         payload["idir_user_id"] = cls.validate_email_and_get_idir_user_id(email)
@@ -79,6 +87,7 @@ class StaffService:
     @classmethod
     def update_staff(cls, staff_id: int, payload: dict):
         """Update existing staff."""
+        cls._check_auth()
         staff = Staff.find_by_id(staff_id)
         if not staff:
             raise ResourceNotFoundError(f"Staff with id '{staff_id}' not found")
@@ -104,6 +113,7 @@ class StaffService:
     @classmethod
     def delete_staff(cls, staff_id: int):
         """Delete staff by id."""
+        cls._check_auth()
         staff = Staff.find_by_id(staff_id)
         staff.is_deleted = True
         Staff.commit()
@@ -133,6 +143,7 @@ class StaffService:
     @classmethod
     def import_staffs(cls, file: IO):
         """Import proponents"""
+        cls._check_auth()
         data = cls._read_excel(file)
         position_names = set(data["position_id"].to_list())
         positions = (

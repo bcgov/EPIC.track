@@ -221,6 +221,7 @@ class TestJwtClaims(dict, Enum):
         'email': 'example@example.com',
         'realm_access': {
             'roles': [
+                'extended_edit',
                 'manage_users'
             ]
         }
@@ -237,6 +238,22 @@ class TestJwtClaims(dict, Enum):
         'realm_access': {
             'roles': [
                 'view',
+            ]
+        }
+    }
+
+    view_only_role = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'preferred_username': f'{fake.user_name()}@idir',
+        'given_name': fake.first_name(),
+        'family_name': fake.last_name(),
+        'tenant_id': 1,
+        'email': 'example@example.com',
+        'realm_access': {
+            'roles': [
+                'view'
             ]
         }
     }

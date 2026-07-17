@@ -96,11 +96,12 @@ class TestFindAllNonDeletedStaff:
 class TestCreateStaff:
     """Tests for create_staff method."""
 
+    @patch("api.services.staff.StaffService._check_auth")
     @patch("api.services.staff.StaffService.create_staff_special_fields")
     @patch("api.services.staff.StaffService.validate_email_and_get_idir_user_id")
     @patch("api.services.staff.Staff")
     def test_creates_staff_with_normalized_email(
-        self, mock_staff_model, mock_validate, mock_create_fields
+        self, mock_staff_model, mock_validate, mock_create_fields, mock_check_auth
     ):
         """Test creating staff normalizes email and validates."""
         payload = {
@@ -123,9 +124,10 @@ class TestCreateStaff:
         mock_create_fields.assert_called_once_with(mock_staff_instance)
         mock_staff_instance.save.assert_called_once()
 
+    @patch("api.services.staff.StaffService._check_auth")
     @patch("api.services.staff.StaffService.validate_email_and_get_idir_user_id")
     @patch("api.services.staff.Staff")
-    def test_create_staff_raises_when_validation_fails(self, mock_staff_model, mock_validate):
+    def test_create_staff_raises_when_validation_fails(self, mock_staff_model, mock_validate, mock_check_auth):
         """Test create_staff raises error when email validation fails."""
         payload = {"email": "invalid@test.com", "first_name": "Test"}
         mock_validate.side_effect = ResourceNotFoundError("User not found in Keycloak")
@@ -137,9 +139,10 @@ class TestCreateStaff:
 class TestUpdateStaff:
     """Tests for update_staff method."""
 
+    @patch("api.services.staff.StaffService._check_auth")
     @patch("api.services.staff.StaffService.validate_email_and_get_idir_user_id")
     @patch("api.services.staff.Staff")
-    def test_updates_staff_with_same_email(self, mock_staff_model, mock_validate):
+    def test_updates_staff_with_same_email(self, mock_staff_model, mock_validate, mock_check_auth):
         """Test updating staff without email change."""
         staff_id = 5
         mock_staff = MagicMock()
@@ -155,9 +158,10 @@ class TestUpdateStaff:
         mock_validate.assert_not_called()
         mock_staff.update.assert_called_once_with(payload)
 
+    @patch("api.services.staff.StaffService._check_auth")
     @patch("api.services.staff.StaffService.validate_email_and_get_idir_user_id")
     @patch("api.services.staff.Staff")
-    def test_updates_staff_with_new_email(self, mock_staff_model, mock_validate):
+    def test_updates_staff_with_new_email(self, mock_staff_model, mock_validate, mock_check_auth):
         """Test updating staff with new email validates and updates idir."""
         staff_id = 5
         mock_staff = MagicMock()
@@ -176,8 +180,9 @@ class TestUpdateStaff:
         mock_validate.assert_called_once_with("new@example.com")
         mock_staff.update.assert_called_once_with(payload)
 
+    @patch("api.services.staff.StaffService._check_auth")
     @patch("api.services.staff.Staff")
-    def test_update_staff_raises_when_not_found(self, mock_staff_model):
+    def test_update_staff_raises_when_not_found(self, mock_staff_model, mock_check_auth):
         """Test update_staff raises error when staff not found."""
         staff_id = 999
         mock_staff_model.find_by_id.return_value = None
@@ -209,8 +214,9 @@ class TestUpdateLastActive:
 class TestDeleteStaff:
     """Tests for delete_staff method."""
 
+    @patch("api.services.staff.StaffService._check_auth")
     @patch("api.services.staff.Staff")
-    def test_marks_staff_as_deleted(self, mock_staff_model):
+    def test_marks_staff_as_deleted(self, mock_staff_model, mock_check_auth):
         """Test soft deleting staff."""
         staff_id = 5
         mock_staff = MagicMock()
@@ -304,11 +310,12 @@ class TestFindByEmail:
 class TestImportStaffs:
     """Tests for import_staffs method."""
 
+    @patch("api.services.staff.StaffService._check_auth")
     @patch("api.services.staff.StaffService._update_or_delete_old_data")
     @patch("api.services.staff.StaffService._read_excel")
     @patch("api.services.staff.db")
     @patch("api.services.staff.TokenInfo")
-    def test_imports_staff_from_excel(self, mock_token, mock_db, mock_read_excel, mock_update):
+    def test_imports_staff_from_excel(self, mock_token, mock_db, mock_read_excel, mock_update, mock_check_auth):
         """Test importing staff from Excel file."""
         mock_file = BytesIO()
         # Position IDs should already be integers after DataFrame processing

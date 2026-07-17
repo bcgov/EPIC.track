@@ -41,7 +41,6 @@ def test_create_phase_overage_responsibility(session, client, jwt):
     payload = {
         "work_phase_id": work_phase.id,
         "responsibility": session.query(Responsibility).first().name,
-        # "work_id": work_phase.work_id,
     }
     url = urljoin(API_BASE_URL, "")
     response = client.post(url, headers=headers, json=payload)
@@ -51,11 +50,10 @@ def test_create_phase_overage_responsibility(session, client, jwt):
 def test_cannot_create_phase_overage_as_non_superuser_non_team_member(session, client, jwt):
     """Test POST /overage-responsibilities"""
     work_phase = factory_work_phase_model()
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.manage_user_role)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.view_only_role)
     payload = {
         "work_phase_id": work_phase.id,
         "responsibility": session.query(Responsibility).first().name,
-        # "work_id": work_phase.work_id,
     }
     url = urljoin(API_BASE_URL, "")
     response = client.post(url, headers=headers, json=payload)
