@@ -74,9 +74,9 @@ class TestEventTemplateUploadAuth:
     def test_upload_without_extended_edit_role_returns_403(self, client, jwt, app):
         """A valid token without extended_edit must receive 403."""
         with app.app_context():
-            # manage_user_role has only 'manage_users' — no 'extended_edit'
+            # viewer has only 'view' — no 'extended_edit'
             headers = factory_auth_header(
-                jwt=jwt, claims=TestJwtClaims.manage_user_role
+                jwt=jwt, claims=TestJwtClaims.viewer
             )
             data = {"event_template": (_minimal_template_file(), "template.xlsx")}
             response = client.post(
