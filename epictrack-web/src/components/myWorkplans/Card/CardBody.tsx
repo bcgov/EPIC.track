@@ -25,15 +25,6 @@ import { dateUtils } from "utils";
 
 const IndicatorSmallIcon: React.FC<IconProps> = Icons["IndicatorSmallIcon"];
 const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];
-
-/**
- * Fixed so every card in the list lines up. Sized to the tallest content the
- * body can hold: title (34) + phase row (26) + milestone row (64) + status
- * update caption (19.5) + clamped description (50) + federal involvement
- * caption (19.5) and value (27), plus six 8px gaps and 32px of padding.
- *
- * Exported so `CardSkeleton` cannot drift from it.
- */
 export const CARD_BODY_HEIGHT = "328px";
 
 const decisionWorkStates = [
@@ -127,10 +118,6 @@ const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
         backgroundColor: Palette.white,
         padding: "16px 24px",
         height: CARD_BODY_HEIGHT,
-        // Grid containers wrap by default. On a fixed-height *column* container
-        // that means any overflow starts a second column, which renders at the
-        // top right instead of clipping - so a few extra pixels of text moved
-        // "FEDERAL INVOLVEMENT"'s value up beside the work state badge.
         flexWrap: "nowrap",
       }}
       gap={1}

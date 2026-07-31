@@ -44,9 +44,6 @@ const ControlledTextField: FC<IFormInputProps> = ({
             field.onChange(e.target.value);
           }}
           {...otherProps}
-          // After `otherProps`, so a caller-supplied `error`/`helperText` can no
-          // longer silently hide a validation message. A caller's helperText is
-          // still shown while the field is valid.
           error={!!errors[name] || otherProps.error}
           helperText={
             errors[name]

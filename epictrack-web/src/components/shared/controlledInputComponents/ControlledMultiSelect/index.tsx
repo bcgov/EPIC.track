@@ -113,8 +113,6 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
               }}
               menuPortalTarget={document.body}
               styles={{
-                // react-select does not read the MUI theme, so these mirror the
-                // MuiOutlinedInput overrides in `theme.tsx` by hand.
                 control: (baseStyles, state) => {
                   return {
                     ...baseStyles,
@@ -154,8 +152,6 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
                 },
               }}
             ></Select>
-            {/* This used to render only when the caller passed `helperText`, so
-                validation messages never appeared on their own. */}
             {(!!errors[name] || helperText) && (
               <FormHelperText
                 error={!!errors[name]}

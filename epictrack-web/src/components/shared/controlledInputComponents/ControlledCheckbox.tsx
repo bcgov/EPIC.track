@@ -28,8 +28,6 @@ const ControlledCheckbox: React.ForwardRefRenderFunction<
           {...field}
           ref={ref}
           checked={!!field.value}
-          // MUI's Checkbox has no error prop, so the invalid state is drawn on
-          // the icon directly. The box outline is a `stroke`, not a `fill`.
           sx={{
             ...(hasError && {
               "& svg": {

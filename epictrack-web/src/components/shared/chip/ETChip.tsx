@@ -29,7 +29,6 @@ const ETChip = styled(
 )(({ active, inactive, highPriority, resolved, error }: StyledChipProps) => {
   if (inactive) {
     return {
-      // These were hardcoded hex values identical to the palette entries.
       background: Palette.neutral.bg.main,
       color: Palette.neutral.main,
       ...chipStyles,

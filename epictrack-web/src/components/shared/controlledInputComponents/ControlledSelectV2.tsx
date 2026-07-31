@@ -69,9 +69,6 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
             }}
             disabled={disabled}
             error={!!error}
-            // `String(undefined)` is the truthy string "undefined", so the old
-            // `String(error?.message) || helperText` never reached the fallback
-            // and could render the literal text "undefined".
             helperText={error ? String(error.message ?? "") : helperText}
           />
         );

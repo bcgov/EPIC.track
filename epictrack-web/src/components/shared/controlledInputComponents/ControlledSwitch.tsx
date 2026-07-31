@@ -28,7 +28,6 @@ const ControlledSwitch: React.ForwardRefRenderFunction<
           sx={{
             marginLeft: "10px",
             marginRight: "10px",
-            // Switch has no error prop either; ring the track instead.
             ...(hasError && {
               "& .MuiSwitch-track": {
                 border: `2px solid ${tokens.supportBorderColorDanger}`,

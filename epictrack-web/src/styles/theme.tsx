@@ -7,20 +7,6 @@ import {
 } from "./constants";
 import * as tokens from "./designTokens";
 import { CheckboxRegular, CheckboxChecked } from "../components/icons/checkbox";
-
-/**
- * Every colour in the app resolves from B.C. Design System tokens.
- *
- * `Palette` is imported directly by ~126 files, so it stays as the public
- * surface - but its values and the MUI theme below now both read from
- * `designTokens`, so the two can no longer disagree. The `accent`/`bg`
- * sub-objects have no equivalent slot in MUI's palette type, which is why
- * `Palette` exists at all.
- *
- * Naming note: `.main` is the solid/icon colour, `.dark` is text or an icon on
- * the matching `.bg.light` tint, and `.bg.dark` is a border. Those roles come
- * from how the app already used them, not from the key names.
- */
 export const Palette = {
   neutral: {
     main: tokens.typographyColorSecondary,
@@ -76,9 +62,6 @@ export const Palette = {
   white: tokens.surfaceColorBackgroundWhite,
   black: tokens.typographyColorPrimary,
 };
-
-/** Shared focus ring. The theme sets `disableRipple`, so this is the only
- *  affordance keyboard users get. */
 const focusVisibleOutline = {
   outline: `2px solid ${tokens.surfaceColorBorderActive}`,
   outlineOffset: "2px",
@@ -88,16 +71,6 @@ const disabledSurface = {
   backgroundColor: tokens.surfaceColorPrimaryDisabled,
   color: tokens.typographyColorDisabled,
 };
-
-/**
- * Per-variant button styling.
- *
- * This used to be a chain of spreads joined with `||` where the secondary branch
- * was gated on colour but *not* on variant, so `variant="outlined"` or `"text"`
- * with `color="secondary"` picked up the contained-secondary rules and skipped
- * its own - a disabled outlined-secondary button rendered as a filled grey block.
- * Every branch is now gated on both, and each variant has its own disabled state.
- */
 const buttonVariantStyles = (
   variant: string | undefined,
   color: string | undefined,
@@ -146,7 +119,6 @@ const buttonVariantStyles = (
           : Palette.secondary.light,
         color: isPrimary ? Palette.white : Palette.secondary.dark,
       },
-      // Stays an outline when disabled rather than becoming a filled block.
       "&:disabled": {
         border: `2px solid ${tokens.surfaceColorBorderDefault}`,
         backgroundColor: Palette.white,
@@ -158,7 +130,6 @@ const buttonVariantStyles = (
   if (variant === "text") {
     return {
       background: Palette.white,
-      // A same-colour border keeps the box from resizing on hover/active.
       border: `2px solid ${Palette.white}`,
       color: isPrimary ? Palette.primary.accent.main : Palette.secondary.dark,
       "&:hover": {
@@ -207,9 +178,6 @@ export const BaseTheme = createTheme({
       dark: Palette.error.dark,
       light: Palette.error.light,
     },
-    // Everything below was previously undefined, so validation, disabled,
-    // placeholder and divider states fell through to MUI's own defaults and
-    // could not be restyled through the theme at all.
     warning: {
       main: Palette.secondary.main,
       dark: Palette.secondary.dark,
@@ -260,8 +228,6 @@ export const BaseTheme = createTheme({
       },
     },
     MuiContainer: {
-      // Was a raw `@media (max-width: 576px)` in App.scss, which matches no MUI
-      // breakpoint - `sm` is 600px.
       styleOverrides: {
         root: ({ theme }) => ({
           [theme.breakpoints.down("sm")]: {
@@ -368,8 +334,6 @@ export const BaseTheme = createTheme({
             "& fieldset": {
               border: `2px solid ${tokens.surfaceColorBorderDefault}`,
             },
-            // Hover and focus were the same colour, so focus was invisible on a
-            // hovered field.
             "&:hover fieldset": {
               borderColor: tokens.surfaceColorBorderMedium,
             },
@@ -411,8 +375,6 @@ export const BaseTheme = createTheme({
         root: {
           "&.Mui-disabled svg": {
             fill: `${tokens.surfaceColorFormsDisabled} !important`,
-            // The unchecked box is drawn with `stroke`, so a fill-only rule left
-            // disabled unchecked checkboxes looking enabled.
             stroke: `${tokens.surfaceColorBorderDefault} !important`,
           },
           "&.Mui-focusVisible": focusVisibleOutline,
@@ -467,8 +429,6 @@ export const BaseTheme = createTheme({
       },
     },
     MuiAlert: {
-      // There were no overrides here, so the raw MUI `<Alert>`s on the report
-      // screens rendered in stock MUI colours instead of BC DS ones.
       styleOverrides: {
         root: {
           borderRadius: tokens.layoutBorderRadiusMedium,
@@ -556,10 +516,6 @@ export const BaseTheme = createTheme({
   typography: {
     fontFamily: MET_Header_Font_Family,
     fontSize: 16,
-    // Sizes are unchanged from before this alignment; the line heights and
-    // weights come from the BC DS type tokens. h1..h4 hold the design system's
-    // h2..h5 sizes, so each one takes its matching upstream line height.
-    // Headings are bold, body copy regular.
     h1: {
       fontWeight: MET_Header_Font_Weight_Bold,
       fontSize: tokens.typographyFontSizeH2,
@@ -621,9 +577,6 @@ export const BaseTheme = createTheme({
       lineHeight: tokens.typographyLineHeightLabel,
     },
     button: {
-      // Matches the medium button, which is the default size. This used to say
-      // 1.125rem while the MuiButton override re-set every size, so the variant
-      // only ever applied to size="small".
       fontWeight: MET_Header_Font_Weight_Bold,
       fontSize: tokens.typographyFontSizeSmallBody,
       lineHeight: tokens.typographyLineHeightSmallBody,

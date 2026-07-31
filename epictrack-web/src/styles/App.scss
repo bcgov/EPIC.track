@@ -1,15 +1,6 @@
 @charset "UTF-8";
 @use "tokens";
 
-// BC Sans itself is loaded by `@bcgov/bc-sans/css/BC_Sans.css`, imported in
-// `src/index.tsx`. The hand-rolled @font-face this replaced declared Regular and
-// Bold as interchangeable sources of a single weight, so bold was synthesized and
-// the real Bold files were never used.
-//
-// The `.MuiContainer-root` gutter reset that used to live here moved to the
-// MuiContainer override in `theme.tsx`; it targeted a raw 576px, which matches no
-// MUI breakpoint (`sm` is 600px).
-
 #main {
   margin-top: 10px;
 }

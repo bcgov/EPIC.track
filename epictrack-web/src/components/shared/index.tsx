@@ -56,23 +56,12 @@ const useStyle = {
     overflow: "hidden",
   },
 };
-
-/**
- * The theme's typography variants carry the weight for each variant - headings
- * bold, body copy regular - so `bold` is only applied when a caller asks for it
- * explicitly. Returning `undefined` leaves the variant's own weight in place.
- */
 const weightFor = (bold?: boolean) =>
   bold === undefined
     ? undefined
     : bold
       ? MET_Header_Font_Weight_Bold
       : MET_Header_Font_Weight_Regular;
-
-/**
- * Shared form label styling. `ETFormLabel` and `ETFormLabelWithCharacterLimit`
- * used to restate this identically.
- */
 const formLabelStyles = {
   fontSize: tokens.typographyFontSizeBody,
   fontWeight: MET_Header_Font_Weight_Bold,
@@ -289,8 +278,6 @@ export const ETCaption2 = ({
       color={color}
       align="left"
       sx={{
-        // The design system's small-body size. Stays on the `caption` variant so
-        // this keeps rendering as an inline <span>; `body2` would make it a <p>.
         fontSize: tokens.typographyFontSizeSmallBody,
         lineHeight: tokens.typographyLineHeightSmallBody,
         fontWeight: weightFor(bold),
@@ -314,8 +301,6 @@ export const ETGridTitle = ({
   enableEllipsis,
   ...rest
 }: LinkHeaderProps) => {
-  // The disabled variant keeps its tooltip and ellipsis; it previously fell back
-  // to a bare ETParagraph and lost both.
   const title = (
     <Tooltip
       title={rest.tooltip as string}
@@ -360,8 +345,6 @@ export const ETCaption3 = ({
     <Typography
       color={color}
       sx={{
-        // The design system's label size. This was `0.75em`, which compounds
-        // against the parent, so 12px was not guaranteed.
         fontSize: tokens.typographyFontSizeLabel,
         lineHeight: tokens.typographyLineHeightLabel,
         fontWeight: weightFor(bold),
@@ -381,8 +364,6 @@ export const ETFormLabel = ({
   ...rest
 }: FormLabelBaseProps & FormLabelOwnProps) => {
   return (
-    // `rest` is forwarded so `htmlFor`, `error` and `disabled` reach the label;
-    // only `required` and `children` used to get through.
     <FormLabel {...rest} sx={{ ...formLabelStyles, ...sx }}>
       {children}
     </FormLabel>
@@ -471,8 +452,6 @@ export const GrayBox = ({ children, sx, ...rest }: GrayBoxProps) => {
     </Box>
   );
 };
-
-/** Same styling as ETDescription; kept as a separate export for its callers. */
 export const ETPreviewText = (props: HeaderProps) => (
   <ETDescription {...props} />
 );

@@ -27,8 +27,6 @@ export const CustomSwitch = styled((props: SwitchProps) => (
         opacity: 1,
       },
     },
-    // Was an off-palette green thumb; the focus ring now matches every other
-    // focusable control in the app.
     "&.Mui-focusVisible": {
       outline: `2px solid ${tokens.surfaceColorBorderActive}`,
       outlineOffset: "2px",

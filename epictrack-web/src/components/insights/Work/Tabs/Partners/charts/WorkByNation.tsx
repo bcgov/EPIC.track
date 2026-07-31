@@ -20,19 +20,7 @@ import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const AXIS_WIDTH = 180;
 const TICK_FONT_SIZE = 12;
-// Rough advance width of BC Sans at the tick size. Only used to decide where to
-// cut, so an approximation is fine.
 const MAX_TICK_CHARS = Math.floor(AXIS_WIDTH / (TICK_FONT_SIZE * 0.55));
-
-/**
- * Single-line axis label.
- *
- * Recharts' default tick wraps to the axis width, and nation names run to 52
- * characters - at `width={100}` that wrapped to four or five lines inside a
- * 30px row, so neighbouring labels ran into each other. Truncating keeps one
- * label per row; the full name stays available on hover, and in the bar
- * tooltip.
- */
 const NationTick = ({ x, y, payload }: any) => {
   const name: string = payload?.value ?? "";
   const label =
