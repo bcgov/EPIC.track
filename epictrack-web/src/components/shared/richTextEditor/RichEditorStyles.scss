@@ -1,11 +1,15 @@
+// Was a plain .css file with three hardcoded colours. SCSS so the design tokens
+// can reach the editor's generated markup, which `sx` cannot style cleanly.
+@use "../../../styles/tokens";
+
 .track-rich-editor__content {
   max-height: 485px;
   min-height: 200px;
   overflow-y: auto;
   padding: 8px;
   margin-bottom: 8px;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: tokens.$typography-font-size-body;
+  line-height: tokens.$typography-line-height-body;
   outline: none;
 }
 
@@ -28,12 +32,12 @@
 }
 
 .track-rich-editor__content a {
-  color: #0053a6;
+  color: tokens.$typography-color-link;
   text-decoration: underline;
 }
 
 .track-rich-editor__content .is-editor-empty:first-child::before {
-  color: #6f7275;
+  color: tokens.$typography-color-placeholder;
   content: attr(data-placeholder);
   float: left;
   height: 0;
@@ -41,6 +45,6 @@
 }
 
 .track-rich-editor__select {
-  background: #ffffff;
+  background: tokens.$surface-color-background-white;
   min-height: 32px;
 }

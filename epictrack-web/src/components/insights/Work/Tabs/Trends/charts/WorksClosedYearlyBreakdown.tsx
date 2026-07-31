@@ -14,6 +14,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useGetWorkClosureBreakdownQuery } from "services/rtkQuery/workInsights";
+import { BAR_COLOR } from "../../../../utils";
 
 const WorksClosedYearlyBreakdown = () => {
   const { isUserInsights, staffId } = useInsightsContext();
@@ -63,7 +64,7 @@ const WorksClosedYearlyBreakdown = () => {
                 cx={isMobile ? "50%" : "35%"}
                 cy="50%"
                 outerRadius={80}
-                fill="#8884d8"
+                fill={BAR_COLOR}
                 dataKey="count"
                 nameKey="work_state"
                 isAnimationActive={false}

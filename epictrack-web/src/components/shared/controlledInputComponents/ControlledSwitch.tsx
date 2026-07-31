@@ -2,6 +2,7 @@ import React from "react";
 import { CheckboxProps } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 import { CustomSwitch } from "../CustomSwitch";
+import * as tokens from "../../../styles/designTokens";
 
 type IFormSwitchProps = {
   name: string;
@@ -10,11 +11,12 @@ type IFormSwitchProps = {
 const ControlledSwitch: React.ForwardRefRenderFunction<
   HTMLButtonElement,
   IFormSwitchProps
-> = ({ name, ...otherProps }, ref) => {
+> = ({ name, sx, ...otherProps }, ref) => {
   const {
     control,
-    formState: { defaultValues },
+    formState: { errors, defaultValues },
   } = useFormContext();
+  const hasError = !!errors[name];
 
   return (
     <Controller
@@ -26,6 +28,13 @@ const ControlledSwitch: React.ForwardRefRenderFunction<
           sx={{
             marginLeft: "10px",
             marginRight: "10px",
+            // Switch has no error prop either; ring the track instead.
+            ...(hasError && {
+              "& .MuiSwitch-track": {
+                border: `2px solid ${tokens.supportBorderColorDanger}`,
+              },
+            }),
+            ...sx,
           }}
           {...otherProps}
           {...field}

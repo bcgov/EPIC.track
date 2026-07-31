@@ -8,6 +8,7 @@ import NewIssueUpdateDialog from "components/workPlan/issues/Dialogs/NewIssueUpd
 import EditIssueUpdateDialog from "components/workPlan/issues/Dialogs/EditIssueUpdateDialog";
 import { MyIssuesContext } from "../MyIssuesContext";
 import IssueCardHeader from "./IssueCardHeader";
+import { Palette } from "../../../../styles/theme";
 
 export interface IssueCardProps {
   item: WorkIssueDashboardItem;
@@ -18,7 +19,7 @@ const IssueCard = ({ item }: IssueCardProps) => {
   return (
     <Box
       sx={{
-        border: `2px solid var(--neutral-background-dark, #DBDCDC)`,
+        border: `2px solid ${Palette.neutral.bg.dark}`,
         borderRadius: "4px",
       }}
     >

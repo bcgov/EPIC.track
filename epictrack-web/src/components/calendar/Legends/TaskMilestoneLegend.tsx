@@ -2,6 +2,7 @@ import { Box, ToggleButton } from "@mui/material";
 import { LEGEND_COLOURS } from "../constants";
 import { ETCaption1 } from "components/shared";
 import { useEventCalendarContext } from "../EventCalendarContext";
+import { Palette } from "../../../styles/theme";
 
 const TaskMilestoneLegend = () => {
   const {
@@ -20,7 +21,9 @@ const TaskMilestoneLegend = () => {
         sx={{
           cursor: "pointer",
           p: 1,
-          backgroundColor: milestoneSelected ? "#F9E9C4" : "transparent", // highlight only when selected
+          backgroundColor: milestoneSelected
+            ? Palette.secondary.bg.light
+            : "transparent", // highlight only when selected
           borderRadius: "3px",
         }}
         onClick={() => setMilestoneSelected((prev) => !prev)}
@@ -48,7 +51,9 @@ const TaskMilestoneLegend = () => {
         sx={{
           cursor: "pointer",
           p: 1,
-          backgroundColor: taskSelected ? "#F9E9C4" : "transparent",
+          backgroundColor: taskSelected
+            ? Palette.secondary.bg.light
+            : "transparent",
           borderRadius: "3px",
         }}
         onClick={() => setTaskSelected((prev) => !prev)}

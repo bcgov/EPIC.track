@@ -4,6 +4,8 @@ import { extendMoment } from "moment-range";
 import * as _ from "lodash";
 import { Box, Tooltip } from "@mui/material";
 import { ETParagraph } from "../../shared";
+import { Palette } from "../../../styles/theme";
+import * as tokens from "../../../styles/designTokens";
 
 const extendedMoment = extendMoment(moment);
 
@@ -84,14 +86,14 @@ const Month = ({
           ...(!date && {
             gridRow: `span ${numTasks + 1}`,
             height: "100%",
-            backgroundColor: "#d2d8e5",
+            backgroundColor: Palette.neutral.bg.main,
           }),
           ...(date && {
             [`&:nth-of-type(${3 + i})`]: {
               "&::after": {
                 content: '" "',
                 height: "1px",
-                backgroundColor: "#a7bce8",
+                backgroundColor: Palette.neutral.bg.dark,
                 left: "0",
                 right: "0",
                 display: "block",
@@ -127,7 +129,7 @@ const Month = ({
             "&::after": {
               content: '" "',
               height: "1px",
-              backgroundColor: "#a7bce8",
+              backgroundColor: Palette.neutral.bg.dark,
               left: "0",
               right: "0",
               display: "block",
@@ -152,7 +154,7 @@ const Month = ({
     projectData.map((event: any, i: number) => {
       const style = {
         // height: "100%",
-        backgroundColor: event.color || "#E6E6E6",
+        backgroundColor: event.color || Palette.neutral.bg.dark,
         gridColumn: `${
           1 + Math.abs(projectStart.start_date.date() - event.start_date.date())
         } / ${2 + event.end_date.date() - projectStart.start_date.date()}`,
@@ -167,13 +169,13 @@ const Month = ({
             borderRadius: "5px",
             cursor: "pointer",
             transition: "opacity 250ms ease-in-out",
-            border: "1px solid #ccd6eb",
+            border: `1px solid ${Palette.neutral.bg.dark}`,
             wordWrap: "normal",
             maxHeight: "100%",
             ...(hoveredEvent === event.id && {
               zIndex: "1000 !important",
               // textIndent: "0",
-              boxShadow: "3px 3px #6863632b",
+              boxShadow: tokens.surfaceShadowSmall,
             }),
           }}
           style={style}
@@ -249,7 +251,7 @@ const Month = ({
     <Box
       sx={{
         display: "grid",
-        border: "2px solid #a7bce8",
+        border: `2px solid ${Palette.neutral.bg.dark}`,
         borderWidth: "2px 0 2px 2px",
         gridColumn: "1/-1",
         gridTemplateColumns: "repeat(56, 1.5rem)",
@@ -273,7 +275,7 @@ const Month = ({
             content: '" "',
             width: "1px",
             height: "100%",
-            backgroundColor: "#a7bce8",
+            backgroundColor: Palette.neutral.bg.dark,
             display: "block",
             position: "absolute",
             top: "0",

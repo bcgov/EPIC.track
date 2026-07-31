@@ -27,9 +27,10 @@ import LinkOffIcon from "@mui/icons-material/LinkOff";
 import FormatClearIcon from "@mui/icons-material/FormatClear";
 import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import FormatColorTextIcon from "@mui/icons-material/FormatColorText";
-import "./RichEditorStyles.css";
+import "./RichEditorStyles.scss";
 import { editorExtensions, EMPTY_DOC, getTipTapContentFromRaw } from "./utils";
 import { Palette } from "../../../styles/theme";
+import * as tokens from "../../../styles/designTokens";
 
 const FONT_SIZE_OPTIONS = [
   "8px",
@@ -267,9 +268,13 @@ const RichTextEditor = ({
     <FormControl fullWidth>
       <Box
         sx={{
-          border: `1px solid ${focused ? "#0070E0" : "rgb(224,224,224)"}`,
-          borderRadius: "4px",
-          background: "#f9f9fb",
+          border: `1px solid ${
+            focused
+              ? tokens.surfaceColorBorderActive
+              : tokens.surfaceColorBorderDefault
+          }`,
+          borderRadius: tokens.layoutBorderRadiusMedium,
+          background: Palette.neutral.bg.light,
           ...(error && { borderColor: Palette.error.main }),
         }}
       >
@@ -277,9 +282,9 @@ const RichTextEditor = ({
           direction="row"
           spacing={0.5}
           sx={{
-            background: "#f9f9fb",
+            background: Palette.neutral.bg.light,
             p: 1,
-            borderBottom: "1px solid rgb(224,224,224)",
+            borderBottom: `1px solid ${tokens.surfaceColorBorderDefault}`,
             flexWrap: "wrap",
           }}
         >
@@ -428,8 +433,8 @@ const RichTextEditor = ({
                   borderRadius: "50%",
                   border:
                     selectedColor === color
-                      ? "2px solid #0b63c5"
-                      : "1px solid #d2d6db",
+                      ? `2px solid ${tokens.surfaceColorBorderActive}`
+                      : `1px solid ${tokens.surfaceColorBorderDefault}`,
                   backgroundColor: color,
                   cursor: "pointer",
                 }}

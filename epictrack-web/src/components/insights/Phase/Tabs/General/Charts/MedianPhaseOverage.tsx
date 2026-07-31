@@ -24,6 +24,7 @@ import {
   ErrorBar,
 } from "recharts";
 import { useGetPhasesByMedianOverageQuery } from "services/rtkQuery/phaseInsights";
+import { Palette } from "../../../../../../styles/theme";
 
 const MedianPhaseOverageChart = () => {
   const { viewUnderage: isUnderageToggled } = usePhaseInsightsContext();
@@ -66,7 +67,11 @@ const MedianPhaseOverageChart = () => {
       const { median_overage, iqr_low, iqr_high } = payload[0].payload;
       return (
         <div
-          style={{ background: "#fff", border: "1px solid #ccc", padding: 8 }}
+          style={{
+            background: Palette.white,
+            border: `1px solid ${Palette.neutral.bg.dark}`,
+            padding: 8,
+          }}
         >
           <div>{label}</div>
           <div>
@@ -102,9 +107,9 @@ const MedianPhaseOverageChart = () => {
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
         <svg width="26" height="8" style={{ marginRight: 4 }}>
-          <rect x="10" y="3" width="8" height="2" fill="black" />
-          <rect x="9" y="1" width="2" height="6" fill="black" />
-          <rect x="17" y="1" width="2" height="6" fill="black" />
+          <rect x="10" y="3" width="8" height="2" fill={Palette.neutral.dark} />
+          <rect x="9" y="1" width="2" height="6" fill={Palette.neutral.dark} />
+          <rect x="17" y="1" width="2" height="6" fill={Palette.neutral.dark} />
         </svg>
         <ETCaption2>IQ Range</ETCaption2>
       </Box>
@@ -176,7 +181,7 @@ const MedianPhaseOverageChart = () => {
                         ]}
                         width={4}
                         strokeWidth={2}
-                        stroke="black"
+                        stroke={Palette.neutral.dark}
                       />
                     </Bar>
                   </BarChart>

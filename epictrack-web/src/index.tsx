@@ -5,7 +5,9 @@ import { store } from "./store";
 import { Provider } from "react-redux";
 import { StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
 import { BaseTheme } from "./styles/theme";
-// import "@bcgov/bc-sans/css/BCSans.css";
+// BC_Sans.css (not the legacy BCSans.css) declares the "BC Sans" family name the
+// design tokens expect, and one @font-face per weight/style.
+import "@bcgov/bc-sans/css/BC_Sans.css";
 
 // eslint-disable-next-line
 const root = ReactDOM.createRoot(document.getElementById("root")!);

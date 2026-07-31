@@ -82,7 +82,7 @@ const EventRow: FC<EventRowProps> = ({
                   sx={{
                     height: cellSizePx,
                     backgroundColor: isWeekendByIndex(dayIdx)
-                      ? "#F6F6F6"
+                      ? Palette.neutral.bg.main
                       : Palette.neutral.bg.light,
                     color: "transparent",
                     border: "none",
@@ -221,7 +221,7 @@ const EventRow: FC<EventRowProps> = ({
                 sx={{
                   height: cellSizePx,
                   backgroundColor: isWeekendByIndex(dayIdx)
-                    ? "#F6F6F6"
+                    ? Palette.neutral.bg.main
                     : "inherit",
                   color: isWeekendByIndex(dayIdx)
                     ? Palette.neutral.light

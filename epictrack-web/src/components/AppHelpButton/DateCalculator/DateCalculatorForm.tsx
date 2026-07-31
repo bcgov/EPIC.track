@@ -102,7 +102,7 @@ export const DateCalculatorForm = () => {
             />
             <If condition={startDateWarning}>
               <Then>
-                <ETCaption1 sx={{ color: "red" }}>
+                <ETCaption1 sx={{ color: Palette.error.main }}>
                   Warning: {startDateWarning} selected
                 </ETCaption1>
               </Then>
@@ -120,7 +120,7 @@ export const DateCalculatorForm = () => {
             />
             <If condition={endDateWarning}>
               <Then>
-                <ETCaption1 sx={{ color: "red" }}>
+                <ETCaption1 sx={{ color: Palette.error.main }}>
                   Warning: {endDateWarning} selected
                 </ETCaption1>
               </Then>
@@ -144,7 +144,7 @@ export const DateCalculatorForm = () => {
                 />
                 <If condition={suspensionDateWarning}>
                   <Then>
-                    <ETCaption1 sx={{ color: "red" }}>
+                    <ETCaption1 sx={{ color: Palette.error.main }}>
                       Warning: {suspensionDateWarning} selected
                     </ETCaption1>
                   </Then>
@@ -166,7 +166,7 @@ export const DateCalculatorForm = () => {
                 />
                 <If condition={resumptionDateWarning}>
                   <Then>
-                    <ETCaption1 sx={{ color: "red" }}>
+                    <ETCaption1 sx={{ color: Palette.error.main }}>
                       Warning: {resumptionDateWarning} selected
                     </ETCaption1>
                   </Then>

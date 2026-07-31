@@ -17,6 +17,7 @@ import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import { useProjectsContext } from "./ProjectsContext";
 import { useTableFilterContext } from "../TableFilterContext";
 import { useInsightsContext } from "../InsightsContext";
+import { BAR_COLOR } from "../utils";
 
 const ProjectBySubtypeChart = () => {
   const { columnFilters } = useTableFilterContext();
@@ -91,7 +92,7 @@ const ProjectBySubtypeChart = () => {
                 cx={isMobile ? "50%" : "35%"}
                 cy="50%"
                 outerRadius={80}
-                fill="#8884d8"
+                fill={BAR_COLOR}
                 dataKey="value"
                 label={!noData}
                 isAnimationActive={false}

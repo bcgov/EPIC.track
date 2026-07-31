@@ -8,13 +8,14 @@ import { ETPageContainer, ETParagraph } from "../shared";
 import TrackDialog from "../shared/TrackDialog";
 import EventDetails from "./components/EventDetails";
 import ReportService from "../../services/reportService";
+import { Palette } from "../../styles/theme";
 
 const extendedMoment = extendMoment(moment);
 
 const titleStyle: SxProps = {
   gridColumn: "span 7",
-  borderBottom: "1px solid #ccd6eb",
-  borderTop: "2px solid #a7bce8",
+  borderBottom: `1px solid ${Palette.neutral.bg.dark}`,
+  borderTop: `2px solid ${Palette.neutral.bg.dark}`,
 
   textAlign: "center",
   height: "100%",
@@ -25,7 +26,7 @@ const titleStyle: SxProps = {
   "&::before, &:nth-of-type(7)::after": {
     content: '" "',
     width: "2px",
-    backgroundColor: "#a7bce8",
+    backgroundColor: Palette.neutral.bg.dark,
     top: "0",
     bottom: "0",
     left: "0",
@@ -148,13 +149,13 @@ const EventCalendar = () => {
                 gridColumn: "8 / 15",
                 gridRow: "span 2",
                 textAlign: "center",
-                borderTop: "2px solid #a7bce8",
-                borderLeft: "2px solid #a7bce8",
+                borderTop: `2px solid ${Palette.neutral.bg.dark}`,
+                borderLeft: `2px solid ${Palette.neutral.bg.dark}`,
                 justifyContent: "center",
                 "&::before": {
                   content: '" "',
                   width: "2px",
-                  backgroundColor: "#a7bce8",
+                  backgroundColor: Palette.neutral.bg.dark,
                   top: "0",
                   bottom: "0",
                   left: "0",
@@ -233,7 +234,7 @@ const EventCalendar = () => {
                     "&::after": {
                       content: '" "',
                       width: "1px",
-                      backgroundColor: "#a7bce8",
+                      backgroundColor: Palette.neutral.bg.dark,
                       top: "0",
                       bottom: "0",
                       display: "block",

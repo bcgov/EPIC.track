@@ -6,6 +6,8 @@ import { CardProps } from "./type";
 import { useNavigate } from "react-router-dom";
 import StaffGroup from "./Staff/StaffGroup";
 
+export const CARD_FOOTER_HEIGHT = "90px";
+
 const CardFooter = ({ workplan }: CardProps) => {
   const navigate = useNavigate();
 
@@ -23,10 +25,10 @@ const CardFooter = ({ workplan }: CardProps) => {
       justifyContent="space-between"
       sx={{
         backgroundColor: Palette.white,
-        borderTop: `1px solid var(--neutral-background-dark, #DBDCDC)`,
+        borderTop: `1px solid ${Palette.neutral.bg.dark}`,
         padding: "16px 24px",
         alignItems: "center",
-        height: "90px",
+        height: CARD_FOOTER_HEIGHT,
         overflow: "hidden",
       }}
     >

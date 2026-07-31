@@ -6,8 +6,7 @@ import { REPORT_ISSUE_LINKS } from "constants/application-constant";
 describe("AppHelpButton", () => {
   const mountWithRoute = (
     initialEntry:
-      | string
-      | { pathname: string; state?: Record<string, unknown> },
+      string | { pathname: string; state?: Record<string, unknown> },
   ) => {
     const initialEntries = [initialEntry];
 

@@ -375,7 +375,12 @@ const PhaseAccordion = ({
                     >
                       Overage Responsibility
                       {hasOverage && isOverageResponsibilityRequired && (
-                        <span style={{ color: "red", marginLeft: "2px" }}>
+                        <span
+                          style={{
+                            color: Palette.error.main,
+                            marginLeft: "2px",
+                          }}
+                        >
                           *
                         </span>
                       )}

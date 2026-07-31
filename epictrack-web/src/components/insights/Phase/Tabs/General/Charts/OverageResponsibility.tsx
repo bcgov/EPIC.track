@@ -22,6 +22,7 @@ import {
   Tooltip,
 } from "recharts";
 import { useGetOverageResponsibilityQuery } from "services/rtkQuery/phaseInsights";
+import { BAR_COLOR } from "../../../../utils";
 
 const OverageResponsibilityChart = () => {
   const { viewUnderage: isUnderageToggled } = usePhaseInsightsContext();
@@ -91,7 +92,7 @@ const OverageResponsibilityChart = () => {
                   cx="50%"
                   cy="50%"
                   outerRadius={80}
-                  fill="#8884d8"
+                  fill={BAR_COLOR}
                   dataKey="value"
                   label
                   isAnimationActive={false}

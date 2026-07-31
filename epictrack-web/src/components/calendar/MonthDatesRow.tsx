@@ -54,7 +54,7 @@ const MonthDatesRow: FC<MonthDatesRowProps> = ({
               position: "relative",
               borderRadius: "2px",
               backgroundColor: isWeekendByIndex(i)
-                ? "#F6F6F6"
+                ? Palette.neutral.bg.main
                 : Palette.neutral.bg.light,
               height: cellSizePx,
               lineHeight: 1,

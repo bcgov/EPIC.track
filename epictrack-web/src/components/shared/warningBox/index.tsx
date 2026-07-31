@@ -1,5 +1,6 @@
 import { Box, Grid, IconButton } from "@mui/material";
 import { Palette } from "../../../styles/theme";
+import * as tokens from "../../../styles/designTokens";
 import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
 import { ETHeading4, ETParagraph } from "..";
@@ -21,9 +22,9 @@ const WarningBox = (props?: WarningBoxProps) => {
         flexDirection: "column",
         color:
           props?.variant === "error"
-            ? Palette.error.text
+            ? Palette.error.dark
             : Palette.secondary.dark,
-        borderRadius: "4px",
+        borderRadius: tokens.layoutBorderRadiusMedium,
       }}
       container
     >

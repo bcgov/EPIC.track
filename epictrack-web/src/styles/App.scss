@@ -1,40 +1,34 @@
 @charset "UTF-8";
+@use "tokens";
+
+// BC Sans itself is loaded by `@bcgov/bc-sans/css/BC_Sans.css`, imported in
+// `src/index.tsx`. The hand-rolled @font-face this replaced declared Regular and
+// Bold as interchangeable sources of a single weight, so bold was synthesized and
+// the real Bold files were never used.
+//
+// The `.MuiContainer-root` gutter reset that used to live here moved to the
+// MuiContainer override in `theme.tsx`; it targeted a raw 576px, which matches no
+// MUI breakpoint (`sm` is 600px).
 
 #main {
   margin-top: 10px;
 }
 
-@font-face {
-  font-family: "BCSans";
-  src: url("../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Regular.woff")
-      format("woff"),
-    url("../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Regular.woff2")
-      format("woff2"),
-    url("../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Bold.woff")
-      format("woff"),
-    url("../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Bold.woff2")
-      format("woff2");
-}
 body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-family: "BCSans", "Noto Sans", Verdana, Arial, sans-serif;
+  font-family:
+    tokens.$typography-font-families-bc-sans, "Noto Sans", Verdana, Arial,
+    sans-serif;
   font-size: 1.25em;
   line-height: 1.3em;
   letter-spacing: -0.32px;
   font-weight: 400;
-  color: #494949;
+  color: tokens.$typography-color-secondary;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
-}
-
-@media (max-width: 576px) {
-  .MuiContainer-root {
-    padding-left: 0;
-    padding-right: 0;
-  }
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }

@@ -7,10 +7,14 @@ import { OptionType, SelectProps } from "./type";
 import { Palette } from "../../../styles/theme";
 import SingleValue from "./components/SingleValueContainer";
 import DropdownIndicator from "./components/DropDownIndicator";
-import { MET_Header_Font_Weight_Regular } from "../../../styles/constants";
+import {
+  MET_Header_Font_Weight_Bold,
+  MET_Header_Font_Weight_Regular,
+} from "../../../styles/constants";
+import * as tokens from "../../../styles/designTokens";
 import { useTheme } from "@mui/material";
 
-const INPUT_SIZE = "0.875rem";
+const INPUT_SIZE = tokens.typographyFontSizeSmallBody;
 
 const FilterSelect = (props: SelectProps) => {
   const theme = useTheme();
@@ -227,8 +231,8 @@ const FilterSelect = (props: SelectProps) => {
             display: "flex",
             alignItems: "center",
             padding: ".5rem .75rem .5rem 0px",
-            fontWeight: "normal",
-            fontSize: "1rem",
+            fontWeight: MET_Header_Font_Weight_Regular,
+            fontSize: tokens.typographyFontSizeBody,
             maxWidth: props.maxWidth ?? "100%",
             background: provided.isFocused
               ? Palette.neutral.bg.main
@@ -261,18 +265,18 @@ const FilterSelect = (props: SelectProps) => {
             position: "relative",
             marginBlock: "0px",
             border: `1px solid ${Palette.neutral.accent.light}`,
-            borderRadius: "4px",
+            borderRadius: tokens.layoutBorderRadiusMedium,
             ...menuStyle,
           }),
           placeholder: (base, props) => ({
             ...base,
             fontWeight: MET_Header_Font_Weight_Regular,
-            color: Palette.neutral.light,
+            color: tokens.typographyColorPlaceholder,
             fontSize: INPUT_SIZE,
             lineHeight: "1rem",
             ...(props.selectProps.filterProps?.variant === "bar" && {
               color: Palette.primary.accent.main,
-              fontWeight: 700,
+              fontWeight: MET_Header_Font_Weight_Bold,
             }),
           }),
           menuPortal: (base) => ({
@@ -282,7 +286,7 @@ const FilterSelect = (props: SelectProps) => {
           }),
           input: (base) => ({
             ...base,
-            fontWeight: "400",
+            fontWeight: MET_Header_Font_Weight_Regular,
             fontSize: INPUT_SIZE,
             padding: 0,
             margin: 0,

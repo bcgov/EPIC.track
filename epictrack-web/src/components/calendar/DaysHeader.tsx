@@ -28,7 +28,7 @@ const DaysHeader = ({ cellSizePx, daysInRow, offset }: DaysHeaderProps) => {
           fontWeight={isWeekendByIndex(i) ? "normal" : "bold"}
           sx={{
             backgroundColor: isWeekendByIndex(i)
-              ? "#F6F6F6"
+              ? Palette.neutral.bg.main
               : Palette.neutral.bg.light,
             borderRadius: "2px",
             color: isWeekendByIndex(i) ? Palette.neutral.light : "inherit",

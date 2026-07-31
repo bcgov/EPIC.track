@@ -1,9 +1,10 @@
 import { Chip, ChipProps, styled } from "@mui/material";
 import { Palette } from "../../../styles/theme";
+import * as tokens from "../../../styles/designTokens";
 
 const chipStyles = {
-  fontWeight: "bold",
-  borderRadius: "4px",
+  fontWeight: tokens.typographyFontWeightsBold,
+  borderRadius: tokens.layoutBorderRadiusMedium,
   minWidth: "80px",
 };
 
@@ -28,8 +29,9 @@ const ETChip = styled(
 )(({ active, inactive, highPriority, resolved, error }: StyledChipProps) => {
   if (inactive) {
     return {
-      background: "#F2F2F2",
-      color: "#6D7274",
+      // These were hardcoded hex values identical to the palette entries.
+      background: Palette.neutral.bg.main,
+      color: Palette.neutral.main,
       ...chipStyles,
     };
   }

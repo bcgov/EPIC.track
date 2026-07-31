@@ -22,6 +22,7 @@ import { BAR_COLOR } from "components/insights/utils";
 import { GrayBox, ETCaption1 } from "components/shared";
 import { showNotification } from "components/shared/notificationProvider";
 import { useGetPercentOfPhasesWithOveragesQuery } from "services/rtkQuery/phaseInsights";
+import { Palette } from "../../../../../../styles/theme";
 
 const CustomTooltip = ({
   active,
@@ -37,7 +38,13 @@ const CustomTooltip = ({
   if (active && payload && payload.length > 0) {
     const data = payload[0].payload;
     return (
-      <Box sx={{ background: "#fff", p: 2, border: "1px solid #ccc" }}>
+      <Box
+        sx={{
+          background: Palette.white,
+          p: 2,
+          border: `1px solid ${Palette.neutral.bg.dark}`,
+        }}
+      >
         <div>
           <strong>{label}</strong>
         </div>

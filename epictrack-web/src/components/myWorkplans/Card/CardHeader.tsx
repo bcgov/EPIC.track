@@ -3,16 +3,18 @@ import { Palette } from "../../../styles/theme";
 import { ETCaption1 } from "../../shared";
 import { CardProps } from "./type";
 
+export const CARD_HEADER_HEIGHT = "48px";
+
 const CardHeader = ({ workplan }: CardProps) => {
   return (
     <Grid
       container
       sx={{
         backgroundColor: Palette.neutral.bg.light,
-        borderBottom: `2px solid var(--neutral-background-dark, #DBDCDC)`,
+        borderBottom: `2px solid ${Palette.neutral.bg.dark}`,
         padding: "12px 24px",
         alignItems: "center",
-        height: "48px",
+        height: CARD_HEADER_HEIGHT,
       }}
       justifyContent="space-between"
       alignContent={"center"}

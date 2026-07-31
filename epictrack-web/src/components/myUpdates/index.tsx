@@ -17,6 +17,7 @@ import StatusAssigneeToggle from "./myStatuses/Filters/StatusAssigneeToggle";
 import StatusContainer from "./myStatuses/MyStatusContainer";
 import StatusFilters from "./myStatuses/Filters";
 import { MY_UPDATES_TABS } from "./constants";
+import { Palette } from "../../styles/theme";
 
 const MyUpdates = () => {
   const { showEnvBanner } = useAppSelector((state) => state.uiState);
@@ -44,7 +45,7 @@ const MyUpdates = () => {
             sx={{
               position: "sticky",
               top: getTotalHeaderHeight(showEnvBanner),
-              backgroundColor: "white",
+              backgroundColor: Palette.white,
               paddingBottom: "1em",
             }}
           >
@@ -108,7 +109,7 @@ const MyUpdates = () => {
             sx={{
               position: "sticky",
               top: getTotalHeaderHeight(showEnvBanner),
-              backgroundColor: "white",
+              backgroundColor: Palette.white,
               paddingBottom: "1em",
             }}
           >

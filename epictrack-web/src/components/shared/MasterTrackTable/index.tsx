@@ -10,6 +10,7 @@ import {
 import { Box, Container, Tooltip, Typography } from "@mui/material";
 import SearchIcon from "../../../assets/images/search.svg";
 import { Palette } from "../../../styles/theme";
+import * as tokens from "../../../styles/designTokens";
 import { MET_Header_Font_Weight_Bold } from "../../../styles/constants";
 import { ETHeading2, IButton } from "..";
 import { exportToCsv } from "./utils";
@@ -48,7 +49,7 @@ const NoDataComponent = ({ ...props }) => {
         >
           <ETHeading2 bold>No results found</ETHeading2>
           {table.options.data.length > 0 && (
-            <Typography color="#6D7274">
+            <Typography color={Palette.neutral.main}>
               Adjust your parameters and try again
             </Typography>
           )}
@@ -157,10 +158,10 @@ const MasterTrackTable = <TData extends MRT_RowData>({
       placeholder: column.columnDef.header,
       variant: "outlined",
       sx: {
-        backgroundColor: "white",
+        backgroundColor: Palette.white,
         "& .MuiInputBase-input::placeholder": {
-          color: Palette.neutral.light,
-          fontSize: "0.875rem",
+          color: tokens.typographyColorPlaceholder,
+          fontSize: tokens.typographyFontSizeSmallBody,
           lineHeight: "1rem",
           opacity: 1,
         },
