@@ -14,7 +14,7 @@ const StatusCardHeader = ({ item }: StatusCardProps) => {
       spacing={2}
       sx={{
         backgroundColor: Palette.neutral.bg.light,
-        borderBottom: `2px solid var(--neutral-background-dark, #DBDCDC)`,
+        borderBottom: `2px solid ${Palette.neutral.bg.dark}`,
         padding: "0.875rem",
         textTransform: "uppercase",
         fontSize: "13px",

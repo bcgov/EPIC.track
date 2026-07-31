@@ -10,6 +10,7 @@ import { EVENT_TYPE_OPTIONS } from "./Filters/EventTypeFilter";
 import EaoCalendarFilters from "./Filters/EaoCalendarFilters";
 import { useMemo, useState } from "react";
 import { EAO_EVENT_TYPE_OPTIONS } from "./Filters/EaoEventTypeFilter";
+import { Palette } from "../../styles/theme";
 
 const MyCalendar = () => {
   const { showEnvBanner } = useAppSelector((state) => state.uiState);
@@ -61,7 +62,7 @@ const MyCalendar = () => {
         sx={{
           position: "sticky",
           top: getTotalHeaderHeight(showEnvBanner),
-          backgroundColor: "white",
+          backgroundColor: Palette.white,
           paddingBottom: "1em",
         }}
       >

@@ -10,12 +10,38 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { BAR_COLOR } from "components/insights/utils";
+import { Palette } from "styles/theme";
 import { WorkByNation } from "models/insights";
 import { useGetWorksByNationQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { useInsightsContext } from "components/insights/InsightsContext";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
+
+const AXIS_WIDTH = 180;
+const TICK_FONT_SIZE = 12;
+const MAX_TICK_CHARS = Math.floor(AXIS_WIDTH / (TICK_FONT_SIZE * 0.55));
+const NationTick = ({ x, y, payload }: any) => {
+  const name: string = payload?.value ?? "";
+  const label =
+    name.length > MAX_TICK_CHARS
+      ? `${name.slice(0, MAX_TICK_CHARS - 1).trimEnd()}…`
+      : name;
+
+  return (
+    <text
+      x={x}
+      y={y}
+      dy={4}
+      textAnchor="end"
+      fontSize={TICK_FONT_SIZE}
+      fill={Palette.neutral.dark}
+    >
+      <title>{name}</title>
+      {label}
+    </text>
+  );
+};
 
 const WorkByNationChart = () => {
   const { isUserInsights, staffId } = useInsightsContext();
@@ -84,9 +110,9 @@ const WorkByNationChart = () => {
                   <YAxis
                     dataKey="nation"
                     interval={0}
-                    tick={{ fontSize: 12 }}
+                    tick={<NationTick />}
                     type="category"
-                    width={100}
+                    width={AXIS_WIDTH}
                   />
                   <Tooltip />
                   <Bar dataKey="count" fill={BAR_COLOR} barSize={20} />

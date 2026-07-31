@@ -13,13 +13,13 @@ import {
   IconButton,
 } from "@mui/material";
 import {
-  MET_Header_Font_Family,
   MET_Header_Font_Weight_Bold,
   MET_Header_Font_Weight_Regular,
 } from "../../styles/constants";
 import { useAppSelector } from "../../hooks";
 import { Link, LinkProps, Path } from "react-router-dom";
 import { Palette } from "../../styles/theme";
+import * as tokens from "../../styles/designTokens";
 
 interface HeaderProps {
   sx?: any;
@@ -56,19 +56,41 @@ const useStyle = {
     overflow: "hidden",
   },
 };
+const weightFor = (bold?: boolean) =>
+  bold === undefined
+    ? undefined
+    : bold
+      ? MET_Header_Font_Weight_Bold
+      : MET_Header_Font_Weight_Regular;
+const formLabelStyles = {
+  fontSize: tokens.typographyFontSizeBody,
+  fontWeight: MET_Header_Font_Weight_Bold,
+  lineHeight: tokens.typographyLineHeightBody,
+  color: Palette.neutral.dark,
+  "& .MuiFormLabel-asterisk": {
+    color: Palette.error.main,
+  },
+  "&.Mui-error": {
+    color: tokens.typographyColorDanger,
+  },
+  "&.Mui-disabled": {
+    color: tokens.typographyColorDisabled,
+  },
+};
+
 export const ETPageContainer = (props: PageContainerProps) => {
   const state = useAppSelector((state) => state.uiState);
   return (
     <Grid
       {...props}
       sx={{
-        ...props.sx,
         pt: state.showEnvBanner ? "9rem" : "7rem",
         pb: "1rem",
         pl: { xs: "0.75rem", sm: "2.5rem" },
         pr: { xs: "0.75rem", sm: "2rem" },
         justifyContent: "flex-start",
         alignItems: "flex-start",
+        ...props.sx,
       }}
     >
       {props.children}
@@ -81,10 +103,10 @@ export const ETReportContainer = (props: PageContainerProps) => {
     <Grid
       {...props}
       sx={{
-        ...props.sx,
         padding: `${state.showEnvBanner ? "6" : "4"}rem 0rem 1rem 0rem`,
         justifyContent: "flex-start",
         alignItems: "flex-start",
+        ...props.sx,
       }}
     >
       {props.children}
@@ -95,11 +117,8 @@ export const ETHeading1 = ({ bold, children, sx, ...rest }: HeaderProps) => {
   return (
     <Typography
       sx={{
+        fontWeight: weightFor(bold),
         ...sx,
-        fontWeight: bold
-          ? MET_Header_Font_Weight_Bold
-          : MET_Header_Font_Weight_Regular,
-        fontFamily: MET_Header_Font_Family,
       }}
       variant="h1"
       {...rest}
@@ -112,11 +131,8 @@ export const ETHeading2 = ({ bold, children, sx, ...rest }: HeaderProps) => {
   return (
     <Typography
       sx={{
+        fontWeight: weightFor(bold),
         ...sx,
-        fontWeight: bold
-          ? MET_Header_Font_Weight_Bold
-          : MET_Header_Font_Weight_Regular,
-        fontFamily: MET_Header_Font_Family,
       }}
       variant="h2"
       {...rest}
@@ -129,11 +145,8 @@ export const ETHeading3 = ({ bold, children, sx, ...rest }: HeaderProps) => {
   return (
     <Typography
       sx={{
+        fontWeight: weightFor(bold),
         ...sx,
-        fontWeight: bold
-          ? MET_Header_Font_Weight_Bold
-          : MET_Header_Font_Weight_Regular,
-        fontFamily: MET_Header_Font_Family,
       }}
       variant="h3"
       {...rest}
@@ -159,11 +172,8 @@ export const ETHeading4 = ({
       <Typography
         color={color}
         sx={{
+          fontWeight: weightFor(bold),
           ...sx,
-          fontWeight: bold
-            ? MET_Header_Font_Weight_Bold
-            : MET_Header_Font_Weight_Regular,
-          fontFamily: MET_Header_Font_Family,
           ...(enableEllipsis && useStyle.textEllipsis),
         }}
         variant="h4"
@@ -186,11 +196,8 @@ export const ETSubhead = ({
     <Typography
       color={color}
       sx={{
+        fontWeight: weightFor(bold),
         ...sx,
-        fontWeight: bold
-          ? MET_Header_Font_Weight_Bold
-          : MET_Header_Font_Weight_Regular,
-        fontFamily: MET_Header_Font_Family,
       }}
       variant="subtitle1"
       {...rest}
@@ -222,10 +229,7 @@ export const ETParagraph = React.forwardRef(
           ref={ref}
           color={color}
           sx={{
-            fontWeight: bold
-              ? MET_Header_Font_Weight_Bold
-              : MET_Header_Font_Weight_Regular,
-            fontFamily: MET_Header_Font_Family,
+            fontWeight: weightFor(bold),
             ...sx,
             ...(enableEllipsis && useStyle.textEllipsis),
           }}
@@ -250,12 +254,9 @@ export const ETCaption1 = ({
     <Typography
       color={color}
       sx={{
-        ...sx,
-        fontWeight: bold
-          ? MET_Header_Font_Weight_Bold
-          : MET_Header_Font_Weight_Regular,
-        fontFamily: MET_Header_Font_Family,
+        fontWeight: weightFor(bold),
         letterSpacing: "0.39px",
+        ...sx,
       }}
       variant="caption"
       {...rest}
@@ -275,18 +276,15 @@ export const ETCaption2 = ({
   return (
     <Typography
       color={color}
+      align="left"
       sx={{
+        fontSize: tokens.typographyFontSizeSmallBody,
+        lineHeight: tokens.typographyLineHeightSmallBody,
+        fontWeight: weightFor(bold),
         ...sx,
-        fontSize: "0.875rem",
-        lineHeight: "1.2rem",
-        fontWeight: bold
-          ? MET_Header_Font_Weight_Bold
-          : MET_Header_Font_Weight_Regular,
-        fontFamily: MET_Header_Font_Family,
       }}
       variant="caption"
       {...rest}
-      align="left"
     >
       {children}
     </Typography>
@@ -303,27 +301,35 @@ export const ETGridTitle = ({
   enableEllipsis,
   ...rest
 }: LinkHeaderProps) => {
+  const title = (
+    <Tooltip
+      title={rest.tooltip as string}
+      disableHoverListener={!enableTooltip}
+    >
+      <ETParagraph
+        bold={bold}
+        {...rest}
+        sx={{
+          ...(enableEllipsis && useStyle.textEllipsis),
+        }}
+        color={
+          disabled
+            ? tokens.typographyColorDisabled
+            : Palette.primary.accent.main
+        }
+      >
+        {children}
+      </ETParagraph>
+    </Tooltip>
+  );
+
   if (disabled) {
-    return <ETParagraph bold={bold}>{children}</ETParagraph>;
+    return title;
   }
 
   return (
     <ETLink onClick={rest.onClick} {...rest}>
-      <Tooltip
-        title={rest.tooltip as string}
-        disableHoverListener={!enableTooltip}
-      >
-        <ETParagraph
-          bold={bold}
-          {...rest}
-          sx={{
-            ...(enableEllipsis && useStyle.textEllipsis),
-          }}
-          color={Palette.primary.accent.main}
-        >
-          {children}
-        </ETParagraph>
-      </Tooltip>
+      {title}
     </ETLink>
   );
 };
@@ -339,13 +345,10 @@ export const ETCaption3 = ({
     <Typography
       color={color}
       sx={{
+        fontSize: tokens.typographyFontSizeLabel,
+        lineHeight: tokens.typographyLineHeightLabel,
+        fontWeight: weightFor(bold),
         ...sx,
-        fontSize: "0.75em",
-        lineHeight: "1.3em",
-        fontWeight: bold
-          ? MET_Header_Font_Weight_Bold
-          : MET_Header_Font_Weight_Regular,
-        fontFamily: MET_Header_Font_Family,
       }}
       variant="caption"
       {...rest}
@@ -355,28 +358,24 @@ export const ETCaption3 = ({
   );
 };
 
-export const ETFormLabel = (props: FormLabelBaseProps & FormLabelOwnProps) => {
+export const ETFormLabel = ({
+  children,
+  sx,
+  ...rest
+}: FormLabelBaseProps & FormLabelOwnProps) => {
   return (
-    <FormLabel
-      required={props.required}
-      sx={{
-        fontSize: "16px",
-        fontWeight: "bold",
-        lineHeight: "1.5rem",
-        color: Palette.neutral.dark,
-        "& .MuiFormLabel-asterisk": {
-          color: Palette.error.main,
-        },
-      }}
-    >
-      {props.children}
+    <FormLabel {...rest} sx={{ ...formLabelStyles, ...sx }}>
+      {children}
     </FormLabel>
   );
 };
 
-export const ETFormLabelWithCharacterLimit = (
-  props: FormLabelWithCharacterCountProps,
-) => {
+export const ETFormLabelWithCharacterLimit = ({
+  characterCount,
+  maxCharacterLength,
+  children,
+  ...rest
+}: FormLabelWithCharacterCountProps) => {
   return (
     <Box
       sx={{
@@ -386,31 +385,16 @@ export const ETFormLabelWithCharacterLimit = (
         alignItems: "baseline",
       }}
     >
-      <FormLabel
-        required={props.required}
+      <ETFormLabel {...rest}>{children}</ETFormLabel>
+      <ETCaption3
         sx={{
-          fontSize: "16px",
-          fontWeight: "bold",
-          lineHeight: "1.5rem",
-          color: Palette.neutral.dark,
-          "& .MuiFormLabel-asterisk": {
-            color: Palette.error.main,
-          },
-        }}
-      >
-        {props.children}
-      </FormLabel>
-      <ETParagraph
-        sx={{
-          fontSize: "12px",
           margin: 0,
-          lineHeight: "1.5rem",
           color: Palette.neutral.light,
         }}
       >
-        {props.maxCharacterLength - props.characterCount}/
-        {props.maxCharacterLength} characters left
-      </ETParagraph>
+        {maxCharacterLength - characterCount}/{maxCharacterLength} characters
+        left
+      </ETCaption3>
     </Box>
   );
 };
@@ -437,15 +421,10 @@ export const ETDescription = ({
     <Typography
       color={color}
       sx={{
+        fontWeight: weightFor(bold),
         ...sx,
-        lineHeight: "21px",
-        fontSize: "14px",
-        fontWeight: bold
-          ? MET_Header_Font_Weight_Bold
-          : MET_Header_Font_Weight_Regular,
-        fontFamily: MET_Header_Font_Family,
       }}
-      variant="body1"
+      variant="body2"
       {...rest}
     >
       {children}
@@ -473,27 +452,9 @@ export const GrayBox = ({ children, sx, ...rest }: GrayBoxProps) => {
     </Box>
   );
 };
-
-export const ETPreviewText = ({ bold, children, sx, ...rest }: HeaderProps) => {
-  return (
-    <Typography
-      sx={{
-        ...sx,
-        fontSize: "14px",
-        fontStyle: "normal",
-        lineHeight: "21px",
-        fontWeight: bold
-          ? MET_Header_Font_Weight_Bold
-          : MET_Header_Font_Weight_Regular,
-        fontFamily: MET_Header_Font_Family,
-      }}
-      variant="body1"
-      {...rest}
-    >
-      {children}
-    </Typography>
-  );
-};
+export const ETPreviewText = (props: HeaderProps) => (
+  <ETDescription {...props} />
+);
 
 export const ETPreviewBox = ({ children, sx, ...rest }: HeaderProps) => {
   return (
@@ -517,7 +478,7 @@ export const IButton = styled(IconButton)({
   },
   "&:hover": {
     backgroundColor: Palette.neutral.bg.main,
-    borderRadius: "4px",
+    borderRadius: tokens.layoutBorderRadiusMedium,
   },
   "&.Mui-disabled": {
     pointerEvents: "auto",

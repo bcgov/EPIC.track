@@ -6,6 +6,7 @@ import { StatusDashboardItem } from "models/status";
 import { StatusProvider } from "components/workPlan/status/StatusContext";
 import { useContext } from "react";
 import { MyStatusesContext } from "../MyStatusContext";
+import { Palette } from "../../../../styles/theme";
 
 export interface StatusCardProps {
   item: StatusDashboardItem;
@@ -17,7 +18,7 @@ const StatusCard = ({ item, statusStalenessSettings }: StatusCardProps) => {
   return (
     <Box
       sx={{
-        border: `2px solid var(--neutral-background-dark, #DBDCDC)`,
+        border: `2px solid ${Palette.neutral.bg.dark}`,
         borderRadius: "4px",
       }}
     >

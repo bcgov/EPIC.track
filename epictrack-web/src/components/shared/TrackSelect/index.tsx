@@ -2,6 +2,7 @@ import React from "react";
 import Select, { Props } from "react-select";
 import { FormHelperText } from "@mui/material";
 import { Palette } from "../../../styles/theme";
+import * as tokens from "../../../styles/designTokens";
 
 type TrackSelectProps = Props & {
   error?: boolean;
@@ -30,22 +31,28 @@ const TrackSelect = React.forwardRef<any, TrackSelectProps>(
                 ...baseStyles,
                 width: fullWidth ? "100%" : baseStyles.width,
                 borderColor: error
-                  ? "#d32f2f"
+                  ? tokens.supportBorderColorDanger
                   : state.isFocused
-                    ? Palette.primary.accent.light
-                    : Palette.neutral.accent.light,
+                    ? tokens.surfaceColorBorderActive
+                    : tokens.surfaceColorBorderDefault,
                 borderWidth: "2px",
-                fontSize: "16px",
-                lineHeight: "24px",
+                fontSize: tokens.typographyFontSizeBody,
+                lineHeight: tokens.typographyLineHeightBody,
                 backgroundColor: !!disabled
-                  ? Palette.neutral.bg.dark
+                  ? tokens.surfaceColorFormsDisabled
                   : Palette.white,
-                fontWeight: "400",
+                fontWeight: tokens.typographyFontWeightsRegular,
                 "&:hover": {
-                  borderColor: Palette.primary.accent.light,
+                  borderColor: error
+                    ? tokens.supportBorderColorDanger
+                    : tokens.surfaceColorBorderMedium,
                 },
               };
             },
+            placeholder: (base) => ({
+              ...base,
+              color: tokens.typographyColorPlaceholder,
+            }),
             indicatorsContainer: (base) => ({
               ...base,
               zIndex: "auto",
@@ -53,7 +60,7 @@ const TrackSelect = React.forwardRef<any, TrackSelectProps>(
             menuPortal: (base) => ({
               ...base,
               zIndex: 1500,
-              fontSize: "1rem",
+              fontSize: tokens.typographyFontSizeBody,
             }),
           }}
           {...rest}

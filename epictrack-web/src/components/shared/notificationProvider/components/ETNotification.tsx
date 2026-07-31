@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import { Palette } from "../../../../styles/theme";
 import { CloseIconComponent } from "./icons";
 import { ETNotificationProps } from "../type";
+import * as tokens from "../../../../styles/designTokens";
 
 const ETNotification = React.forwardRef<HTMLDivElement, ETNotificationProps>(
   (props, ref) => {
@@ -51,7 +52,7 @@ const ETNotification = React.forwardRef<HTMLDivElement, ETNotificationProps>(
           padding: "16px 24px",
           gap: "16px",
           flexDirection: "column",
-          borderRadius: "4px",
+          borderRadius: tokens.layoutBorderRadiusMedium,
           ...(type === "success" && {
             backgroundColor: Palette.success.bg.light,
             color: Palette.success.dark,

@@ -23,7 +23,7 @@ const IssueCardHeader = ({ item }: IssueCardProps) => {
       container
       sx={{
         backgroundColor: Palette.neutral.bg.light,
-        borderBottom: `2px solid var(--neutral-background-dark, #DBDCDC)`,
+        borderBottom: `2px solid ${Palette.neutral.bg.dark}`,
         padding: "0.875rem",
         height: "120px",
         fontSize: "13px",

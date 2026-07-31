@@ -5,7 +5,7 @@ import { store } from "./store";
 import { Provider } from "react-redux";
 import { StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
 import { BaseTheme } from "./styles/theme";
-// import "@bcgov/bc-sans/css/BCSans.css";
+import "@bcgov/bc-sans/css/BC_Sans.css";
 
 // eslint-disable-next-line
 const root = ReactDOM.createRoot(document.getElementById("root")!);

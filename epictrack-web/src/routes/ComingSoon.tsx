@@ -41,7 +41,7 @@ const ComingSoon = () => {
               alignItems: "center",
             }}
           >
-            <PaintBrushIcon sx={{ backgroundColor: "red" }} />
+            <PaintBrushIcon sx={{ backgroundColor: Palette.error.main }} />
             <ETHeading1
               bold
               sx={{

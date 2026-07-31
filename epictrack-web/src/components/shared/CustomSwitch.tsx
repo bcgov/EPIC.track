@@ -1,5 +1,6 @@
 import { styled } from "@mui/material/styles";
 import { Palette } from "../../styles/theme";
+import * as tokens from "../../styles/designTokens";
 import Switch, { SwitchProps } from "@mui/material/Switch";
 
 export const CustomSwitch = styled((props: SwitchProps) => (
@@ -18,7 +19,7 @@ export const CustomSwitch = styled((props: SwitchProps) => (
     margin: 2,
     "&.Mui-checked": {
       transform: "translateX(16px)",
-      color: "#FFFFFF",
+      color: Palette.white,
       "& + .MuiSwitch-track": {
         backgroundColor: `${
           props.disabled ? Palette.neutral.light : Palette.primary.accent.main
@@ -26,9 +27,9 @@ export const CustomSwitch = styled((props: SwitchProps) => (
         opacity: 1,
       },
     },
-    "&.Mui-focusVisible .MuiSwitch-thumb": {
-      color: "#33cf4d",
-      border: "6px solid #fff",
+    "&.Mui-focusVisible": {
+      outline: `2px solid ${tokens.surfaceColorBorderActive}`,
+      outlineOffset: "2px",
     },
     "&.Mui-disabled .MuiSwitch-thumb": {
       color: Palette.white,

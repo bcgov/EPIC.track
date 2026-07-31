@@ -1,4 +1,5 @@
 import { Palette } from "../../styles/theme";
+import * as tokens from "../../styles/designTokens";
 import { Box, BoxProps } from "@mui/system";
 
 type StatusBadgeProps = {
@@ -8,22 +9,22 @@ type StatusBadgeProps = {
 const StatusBadge = ({ is_active, ...boxProps }: StatusBadgeProps) => {
   const status = is_active ? "Active" : "Inactive";
   const backgroundColour = is_active
-    ? Palette.primary.bg.main
+    ? Palette.success.bg.light
     : Palette.neutral.bg.main;
-  const colour = is_active ? Palette.primary.main : Palette.neutral.main;
+  const colour = is_active ? Palette.success.dark : Palette.neutral.main;
 
   return (
     <Box
       {...boxProps}
       sx={{
-        borderRadius: "4px",
+        borderRadius: tokens.layoutBorderRadiusMedium,
         padding: "4px 8px",
         backgroundColor: backgroundColour,
         color: colour,
         whiteSpace: "nowrap",
         textTransform: "capitalize",
         display: "inline-block",
-        fontWeight: "700",
+        fontWeight: tokens.typographyFontWeightsBold,
         ...boxProps.sx,
       }}
     >

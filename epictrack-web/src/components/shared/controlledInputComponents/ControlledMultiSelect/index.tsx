@@ -3,6 +3,7 @@ import { FormHelperText } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 import Select, { CSSObjectWithLabel } from "react-select";
 import { Palette } from "../../../../styles/theme";
+import * as tokens from "../../../../styles/designTokens";
 import Option from "./Option";
 
 type IFormInputProps = {
@@ -116,26 +117,34 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
                   return {
                     ...baseStyles,
                     borderColor: !!errors[name]
-                      ? "#d32f2f"
-                      : Palette.neutral.accent.light,
+                      ? tokens.supportBorderColorDanger
+                      : state.isFocused
+                        ? tokens.surfaceColorBorderActive
+                        : tokens.surfaceColorBorderDefault,
                     borderWidth: "2px",
-                    fontSize: "16px",
-                    lineHeight: "24px",
+                    fontSize: tokens.typographyFontSizeBody,
+                    lineHeight: tokens.typographyLineHeightBody,
                     backgroundColor: !!disabled
-                      ? Palette.neutral.bg.dark
+                      ? tokens.surfaceColorFormsDisabled
                       : Palette.white,
-                    fontWeight: "400",
+                    fontWeight: tokens.typographyFontWeightsRegular,
                     "&:hover": {
-                      borderColor: Palette.primary.accent.light,
+                      borderColor: !!errors[name]
+                        ? tokens.supportBorderColorDanger
+                        : tokens.surfaceColorBorderMedium,
                     },
                   };
                 },
+                placeholder: (base: CSSObjectWithLabel) => ({
+                  ...base,
+                  color: tokens.typographyColorPlaceholder,
+                }),
                 menuPortal: (base: CSSObjectWithLabel) => ({
                   ...base,
                   zIndex: 99999,
-                  fontSize: "1rem",
+                  fontSize: tokens.typographyFontSizeBody,
                 }),
-                multiValue(base, props) {
+                multiValue(base) {
                   return {
                     ...base,
                     padding: "0px 4px 0px 2px",
@@ -143,13 +152,15 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
                 },
               }}
             ></Select>
-            {helperText && (
+            {(!!errors[name] || helperText) && (
               <FormHelperText
-                error={true}
+                error={!!errors[name]}
                 className="MuiFormHelperText-sizeSmall"
                 style={{ marginInline: "14px" }}
               >
-                {String(errors[name]?.message || "")}
+                {errors[name]
+                  ? String(errors[name]?.message || "")
+                  : helperText}
               </FormHelperText>
             )}
           </>

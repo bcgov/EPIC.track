@@ -1,5 +1,12 @@
 import { Skeleton } from "@mui/material";
+import { CARD_BODY_HEIGHT } from "./CardBody";
+import { CARD_HEADER_HEIGHT } from "./CardHeader";
+import { CARD_FOOTER_HEIGHT } from "./CardFooter";
+const CARD_HEIGHT =
+  parseInt(CARD_HEADER_HEIGHT, 10) +
+  parseInt(CARD_BODY_HEIGHT, 10) +
+  parseInt(CARD_FOOTER_HEIGHT, 10);
 
 export const CardSkeleton = () => {
-  return <Skeleton variant="rectangular" height={446} />;
+  return <Skeleton variant="rectangular" height={CARD_HEIGHT} />;
 };

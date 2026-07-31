@@ -15,6 +15,7 @@ import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import { useInsightsContext } from "components/insights/InsightsContext";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
+import { BAR_COLOR } from "../../../../utils";
 
 const WorkByTypeChart = () => {
   const { isUserInsights, staffId } = useInsightsContext();
@@ -77,7 +78,7 @@ const WorkByTypeChart = () => {
                 cx={isMobile ? "50%" : "35%"}
                 cy="50%"
                 outerRadius={80}
-                fill="#8884d8"
+                fill={BAR_COLOR}
                 dataKey="value"
                 label
                 isAnimationActive={false}

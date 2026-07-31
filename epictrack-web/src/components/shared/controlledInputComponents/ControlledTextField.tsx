@@ -43,9 +43,13 @@ const ControlledTextField: FC<IFormInputProps> = ({
             }
             field.onChange(e.target.value);
           }}
-          error={!!errors[name]}
-          helperText={String(errors[name]?.message ?? "")}
           {...otherProps}
+          error={!!errors[name] || otherProps.error}
+          helperText={
+            errors[name]
+              ? String(errors[name]?.message ?? "")
+              : otherProps.helperText
+          }
         />
       )}
     />

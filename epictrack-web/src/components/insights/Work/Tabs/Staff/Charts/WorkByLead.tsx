@@ -16,6 +16,7 @@ import type { WorkByLead } from "models/insights";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
 import { useInsightsContext } from "components/insights/InsightsContext";
+import { BAR_COLOR } from "../../../../utils";
 
 const WorkByLeadChart = () => {
   const { isUserInsights, staffId } = useInsightsContext();
@@ -86,9 +87,9 @@ const WorkByLeadChart = () => {
                     tick={{ fontSize: 12 }} // Make sure to pass the width
                   />
                   <Tooltip />
-                  <Bar dataKey="value" fill="#82ca9d" barSize={20}>
+                  <Bar dataKey="value" fill={BAR_COLOR} barSize={20}>
                     {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={"#4bacc6"} />
+                      <Cell key={`cell-${index}`} fill={BAR_COLOR} />
                     ))}
                   </Bar>
                 </BarChart>

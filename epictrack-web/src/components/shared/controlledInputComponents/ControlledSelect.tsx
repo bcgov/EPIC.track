@@ -26,8 +26,12 @@ const ControlledSelect: React.ForwardRefRenderFunction<
           {...field}
           ref={ref}
           {...otherProps}
-          error={!!errors[name]}
-          helperText={String(errors[name]?.message || "")}
+          error={!!errors[name] || otherProps.error}
+          helperText={
+            errors[name]
+              ? String(errors[name]?.message || "")
+              : otherProps.helperText
+          }
         >
           {children}
         </TextField>

@@ -69,7 +69,7 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
             }}
             disabled={disabled}
             error={!!error}
-            helperText={String(error?.message) || helperText}
+            helperText={error ? String(error.message ?? "") : helperText}
           />
         );
       }}

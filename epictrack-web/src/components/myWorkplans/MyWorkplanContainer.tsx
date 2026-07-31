@@ -10,6 +10,7 @@ import { MY_WORKPLAN_VIEW } from "./type";
 import { MyWorkplanGantt } from "./Gantt";
 import { useAppSelector } from "hooks";
 import { getTotalHeaderHeight } from "components/layout/Header/constants";
+import { Palette } from "../../styles/theme";
 
 const WorkPlanContainer = () => {
   const { myWorkPlanView } = useContext(MyWorkplansContext);
@@ -28,7 +29,7 @@ const WorkPlanContainer = () => {
           position: "sticky",
           zIndex: theme.zIndex.appBar,
           top: getTotalHeaderHeight(showEnvBanner),
-          backgroundColor: "white",
+          backgroundColor: Palette.white,
           paddingBottom: "1em",
         }}
       >

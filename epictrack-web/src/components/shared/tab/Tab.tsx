@@ -4,6 +4,7 @@ import {
   MET_Header_Font_Weight_Bold,
   MET_Header_Font_Weight_Regular,
 } from "../../../styles/constants";
+import * as tokens from "../../../styles/designTokens";
 import { Chip, Tab, Tabs } from "@mui/material";
 import ETTabProps from "./type";
 
@@ -25,15 +26,19 @@ const ETTabs = styled(Tabs)({
     padding: "0rem",
     color: Palette.neutral.dark,
     fontWeight: MET_Header_Font_Weight_Regular,
-    fontSize: "1rem",
+    fontSize: tokens.typographyFontSizeBody,
     minWidth: "0px",
   },
   "& .Mui-disabled": {
-    color: Palette.neutral.accent.light,
+    color: tokens.typographyColorDisabled,
   },
   "& .Mui-selected": {
     fontWeight: MET_Header_Font_Weight_Bold,
     color: Palette.primary.main,
+  },
+  "& .Mui-focusVisible": {
+    outline: `2px solid ${tokens.surfaceColorBorderActive}`,
+    outlineOffset: "2px",
   },
 });
 

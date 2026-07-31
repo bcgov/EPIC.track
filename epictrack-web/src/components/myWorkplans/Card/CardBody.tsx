@@ -25,6 +25,7 @@ import { dateUtils } from "utils";
 
 const IndicatorSmallIcon: React.FC<IconProps> = Icons["IndicatorSmallIcon"];
 const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];
+export const CARD_BODY_HEIGHT = "328px";
 
 const decisionWorkStates = [
   WorkStateEnum.CLOSED,
@@ -116,7 +117,8 @@ const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
       sx={{
         backgroundColor: Palette.white,
         padding: "16px 24px",
-        height: "313px",
+        height: CARD_BODY_HEIGHT,
+        flexWrap: "nowrap",
       }}
       gap={1}
     >

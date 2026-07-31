@@ -1,6 +1,7 @@
 import React from "react";
 import { Backdrop, CircularProgress } from "@mui/material";
 import { useAppSelector } from "../../../hooks";
+import { Palette } from "../../../styles/theme";
 
 export const Loader = () => {
   // Loading state changes handled in src\components\axiosErrorHandler\AxiosErrorHandler.tsx
@@ -8,7 +9,7 @@ export const Loader = () => {
 
   return (
     <Backdrop
-      sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.modal + 1 }}
+      sx={{ color: Palette.white, zIndex: (theme) => theme.zIndex.modal + 1 }}
       open={loadingState.isLoading}
     >
       <CircularProgress color="inherit" />
