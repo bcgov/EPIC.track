@@ -3,6 +3,9 @@
 This module is to handle authorization related queries.
 """
 
+from contextlib import contextmanager
+
+from flask import g
 from flask_restx import abort
 
 from api.utils import TokenInfo
@@ -12,9 +15,30 @@ from api.models import StaffElevatedRole as StaffElevatedRoleModel
 from api.models import StaffWorkRole as StaffWorkRoleModel
 
 
+@contextmanager
+def action_context():
+    """Run a block of code as a side effect of an already authorized operation.
+
+    Event actions (see `api.actions`) cascade through services that each run their
+    own check. The user's right to trigger the cascade is checked once, against the work
+    the event belongs to; the cascade itself acts on the system's behalf and can
+    reach records the user has no standalone permission on, such as a work the action
+    itself creates.
+    """
+    previous = getattr(g, "in_action_context", False)
+    g.in_action_context = True
+    try:
+        yield
+    finally:
+        g.in_action_context = previous
+
+
 # pylint: disable=unused-argument,inconsistent-return-statements
 def check_auth(**kwargs):
     """Check if user is authorized to perform action on the service."""
+    if getattr(g, "in_action_context", False):
+        return True
+
     raw_roles = kwargs.get("one_of_roles", [])
     work_id = kwargs.get("work_id")
     permitted_roles = {_normalize_role(r) for r in raw_roles}
