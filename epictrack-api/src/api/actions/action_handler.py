@@ -5,6 +5,7 @@ from api.actions.base import ACTION_HANDLER_CLASS_MAPS, ActionFactory
 from api.exceptions import UnprocessableEntityError
 from api.models.action import ActionEnum
 from api.models.event import Event
+from api.services import authorisation
 
 
 class ActionHandler:  # pylint: disable=too-few-public-methods
@@ -29,7 +30,9 @@ class ActionHandler:  # pylint: disable=too-few-public-methods
         """Perform the action"""
         # So that actions not done yet won't raise errors
         if self.action_class:
-            self.action_class().run(source_event, params)
+            # The caller already checked the user against the work the event belongs to
+            with authorisation.action_context():
+                self.action_class().run(source_event, params)
 
     def get_additional_params(self, params: dict) -> None:
         """
