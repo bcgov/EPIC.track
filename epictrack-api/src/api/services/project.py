@@ -20,6 +20,7 @@ import pandas as pd
 from flask import current_app
 from psycopg2.extras import DateTimeTZRange
 from sqlalchemy import and_
+from sqlalchemy.orm import joinedload
 
 from api.exceptions import BadRequestError, ResourceExistsError, ResourceNotFoundError
 from api.models import Project, db
@@ -121,14 +122,19 @@ class ProjectService:
     def find_team_members(cls, project_id: int = None) -> List[dict]:
         """Return the staff working on each project, folded across the project's works."""
         cls._check_auth(one_of_roles=[KeycloakRole.VIEW])
-        works_query = db.session.query(Work).filter(Work.is_deleted.is_(False))
+        works_query = (
+            db.session.query(Work)
+            .join(Project, Work.project_id == Project.id)
+            .options(joinedload(Work.work_lead), joinedload(Work.responsible_epd))
+            .filter(Work.is_deleted.is_(False), Project.is_deleted.is_(False))
+        )
         if project_id:
             works_query = works_query.filter(Work.project_id == project_id)
         works = works_query.all()
         if not works:
             return []
 
-        # ponytail: one IN-list over every work; paginate if Track outgrows a few thousand.
+        # ponytail: two statements total, the second an IN-list over every work; paginate if Track outgrows a few thousand works.
         staff_for_works = WorkService.find_staff_for_works([work.id for work in works])
         teams: dict = {}
         for work in works:
@@ -148,7 +154,6 @@ class ProjectService:
                         "staff_id": staff_id,
                         "idir_user_id": member["staff"].idir_user_id,
                         "email": member["staff"].email,
-                        "is_active": member["staff"].is_active,
                         "roles": sorted(member["roles"]),
                         "work_ids": sorted(member["work_ids"]),
                     }

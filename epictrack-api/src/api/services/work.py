@@ -22,7 +22,7 @@ import pandas as pd
 from flask import current_app
 from sqlalchemy import and_
 from sqlalchemy import tuple_
-from sqlalchemy.orm import aliased
+from sqlalchemy.orm import aliased, contains_eager
 
 from api.exceptions import (
     ResourceExistsError,
@@ -425,6 +425,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             .join(Staff, StaffWorkRole.staff_id == Staff.id)
             .join(Role, StaffWorkRole.role_id == Role.id)
             .join(Work, StaffWorkRole.work_id == Work.id)
+            .options(contains_eager(StaffWorkRole.staff), contains_eager(StaffWorkRole.role))
             .filter(
                 StaffWorkRole.is_deleted.is_(False),
                 StaffWorkRole.is_active.is_(True),

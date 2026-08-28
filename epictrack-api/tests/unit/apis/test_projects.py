@@ -13,11 +13,14 @@
 # limitations under the License.
 """Test suite for projects."""
 
+from contextlib import contextmanager
 from decimal import Decimal
 from http import HTTPStatus
 from pathlib import Path
 from urllib.parse import urljoin
 
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 from werkzeug.datastructures import FileStorage
 
 from api.models.work import WorkStateEnum
@@ -136,6 +139,21 @@ def _get_team_members(client, auth_header, query=None):
     return client.get(url, query_string=query, headers=auth_header)
 
 
+@contextmanager
+def _count_statements():
+    """Count the SQL statements issued inside the block."""
+    statements = []
+
+    def record(conn, cursor, statement, parameters, context, executemany):  # pylint: disable=too-many-arguments,unused-argument
+        statements.append(statement)
+
+    event.listen(Engine, "before_cursor_execute", record)
+    try:
+        yield statements
+    finally:
+        event.remove(Engine, "before_cursor_execute", record)
+
+
 def _staff_by_id(teams, project_id):
     """Return the staff of one project keyed by staff id."""
     team = next(entry for entry in teams if entry["project_id"] == project_id)
@@ -165,7 +183,6 @@ def test_project_team_members_unions_works(client, auth_header):
     assert staff[shared_staff.id]["work_ids"] == [work_a.id, work_b.id]
     assert staff[shared_staff.id]["roles"] == ["Officer / Analyst"]
     assert staff[shared_staff.id]["email"] == shared_staff.email
-    assert staff[shared_staff.id]["is_active"] is True
     assert staff[work_a.work_lead_id]["roles"] == ["Work Lead"]
     assert staff[work_a.work_lead_id]["work_ids"] == [work_a.id]
     assert staff[work_a.responsible_epd_id]["roles"] == ["Responsible EPD"]
@@ -261,6 +278,70 @@ def test_project_team_members_filtered_by_project(client, auth_header):
         work_second.work_lead_id,
         work_second.responsible_epd_id,
     }
+
+
+def test_project_team_members_excludes_deleted_project(client, auth_header):
+    """A soft deleted project drops out even though its work is live."""
+    work = factory_work_model()
+    project = work.project
+    project.is_deleted = True
+    project.save()
+
+    response = _get_team_members(client, auth_header)
+
+    assert response.status_code == HTTPStatus.OK
+    assert project.id not in {entry["project_id"] for entry in response.json}
+
+
+def test_project_team_members_excludes_deleted_staff(client, auth_header):
+    """A soft deleted staff member drops out even while still marked active."""
+    work = factory_work_model()
+    work.work_lead.is_deleted = True
+    work.work_lead.save()
+    assert work.work_lead.is_active is True
+
+    response = _get_team_members(client, auth_header)
+
+    assert response.status_code == HTTPStatus.OK
+    staff = _staff_by_id(response.json, work.project_id)
+    assert set(staff) == {work.responsible_epd_id}
+
+
+def test_project_team_members_rejects_bad_project_id(client, auth_header):
+    """A project_id that is not a positive integer is rejected."""
+    assert (
+        _get_team_members(client, auth_header, {"project_id": "abc"}).status_code
+        == HTTPStatus.BAD_REQUEST
+    )
+    assert (
+        _get_team_members(client, auth_header, {"project_id": "0"}).status_code
+        == HTTPStatus.BAD_REQUEST
+    )
+
+
+def test_project_team_members_query_count_does_not_grow_with_works(client, auth_header):
+    """The endpoint issues the same number of statements for one work as for three."""
+    work = factory_work_model()
+    factory_staff_work_role_model(work_id=work.id)
+    query = {"project_id": work.project_id}
+
+    with _count_statements() as one_work_statements:
+        one_work = _get_team_members(client, auth_header, query)
+
+    for _ in range(2):
+        extra_work = factory_work_model()
+        factory_staff_work_role_model(work_id=extra_work.id)
+
+    with _count_statements() as three_work_statements:
+        three_works = _get_team_members(client, auth_header, query)
+
+    assert one_work.status_code == HTTPStatus.OK
+    assert three_works.status_code == HTTPStatus.OK
+    assert len(_staff_by_id(three_works.json, work.project_id)) > len(
+        _staff_by_id(one_work.json, work.project_id)
+    )
+    assert len(three_work_statements) == len(one_work_statements)
+    assert len(three_work_statements) <= 2  # the works query and the staff query
 
 
 def test_project_team_members_requires_token(client):
