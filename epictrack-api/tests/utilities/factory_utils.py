@@ -247,13 +247,15 @@ def factory_staff_elevated_role_model(
 
 
 def factory_staff_work_role_model(
-    work_id=None, role_id=TestRoleEnum.OFFICER_ANALYST.value
+    work_id=None, role_id=TestRoleEnum.OFFICER_ANALYST.value, staff_id=None
 ):
     """Produce a Staff work role model"""
     if work_id is None:
         work_id = factory_work_model().id
+    if staff_id is None:
+        staff_id = factory_staff_model().id
     staff_work_role = StaffWorkRole(
-        staff_id=factory_staff_model().id, work_id=work_id, role_id=role_id
+        staff_id=staff_id, work_id=work_id, role_id=role_id
     )
     staff_work_role.save()
     return staff_work_role

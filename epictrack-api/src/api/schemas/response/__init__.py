@@ -32,7 +32,11 @@ from .outcome_configuration_response import OutcomeConfigurationResponseSchema
 from .outcome_template_response import OutcomeTemplateResponseSchema
 from .phase_response import PhaseResponseSchema
 from .phase_overage_responsibility_response import PhaseOverageResponsibilityResponseSchema
-from .project_response import ProjectResponseSchema
+from .project_response import (
+    ProjectResponseSchema,
+    ProjectTeamMemberSchema,
+    ProjectTeamResponseSchema,
+)
 from .proponent_response import ProponentResponseSchema
 from .responsibility_response import ResponsibilityResponseSchema
 from .role_response import RoleResponseSchema

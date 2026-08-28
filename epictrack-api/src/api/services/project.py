@@ -38,6 +38,7 @@ from api.models.work_type import WorkType
 from api.schemas.types import TypeSchema
 from api.services import authorisation
 from api.services.special_field import SpecialFieldService
+from api.services.work import WorkService
 from api.utils.enums import ProjectCodeMethod
 from api.utils.roles import Role as KeycloakRole
 from api.utils.token_info import TokenInfo
@@ -115,6 +116,58 @@ class ProjectService:
         project.is_deleted = True
         project.save()
         return True
+
+    @classmethod
+    def find_team_members(cls, project_id: int = None) -> List[dict]:
+        """Return the staff working on each project, folded across the project's works."""
+        cls._check_auth(one_of_roles=[KeycloakRole.VIEW])
+        works_query = db.session.query(Work).filter(Work.is_deleted.is_(False))
+        if project_id:
+            works_query = works_query.filter(Work.project_id == project_id)
+        works = works_query.all()
+        if not works:
+            return []
+
+        # ponytail: one IN-list over every work; paginate if Track outgrows a few thousand.
+        staff_for_works = WorkService.find_staff_for_works([work.id for work in works])
+        teams: dict = {}
+        for work in works:
+            members = teams.setdefault(work.project_id, {})
+            for staff_work_role in staff_for_works.get(work.id, []):
+                cls._add_team_member(
+                    members, staff_work_role.staff, staff_work_role.role.name, work.id
+                )
+            cls._add_team_member(members, work.work_lead, "Work Lead", work.id)
+            cls._add_team_member(members, work.responsible_epd, "Responsible EPD", work.id)
+
+        return [
+            {
+                "project_id": team_project_id,
+                "staff": [
+                    {
+                        "staff_id": staff_id,
+                        "idir_user_id": member["staff"].idir_user_id,
+                        "email": member["staff"].email,
+                        "is_active": member["staff"].is_active,
+                        "roles": sorted(member["roles"]),
+                        "work_ids": sorted(member["work_ids"]),
+                    }
+                    for staff_id, member in sorted(members.items())
+                ],
+            }
+            for team_project_id, members in sorted(teams.items())
+        ]
+
+    @staticmethod
+    def _add_team_member(members: dict, staff, role_name: str, work_id: int) -> None:
+        """Record one role and work against a staff member, skipping departed staff."""
+        if not staff or not staff.is_active or staff.is_deleted:
+            return
+        member = members.setdefault(
+            staff.id, {"staff": staff, "roles": set(), "work_ids": set()}
+        )
+        member["roles"].add(role_name)
+        member["work_ids"].add(work_id)
 
     @classmethod
     def check_existence(cls, name, project_id=None):

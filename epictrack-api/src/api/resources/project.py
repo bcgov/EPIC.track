@@ -125,6 +125,22 @@ class ValidateProject(Resource):
 
 
 @cors_preflight("GET")
+@API.route("/team-members", methods=["GET", "OPTIONS"])
+class ProjectTeamMembers(Resource):
+    """Endpoint resource to return the staff working on projects."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get():
+        """Return team members grouped by project."""
+        project_id = request.args.get("project_id", None, int)
+        teams = ProjectService.find_team_members(project_id)
+        return res.ProjectTeamResponseSchema(many=True).dump(teams), HTTPStatus.OK
+
+
+@cors_preflight("GET")
 @API.route("/<int:project_id>/work-types", methods=["GET", "OPTIONS"])
 class ProjectWorkTypes(Resource):
     """Endpoint resource to get all work types associated with a project."""
