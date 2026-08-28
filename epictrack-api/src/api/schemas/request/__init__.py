@@ -60,6 +60,7 @@ from .project_request import (
     ProjectExistenceQueryParamSchema,
     ProjectFirstNationsQueryParamSchema,
     ProjectIdPathParameterSchema,
+    ProjectTeamMembersQueryParamSchema,
 )
 from .proponent_request import (
     ProponentBodyParameterSchema,

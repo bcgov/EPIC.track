@@ -150,6 +150,16 @@ class ProjectExistenceQueryParamSchema(RequestQueryParameterSchema):
     )
 
 
+class ProjectTeamMembersQueryParamSchema(RequestQueryParameterSchema):
+    """Project team members query parameters"""
+
+    project_id = fields.Int(
+        metadata={"description": "The id of the project"},
+        validate=validate.Range(min=1),
+        load_default=None
+    )
+
+
 class ProjectIdPathParameterSchema(RequestPathParameterSchema):
     """project id path parameter schema"""
 

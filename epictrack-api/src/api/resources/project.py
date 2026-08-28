@@ -135,13 +135,8 @@ class ProjectTeamMembers(Resource):
     @profiletime
     def get():
         """Return team members grouped by project."""
-        project_id = request.args.get("project_id")
-        if project_id is not None:
-            if not project_id.isdecimal() or int(project_id) < 1:
-                return {
-                    "message": "project_id must be a positive integer"
-                }, HTTPStatus.BAD_REQUEST
-            project_id = int(project_id)
+        args = req.ProjectTeamMembersQueryParamSchema().load(request.args)
+        project_id = args.get("project_id")
         teams = ProjectService.find_team_members(project_id)
         return res.ProjectTeamResponseSchema(many=True).dump(teams), HTTPStatus.OK
 
