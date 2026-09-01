@@ -430,6 +430,7 @@ class TestFindStaffForWorks:
         mock_query = MagicMock()
         mock_db.session.query.return_value = mock_query
         mock_query.join.return_value = mock_query
+        mock_query.options.return_value = mock_query
         mock_query.filter.return_value = mock_query
         mock_query.all.return_value = [(mock_staff1, mock_work1), (mock_staff2, mock_work2)]
 
