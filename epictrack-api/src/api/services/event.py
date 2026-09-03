@@ -22,7 +22,7 @@ from flask import current_app
 import pytz
 
 from sqlalchemy import and_, extract, func, or_
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import contains_eager, joinedload
 
 from api.actions.action_handler import ActionHandler
 from api.models.dashboard_search_options import EventCalendarSearchOptions
@@ -1233,6 +1233,7 @@ class EventService:
                 EventConfiguration,
                 Event.event_configuration_id == EventConfiguration.id,
             )
+            .options(contains_eager(Event.event_configuration))
             .filter(
                 Event.is_active.is_(True),
                 Event.is_deleted.is_(False),
