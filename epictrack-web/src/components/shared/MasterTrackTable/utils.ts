@@ -70,26 +70,31 @@ interface ExportToCsvOptions<T extends MRT_RowData> {
   table: MRT_TableInstance<T>;
   downloadDate: string | null;
   filenamePrefix: string;
+  // Every matching row, keyed by column id, for server side paginated tables
+  rows?: Record<string, unknown>[];
 }
 
 export async function exportToCsv<T extends MRT_RowData>({
   table,
   downloadDate,
   filenamePrefix,
+  rows,
 }: ExportToCsvOptions<T>) {
   const columns = table
     .getVisibleFlatColumns()
     .map((p) => p.columnDef.id?.toString());
 
-  const csvRows = table.getFilteredRowModel().flatRows.map((row) => {
-    const csvRow: { [key: string]: any } = {};
-    columns.forEach((column: string | undefined) => {
-      if (column) {
-        csvRow[column] = row.getValue(column);
-      }
+  const csvRows =
+    rows ??
+    table.getFilteredRowModel().flatRows.map((row) => {
+      const csvRow: { [key: string]: any } = {};
+      columns.forEach((column: string | undefined) => {
+        if (column) {
+          csvRow[column] = row.getValue(column);
+        }
+      });
+      return csvRow;
     });
-    return csvRow;
-  });
 
   const csv = await json2csv(csvRows, {
     emptyFieldValue: "",

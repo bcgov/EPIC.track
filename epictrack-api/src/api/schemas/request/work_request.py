@@ -335,6 +335,68 @@ class WorkQueryParameterSchema(RequestQueryParameterSchema):
     )
 
 
+class WorkListingBodyParameterSchema(RequestBodyParameterSchema):
+    """Body parameters for the paginated insights work listing"""
+
+    is_active = fields.Bool(
+        metadata={"description": "Limit the listing to active works"},
+        required=False,
+        missing=None,
+        allow_none=True,
+    )
+
+    staff_id = fields.Int(
+        metadata={"description": "Staff ID to filter by (optional)"},
+        required=False,
+        missing=None,
+        allow_none=True,
+    )
+
+    filters = fields.Field(
+        metadata={"description": "Front end table column filters"},
+        required=False,
+        missing=None,
+    )
+
+    page = fields.Int(
+        metadata={"description": "Page number, 1 based. Omit to fetch every matching work"},
+        required=False,
+        missing=None,
+        allow_none=True,
+    )
+
+    size = fields.Int(
+        metadata={"description": "Page size. Omit to fetch every matching work"},
+        required=False,
+        missing=None,
+        allow_none=True,
+    )
+
+    sort_key = fields.Str(
+        metadata={"description": "Front end column id to sort by"},
+        required=False,
+        missing=None,
+        allow_none=True,
+    )
+
+    sort_order = fields.Str(
+        metadata={"description": "asc or desc"},
+        required=False,
+        missing="asc",
+        allow_none=True,
+    )
+
+    include_indigenous_nations = fields.Bool(
+        metadata={"description": "Indicate if the result should have indigenous nations"},
+        load_default=False,
+    )
+
+    include_rel_staff = fields.Bool(
+        metadata={"description": "Indicate if the result should include REL staff for each work"},
+        load_default=False,
+    )
+
+
 class WorkPhaseQueryParameterSchema(RequestQueryParameterSchema):
     """Work Phase Query parameters"""
 

@@ -174,6 +174,76 @@ class WorksByStaff(Resource):
         return work_ids, 200
 
 
+def _dump_insight_works(works, include_indigenous_nations=False, include_rel_staff=False):
+    """Serialize works for the insights tables, dropping the nested objects those tables never read."""
+    exclude = [] if include_indigenous_nations else ['indigenous_works']
+    if not include_rel_staff:
+        exclude.append('rel_staff')
+    exclude.extend(['ea_act', 'responsible_epd', 'eac_decision_by', 'decision_by', 'substitution_act', 'eao_team'])
+
+    if include_rel_staff:
+        staff_for_works = WorkService.find_staff_for_works([work.id for work in works], is_active=True)
+        for work in works:
+            work.rel_staff = [
+                staff_work_role.staff
+                for staff_work_role in staff_for_works.get(work.id, [])
+                if staff_work_role.staff.position.name == 'REL'
+            ]
+
+    return res.WorkResponseSchema(many=True, exclude=exclude).dump(works)
+
+
+@cors_preflight("POST")
+@API.route("/listing", methods=["POST", "OPTIONS"])
+class WorkListing(Resource):
+    """Endpoint resource to return a single page of works for the insights listing tables."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post():
+        """Return the requested page of works along with the total number of matches."""
+        args = req.WorkListingBodyParameterSchema().load(API.payload or {})
+        pagination_options = PaginationOptions(
+            page=args.get("page"),
+            size=args.get("size"),
+            sort_key=args.get("sort_key"),
+            sort_order=args.get("sort_order") or "asc",
+        )
+        works, total = WorkService.fetch_work_listing(
+            is_active=args.get("is_active"),
+            staff_id=args.get("staff_id"),
+            filters=args.get("filters"),
+            pagination_options=pagination_options,
+        )
+        items = _dump_insight_works(
+            works,
+            include_indigenous_nations=args.get("include_indigenous_nations", False),
+            include_rel_staff=args.get("include_rel_staff", False),
+        )
+        return jsonify({"items": items, "total": total}), HTTPStatus.OK
+
+
+@cors_preflight("GET")
+@API.route("/listing/filter-options", methods=["GET", "OPTIONS"])
+class WorkListingFilterOptions(Resource):
+    """Endpoint resource to return the dropdown values for the insights listing tables."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get():
+        """Return the distinct filter values for the works the listing can show."""
+        request_args = req.WorkQueryParameterSchema().load(request.args)
+        options = WorkService.fetch_work_listing_filter_options(
+            is_active=request_args.get("is_active"),
+            staff_id=request_args.get("staff_id"),
+        )
+        return jsonify(options), HTTPStatus.OK
+
+
 @cors_preflight("GET")
 @API.route("/resources", methods=["GET", "OPTIONS"])
 class WorkResources(Resource):

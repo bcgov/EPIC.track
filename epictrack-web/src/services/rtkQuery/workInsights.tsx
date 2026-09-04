@@ -22,6 +22,39 @@ type InsightQueryArgs = {
   staffId?: number;
 };
 
+export type WorkListingScope = {
+  is_active?: boolean;
+  staffId?: number;
+};
+
+export type WorkListingArgs = WorkListingScope & {
+  filters?: ColumnFilter[];
+  page?: number;
+  size?: number;
+  sortKey?: string;
+  sortOrder?: "asc" | "desc";
+  includeIndigenousNations?: boolean;
+  includeRelStaff?: boolean;
+};
+
+export type WorkListingPage = {
+  items: Work[];
+  total: number;
+};
+
+export type WorkListingFilterOptions = {
+  projects: string[];
+  work_types: string[];
+  phases: string[];
+  ministries: string[];
+  federal_involvements: string[];
+  indigenous_nations: string[];
+  rel_staff: string[];
+  work_states: string[];
+  started_years: string[];
+  closed_years: string[];
+};
+
 function buildInsightBody(
   groupBy: string,
   { columnFilters, staffId }: InsightQueryArgs,
@@ -58,7 +91,8 @@ function buildQueryString(
 
 export const workInsightsApi = createApi({
   tagTypes: [
-    "Works",
+    "WorkListing",
+    "WorkListingFilterOptions",
     "WorksByStaff",
     "WorksByType",
     "WorksByTeam",
@@ -67,7 +101,6 @@ export const workInsightsApi = createApi({
     "WorksByFederalInvolvement",
     "WorksByNation",
     "WorksByRel",
-    "WorksWithNations",
     "AssessmentsByPhase",
     "WorksByYearOpened",
     "WorksByYearCompleted",
@@ -99,23 +132,45 @@ export const workInsightsApi = createApi({
       },
     ),
 
-    getWorks: builder.query<
-      Work[],
-      { is_active?: boolean; staffId?: number } | void
+    getWorksListing: builder.query<WorkListingPage, WorkListingArgs>({
+      query: ({
+        is_active,
+        staffId,
+        filters,
+        page,
+        size,
+        sortKey,
+        sortOrder,
+        includeIndigenousNations,
+        includeRelStaff,
+      }) => ({
+        url: "works/listing",
+        method: "POST",
+        body: {
+          is_active,
+          staff_id: staffId,
+          filters: filters ?? [],
+          page,
+          size,
+          sort_key: sortKey,
+          sort_order: sortOrder ?? "asc",
+          include_indigenous_nations: includeIndigenousNations ?? false,
+          include_rel_staff: includeRelStaff ?? false,
+        },
+      }),
+      providesTags: [{ type: "WorkListing", id: "LIST" }],
+    }),
+
+    getWorkListingFilterOptions: builder.query<
+      WorkListingFilterOptions,
+      WorkListingScope
     >({
-      query: (
-        args: { is_active?: boolean; staffId?: number } = { is_active: true },
-      ) => buildQueryString("works", { ...args, context: "insights" }),
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.map(({ id }) => ({
-                type: "Works" as const,
-                id,
-              })),
-              { type: "Works", id: "LIST" },
-            ]
-          : [{ type: "Works", id: "LIST" }],
+      query: ({ is_active, staffId }) =>
+        buildQueryString("works/listing/filter-options", {
+          is_active,
+          staffId,
+        }),
+      providesTags: [{ type: "WorkListingFilterOptions", id: "LIST" }],
     }),
 
     getWorksByType: builder.query<WorkByType[], InsightQueryArgs>({
@@ -134,25 +189,6 @@ export const workInsightsApi = createApi({
               { type: "WorksByType", id: "LIST" },
             ]
           : [{ type: "WorksByType", id: "LIST" }],
-    }),
-
-    getWorksWithNations: builder.query<Work[], { staffId?: number } | void>({
-      query: (args) =>
-        buildQueryString("works", {
-          ...args,
-          is_active: true,
-          context: "insights",
-        }) + "&include_indigenous_nations=true&include_rel_staff=true",
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.map(({ id }) => ({
-                type: "WorksWithNations" as const,
-                id,
-              })),
-              { type: "WorksWithNations", id: "LIST" },
-            ]
-          : [{ type: "WorksWithNations", id: "LIST" }],
     }),
 
     getWorkByMinistry: builder.query<WorkByMinistry[], InsightQueryArgs>({
@@ -315,7 +351,9 @@ export const workInsightsApi = createApi({
 
 export const {
   useGetWorksByTypeQuery,
-  useGetWorksQuery,
+  useGetWorksListingQuery,
+  useLazyGetWorksListingQuery,
+  useGetWorkListingFilterOptionsQuery,
   useGetWorksByTeamQuery,
   useGetWorksByLeadQuery,
   useGetWorkByMinistryQuery,
@@ -323,7 +361,6 @@ export const {
   useGetWorksByNationQuery,
   useGetWorksByStaffQuery,
   useGetWorksByRelQuery,
-  useGetWorksWithNationsQuery,
   useGetAssessmentsByPhaseQuery,
   useGetWorksByYearOpenedQuery,
   useGetWorksByYearCompletedQuery,

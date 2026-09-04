@@ -289,9 +289,11 @@ const MasterTrackTable = <TData extends MRT_RowData>({
     ...otherProps,
   });
 
-  const filteredRowCount = !loading
-    ? table.getFilteredRowModel().rows.length
-    : 0;
+  const filteredRowCount = loading
+    ? 0
+    : otherProps.manualPagination
+      ? (otherProps.rowCount ?? 0)
+      : table.getFilteredRowModel().rows.length;
 
   const prevTableRef = useRef<MRT_TableInstance<TData> | null>(null);
 

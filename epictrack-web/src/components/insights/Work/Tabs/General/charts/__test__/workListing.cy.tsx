@@ -1,5 +1,5 @@
 import { MemoryRouter as Router } from "react-router-dom";
-import WorkList from "../WorkListing";
+import WorkList from "../workListing";
 import { InsightsContext } from "components/insights/InsightsContext";
 import { TableFilterProvider } from "components/insights/TableFilterContext";
 import { AppConfig } from "config";
@@ -10,31 +10,25 @@ import {
 
 const works = [
   {
-    id: 301,
-    title: "Coastal Project",
-    project: { name: "Project Coast" },
+    id: 401,
+    title: "Riverbend Crossing",
+    project: { name: "Project Riverbend" },
     work_type: { name: "EA" },
-    start_date: "2024-01-05T00:00:00.000Z",
-    work_decision_date: "2025-06-10T00:00:00.000Z",
-    work_state: "IN_PROGRESS",
-    is_active: true,
+    current_work_phase: { name: "Early Engagement" },
   },
   {
-    id: 302,
-    title: "Northern Upgrade",
-    project: { name: "Project North" },
+    id: 402,
+    title: "Summit Expansion",
+    project: { name: "Project Summit" },
     work_type: { name: "Amendment" },
-    start_date: "2023-03-12T00:00:00.000Z",
-    work_decision_date: null,
-    work_state: "COMPLETED",
-    is_active: false,
+    current_work_phase: { name: "Application Review" },
   },
 ] as any[];
 
 const filterOptions = {
-  projects: [],
-  work_types: [],
-  phases: [],
+  projects: ["Project Riverbend", "Project Summit"],
+  work_types: ["Amendment", "EA"],
+  phases: ["Application Review", "Early Engagement"],
   ministries: [],
   federal_involvements: [],
   indigenous_nations: [],
@@ -49,7 +43,7 @@ const endpoints: Endpoint[] = [
     name: "getWorksListing",
     method: "POST",
     url: `${AppConfig.apiUrl}works/listing`,
-    response: { body: { items: works, total: works.length } },
+    response: { body: { items: works, total: 43 } },
   },
   {
     name: "getFilterOptions",
@@ -80,45 +74,32 @@ const mountComponent = (isUserInsights = false, staffId?: number) => {
   );
 };
 
-describe("Trends WorkListing", () => {
+describe("General WorkListing", () => {
   beforeEach(() => {
     setupIntercepts(endpoints);
   });
 
-  it("renders trends listing columns and rows", () => {
+  it("renders the rows of the fetched page", () => {
     mountComponent();
 
     cy.wait("@getWorksListing").then(({ request }) => {
       expect(request.body.page).to.equal(1);
       expect(request.body.size).to.equal(15);
     });
+
     cy.contains("Name").should("exist");
     cy.contains("Project").should("exist");
     cy.contains("Work type").should("exist");
-    cy.contains("Started").should("exist");
-    cy.contains("Closed").should("exist");
-    cy.contains("Work state").should("exist");
-    cy.contains("Status").should("exist");
+    cy.contains("Current Phase").should("exist");
 
-    cy.contains("Coastal Project").should("exist");
-    cy.contains("Northern Upgrade").should("exist");
-    cy.contains("Project Coast").should("exist");
-    cy.contains("Project North").should("exist");
-    cy.contains("Active").should("exist");
-    cy.contains("Inactive").should("exist");
+    cy.contains("Riverbend Crossing").should("exist");
+    cy.contains("Project Summit").should("exist");
+    cy.contains("Early Engagement").should("exist");
   });
 
-  it("includes staff id in the request for user insights", () => {
-    mountComponent(true, 42);
-
-    cy.wait("@getWorksListing")
-      .its("request.body.staff_id")
-      .should("equal", 42);
-  });
-
-  it("shows export icon action", () => {
+  it("reports the server side total, not the page size", () => {
     mountComponent();
 
-    cy.get("button .icon").first().parent("button").should("exist");
+    cy.contains("Results: 43").should("exist");
   });
 });

@@ -29,12 +29,31 @@ const works = [
   },
 ] as any[];
 
+const filterOptions = {
+  projects: [],
+  work_types: [],
+  phases: [],
+  ministries: [],
+  federal_involvements: [],
+  indigenous_nations: [],
+  rel_staff: [],
+  work_states: [],
+  started_years: [],
+  closed_years: [],
+};
+
 const endpoints: Endpoint[] = [
   {
-    name: "getWorksWithNations",
+    name: "getWorksListing",
+    method: "POST",
+    url: `${AppConfig.apiUrl}works/listing`,
+    response: { body: { items: works, total: works.length } },
+  },
+  {
+    name: "getFilterOptions",
     method: "GET",
-    url: `${AppConfig.apiUrl}works?*include_indigenous_nations=true*`,
-    response: { body: works },
+    url: `${AppConfig.apiUrl}works/listing/filter-options*`,
+    response: { body: filterOptions },
   },
 ];
 
@@ -67,7 +86,10 @@ describe("Partners WorkList", () => {
   it("renders partner listing columns and data", () => {
     mountComponent();
 
-    cy.wait("@getWorksWithNations");
+    cy.wait("@getWorksListing").then(({ request }) => {
+      expect(request.body.page).to.equal(1);
+      expect(request.body.size).to.equal(15);
+    });
     cy.contains("Name").should("exist");
     cy.contains("Other Ministry").should("exist");
     cy.contains("First Nations").should("exist");
@@ -77,12 +99,12 @@ describe("Partners WorkList", () => {
     cy.contains("Sam REL").should("exist");
   });
 
-  it("includes staff id in query for user insights", () => {
+  it("includes staff id in the request for user insights", () => {
     mountComponent(true, 17);
 
-    cy.wait("@getWorksWithNations")
-      .its("request.url")
-      .should("include", "staff_id=17");
+    cy.wait("@getWorksListing")
+      .its("request.body.staff_id")
+      .should("equal", 17);
   });
 
   it("shows export icon button", () => {

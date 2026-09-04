@@ -9,11 +9,6 @@ import {
 } from "../../../../../../../../cypress/support/utils";
 import { WorkStaffRole } from "models/role";
 
-const works = [
-  { id: 101, title: "Alpha Work", eao_team_id: 1 },
-  { id: 102, title: "Beta Work", eao_team_id: 2 },
-] as any[];
-
 const workStaffs = [
   {
     id: 1,
@@ -53,18 +48,6 @@ const workStaffs = [
 
 const endpoints: Endpoint[] = [
   {
-    name: "getWorks",
-    method: "GET",
-    url: `${AppConfig.apiUrl}works?is_active=true&context=insights`,
-    response: { body: works },
-  },
-  {
-    name: "getWorksUserInsights",
-    method: "GET",
-    url: `${AppConfig.apiUrl}works?is_active=true&staff_id=7&context=insights`,
-    response: { body: works },
-  },
-  {
     name: "getWorkStaffs",
     method: "GET",
     url: `${AppConfig.apiUrl}works/resources?is_active=true`,
@@ -100,7 +83,6 @@ describe("Staff WorkListing", () => {
 
   it("renders listing and loads hook data", () => {
     mountComponent();
-    cy.wait("@getWorks");
     cy.wait("@getWorkStaffs");
     cy.contains("Name").should("exist");
     cy.contains("Team").should("exist");
@@ -112,7 +94,6 @@ describe("Staff WorkListing", () => {
 
   it("filters works client-side by staffId for user insights", () => {
     mountComponent(true, 7);
-    cy.wait("@getWorksUserInsights");
     cy.contains("Team One").should("exist");
     cy.contains("Team Two").should("not.exist");
   });
