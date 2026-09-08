@@ -145,25 +145,25 @@ const FilterSelect = (props: SelectProps) => {
     setSelectedOptions(currentValues);
   }, [isMulti, selectValue]);
 
+  // Seeding the in menu selection has to happen on open only. Measuring the overflow sets state of
+  // its own a frame later, so sharing an effect with it would re-seed and discard anything picked
+  // in between.
   useEffect(() => {
-    if (menuIsOpen) {
-      requestAnimationFrame(() => {
-        const documentWidth = document.documentElement.clientWidth;
-        const scrollWidth = document.documentElement.scrollWidth;
-        const overflowRight = Math.max(scrollWidth - documentWidth, 1);
-        setOverflowRight(overflowRight);
-      });
-      updateSelectedOptions();
-      adjustDropdownPosition();
-    } else {
+    if (!menuIsOpen) {
       setOverflowRight(0);
+      return;
     }
-  }, [
-    adjustDropdownPosition,
-    menuIsOpen,
-    overflowRight,
-    updateSelectedOptions,
-  ]);
+    updateSelectedOptions();
+    requestAnimationFrame(() => {
+      const documentWidth = document.documentElement.clientWidth;
+      const scrollWidth = document.documentElement.scrollWidth;
+      setOverflowRight(Math.max(scrollWidth - documentWidth, 1));
+    });
+  }, [menuIsOpen, updateSelectedOptions]);
+
+  useEffect(() => {
+    adjustDropdownPosition();
+  }, [adjustDropdownPosition]);
 
   useEffect(() => {
     let filterOptions = props.options as OptionType[];
