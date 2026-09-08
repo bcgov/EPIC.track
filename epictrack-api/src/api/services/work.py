@@ -16,11 +16,12 @@ import re
 from collections import defaultdict
 from datetime import datetime, timedelta
 from io import BytesIO
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
 from flask import current_app
 from sqlalchemy import and_
+from sqlalchemy import extract
 from sqlalchemy import tuple_
 from sqlalchemy.orm import aliased, contains_eager
 
@@ -58,6 +59,14 @@ from api.models.phase_code import PhaseVisibilityEnum
 from api.models.special_field import EntityEnum, FieldTypeEnum
 from api.models.work_status import WorkStatus
 from api.models.work_type import WorkType
+from api.insights.insights_table_filters import (
+    WORK_LISTING,
+    build_insights_filters,
+    work_listing_sort_map,
+)
+from api.models.federal_involvement import FederalInvolvement
+from api.models.ministry import Ministry
+from api.models.position import Position
 from api.schemas.request import (
     ActionConfigurationBodyParameterSchema,
     OutcomeConfigurationBodyParameterSchema,
@@ -124,6 +133,157 @@ class WorkService:  # pylint: disable=too-many-public-methods
             )
         works = query.all()
         return works
+
+    @classmethod
+    def _work_listing_scope(cls, is_active: Optional[bool], staff_id: Optional[int]) -> List:
+        """Conditions shared by the insights work listing page query and its filter options."""
+        conditions = [Work.is_deleted.is_(False)]
+        if is_active:
+            conditions.append(Work.is_active.is_(True))
+        if staff_id:
+            conditions.append(
+                Work.id.in_(
+                    db.session.query(StaffWorkRole.work_id).filter(
+                        StaffWorkRole.staff_id == staff_id,
+                        StaffWorkRole.is_active.is_(True),
+                        StaffWorkRole.is_deleted.is_(False),
+                    )
+                )
+            )
+        return conditions
+
+    @classmethod
+    def fetch_work_listing(
+        cls,
+        is_active: Optional[bool] = None,
+        staff_id: Optional[int] = None,
+        filters: List[Dict] = None,
+        pagination_options: PaginationOptions = None,
+    ) -> Tuple[List[Work], int]:
+        """Fetch a single page of works for the insights listing tables."""
+        cls._check_can_view()
+        # Work.title is an expression over projects and work_types, so both must be in the FROM
+        # clause to filter or sort on it. Both foreign keys are mandatory, so nothing is dropped.
+        query = (
+            Work.query.join(Project, Work.project_id == Project.id)
+            .join(WorkType, Work.work_type_id == WorkType.id)
+            .filter(*cls._work_listing_scope(is_active, staff_id))
+        )
+
+        filter_expressions = build_insights_filters(filters, WORK_LISTING) if filters else []
+        if filter_expressions:
+            query = query.filter(*filter_expressions)
+
+        sort_key = pagination_options.sort_key if pagination_options else None
+        sort_column = work_listing_sort_map.get(sort_key, Work.title)
+        descending = bool(pagination_options and pagination_options.sort_order == "desc")
+        # Work.id keeps the order stable across pages when the sort column has duplicates
+        query = query.order_by(sort_column.desc() if descending else sort_column.asc(), Work.id)
+
+        if not pagination_options or not pagination_options.page or not pagination_options.size:
+            works = query.all()
+            return works, len(works)
+
+        page = query.paginate(
+            page=pagination_options.page, per_page=pagination_options.size, error_out=False
+        )
+        return page.items, page.total
+
+    @classmethod
+    def fetch_work_listing_filter_options(
+        cls, is_active: Optional[bool] = None, staff_id: Optional[int] = None
+    ) -> Dict[str, List[str]]:
+        """Distinct dropdown values for the insights work listing tables."""
+        cls._check_can_view()
+        scope = cls._work_listing_scope(is_active, staff_id)
+
+        def names(model, join_condition, column=None):
+            column = model.name if column is None else column
+            rows = (
+                db.session.query(column)
+                .select_from(Work)
+                .join(model, join_condition)
+                .filter(*scope)
+                .distinct()
+                .order_by(column)
+                .all()
+            )
+            return [value for (value,) in rows if value]
+
+        def names_by_sort_order(model, join_condition):
+            rows = (
+                db.session.query(model.name, model.sort_order)
+                .select_from(Work)
+                .join(model, join_condition)
+                .filter(*scope)
+                .distinct()
+                .order_by(model.sort_order)
+                .all()
+            )
+            return [name for name, _ in rows if name]
+
+        def years(column):
+            rows = (
+                db.session.query(extract("year", column))
+                .select_from(Work)
+                .filter(*scope, column.isnot(None))
+                .distinct()
+                .all()
+            )
+            return sorted((str(int(year)) for (year,) in rows if year), reverse=True)
+
+        nations = (
+            db.session.query(IndigenousNation.name)
+            .select_from(Work)
+            .join(IndigenousWork, IndigenousWork.work_id == Work.id)
+            .join(IndigenousNation, IndigenousWork.indigenous_nation_id == IndigenousNation.id)
+            .filter(
+                *scope,
+                IndigenousWork.is_active.is_(True),
+                IndigenousWork.is_deleted.is_(False),
+            )
+            .distinct()
+            .order_by(IndigenousNation.name)
+            .all()
+        )
+        rel_staff = (
+            db.session.query(Staff.full_name)
+            .select_from(Work)
+            .join(StaffWorkRole, StaffWorkRole.work_id == Work.id)
+            .join(Staff, StaffWorkRole.staff_id == Staff.id)
+            .join(Position, Staff.position_id == Position.id)
+            .filter(
+                *scope,
+                Position.name == "REL",
+                StaffWorkRole.is_active.is_(True),
+                StaffWorkRole.is_deleted.is_(False),
+            )
+            .distinct()
+            .order_by(Staff.full_name)
+            .all()
+        )
+        work_states = (
+            db.session.query(Work.work_state)
+            .filter(*scope)
+            .distinct()
+            .order_by(Work.work_state)
+            .all()
+        )
+
+        return {
+            "projects": names(Project, Work.project_id == Project.id),
+            "work_types": names(WorkType, Work.work_type_id == WorkType.id),
+            "phases": names(WorkPhase, Work.current_work_phase_id == WorkPhase.id),
+            "ministries": names_by_sort_order(Ministry, Work.ministry_id == Ministry.id),
+            "federal_involvements": names_by_sort_order(
+                FederalInvolvement, Work.federal_involvement_id == FederalInvolvement.id
+            ),
+            "indigenous_nations": [name for (name,) in nations if name],
+            "rel_staff": [name for (name,) in rel_staff if name],
+            "work_states": [state.value for (state,) in work_states if state],
+            "started_years": years(Work.start_date),
+            "closed_years": years(Work.work_decision_date),
+        }
 
     @classmethod
     def fetch_all_work_plans(

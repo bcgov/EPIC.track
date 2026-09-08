@@ -14,4 +14,11 @@ const searchFilter: MRT_FilterFn<any> = (row, id, filterValue) => {
   // If filterValue is neither an array nor a string, return false
   return false;
 };
-export { searchFilter };
+/**
+ * Never runs (the API filters), but a column still needs it: TanStack drops an empty filter value
+ * when the filter function declares `autoRemove`, and the insights charts stay blank until the
+ * table has registered its columns in the shared filter context. Ours has no `autoRemove`.
+ */
+const serverSideFilter: MRT_FilterFn<any> = () => true;
+
+export { searchFilter, serverSideFilter };

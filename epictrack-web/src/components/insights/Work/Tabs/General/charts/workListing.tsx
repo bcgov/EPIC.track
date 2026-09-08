@@ -1,102 +1,47 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Tooltip, Box } from "@mui/material";
-import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
-import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { useGetWorksQuery } from "services/rtkQuery/workInsights";
+import { serverSideFilter } from "components/shared/MasterTrackTable/filters";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
-import { useInsightsContext } from "components/insights/InsightsContext";
-import { useTableFilterContext } from "components/insights/TableFilterContext";
+import { useWorkListing } from "components/insights/Work/Tabs/useWorkListing";
 
 const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
+const toExportRow = (work: Work) => ({
+  title: work.title,
+  "project.name": work.project?.name ?? "",
+  "work_type.name": work.work_type?.name ?? "",
+  "current_work_phase.name": work.current_work_phase?.name ?? "",
+});
+
 const WorkList = () => {
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 15,
-  });
-  const { columnFilters, setColumnFilters } = useTableFilterContext();
-  const { isUserInsights, staffId } = useInsightsContext();
-
-  const queryArg = useMemo(() => {
-    return {
-      is_active: true,
-      ...(isUserInsights && staffId ? { staffId } : {}),
-    };
-  }, [isUserInsights, staffId]);
-
-  const { data, error, isLoading } = useGetWorksQuery(queryArg, {
-    refetchOnMountOrArgChange: true,
-  });
-
-  const works = useMemo(() => data || [], [data]);
-
-  useEffect(() => {
-    setPagination((prev) => ({
-      ...prev,
-      pageSize: works.length,
-    }));
-  }, [works]);
-
-  const workTypes = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          works
-            .map((work) => work?.work_type?.name || "")
-            .filter((type) => type)
-            .sort(),
-        ),
-      ),
-    [works],
-  );
-
-  const projects = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          works
-            .map((work) => work?.project?.name || "")
-            .filter((project) => project)
-            .sort(),
-        ),
-      ),
-    [works],
-  );
-
-  const phases = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          works
-            .map((work) => work?.current_work_phase?.name || "")
-            .filter((phase) => phase)
-            .sort(),
-        ),
-      ),
-    [works],
-  );
-
-  useEffect(() => {
-    if (error) {
-      showNotification("Error fetching Works", {
-        duration: 3000,
-        type: "error",
-      });
-    }
-  }, [error]);
+  const {
+    works,
+    total,
+    filterOptions,
+    isLoading,
+    isFetching,
+    pagination,
+    setPagination,
+    sorting,
+    setSorting,
+    columnFilters,
+    onColumnFiltersChange,
+    buildExportRows,
+  } = useWorkListing({ isActive: true });
 
   const columns = useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
         accessorKey: "title",
+        filterFn: serverSideFilter,
         header: "Name",
         size: 300,
         Cell: ({ row, renderedCellValue }) => (
@@ -108,15 +53,14 @@ const WorkList = () => {
             {renderedCellValue}
           </ETGridTitle>
         ),
-        sortingFn: "sortFn",
-        filterFn: searchFilter,
       },
       {
         accessorKey: "project.name",
+        filterFn: serverSideFilter,
         header: "Project",
         size: 200,
         filterVariant: "multi-select",
-        filterSelectOptions: projects,
+        filterSelectOptions: filterOptions.projects,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -127,25 +71,14 @@ const WorkList = () => {
               name="rolesFilter"
             />
           );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > projects.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id) || "";
-
-          return filterValue.includes(value);
         },
       },
       {
         accessorKey: "work_type.name",
+        filterFn: serverSideFilter,
         header: "Work type",
         filterVariant: "multi-select",
-        filterSelectOptions: workTypes,
+        filterSelectOptions: filterOptions.work_types,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -156,25 +89,14 @@ const WorkList = () => {
               name="rolesFilter"
             />
           );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > workTypes.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id) || "";
-
-          return filterValue.includes(value);
         },
       },
       {
         accessorKey: "current_work_phase.name",
+        filterFn: serverSideFilter,
         header: "Current Phase",
         filterVariant: "multi-select",
-        filterSelectOptions: phases,
+        filterSelectOptions: filterOptions.phases,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -186,41 +108,29 @@ const WorkList = () => {
             />
           );
         },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > phases.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id) || "";
-
-          return filterValue.includes(value);
-        },
       },
     ],
-    [projects, phases, workTypes],
+    [filterOptions],
   );
+
   return (
     <MasterTrackTable
       columns={columns}
       data={works}
-      initialState={{
-        sorting: [
-          {
-            id: "title",
-            desc: false,
-          },
-        ],
-      }}
       loading={isLoading}
-      onColumnFiltersChange={setColumnFilters}
+      manualPagination
+      manualFiltering
+      manualSorting
+      rowCount={total}
+      onColumnFiltersChange={onColumnFiltersChange}
+      onSortingChange={setSorting}
       state={{
         isLoading: isLoading,
         showGlobalFilter: true,
+        showProgressBars: isFetching,
         pagination: pagination,
         columnFilters,
+        sorting,
       }}
       renderResultCount
       renderTopToolbarCustomActions={({ table }) => (
@@ -233,11 +143,12 @@ const WorkList = () => {
         >
           <Tooltip title="Export to csv">
             <IButton
-              onClick={() =>
+              onClick={async () =>
                 exportToCsv({
                   table,
                   downloadDate: new Date().toISOString(),
                   filenamePrefix: "general-insights-listing",
+                  rows: await buildExportRows(toExportRow),
                 })
               }
             >
@@ -248,7 +159,7 @@ const WorkList = () => {
       )}
       enablePagination
       muiPaginationProps={{
-        rowsPerPageOptions: rowsPerPageOptions(works.length),
+        rowsPerPageOptions: rowsPerPageOptions(total),
       }}
       onPaginationChange={setPagination}
     />

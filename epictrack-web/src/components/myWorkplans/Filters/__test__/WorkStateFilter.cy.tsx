@@ -51,6 +51,25 @@ describe("WorkStateFilter", () => {
     cy.get("[data-cy='states']").should("contain.text", "SUSPENDED");
   });
 
+  // The menu measures its own overflow a frame after opening. That measurement used to re-seed the
+  // in menu selection, dropping anything picked before the frame landed.
+  it("keeps a state picked before the menu finishes measuring", () => {
+    cy.mount(<Harness />);
+
+    cy.window().then((win) => {
+      cy.stub(win, "requestAnimationFrame").callsFake(
+        (cb: FrameRequestCallback) => win.setTimeout(() => cb(0), 400),
+      );
+    });
+
+    cy.get("input").first().click({ force: true });
+    cy.contains("Suspended").click({ force: true });
+    cy.wait(500);
+    cy.contains("Apply").click({ force: true });
+
+    cy.get("[data-cy='states']").should("contain.text", "SUSPENDED");
+  });
+
   it("clears applied work states", () => {
     cy.mount(<Harness />);
 

@@ -1,15 +1,10 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
-import {
-  getSelectFilterOptions,
-  rowsPerPageOptions,
-} from "components/shared/MasterTrackTable/utils";
-import { searchFilter } from "components/shared/MasterTrackTable/filters";
+import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { useGetWorksQuery } from "services/rtkQuery/workInsights";
+import { serverSideFilter } from "components/shared/MasterTrackTable/filters";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { Tooltip, Box, Grid } from "@mui/material";
 import { ETCaption1, ETGridTitle, IButton } from "components/shared";
@@ -18,124 +13,48 @@ import { IconProps } from "components/icons/type";
 import { dateUtils } from "utils";
 import { MONTH_DAY_YEAR } from "constants/application-constant";
 import WorkState from "components/workPlan/WorkState";
-import { useInsightsContext } from "components/insights/InsightsContext";
-import { useTableFilterContext } from "components/insights/TableFilterContext";
 import { getStatusFilter } from "components/shared/filterSelect/utils";
 import { ETChip } from "components/shared/chip/ETChip";
+import { useWorkListing } from "components/insights/Work/Tabs/useWorkListing";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
+const statuses = [
+  { text: "Active", value: true },
+  { text: "Inactive", value: false },
+];
+
+const toExportRow = (work: Work) => ({
+  title: work.title,
+  "project.name": work.project?.name ?? "",
+  "work_type.name": work.work_type?.name ?? "",
+  start_date: work.start_date,
+  work_decision_date: work.work_decision_date ?? "",
+  work_state: work.work_state,
+  is_active: work.is_active,
+});
+
 const WorkList = () => {
-  const [pagination, setPagination] = React.useState({
-    pageIndex: 0,
-    pageSize: 15,
-  });
-  const { columnFilters, setColumnFilters } = useTableFilterContext();
-  const { isUserInsights, staffId } = useInsightsContext();
-
-  const queryArg = useMemo(() => {
-    return {
-      is_active: false,
-      ...(isUserInsights && staffId ? { staffId } : {}),
-    };
-  }, [isUserInsights, staffId]);
-
-  const { data, error, isLoading } = useGetWorksQuery(queryArg, {
-    refetchOnMountOrArgChange: true,
-  });
-
-  const works = useMemo(() => data || [], [data]);
-
-  useEffect(() => {
-    setPagination((prev) => ({
-      ...prev,
-      pageSize: works.length,
-    }));
-  }, [works]);
-
-  const workStates = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          works
-            .map((work) => work?.work_state || "")
-            .filter((type) => type)
-            .sort(),
-        ),
-      ),
-    [works],
-  );
-
-  const workTypes = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          works
-            .map((work) => work?.work_type?.name || "")
-            .filter((type) => type)
-            .sort(),
-        ),
-      ),
-    [works],
-  );
-
-  const projects = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          works
-            .map((work) => work?.project?.name || "")
-            .filter((project) => project)
-            .sort(),
-        ),
-      ),
-    [works],
-  );
-
-  const started_years = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          works.map((work) => dateUtils.formatDate(work?.start_date, "YYYY")),
-        ),
-      ).sort((a, b) => parseInt(b) - parseInt(a)),
-    [works],
-  );
-
-  const closed_years = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          works
-            .map((work) =>
-              dateUtils.formatDate(work?.work_decision_date as string, "YYYY"),
-            )
-            .filter((year) => year !== "Invalid date"),
-        ),
-      ).sort((a, b) => parseInt(b) - parseInt(a)),
-    [works],
-  );
-
-  useEffect(() => {
-    if (error) {
-      showNotification("Error fetching Works", {
-        duration: 3000,
-        type: "error",
-      });
-    }
-  }, [error]);
-
-  const statuses = getSelectFilterOptions(
+  const {
     works,
-    "is_active",
-    (value) => (value ? "Active" : "Inactive"),
-    (value) => value,
-  );
+    total,
+    filterOptions,
+    isLoading,
+    isFetching,
+    pagination,
+    setPagination,
+    sorting,
+    setSorting,
+    columnFilters,
+    onColumnFiltersChange,
+    buildExportRows,
+  } = useWorkListing({ isActive: false });
 
   const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
         accessorKey: "title",
+        filterFn: serverSideFilter,
         header: "Name",
         size: 300,
         Cell: ({ row, renderedCellValue }) => (
@@ -147,15 +66,14 @@ const WorkList = () => {
             {renderedCellValue}
           </ETGridTitle>
         ),
-        sortingFn: "sortFn",
-        filterFn: searchFilter,
       },
       {
         accessorKey: "project.name",
+        filterFn: serverSideFilter,
         header: "Project",
         size: 200,
         filterVariant: "multi-select",
-        filterSelectOptions: projects,
+        filterSelectOptions: filterOptions.projects,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -166,25 +84,14 @@ const WorkList = () => {
               name="rolesFilter"
             />
           );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > projects.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id) || "";
-
-          return filterValue.includes(value);
         },
       },
       {
         accessorKey: "work_type.name",
+        filterFn: serverSideFilter,
         header: "Work type",
         filterVariant: "multi-select",
-        filterSelectOptions: workTypes,
+        filterSelectOptions: filterOptions.work_types,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -196,27 +103,19 @@ const WorkList = () => {
             />
           );
         },
-        filterFn: (row, id, filterValue) => {
-          if (!filterValue.length || filterValue.length > workTypes.length) {
-            return true;
-          }
-
-          const value: string = row.getValue(id) || "";
-
-          return filterValue.includes(value);
-        },
       },
       {
         accessorKey: "start_date",
+        filterFn: serverSideFilter,
         header: "Started",
-        Cell: ({ row, renderedCellValue }) => {
+        Cell: ({ renderedCellValue }) => {
           return dateUtils.formatDate(
             renderedCellValue?.toString() || "",
             MONTH_DAY_YEAR,
           );
         },
         filterVariant: "multi-select",
-        filterSelectOptions: started_years,
+        filterSelectOptions: filterOptions.started_years,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -228,24 +127,12 @@ const WorkList = () => {
             />
           );
         },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > started_years.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string =
-            dateUtils.formatDate(row.getValue(id) as string, "YYYY") || "";
-
-          return filterValue.includes(value);
-        },
       },
       {
         accessorKey: "work_decision_date",
+        filterFn: serverSideFilter,
         header: "Closed",
-        Cell: ({ row, renderedCellValue }) => {
+        Cell: ({ renderedCellValue }) => {
           return renderedCellValue
             ? dateUtils.formatDate(
                 renderedCellValue?.toString() || "",
@@ -254,7 +141,7 @@ const WorkList = () => {
             : "";
         },
         filterVariant: "multi-select",
-        filterSelectOptions: closed_years,
+        filterSelectOptions: filterOptions.closed_years,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -265,26 +152,14 @@ const WorkList = () => {
               name="rolesFilter"
             />
           );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > closed_years.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string =
-            dateUtils.formatDate(row.getValue(id) as string, "YYYY") || "";
-
-          return filterValue.includes(value);
         },
       },
       {
         accessorKey: "work_state",
+        filterFn: serverSideFilter,
         header: "Work state",
         filterVariant: "multi-select",
-        filterSelectOptions: workStates,
+        filterSelectOptions: filterOptions.work_states,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -295,18 +170,6 @@ const WorkList = () => {
               name="rolesFilter"
             />
           );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > workStates.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id) || "";
-
-          return filterValue.includes(value);
         },
         Cell: ({ row }) => {
           return (
@@ -320,11 +183,11 @@ const WorkList = () => {
       },
       {
         accessorKey: "is_active",
+        filterFn: serverSideFilter,
         header: "Status",
         size: 75,
         filterVariant: "multi-select",
         filterSelectOptions: statuses,
-        filterFn: "multiSelectFilter",
         Filter: getStatusFilter<Work>,
         Cell: ({ cell }) => (
           <span>
@@ -334,27 +197,27 @@ const WorkList = () => {
         ),
       },
     ],
-    [projects, workStates, workTypes, started_years, closed_years, statuses],
+    [filterOptions],
   );
+
   return (
     <MasterTrackTable
       columns={columns}
       data={works}
-      initialState={{
-        sorting: [
-          {
-            id: "title",
-            desc: false,
-          },
-        ],
-      }}
       loading={isLoading}
-      onColumnFiltersChange={setColumnFilters}
+      manualPagination
+      manualFiltering
+      manualSorting
+      rowCount={total}
+      onColumnFiltersChange={onColumnFiltersChange}
+      onSortingChange={setSorting}
       state={{
         isLoading: isLoading,
         showGlobalFilter: true,
+        showProgressBars: isFetching,
         pagination: pagination,
         columnFilters,
+        sorting,
       }}
       renderResultCount
       renderTopToolbarCustomActions={({ table }) => (
@@ -367,11 +230,12 @@ const WorkList = () => {
         >
           <Tooltip title="Export to csv">
             <IButton
-              onClick={() =>
+              onClick={async () =>
                 exportToCsv({
                   table,
                   downloadDate: new Date().toISOString(),
                   filenamePrefix: "general-insights-listing",
+                  rows: await buildExportRows(toExportRow),
                 })
               }
             >
@@ -382,7 +246,7 @@ const WorkList = () => {
       )}
       enablePagination
       muiPaginationProps={{
-        rowsPerPageOptions: rowsPerPageOptions(works.length),
+        rowsPerPageOptions: rowsPerPageOptions(total),
       }}
       onPaginationChange={setPagination}
     />

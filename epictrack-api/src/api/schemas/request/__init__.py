@@ -128,7 +128,8 @@ from .work_request import (
     WorkStatusParameterSchema,
     WorkTypeIdQueryParamSchema,
     WorkQueryParameterSchema,
-    WorkPhaseQueryParameterSchema
+    WorkPhaseQueryParameterSchema,
+    WorkListingBodyParameterSchema
 )
 from .ministry_request import (
     MinistryBodyParameterSchema,

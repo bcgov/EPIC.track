@@ -1,130 +1,63 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
-import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { useGetWorksWithNationsQuery } from "services/rtkQuery/workInsights";
+import { serverSideFilter } from "components/shared/MasterTrackTable/filters";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { Tooltip, Box } from "@mui/material";
-import { sort } from "utils";
 import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
-import { useInsightsContext } from "components/insights/InsightsContext";
-import { useTableFilterContext } from "components/insights/TableFilterContext";
+import { useWorkListing } from "components/insights/Work/Tabs/useWorkListing";
 
 const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
+const nationNames = (work: Work) =>
+  work.indigenous_works
+    ?.map((indigenous_work) => indigenous_work.name)
+    .join(", ") || "";
+
+const relStaffNames = (work: Work) =>
+  work.rel_staff?.map((staff) => staff.full_name).join(", ") || "";
+
+const toExportRow = (work: Work) => ({
+  title: work.title,
+  "ministry.name": work.ministry?.name ?? "",
+  "federal_involvement.name": work.federal_involvement?.name ?? "",
+  "indigenous_works.name": nationNames(work),
+  rel_staff: relStaffNames(work),
+  "work_type.name": work.work_type?.name ?? "",
+});
+
 const WorkList = () => {
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 15,
+  const {
+    works,
+    total,
+    filterOptions,
+    isLoading,
+    isFetching,
+    pagination,
+    setPagination,
+    sorting,
+    setSorting,
+    columnFilters,
+    onColumnFiltersChange,
+    buildExportRows,
+  } = useWorkListing({
+    isActive: true,
+    includeIndigenousNations: true,
+    includeRelStaff: true,
   });
-  const { columnFilters, setColumnFilters } = useTableFilterContext();
-  const { isUserInsights, staffId } = useInsightsContext();
-
-  const queryArg = useMemo(() => {
-    return {
-      is_active: true,
-      ...(isUserInsights && staffId ? { staffId } : {}),
-    };
-  }, [isUserInsights, staffId]);
-
-  const { data, error, isLoading } = useGetWorksWithNationsQuery(queryArg, {
-    refetchOnMountOrArgChange: true,
-  });
-
-  const works = useMemo(() => data || [], [data]);
-
-  useEffect(() => {
-    setPagination((prev) => ({
-      ...prev,
-      pageSize: works.length,
-    }));
-  }, [works]);
-
-  useEffect(() => {
-    if (error) {
-      showNotification("Error fetching Works", {
-        duration: 3000,
-        type: "error",
-      });
-    }
-  }, [error]);
-
-  const federalInvolvements = useMemo(() => {
-    return Array.from(
-      new Set(
-        [...works]
-          .sort(
-            (a, b) =>
-              Number(a?.federal_involvement?.sort_order) -
-              Number(b?.federal_involvement?.sort_order),
-          )
-          .filter((p) => p.federal_involvement)
-          .map((w) => w?.federal_involvement?.name),
-      ),
-    );
-  }, [works]);
-
-  const ministries = useMemo(() => {
-    const ministry = Array.from(
-      new Set(
-        [...works]
-          .sort((a, b) => a.ministry?.sort_order - b.ministry?.sort_order)
-          .filter((w) => w.ministry)
-          .map((w) => w.ministry.name),
-      ),
-    );
-    return ministry;
-  }, [works]);
-
-  const indigenousNations = useMemo(() => {
-    const nations = works.map((work) => work.indigenous_works).flat();
-
-    const uniqueNations = Array.from(
-      new Set(
-        sort([...nations], "name")
-          .map((nation) => nation?.name ?? "")
-          .filter((nation) => nation),
-      ),
-    );
-
-    return uniqueNations;
-  }, [works]);
-
-  const relStaff = useMemo(() => {
-    const staff = works
-      .map((work) => work.rel_staff || [])
-      .flat()
-      .filter((s) => s);
-
-    const uniqueStaff = Array.from(
-      new Set(staff.map((s) => s.full_name)),
-    ).sort();
-
-    return uniqueStaff;
-  }, [works]);
-
-  const workTypes = useMemo(() => {
-    return Array.from(
-      new Set(
-        [...works].filter((w) => w.work_type).map((w) => w.work_type.name),
-      ),
-    ).sort();
-  }, [works]);
 
   const columns = useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
         accessorKey: "title",
+        filterFn: serverSideFilter,
         header: "Name",
         size: 300,
-        sortingFn: "sortFn",
-        filterFn: searchFilter,
         Cell: ({ row, renderedCellValue }) => (
           <ETGridTitle
             to={`/work-plan?work_id=${row.original.id}`}
@@ -137,10 +70,11 @@ const WorkList = () => {
       },
       {
         accessorKey: "ministry.name",
+        filterFn: serverSideFilter,
         header: "Other Ministry",
         size: 200,
         filterVariant: "multi-select",
-        filterSelectOptions: ministries,
+        filterSelectOptions: filterOptions.ministries,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -150,28 +84,16 @@ const WorkList = () => {
               variant="inline"
               name="rolesFilter"
             />
-          );
-        },
-        filterFn: (row, id, filterValues) => {
-          if (
-            !filterValues.length ||
-            filterValues.length > ministries.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id) || "";
-
-          return filterValues.some((filerValue: string) =>
-            value.includes(filerValue),
           );
         },
       },
       {
         accessorKey: "federal_involvement.name",
+        filterFn: serverSideFilter,
         header: "Federal Involvement",
         size: 100,
-        filterSelectOptions: federalInvolvements,
+        filterVariant: "multi-select",
+        filterSelectOptions: filterOptions.federal_involvements,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -182,35 +104,22 @@ const WorkList = () => {
               name="rolesFilter"
             />
           );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > federalInvolvements.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id) || "";
-
-          return filterValue.includes(value);
         },
       },
       {
         accessorKey: "indigenous_works.name",
+        filterFn: serverSideFilter,
         header: "First Nations",
         size: 200,
+        enableSorting: false,
         filterVariant: "multi-select",
-        filterSelectOptions: indigenousNations,
-        accessorFn: (row) => {
-          return (
-            <div style={{ wordWrap: "break-word", whiteSpace: "pre-wrap" }}>
-              {row.indigenous_works
-                ?.map((indigenous_work) => indigenous_work.name)
-                .join(", ")}
-            </div>
-          );
-        },
+        filterSelectOptions: filterOptions.indigenous_nations,
+        accessorFn: nationNames,
+        Cell: ({ row }) => (
+          <div style={{ wordWrap: "break-word", whiteSpace: "pre-wrap" }}>
+            {nationNames(row.original)}
+          </div>
+        ),
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -220,45 +129,23 @@ const WorkList = () => {
               variant="inline"
               name="rolesFilter"
             />
-          );
-        },
-        filterFn: (row, id, filterValues) => {
-          if (
-            !filterValues.length ||
-            filterValues.length > indigenousNations.length // select all is selected
-          ) {
-            return true;
-          }
-
-          // list of First Nations associated with the work
-          const workIndigenousNations: string[] =
-            row.original.indigenous_works?.map((work) => work.name) || [];
-
-          return filterValues.some((filterValue: string) =>
-            workIndigenousNations.includes(filterValue),
           );
         },
       },
       {
         accessorKey: "rel_staff",
+        filterFn: serverSideFilter,
         header: "REL",
         size: 200,
+        enableSorting: false,
         filterVariant: "multi-select",
-        filterSelectOptions: relStaff,
-        accessorFn: (row) => {
-          return (
-            row.rel_staff?.map((staff) => staff.full_name).join(", ") || ""
-          );
-        },
-        Cell: ({ row }) => {
-          return (
-            <div style={{ wordWrap: "break-word", whiteSpace: "pre-wrap" }}>
-              {row.original.rel_staff
-                ?.map((staff) => staff.full_name)
-                .join(", ") || ""}
-            </div>
-          );
-        },
+        filterSelectOptions: filterOptions.rel_staff,
+        accessorFn: relStaffNames,
+        Cell: ({ row }) => (
+          <div style={{ wordWrap: "break-word", whiteSpace: "pre-wrap" }}>
+            {relStaffNames(row.original)}
+          </div>
+        ),
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -268,31 +155,16 @@ const WorkList = () => {
               variant="inline"
               name="rolesFilter"
             />
-          );
-        },
-        filterFn: (row, id, filterValues) => {
-          if (
-            !filterValues.length ||
-            filterValues.length > relStaff.length // select all is selected
-          ) {
-            return true;
-          }
-
-          // list of REL staff associated with the work
-          const workRelStaff: string[] =
-            row.original.rel_staff?.map((staff) => staff.full_name) || [];
-
-          return filterValues.some((filterValue: string) =>
-            workRelStaff.includes(filterValue),
           );
         },
       },
       {
         accessorKey: "work_type.name",
+        filterFn: serverSideFilter,
         header: "Work Type",
         size: 150,
         filterVariant: "multi-select",
-        filterSelectOptions: workTypes,
+        filterSelectOptions: filterOptions.work_types,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -304,41 +176,29 @@ const WorkList = () => {
             />
           );
         },
-        filterFn: (row, id, filterValues) => {
-          if (
-            !filterValues.length ||
-            filterValues.length > workTypes.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id) || "";
-
-          return filterValues.includes(value);
-        },
       },
     ],
-    [federalInvolvements, indigenousNations, ministries, relStaff, workTypes],
+    [filterOptions],
   );
+
   return (
     <MasterTrackTable
       columns={columns}
       data={works}
-      initialState={{
-        sorting: [
-          {
-            id: "title",
-            desc: false,
-          },
-        ],
-      }}
       loading={isLoading}
-      onColumnFiltersChange={setColumnFilters}
+      manualPagination
+      manualFiltering
+      manualSorting
+      rowCount={total}
+      onColumnFiltersChange={onColumnFiltersChange}
+      onSortingChange={setSorting}
       state={{
         isLoading: isLoading,
         showGlobalFilter: true,
+        showProgressBars: isFetching,
         pagination: pagination,
         columnFilters,
+        sorting,
       }}
       renderResultCount
       renderTopToolbarCustomActions={({ table }) => (
@@ -351,11 +211,12 @@ const WorkList = () => {
         >
           <Tooltip title="Export to csv">
             <IButton
-              onClick={() =>
+              onClick={async () =>
                 exportToCsv({
                   table,
                   downloadDate: new Date().toISOString(),
                   filenamePrefix: "partners-insights-listing",
+                  rows: await buildExportRows(toExportRow),
                 })
               }
             >
@@ -366,7 +227,7 @@ const WorkList = () => {
       )}
       enablePagination
       muiPaginationProps={{
-        rowsPerPageOptions: rowsPerPageOptions(works.length),
+        rowsPerPageOptions: rowsPerPageOptions(total),
       }}
       onPaginationChange={setPagination}
     />

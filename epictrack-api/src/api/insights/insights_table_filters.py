@@ -2,6 +2,9 @@
 from typing import List, Dict, Any
 
 from api.models.work import Work
+from api.models.indigenous_work import IndigenousWork
+from api.models.position import Position
+from api.models.staff_work_role import StaffWorkRole
 from api.models.project import Project
 from api.models.work_type import WorkType
 from api.models.work_phase import WorkPhase
@@ -16,7 +19,7 @@ from api.models.sub_types import SubType
 from api.models.proponent import Proponent
 from api.models.region import Region
 from api.models.ea_act import EAAct
-from sqlalchemy import extract
+from sqlalchemy import extract, select
 from sqlalchemy.sql import exists, and_
 
 
@@ -63,12 +66,55 @@ phase_table_filter_map = {
     "work_phase_end_date": lambda v: extract('year', WorkPhase.end_date).in_(v),
 }
 
+# Kept separate from work_table_filter_map so the entries below cannot change chart behaviour
+work_listing_filter_map = {
+    **work_table_filter_map,
+    # the relationship is to IndigenousWork, so the nation name is one hop further
+    "indigenous_works.name": lambda v: Work.indigenous_works.any(
+        and_(
+            IndigenousWork.is_active.is_(True),
+            IndigenousWork.is_deleted.is_(False),
+            IndigenousWork.indigenous_nation.has(IndigenousNation.name.in_(v)),
+        )
+    ),
+    "rel_staff": lambda v: exists().where(
+        and_(
+            StaffWorkRole.work_id == Work.id,
+            StaffWorkRole.staff_id == Staff.id,
+            Staff.position_id == Position.id,
+            Position.name == "REL",
+            Staff.full_name.in_(v),
+            StaffWorkRole.is_active.is_(True),
+            StaffWorkRole.is_deleted.is_(False),
+        )
+    ).correlate(Work),
+    "is_active": Work.is_active.in_,
+}
+
+# Keyed by front end column id. Correlated subqueries so no joins have to be managed.
+work_listing_sort_map = {
+    "title": Work.title,
+    "project.name": select(Project.name).where(Project.id == Work.project_id).correlate(Work).scalar_subquery(),
+    "work_type.name": select(WorkType.name).where(WorkType.id == Work.work_type_id).correlate(Work).scalar_subquery(),
+    "current_work_phase.name": select(WorkPhase.name).where(WorkPhase.id == Work.current_work_phase_id)
+    .correlate(Work).scalar_subquery(),
+    "ministry.name": select(Ministry.name).where(Ministry.id == Work.ministry_id).correlate(Work).scalar_subquery(),
+    "federal_involvement.name": select(FederalInvolvement.name)
+    .where(FederalInvolvement.id == Work.federal_involvement_id).correlate(Work).scalar_subquery(),
+    "start_date": Work.start_date,
+    "work_decision_date": Work.work_decision_date,
+    "work_state": Work.work_state,
+    "is_active": Work.is_active,
+}
+
 WORKS = "works"
+WORK_LISTING = "work_listing"
 PROJECTS = "projects"
 PHASES = "phases"
 
 filter_maps = {
     WORKS: work_table_filter_map,
+    WORK_LISTING: work_listing_filter_map,
     PROJECTS: project_table_filter_map,
     PHASES: phase_table_filter_map,
 }
