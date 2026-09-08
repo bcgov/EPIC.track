@@ -71,7 +71,11 @@ work_listing_filter_map = {
     **work_table_filter_map,
     # the relationship is to IndigenousWork, so the nation name is one hop further
     "indigenous_works.name": lambda v: Work.indigenous_works.any(
-        IndigenousWork.indigenous_nation.has(IndigenousNation.name.in_(v))
+        and_(
+            IndigenousWork.is_active.is_(True),
+            IndigenousWork.is_deleted.is_(False),
+            IndigenousWork.indigenous_nation.has(IndigenousNation.name.in_(v)),
+        )
     ),
     "rel_staff": lambda v: exists().where(
         and_(

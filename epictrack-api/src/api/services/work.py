@@ -237,7 +237,11 @@ class WorkService:  # pylint: disable=too-many-public-methods
             .select_from(Work)
             .join(IndigenousWork, IndigenousWork.work_id == Work.id)
             .join(IndigenousNation, IndigenousWork.indigenous_nation_id == IndigenousNation.id)
-            .filter(*scope, IndigenousWork.is_deleted.is_(False))
+            .filter(
+                *scope,
+                IndigenousWork.is_active.is_(True),
+                IndigenousWork.is_deleted.is_(False),
+            )
             .distinct()
             .order_by(IndigenousNation.name)
             .all()
