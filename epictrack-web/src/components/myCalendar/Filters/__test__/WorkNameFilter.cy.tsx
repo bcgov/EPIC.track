@@ -20,7 +20,7 @@ const WorkNameFilterHarness = () => {
 
 describe("WorkNameFilter", () => {
   it("loads and sorts work options alphabetically", () => {
-    cy.stub(workService, "getAll").resolves({
+    cy.stub(workService, "getOptions").resolves({
       data: [
         { id: 2, title: "Zulu Work" },
         { id: 1, title: "Alpha Work" },
@@ -38,7 +38,7 @@ describe("WorkNameFilter", () => {
   });
 
   it("updates selected work ids when a work is selected", () => {
-    cy.stub(workService, "getAll").resolves({
+    cy.stub(workService, "getOptions").resolves({
       data: [
         { id: 11, title: "North Work" },
         { id: 12, title: "South Work" },
@@ -57,7 +57,7 @@ describe("WorkNameFilter", () => {
   });
 
   it("stops loading and remains usable when loading works fails", () => {
-    cy.stub(workService, "getAll").rejects(new Error("load failed"));
+    cy.stub(workService, "getOptions").rejects(new Error("load failed"));
 
     cy.mount(<WorkNameFilterHarness />);
 

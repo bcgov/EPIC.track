@@ -1,10 +1,9 @@
 """Work model schema"""
-from datetime import datetime, timezone
 from flask_marshmallow import Schema
 from marshmallow import EXCLUDE, fields, pre_dump
 
-from api.models import db, Staff, Work, WorkIssues, WorkIssueUpdates, WorkPhase, WorkStatus
-from api.models.staleness_settings import StalenessSettings, StalenessTypeEnum
+from api.models import Staff, Work, WorkIssues, WorkIssueUpdates, WorkPhase, WorkStatus
+from api.models.staleness_settings import StalenessTypeEnum
 from api.schemas import PositionSchema, RoleSchema
 from api.schemas.base import AutoSchemaBase
 from api.schemas.ea_act import EAActSchema
@@ -18,7 +17,7 @@ from api.schemas.staff import StaffSchema
 from api.schemas.substitution_act import SubstitutionActSchema
 from api.schemas.work_type import WorkTypeSchema
 from api.schemas.response.phase_overage_responsibility_response import PhaseOverageResponsibilityResponseSchema
-from api.utils.enums import StalenessEnum
+from api.utils.staleness import get_staleness_policy
 
 
 class WorkPhaseResponseSchema(
@@ -103,7 +102,18 @@ class WorkResponseSchema(
 
     def get_anticipated_referral_date(self, obj) -> str:
         """Return the referral date"""
-        return obj.anticipated_referral_date if obj.anticipated_referral_date else None
+        dates = self.context.get("referral_dates", {})
+        if obj.id in dates:
+            return dates[obj.id]
+        return obj.anticipated_referral_date
+
+    @pre_dump(pass_many=True)
+    def load_referral_dates(self, works, many, **_kwargs):
+        """Batch this computed field only when the response actually includes it."""
+        if many and "anticipated_referral_date" in self.dump_fields:
+            works = list(works)
+            self.context["referral_dates"] = Work.anticipated_referral_dates([work.id for work in works])
+        return works
 
 
 class WorkStaffRoleResponseSchema(
@@ -242,17 +252,7 @@ class WorkStatusResponseSchema(
         """Return the staleness of the work status"""
         if not obj:
             return None
-        staleness_settings = db.session.query(StalenessSettings).filter_by(is_active=True, staleness_type=StalenessTypeEnum.STATUS).one_or_none()
-        warning_length = getattr(staleness_settings, "warning_length", 5) or 5
-        staleness_length = getattr(staleness_settings, "staleness_length", 10) or 10
-        if obj.posted_date:
-            days_since_update = (datetime.now(timezone.utc) - obj.posted_date).days
-            if days_since_update >= staleness_length:
-                return StalenessEnum.CRITICAL.value
-            if days_since_update >= warning_length:
-                return StalenessEnum.WARN.value
-            return StalenessEnum.GOOD.value
-        return StalenessEnum.CRITICAL.value
+        return get_staleness_policy(StalenessTypeEnum.STATUS).classify(obj.posted_date)
 
 
 class WorkIssueUpdatesResponseSchema(
@@ -273,17 +273,7 @@ class WorkIssueUpdatesResponseSchema(
         """Return the staleness of the work issue update"""
         if not obj:
             return None
-        staleness_settings = db.session.query(StalenessSettings).filter_by(is_active=True, staleness_type=StalenessTypeEnum.ISSUES).one_or_none()
-        warning_length = getattr(staleness_settings, "warning_length", 5) or 5
-        staleness_length = getattr(staleness_settings, "staleness_length", 10) or 10
-        if obj.posted_date:
-            days_since_update = (datetime.now(timezone.utc) - obj.posted_date).days
-            if days_since_update >= staleness_length:
-                return StalenessEnum.CRITICAL.value
-            if days_since_update >= warning_length:
-                return StalenessEnum.WARN.value
-            return StalenessEnum.GOOD.value
-        return StalenessEnum.CRITICAL.value
+        return get_staleness_policy(StalenessTypeEnum.ISSUES).classify(obj.posted_date)
 
 
 class WorkIssuesResponseSchema(

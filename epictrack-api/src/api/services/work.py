@@ -23,7 +23,7 @@ from flask import current_app
 from sqlalchemy import and_
 from sqlalchemy import extract
 from sqlalchemy import tuple_
-from sqlalchemy.orm import aliased, contains_eager
+from sqlalchemy.orm import aliased, contains_eager, joinedload, selectinload
 
 from api.exceptions import (
     ResourceExistsError,
@@ -55,7 +55,7 @@ from api.models.indigenous_nation import IndigenousNation
 from api.models.indigenous_work import IndigenousWork
 from api.models.indigenous_work_queries import find_all_by_project_id
 from api.models.pagination_options import PaginationOptions
-from api.models.phase_code import PhaseVisibilityEnum
+from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
 from api.models.special_field import EntityEnum, FieldTypeEnum
 from api.models.work_status import WorkStatus
 from api.models.work_type import WorkType
@@ -106,14 +106,49 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return Work.check_existence(title=title, work_id=work_id)
 
     @classmethod
-    def find_all_works(cls, is_active=False):
+    def find_all_works(cls, is_active=False, response_options=None):
         """Find all non-deleted works"""
         cls._check_can_view()
-        works = Work.find_all(is_active)
-        return works
+        if response_options is None:
+            return Work.find_all(is_active)
+        query = Work.query.filter(Work.is_deleted.is_(False))
+        if is_active:
+            query = query.filter(Work.is_active.is_(True))
+        return query.options(*response_options).all()
 
     @classmethod
-    def get_works_by_staff(cls, staff_id: Optional[int] = None) -> List[Work]:
+    def work_options(cls):
+        """Return the calendar's work IDs and titles without loading work objects."""
+        cls._check_can_view()
+        rows = db.session.query(Work.id, Project.name, WorkType.name, Work.simple_title).join(
+            Project, Work.project_id == Project.id
+        ).join(WorkType, Work.work_type_id == WorkType.id).filter(Work.is_deleted.is_(False)).all()
+        return [{"id": work_id, "title": util.generate_title(project, work_type, title)}
+                for work_id, project, work_type, title in rows]
+
+    @staticmethod
+    def response_options(insights=False, include_indigenous_nations=False):
+        """Load only the relationship graph used by the requested work response."""
+        options = [joinedload(getattr(Work, name)) for name in (
+            "ministry", "federal_involvement", "work_lead", "work_type"
+        )]
+        options.extend(joinedload(Work.project).joinedload(getattr(Project, name)) for name in (
+            "sub_type", "type", "proponent", "region_env", "region_flnro", "project_state"
+        ))
+        options.extend([
+            joinedload(Work.current_work_phase).joinedload(WorkPhase.phase).joinedload(PhaseCode.ea_act),
+            joinedload(Work.current_work_phase).joinedload(WorkPhase.phase).joinedload(PhaseCode.work_type),
+        ])
+        if not insights:
+            options.extend(joinedload(getattr(Work, name)) for name in (
+                "ea_act", "responsible_epd", "eac_decision_by", "decision_by", "substitution_act", "eao_team"
+            ))
+        if include_indigenous_nations:
+            options.append(selectinload(Work.indigenous_works).joinedload(IndigenousWork.indigenous_nation))
+        return options
+
+    @classmethod
+    def get_works_by_staff(cls, staff_id: Optional[int] = None, response_options=None) -> List[Work]:
         """Fetch all active, non-deleted works and filter by staff_id if provided."""
         cls._check_can_view()
         query = Work.query.filter(
@@ -131,6 +166,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
                     StaffWorkRole.is_deleted.is_(False)
                 )
             )
+        if response_options is not None:
+            query = query.options(*response_options)
         works = query.all()
         return works
 
@@ -153,12 +190,13 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return conditions
 
     @classmethod
-    def fetch_work_listing(
+    def fetch_work_listing(  # pylint: disable=too-many-arguments
         cls,
         is_active: Optional[bool] = None,
         staff_id: Optional[int] = None,
         filters: List[Dict] = None,
         pagination_options: PaginationOptions = None,
+        include_indigenous_nations: bool = False,
     ) -> Tuple[List[Work], int]:
         """Fetch a single page of works for the insights listing tables."""
         cls._check_can_view()
@@ -168,6 +206,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             Work.query.join(Project, Work.project_id == Project.id)
             .join(WorkType, Work.work_type_id == WorkType.id)
             .filter(*cls._work_listing_scope(is_active, staff_id))
+            .options(*cls.response_options(insights=True, include_indigenous_nations=include_indigenous_nations))
         )
 
         filter_expressions = build_insights_filters(filters, WORK_LISTING) if filters else []
@@ -585,7 +624,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             .join(Staff, StaffWorkRole.staff_id == Staff.id)
             .join(Role, StaffWorkRole.role_id == Role.id)
             .join(Work, StaffWorkRole.work_id == Work.id)
-            .options(contains_eager(StaffWorkRole.staff), contains_eager(StaffWorkRole.role))
+            .options(contains_eager(StaffWorkRole.staff).joinedload(Staff.position), contains_eager(StaffWorkRole.role))
             .filter(
                 StaffWorkRole.is_deleted.is_(False),
                 StaffWorkRole.is_active.is_(True),

@@ -22,9 +22,9 @@ export const WorkNameFilter = ({
   useEffect(() => {
     const fetchWorks = async () => {
       try {
-        const response = await workService.getAll();
+        const response = await workService.getOptions();
         const works: Work[] = response.data
-          .map((w: any) => ({
+          .map((w) => ({
             id: w.id,
             name: w.title,
           }))

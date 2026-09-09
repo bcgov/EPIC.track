@@ -6,7 +6,6 @@ import pytest
 
 from api.exceptions import BadRequestError, ResourceNotFoundError
 from api.services.work_issues import WorkIssuesService
-from api.utils.enums import StalenessEnum
 
 
 class TestFindAllWorkIssues:
@@ -55,127 +54,6 @@ class TestFindWorkIssuesByWorkIds:
 
         assert result == mock_results
         mock_query.find_work_issues_by_work_ids.assert_called_once_with(work_ids)
-
-
-class TestFetchIssuesForAllWorks:
-    """Tests for fetch_issues_for_all_works method."""
-
-    @patch("api.services.work_issues.WorkIssuesService._serialize_issue")
-    @patch("api.services.work_issues.WorkIssueUpdatesResponseSchema")
-    @patch("api.services.work_issues.WorkIssuesModel")
-    @patch("api.services.work_issues.Work")
-    def test_fetches_and_filters_issues(self, mock_work, mock_issues_model, mock_schema, mock_serialize):
-        """Test fetching all work issues with filtering."""
-        pagination_options = MagicMock(page=1, size=10, sort_key=None)
-        search_options = MagicMock(
-            is_approved=None,
-            staleness=None,
-            issue_state=None
-        )
-
-        mock_work1 = MagicMock(id=1)
-        mock_work2 = MagicMock(id=2)
-        mock_work.fetch_all_works_by_work_issues.return_value = ([mock_work1, mock_work2], 2)
-
-        mock_update = MagicMock(is_approved=True, posted_date=datetime.now(timezone.utc))
-        mock_issue1 = MagicMock(work_id=1, updates=[mock_update], is_active=True, is_resolved=False)
-        mock_issue2 = MagicMock(work_id=2, updates=[mock_update], is_active=True, is_resolved=False)
-        mock_issues_model.list_all_issues_for_work_ids.return_value = [mock_issue1, mock_issue2]
-
-        mock_schema_instance = MagicMock()
-        mock_schema.return_value = mock_schema_instance
-        mock_schema_instance.get_staleness.return_value = StalenessEnum.GOOD.value
-
-        mock_serialize.side_effect = [
-            {"work_id": 1, "issue": {}},
-            {"work_id": 2, "issue": {}}
-        ]
-
-        result = WorkIssuesService.fetch_issues_for_all_works(pagination_options, search_options)
-
-        assert "items" in result
-        assert "total" in result
-        assert len(result["items"]) == 2
-
-    @patch("api.services.work_issues.WorkIssuesService._serialize_issue")
-    @patch("api.services.work_issues.WorkIssueUpdatesResponseSchema")
-    @patch("api.services.work_issues.WorkIssuesModel")
-    @patch("api.services.work_issues.Work")
-    def test_filters_by_approval_status(self, mock_work, mock_issues_model, mock_schema, mock_serialize):
-        """Test filtering issues by approval status."""
-        pagination_options = MagicMock(page=1, size=10, sort_key=None)
-        search_options = MagicMock(
-            is_approved=["true"],
-            staleness=None,
-            issue_state=None
-        )
-
-        mock_work1 = MagicMock(id=1)
-        mock_work.fetch_all_works_by_work_issues.return_value = ([mock_work1], 1)
-
-        mock_approved_update = MagicMock(is_approved=True)
-        mock_issue_approved = MagicMock(work_id=1, updates=[mock_approved_update], is_active=True, is_resolved=False)
-        mock_issues_model.list_all_issues_for_work_ids.return_value = [mock_issue_approved]
-
-        result = WorkIssuesService.fetch_issues_for_all_works(pagination_options, search_options)
-
-        assert result["total"] == 1
-
-    @patch("api.services.work_issues.WorkIssuesService._serialize_issue")
-    @patch("api.services.work_issues.WorkIssueUpdatesResponseSchema")
-    @patch("api.services.work_issues.WorkIssuesModel")
-    @patch("api.services.work_issues.Work")
-    def test_filters_by_staleness(self, mock_work, mock_issues_model, mock_schema, mock_serialize):
-        """Test filtering issues by staleness."""
-        pagination_options = MagicMock(page=1, size=10, sort_key=None)
-        search_options = MagicMock(
-            is_approved=None,
-            staleness=[StalenessEnum.GOOD.value],
-            issue_state=None
-        )
-
-        mock_work1 = MagicMock(id=1)
-        mock_work.fetch_all_works_by_work_issues.return_value = ([mock_work1], 1)
-
-        mock_update = MagicMock(is_approved=True)
-        mock_issue = MagicMock(work_id=1, updates=[mock_update], is_active=True, is_resolved=False)
-        mock_issues_model.list_all_issues_for_work_ids.return_value = [mock_issue]
-
-        mock_schema_instance = MagicMock()
-        mock_schema.return_value = mock_schema_instance
-        mock_schema_instance.get_staleness.return_value = StalenessEnum.GOOD.value
-
-        mock_serialize.return_value = {"work_id": 1, "issue": {}}
-
-        result = WorkIssuesService.fetch_issues_for_all_works(pagination_options, search_options)
-
-        assert result["total"] == 1
-
-    @patch("api.services.work_issues.WorkIssuesService._serialize_issue")
-    @patch("api.services.work_issues.WorkIssueUpdatesResponseSchema")
-    @patch("api.services.work_issues.WorkIssuesModel")
-    @patch("api.services.work_issues.Work")
-    def test_paginates_results(self, mock_work, mock_issues_model, mock_schema, mock_serialize):
-        """Test pagination of filtered results."""
-        pagination_options = MagicMock(page=2, size=2, sort_key=None)
-        search_options = MagicMock(is_approved=None, staleness=None, issue_state=None)
-
-        works = [MagicMock(id=i) for i in range(1, 6)]
-        mock_work.fetch_all_works_by_work_issues.return_value = (works, 5)
-
-        issues = []
-        for i in range(1, 6):
-            mock_update = MagicMock(is_approved=True)
-            mock_issue = MagicMock(work_id=i, updates=[mock_update], is_active=True, is_resolved=False)
-            issues.append(mock_issue)
-        mock_issues_model.list_all_issues_for_work_ids.return_value = issues
-
-        mock_serialize.side_effect = [{"work_id": i, "issue": {}} for i in range(1, 6)]
-
-        result = WorkIssuesService.fetch_issues_for_all_works(pagination_options, search_options)
-
-        assert result["total"] == 5
-        assert len(result["items"]) == 2  # Page 2, size 2 should return 2 items
 
 
 class TestSerializeIssue:

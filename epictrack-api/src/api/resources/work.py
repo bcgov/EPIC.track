@@ -104,13 +104,15 @@ class Works(Resource):
         staff_id = request_args.get("staff_id", None)
         include_indigenous_nations = request_args.get('include_indigenous_nations')
         include_rel_staff = request_args.get('include_rel_staff', False)
+        context = request_args.get("context", None)
+        response_options = WorkService.response_options(
+            insights=context == "insights", include_indigenous_nations=include_indigenous_nations
+        )
 
         if staff_id is not None:
-            works = WorkService.get_works_by_staff(staff_id)
+            works = WorkService.get_works_by_staff(staff_id, response_options=response_options)
         else:
-            works = WorkService.find_all_works(is_active)
-
-        context = request_args.get("context", None)
+            works = WorkService.find_all_works(is_active, response_options=response_options)
 
         exclude = [] if include_indigenous_nations else ['indigenous_works']
         if not include_rel_staff:
@@ -139,8 +141,7 @@ class Works(Resource):
 
         if include_phase_status:
             augmented_works = []
-            for work in works:
-                work_data = works_schema.dump([work])[0]
+            for work, work_data in zip(works, works_schema.dump(works)):
                 work_phase_statuses = res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(WorkPhaseService.find_work_phases_status(work.id, EventService()))
                 work_data['work_phase_status'] = work_phase_statuses
                 augmented_works.append(work_data)
@@ -172,6 +173,19 @@ class WorksByStaff(Resource):
         """Return all work ids that a staff is assigned to."""
         work_ids = WorkService.get_work_ids_by_staff(staff_id)
         return work_ids, 200
+
+
+@cors_preflight("GET")
+@API.route("/options", methods=["GET", "OPTIONS"])
+class WorkOptions(Resource):
+    """Lightweight work labels for calendar filters."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    def get():
+        """Return all non-deleted work IDs and titles, including inactive works."""
+        return jsonify(WorkService.work_options()), HTTPStatus.OK
 
 
 def _dump_insight_works(works, include_indigenous_nations=False, include_rel_staff=False):
@@ -216,6 +230,7 @@ class WorkListing(Resource):
             staff_id=args.get("staff_id"),
             filters=args.get("filters"),
             pagination_options=pagination_options,
+            include_indigenous_nations=args.get("include_indigenous_nations", False),
         )
         items = _dump_insight_works(
             works,

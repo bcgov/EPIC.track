@@ -11,7 +11,18 @@ import { WorkResource } from "models/workResource";
 interface WorkPhaseResponse {
   work_phase: WorkPhase;
 }
+export interface WorkOption {
+  id: number;
+  title: string;
+}
+
 class WorkService implements ServiceBase {
+  async getOptions() {
+    return await http.GetRequest<WorkOption[]>(
+      `${Endpoints.Works.WORKS}/options`,
+    );
+  }
+
   async getAll(is_active = undefined) {
     return await http.GetRequest<Work[]>(Endpoints.Works.WORKS, { is_active });
   }
