@@ -34,4 +34,4 @@ SPECIAL_FIELD_ENTITY_MODEL_MAPS = {
     EntityEnum.STAFF: Staff,
 }
 
-CANADA_TIMEZONE = timezone("US/Pacific")
+CANADA_TIMEZONE = timezone("America/Vancouver")

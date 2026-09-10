@@ -2,7 +2,6 @@
 from datetime import datetime, timedelta
 
 from flask import jsonify, current_app
-from pytz import timezone
 from sqlalchemy import and_, case, cast, func, Integer, or_, select
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
@@ -133,7 +132,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
     def _get_date_range(self, report_date: datetime) -> tuple[datetime, datetime]:
         """Calculates the start and end dates for the data period based on the report date."""
         start_date = report_date + timedelta(days=-7)
-        report_date = report_date.astimezone(timezone("US/Pacific"))
+        report_date = report_date.astimezone(CANADA_TIMEZONE)
         return start_date, report_date
 
     def _get_aliased_tables(self) -> dict:

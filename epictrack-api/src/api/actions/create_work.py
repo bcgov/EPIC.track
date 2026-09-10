@@ -1,10 +1,9 @@
 """Create work action handler"""
 from datetime import timedelta
 
-from pytz import timezone
-
 from api.actions.base import ActionFactory
 from api.models.linked_work import LinkedWork
+from api.utils.constants import CANADA_TIMEZONE
 
 
 class CreateWork(ActionFactory):
@@ -16,7 +15,7 @@ class CreateWork(ActionFactory):
         from api.services.work import WorkService  # pylint: disable=import-outside-toplevel
 
         start_date = source_event.actual_date + timedelta(days=1)
-        start_date = start_date.astimezone(timezone('US/Pacific'))
+        start_date = start_date.astimezone(CANADA_TIMEZONE)
         new_work = {
             "ea_act_id": source_event.work.ea_act_id,
             "work_type_id": params.get("work_type"),
