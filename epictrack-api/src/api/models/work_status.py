@@ -21,7 +21,6 @@ from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, d
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
-from api.models import db
 
 
 class WorkStatus(BaseModelVersioned):
@@ -42,7 +41,7 @@ class WorkStatus(BaseModelVersioned):
     @classmethod
     def list_statuses_for_work_id(cls, work_id) -> List[WorkStatus]:
         """Return all WorkStatus records for a specific work_id"""
-        return WorkStatus.query.filter_by(work_id=work_id).order_by(desc(WorkStatus.posted_date)).all()
+        return WorkStatus.query.filter_by(work_id=work_id).order_by(desc(WorkStatus.posted_date), desc(WorkStatus.id)).all()
 
     @classmethod
     def list_statuses_for_work_ids(cls, work_ids: list[int]) -> dict[int, list[WorkStatus]]:
@@ -51,7 +50,7 @@ class WorkStatus(BaseModelVersioned):
             WorkStatus
             .query
             .filter(cls.work_id.in_(work_ids))
-            .order_by(cls.work_id, cls.posted_date.desc())
+            .order_by(cls.work_id, cls.posted_date.desc(), cls.id.desc())
             .all()
         )
 
@@ -63,40 +62,19 @@ class WorkStatus(BaseModelVersioned):
     @classmethod
     def list_latest_approved_statuses_for_work_ids(cls, work_ids: List[int]) -> Dict[int, WorkStatus]:
         """Return a dictionary with work_id as key and the latest approved WorkStatus against it."""
-        work_statuses_dict = {}
-
-        # Query to fetch all approved WorkStatus for the given work_ids
-        work_statuses = (
-            cls.query
-            .filter(
-                cls.work_id.in_(work_ids),
-                cls.is_approved.is_(True)
-            )
-            .all()
-        )
-
-        # Sort the work_statuses by work_id and posted_date in descending order
-        work_statuses.sort(key=lambda x: (x.work_id, x.posted_date), reverse=True)
-
-        # Create the dictionary with only the latest approved status for each work_id
-        for status in work_statuses:
-            if status.work_id not in work_statuses_dict:
-                work_statuses_dict[status.work_id] = status
-
-        return work_statuses_dict
+        return cls._latest_statuses(work_ids, approved_only=True)
 
     @classmethod
     def list_latest_status_for_work_ids(cls, work_ids: List[int]) -> Dict[int, WorkStatus]:
-        """Return the latest WorkStatus per work_id"""
-        query = db.session.query(WorkStatus).filter(WorkStatus.work_id.in_(work_ids))
+        """Return the latest WorkStatus per work_id."""
+        return cls._latest_statuses(work_ids)
 
-        query = query.order_by(WorkStatus.posted_date.desc())
-        statuses = query.all()
-
-        # Select latest per work_id
-        latest_per_work = {}
-        for status in statuses:
-            if status.work_id not in latest_per_work:
-                latest_per_work[status.work_id] = status
-
-        return latest_per_work
+    @classmethod
+    def _latest_statuses(cls, work_ids, approved_only=False):
+        if not work_ids:
+            return {}
+        query = cls.query.filter(cls.work_id.in_(work_ids))
+        if approved_only:
+            query = query.filter(cls.is_approved.is_(True))
+        rows = query.distinct(cls.work_id).order_by(cls.work_id, cls.posted_date.desc(), cls.id.desc()).all()
+        return {row.work_id: row for row in rows}

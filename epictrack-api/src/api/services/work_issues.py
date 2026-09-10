@@ -23,11 +23,11 @@ from api.models import WorkIssueUpdates as WorkIssueUpdatesModel
 from api.models.dashboard_search_options import IssuesDashboardSearchOptions
 from api.models.pagination_options import PaginationOptions
 from api.models.queries import WorkIssueQuery
+from api.models.queries.dashboard_queries import issue_page
 from api.models.special_field import EntityEnum, FieldTypeEnum
-from api.schemas.response import WorkIssuesResponseSchema, WorkIssueUpdatesResponseSchema
+from api.schemas.response import WorkIssuesResponseSchema
 from api.services import authorisation
 from api.utils import TokenInfo
-from api.utils.enums import StalenessEnum
 from api.utils.roles import Role as KeycloakRole, Membership
 
 
@@ -59,73 +59,8 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
             pagination_options: PaginationOptions,
             search_options: IssuesDashboardSearchOptions):
         """Fetch all work issues for all works."""
-        works, _ = Work.fetch_all_works_by_work_issues(None, search_options)
-        work_ids = [work.id for work in works]
-        work_issues = WorkIssuesModel.list_all_issues_for_work_ids(work_ids)
-        schema = WorkIssueUpdatesResponseSchema()
-
-        filtered = []
-        work_map = {work.id: work for work in works}
-        for issue in work_issues:
-            work = work_map.get(issue.work_id)
-            if not work or not issue.updates:
-                continue
-            issue_update = issue.updates[0]
-            if not work:
-                continue
-            # Filter approved
-            if (
-                search_options.is_approved
-                and str(issue_update.is_approved).lower() not in search_options.is_approved
-            ):
-                continue
-            # Filter staleness
-            if search_options.staleness:
-                issue_staleness = schema.get_staleness(issue_update)
-                if not issue.is_active or issue.is_resolved:
-                    issue_staleness = StalenessEnum.GOOD.value
-                if issue_staleness not in search_options.staleness:
-                    continue
-            # Filter issue_state
-            if search_options.issue_state:
-                matches_state = False
-                for state in search_options.issue_state:
-                    try:
-                        field, value = state.split(":")
-                        expected = value.lower() == "true"
-                        actual = getattr(issue, field, None)
-                        if actual is not None and bool(actual) == expected:
-                            matches_state = True
-                    except ValueError:
-                        continue
-                if not matches_state:
-                    continue
-            filtered.append((work, issue))
-
-        # Apply pagination to filtered results
-        if pagination_options.sort_key:
-            sort_key = pagination_options.sort_key
-            reverse = pagination_options.sort_order == "desc"
-            filtered.sort(
-                key=lambda item: (
-                    getattr(item[1].updates[0], sort_key, None)
-                    if item[1] and item[1].updates
-                    else datetime.min.replace(tzinfo=timezone.utc)
-                ),
-                reverse=reverse
-            )
-        total = len(filtered)
-        page = pagination_options.page or 1
-        size = pagination_options.size or total
-        start = (page - 1) * size
-        end = start + size
-        paginated_filtered = filtered[start:end]
-
-        serialized = []
-        for work, issue in paginated_filtered:
-            serialized.append(cls._serialize_issue(work, issue))
-
-        return {"items": serialized, "total": total}
+        rows, total = issue_page(pagination_options, search_options)
+        return {"items": [cls._serialize_issue(work, issue) for work, issue in rows], "total": total}
 
     @staticmethod
     def _serialize_issue(work: Work, issue: Optional[WorkIssuesModel]) -> Dict:

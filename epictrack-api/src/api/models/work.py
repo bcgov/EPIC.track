@@ -174,6 +174,26 @@ class Work(BaseModelVersioned):
             .scalar()
         )
 
+    @classmethod
+    def anticipated_referral_dates(cls, work_ids):
+        """Return {work_id: referral date}, with None for works that have no referral event."""
+        dates = dict.fromkeys(work_ids)
+        if not dates:
+            return dates
+        rows = db.session.query(Event.work_id, func.min(Event.anticipated_date)).join(
+            EventConfiguration,
+            and_(
+                Event.event_configuration_id == EventConfiguration.id,
+                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                Event.is_active.is_(True),
+            ),
+        ).filter(
+            Event.work_id.in_(work_ids),
+            func.coalesce(Event.actual_date, Event.anticipated_date) >= datetime.today(),
+        ).group_by(Event.work_id).all()
+        dates.update(rows)
+        return dates
+
     def as_dict(self, recursive=True):
         """Return JSON Representation."""
         result = super().as_dict(recursive=recursive)

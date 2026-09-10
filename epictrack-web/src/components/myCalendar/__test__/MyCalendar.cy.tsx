@@ -14,9 +14,9 @@ const mockCalendarEvents: any[] = [];
 
 const endpoints: Endpoint[] = [
   {
-    name: "getWorks",
+    name: "getWorkOptions",
     method: "GET",
-    url: `${AppConfig.apiUrl}works*`,
+    url: `${AppConfig.apiUrl}works/options*`,
     response: { body: mockWorks },
   },
   {
@@ -72,7 +72,12 @@ describe("MyCalendar", () => {
       </Router>,
     );
 
-    cy.wait(["@getWorks", "@getProjectTypes", "@getWorkTypes", "@getRegions"]);
+    cy.wait([
+      "@getWorkOptions",
+      "@getProjectTypes",
+      "@getWorkTypes",
+      "@getRegions",
+    ]);
     cy.wait(["@getMilestones", "@getTasks"]);
   });
 

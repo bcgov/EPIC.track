@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Work status."""
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Dict, Optional
 
 from api.exceptions import BadRequestError, ResourceNotFoundError
 from api.models.dashboard_search_options import StatusDashboardSearchOptions
 from api.models.pagination_options import PaginationOptions
+from api.models.queries.dashboard_queries import status_page
 from api.models import WorkStatus as WorkStatusModel
 from api.models import Work
 from api.utils import TokenInfo
@@ -49,50 +50,12 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
             pagination_options: PaginationOptions,
             search_options: StatusDashboardSearchOptions):
         """Fetch all latest work statuses for all works."""
-        works, _ = Work.fetch_all_works_by_work_status(None, search_options)
-        work_ids = [work.id for work in works]
-
-        work_statuses = WorkStatusModel.list_latest_status_for_work_ids(work_ids)
-        approved_status_histories = WorkStatusModel.list_statuses_for_work_ids(work_ids)
-
-        schema = WorkStatusResponseSchema()
-
-        filtered = []
-        for work in works:
-            status = work_statuses.get(work.id)
-            if (
-                search_options.is_approved
-                and (not status or str(status.is_approved).lower() not in search_options.is_approved)
-            ):
-                continue
-            if search_options.staleness and status:
-                status_staleness = schema.get_staleness(status)
-                if status_staleness not in search_options.staleness:
-                    continue
-
-            filtered.append((work, status))
-
-        # Apply pagination to filtered results
-        if pagination_options.sort_key:
-            sort_key = pagination_options.sort_key
-            reverse = pagination_options.sort_order == "desc"
-            filtered.sort(
-                key=lambda item: getattr(item[1], sort_key, None) if item[1] else datetime.min.replace(tzinfo=timezone.utc),
-                reverse=reverse
-            )
-        total = len(filtered)
-        page = pagination_options.page or 1
-        size = pagination_options.size or total
-        start = (page - 1) * size
-        end = start + size
-        paginated_filtered = filtered[start:end]
-
-        serialized = []
-        for work, status in paginated_filtered:
-            history = approved_status_histories.get(work.id, [])
-            serialized.append(cls._serialize_status(work, status, history))
-
-        return {"items": serialized, "total": total}
+        rows, total = status_page(pagination_options, search_options)
+        histories = WorkStatusModel.list_statuses_for_work_ids([work.id for work, _ in rows]) if rows else {}
+        return {
+            "items": [cls._serialize_status(work, status, histories.get(work.id, [])) for work, status in rows],
+            "total": total,
+        }
 
     @staticmethod
     def _serialize_status(work: Work, status: Optional[WorkStatusModel], status_history: Optional[list[WorkStatusModel]]) -> Dict:
