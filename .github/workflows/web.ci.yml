@@ -72,6 +72,15 @@ jobs:
         run: |
           npx cypress run --component --headed --browser chrome
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v6
+        with:
+          flags: epictrack-web
+          name: codecov-epictrack-web
+          fail_ci_if_error: true   
+          verbose: true 
+          token: ${{ secrets.CODECOV_TOKEN }}
+
   web-build-check:
     needs: setup-job
     runs-on: ubuntu-latest
