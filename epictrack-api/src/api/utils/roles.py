@@ -20,6 +20,7 @@ class Role(Enum):
 
     # Keycloak Based roles
     VIEW = 'view'
+    LIMITED_VIEW = 'limited_view'
     CREATE = 'create'
     DELETE = 'delete'
     EDIT = 'edit'
