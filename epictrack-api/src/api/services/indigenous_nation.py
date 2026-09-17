@@ -196,6 +196,7 @@ class IndigenousNationService:
         one_of_roles = (
             ElevatedRole.MANAGE_FIRST_NATIONS.value,
             KeycloakRole.VIEW.value,
+            KeycloakRole.LIMITED_VIEW.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles)
 
