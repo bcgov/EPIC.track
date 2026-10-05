@@ -280,10 +280,11 @@ class ThirtySixtyNinetyReport(ReportFactory):
             issues = res.WorkIssuesLatestUpdateResponseSchema(many=True).dump(
                 issue_per_work
             )
+            # An issue without approved updates dumps latest_update as {"staleness": None}, not {}.
             dates = [
-                parser.isoparse(issue["latest_update"].get("posted_date"))
+                parser.isoparse(issue["latest_update"]["posted_date"])
                 for issue in issues
-                if issue.get("latest_update") and not issue.get("is_resolved", False)
+                if (issue.get("latest_update") or {}).get("posted_date") and not issue.get("is_resolved", False)
             ]
             status_date_updated = result_item.get("status_date_updated")
             if status_date_updated:

@@ -20,7 +20,9 @@ from pytz import utc
 
 from api.reports.thirty_sixty_ninety_report import ThirtySixtyNinetyReport
 from api.utils.constants import CANADA_TIMEZONE
-from tests.utilities.factory_scenarios import TestJwtClaims
+from tests.utilities.factory_scenarios import TestJwtClaims, TestWorkIssueUpdatesInfo, TestWorkIssuesInfo
+from tests.utilities.factory_utils import (
+    factory_work_issue_updates_model, factory_work_issues_model, factory_work_model)
 
 
 class TestThirtySixtyNinetyReportInit:
@@ -223,6 +225,27 @@ class TestThirtySixtyNinetyReportUpdateWorkIssues:
 
                 assert len(result) == 1
                 assert "work_issues" in result[0]["items"][0]
+
+    def test_update_work_issues_issue_without_approved_update(self, app, db):
+        """A high priority issue with only unapproved updates does not break the report."""
+        with app.app_context():
+            g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
+            work = factory_work_model()
+            issue = factory_work_issues_model(work.id, {
+                **TestWorkIssuesInfo.issue1.value, "is_high_priority": True,
+            })
+            factory_work_issue_updates_model(issue.id, {
+                **TestWorkIssueUpdatesInfo.update1.value, "is_approved": False,
+            })
+            status_date = datetime(2026, 9, 18, tzinfo=utc)
+            data = [{"group": work.id, "items": [{"work_id": work.id, "status_date_updated": status_date}]}]
+
+            report = ThirtySixtyNinetyReport(filters=None, color_intensity=50)
+            result = report._update_work_issues(data)
+
+            item = result[0]["items"][0]
+            assert len(item["work_issues"]) == 1
+            assert item["oldest_update"] == status_date
 
 
 class TestThirtySixtyNinetyReportGetNextPcpQuery:
