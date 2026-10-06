@@ -2,7 +2,7 @@ version: "3.1"
 
 services:
   reportdb:
-    image: postgres:latest
+    image: postgres:16
     restart: always
     environment:
       POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
@@ -14,7 +14,7 @@ services:
       - ./postgres/reports-db:/var/lib/postgresql/data
 
   reportdb-test:
-    image: postgres:latest
+    image: postgres:16
     restart: always
     environment:
       POSTGRES_DB: postgres
