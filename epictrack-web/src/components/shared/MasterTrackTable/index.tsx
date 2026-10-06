@@ -13,7 +13,7 @@ import { Palette } from "../../../styles/theme";
 import * as tokens from "../../../styles/designTokens";
 import { MET_Header_Font_Weight_Bold } from "../../../styles/constants";
 import { ETHeading2, IButton } from "..";
-import { exportToCsv } from "./utils";
+import { CsvOnlyColumn, exportToCsv } from "./utils";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 
@@ -63,6 +63,7 @@ export interface MaterialReactTableProps<
   TData extends MRT_RowData,
 > extends MRT_TableOptions<TData> {
   columns: MRT_ColumnDef<TData>[];
+  csvOnlyColumns?: CsvOnlyColumn<TData>[];
   data: TData[];
   enableExport?: boolean;
   loading?: boolean;
@@ -74,6 +75,7 @@ export interface MaterialReactTableProps<
 
 const MasterTrackTable = <TData extends MRT_RowData>({
   columns,
+  csvOnlyColumns,
   data,
   enableExport,
   loading,
@@ -253,6 +255,7 @@ const MasterTrackTable = <TData extends MRT_RowData>({
                       table,
                       downloadDate: new Date().toISOString(),
                       filenamePrefix: tableName || "exported-data",
+                      csvOnlyColumns,
                     })
                   }
                 >

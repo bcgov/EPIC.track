@@ -7,7 +7,10 @@ import { ETGridTitle, ETPageContainer } from "../shared";
 import { projectService } from "../../services/projectService/projectService";
 import { ETChip } from "../shared/chip/ETChip";
 import { TableFilter } from "../shared/filterSelect/TableFilter";
-import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
+import {
+  CsvOnlyColumn,
+  getSelectFilterOptions,
+} from "../shared/MasterTrackTable/utils";
 import { Restricted } from "../shared/restricted";
 import { ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
@@ -16,6 +19,7 @@ import { showNotification } from "components/shared/notificationProvider";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { getStatusFilter } from "components/shared/filterSelect/utils";
+import { dateUtils } from "utils";
 
 const projectsListingFiltersCacheKey = "projects-listing-filters";
 const ProjectList = () => {
@@ -231,6 +235,23 @@ const ProjectList = () => {
     [envRegionsOptions, proponents, statusesOptions, subTypes, types],
   );
 
+  // Appended to the end of the csv export so the exported column order still
+  // matches the table
+  const csvOnlyColumns: CsvOnlyColumn<Project>[] = useMemo(
+    () => [
+      {
+        key: "id",
+        accessor: (project) => project.id,
+      },
+      {
+        key: "created_at",
+        accessor: (project) =>
+          project.created_at ? dateUtils.formatDate(project.created_at) : "",
+      },
+    ],
+    [],
+  );
+
   const handleCacheFilters = (filters?: ColumnFilter[]) => {
     if (!filters) {
       return;
@@ -249,6 +270,7 @@ const ProjectList = () => {
         <Grid item xs={12}>
           <MasterTrackTable
             columns={columns}
+            csvOnlyColumns={csvOnlyColumns}
             data={projects}
             initialState={{
               sorting: [

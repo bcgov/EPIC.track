@@ -66,12 +66,21 @@ export const rowsPerPageOptions = (dataSize = 10) => {
   return defaultOptions;
 };
 
+// A column that only exists in the csv, not in the table
+export interface CsvOnlyColumn<T extends MRT_RowData> {
+  // Doubles as the csv header, the way table columns use their column id
+  key: string;
+  accessor: (row: T) => unknown;
+}
+
 interface ExportToCsvOptions<T extends MRT_RowData> {
   table: MRT_TableInstance<T>;
   downloadDate: string | null;
   filenamePrefix: string;
   // Every matching row, keyed by column id, for server side paginated tables
   rows?: Record<string, unknown>[];
+  // Appended after the visible table columns. Ignored when rows is given
+  csvOnlyColumns?: CsvOnlyColumn<T>[];
 }
 
 export async function exportToCsv<T extends MRT_RowData>({
@@ -79,6 +88,7 @@ export async function exportToCsv<T extends MRT_RowData>({
   downloadDate,
   filenamePrefix,
   rows,
+  csvOnlyColumns = [],
 }: ExportToCsvOptions<T>) {
   const columns = table
     .getVisibleFlatColumns()
@@ -93,12 +103,18 @@ export async function exportToCsv<T extends MRT_RowData>({
           csvRow[column] = row.getValue(column);
         }
       });
+      csvOnlyColumns.forEach((csvOnlyColumn) => {
+        csvRow[csvOnlyColumn.key] = csvOnlyColumn.accessor(row.original);
+      });
       return csvRow;
     });
 
   const csv = await json2csv(csvRows, {
     emptyFieldValue: "",
-    keys: columns as string[],
+    keys: [
+      ...columns,
+      ...(rows ? [] : csvOnlyColumns.map((column) => column.key)),
+    ] as string[],
   });
 
   const url = window.URL.createObjectURL(new Blob([csv as any]));

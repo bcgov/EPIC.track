@@ -28,6 +28,7 @@ export interface Project {
   region_flnro: Region;
   fte_positions_construction: number;
   fte_positions_operation: number;
+  created_at: string;
 }
 
 export const defaultProject = {
