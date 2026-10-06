@@ -230,6 +230,7 @@ export const generateMockProject = (() => {
       },
       fte_positions_construction: faker.number.int() + projectCounter,
       fte_positions_operation: faker.number.int() + projectCounter,
+      created_at: faker.date.past().toISOString(),
     };
   };
 })();

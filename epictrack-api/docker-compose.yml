@@ -3,7 +3,7 @@ version: "3.7"
 services:
   eao-reports-api-db:
     container_name: eao-reports-api-db
-    image: postgres:latest
+    image: postgres:16
     environment:
       POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
