@@ -30,6 +30,10 @@ describe("MyWorkplans Toolbar", () => {
           setSortOrder: () => {
             return;
           },
+          sortKey: "start_date",
+          setSortKey: () => {
+            return;
+          },
         }}
       >
         <Toolbar />
