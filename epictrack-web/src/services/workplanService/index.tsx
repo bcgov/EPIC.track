@@ -8,6 +8,7 @@ class WorkPlanService {
     page: number,
     size: number,
     sort_order: string,
+    sort_key: string,
     searchOptions: WorkPlanSearchOptions,
   ) {
     return await http.GetRequest<{ items: WorkPlan[]; total: number }>(
@@ -16,6 +17,7 @@ class WorkPlanService {
         page: page,
         size: size,
         sort_order: sort_order,
+        sort_key: sort_key,
         ...searchOptions,
       },
     );

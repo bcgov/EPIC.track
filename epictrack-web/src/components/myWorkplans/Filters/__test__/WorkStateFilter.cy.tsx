@@ -28,6 +28,8 @@ const Harness = () => {
         setMyWorkPlanView: () => {},
         sortOrder: "desc",
         setSortOrder: () => {},
+        sortKey: "start_date",
+        setSortKey: () => {},
       }}
     >
       <WorkStateFilter />

@@ -104,6 +104,8 @@ const makeContextValue = (overrides: Partial<any> = {}) => ({
   setMyWorkPlanView: () => {},
   sortOrder: "desc",
   setSortOrder: () => {},
+  sortKey: "start_date",
+  setSortKey: () => {},
   ...overrides,
 });
 

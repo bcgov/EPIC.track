@@ -12,11 +12,10 @@ import {
   workplanDefaultFilters,
 } from "../MyWorkPlanContext";
 import { Unless } from "react-if";
-import { SortBy } from "components/myUpdates/Filters/SortBy";
+import { SortByFilter } from "./SortByFilter";
 
 const Filters = () => {
-  const { searchOptions, setSortOrder, sortOrder } =
-    useContext(MyWorkplansContext);
+  const { searchOptions } = useContext(MyWorkplansContext);
 
   const isDefaultOptions =
     JSON.stringify(searchOptions) ===
@@ -32,27 +31,23 @@ const Filters = () => {
         <NameFilter />
       </Grid>
       <Grid item xs container spacing={2} justifyContent="flex-end">
-        <Grid item xs={2}>
+        <Grid item xs>
           <TeamFilter />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs>
           <WorkTypeFilter />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs>
           <ProjectTypeFilter />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs>
           <EnvRegionFilter />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs>
           <WorkStateFilter />
         </Grid>
-        <Grid item xs={2}>
-          <SortBy
-            sortOrder={sortOrder}
-            setSortOrder={setSortOrder}
-            label={"Start Date"}
-          />
+        <Grid item xs="auto">
+          <SortByFilter />
         </Grid>
         <Unless condition={isDefaultOptions}>
           <Grid item xs={"auto"}>

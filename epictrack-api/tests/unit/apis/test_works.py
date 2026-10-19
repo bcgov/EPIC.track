@@ -29,10 +29,11 @@ from api.models.project import Project as ProjectModel
 from api.models.work_type import WorkType as WorkTypeModel
 from api.models.event_template import EventTemplateVisibilityEnum
 from api.services.role import RoleService
-from tests.utilities.factory_scenarios import TestRoleEnum, TestWorkFirstNationEnum, TestWorkInfo, TestWorkNotesEnum, TestJwtClaims
+from tests.utilities.factory_scenarios import TestRoleEnum, TestWorkFirstNationEnum, TestWorkInfo, TestWorkNotesEnum, TestJwtClaims, TestProjectInfo
 from tests.utilities.factory_utils import (
     factory_auth_header,
     factory_first_nation_model,
+    factory_project_model,
     factory_staff_model,
     factory_staff_work_role_model,
     factory_work_first_nation_model,
@@ -256,6 +257,34 @@ def test_work_dashboard(client, auth_header):
     assert len(response.json["items"]) == 1
     assert response.json["total"] == 1
     assert response.json["items"][0]["id"] == work_response_json["id"]
+
+
+def test_work_dashboard_sort_by_project_name(client, auth_header):
+    """Test work dashboard sorted alphabetically by project name, ignoring case"""
+    work_ids = {}
+    for name in ["alpha-track-802", "Beta-track-802"]:
+        project_data = copy(TestProjectInfo.project1.value)
+        project_data.update({"name": name, "abbreviation": name[:4].upper()})
+        project = factory_project_model(project_data)
+        work = factory_work_model()
+        work.project_id = project.id
+        work.save()
+        work_ids[name] = work.id
+
+    url = urljoin(API_BASE_URL, "works/dashboard?sort_key=name&sort_order=asc")
+    response = client.get(url, headers=auth_header)
+    assert response.status_code == HTTPStatus.OK
+    assert [item["id"] for item in response.json["items"]] == [
+        work_ids["alpha-track-802"],
+        work_ids["Beta-track-802"],
+    ]
+
+    url = urljoin(API_BASE_URL, "works/dashboard?sort_key=name&sort_order=desc")
+    response = client.get(url, headers=auth_header)
+    assert [item["id"] for item in response.json["items"]] == [
+        work_ids["Beta-track-802"],
+        work_ids["alpha-track-802"],
+    ]
 
 
 def test_work_resources(client, auth_header):

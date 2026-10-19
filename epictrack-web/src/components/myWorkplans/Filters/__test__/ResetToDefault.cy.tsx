@@ -34,6 +34,8 @@ describe("ResetToDefault", () => {
           setMyWorkPlanView: () => {},
           sortOrder: "desc",
           setSortOrder: () => {},
+          sortKey: "start_date",
+          setSortKey: () => {},
         }}
       >
         <ResetToDefault />

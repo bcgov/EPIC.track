@@ -31,6 +31,8 @@ interface MyWorkplanContextProps {
   setMyWorkPlanView: React.Dispatch<React.SetStateAction<MyWorkPlanView>>;
   sortOrder: string;
   setSortOrder: React.Dispatch<React.SetStateAction<string>>;
+  sortKey: string;
+  setSortKey: React.Dispatch<React.SetStateAction<string>>;
 }
 export type WorkPlanFilters = {
   teams: string[];
@@ -85,6 +87,10 @@ export const MyWorkplansContext = createContext<MyWorkplanContextProps>({
   setSortOrder: () => {
     return;
   },
+  sortKey: "start_date",
+  setSortKey: () => {
+    return;
+  },
 });
 
 const PAGE_SIZE = 12;
@@ -104,6 +110,7 @@ export const MyWorkplansProvider = ({
   const [totalWorkplans, setTotalWorkplans] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
   const [sortOrder, setSortOrder] = useState<string>("desc");
+  const [sortKey, setSortKey] = useState<string>("start_date");
 
   const [searchOptions, setSearchOptions] = useCachedState(
     MY_WORKPLAN_CACHED_SEARCH_OPTIONS,
@@ -124,6 +131,7 @@ export const MyWorkplansProvider = ({
           page,
           PAGE_SIZE,
           sortOrder,
+          sortKey,
           searchOptions,
         );
         if (!result || !result.data) {
@@ -150,7 +158,7 @@ export const MyWorkplansProvider = ({
         });
       }
     },
-    [searchOptions, sortOrder],
+    [searchOptions, sortOrder, sortKey],
   );
 
   const getStalenessSettings = useCallback(async () => {
@@ -200,6 +208,8 @@ export const MyWorkplansProvider = ({
       setMyWorkPlanView,
       sortOrder,
       setSortOrder,
+      sortKey,
+      setSortKey,
     }),
     [
       workplans,
@@ -215,6 +225,8 @@ export const MyWorkplansProvider = ({
       setMyWorkPlanView,
       sortOrder,
       setSortOrder,
+      sortKey,
+      setSortKey,
     ],
   );
 

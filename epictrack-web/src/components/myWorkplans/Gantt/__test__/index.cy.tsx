@@ -21,6 +21,8 @@ const makeContextValue = (workplans: any[]) => ({
   setMyWorkPlanView: () => {},
   sortOrder: "desc",
   setSortOrder: () => {},
+  sortKey: "start_date",
+  setSortKey: () => {},
 });
 
 describe("MyWorkplanGantt", () => {

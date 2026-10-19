@@ -225,10 +225,14 @@ class Work(BaseModelVersioned):
         """Fetch all active works."""
         query = cls.query.filter_by(is_deleted=False)
         query = cls.filter_by_search_criteria(query, search_filters)
+        sort_column = Work.start_date
+        if pagination_options and pagination_options.sort_key == "name":
+            query = query.join(Project, Work.project_id == Project.id)
+            sort_column = func.lower(Project.name)
         if pagination_options and pagination_options.sort_order == "asc":
-            query = query.order_by(Work.start_date.asc())
+            query = query.order_by(sort_column.asc(), Work.id.asc())
         else:
-            query = query.order_by(Work.start_date.desc())
+            query = query.order_by(sort_column.desc(), Work.id.desc())
 
         no_pagination_options = not pagination_options or not pagination_options.page or not pagination_options.size
         if no_pagination_options:
