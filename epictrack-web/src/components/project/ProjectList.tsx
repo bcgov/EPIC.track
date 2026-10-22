@@ -248,6 +248,14 @@ const ProjectList = () => {
         accessor: (project) =>
           project.created_at ? dateUtils.formatDate(project.created_at) : "",
       },
+      {
+        key: "latitude",
+        accessor: (project) => project.latitude,
+      },
+      {
+        key: "longitude",
+        accessor: (project) => project.longitude,
+      },
     ],
     [],
   );
