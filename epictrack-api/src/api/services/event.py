@@ -532,6 +532,10 @@ class EventService:
         current_event_index = cls.find_event_index(
             all_work_events, event, current_work_phase
         )
+        # Restore the new values straight away, the pushes below read the event's actual date
+        if event_old_copy:
+            event.anticipated_date = new_anticipated_date
+            event.actual_date = new_actual_date
 
         current_future_work_phases = all_work_phases[current_work_phase_index:]
         # if the phase is legislated, only start event, extension or suspension can push
@@ -601,10 +605,6 @@ class EventService:
                 current_work_phase,
                 current_event_index,
             )
-        # Restore the updated date values after pushing subsequent events/phases
-        if event_old_copy:
-            event.anticipated_date = new_anticipated_date
-            event.actual_date = new_actual_date
 
     @classmethod
     def _validate_dates(

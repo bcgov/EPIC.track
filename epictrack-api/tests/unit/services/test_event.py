@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Test suite for EventService."""
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -617,6 +617,51 @@ class TestEventServicePushEvents:
             assert locked_event.anticipated_date == datetime(2024, 1, 15)
             # Unlocked event should be pushed
             assert unlocked_event.anticipated_date == datetime(2024, 2, 25)
+
+
+class TestEventServicePushSubsequentEvents:
+    """Test _push_subsequent_events method."""
+
+    @pytest.mark.parametrize("legislated", [False, True])
+    def test_end_event_actual_date_keeps_current_phase_end(self, app, legislated):
+        """Test entering a late END actual date with push does not push the completed phase end date."""
+        with app.app_context():
+            old_anticipated = datetime(2025, 12, 18, tzinfo=pytz.utc)
+            new_actual = datetime(2026, 10, 15, tzinfo=pytz.utc)
+            delta = (new_actual - old_anticipated).days
+
+            current_phase = WorkPhase(
+                id=1, start_date=datetime(2025, 11, 18, tzinfo=pytz.utc),
+                end_date=new_actual, legislated=legislated,
+            )
+            next_phase = WorkPhase(
+                id=2, start_date=datetime(2026, 1, 1, tzinfo=pytz.utc),
+                end_date=datetime(2026, 2, 1, tzinfo=pytz.utc), legislated=False,
+            )
+            event = MagicMock()
+            event.id = 10
+            event.anticipated_date = new_actual
+            event.actual_date = new_actual
+            event.event_position = EventPositionEnum.END.value
+            event.event_configuration.event_position.value = EventPositionEnum.END.value
+            event.event_configuration.event_category_id = None
+
+            with patch(
+                "api.services.event.EventConfigurationService.find_all_configurations_by_work",
+                return_value=[],
+            ), patch.object(EventService, "_handle_child_events"), patch.object(
+                EventService, "_find_work_phase_events", return_value=[]
+            ), patch.object(EventService, "find_event_index", return_value=0):
+                EventService._push_subsequent_events(
+                    event, [current_phase, next_phase], [], 0, current_phase, delta,
+                    {"anticipated_date": old_anticipated, "actual_date": None},
+                )
+
+            assert current_phase.end_date == new_actual
+            assert next_phase.start_date == datetime(2026, 1, 1, tzinfo=pytz.utc) + timedelta(days=delta)
+            assert next_phase.end_date == datetime(2026, 2, 1, tzinfo=pytz.utc) + timedelta(days=delta)
+            assert event.actual_date == new_actual
+            assert event.anticipated_date == new_actual
 
 
 class TestEventServiceFindEventIndex:
