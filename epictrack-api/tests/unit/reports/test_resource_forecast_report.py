@@ -411,6 +411,7 @@ class TestEAResourceForeCastReportFilterStartEvents:
             mock_event1.event_configuration.work_phase.start_date = datetime(2024, 1, 1)
             mock_event1.event_configuration.work_phase.end_date = datetime(2024, 3, 31)
             mock_event1.event_configuration.work_phase.phase.color = "#FF0000"
+            mock_event1.event_configuration.work_phase.is_completed = False
             mock_event1.event_configuration.event_position.value = "START"
 
             mock_event2 = MagicMock()
@@ -421,6 +422,7 @@ class TestEAResourceForeCastReportFilterStartEvents:
             mock_event2.event_configuration.work_phase.start_date = datetime(2024, 4, 1)
             mock_event2.event_configuration.work_phase.end_date = datetime(2024, 6, 30)
             mock_event2.event_configuration.work_phase.phase.color = "#00FF00"
+            mock_event2.event_configuration.work_phase.is_completed = False
             mock_event2.event_configuration.event_position.value = "END"  # Not a start event
 
             from api.models.event_template import EventPositionEnum
@@ -433,6 +435,54 @@ class TestEAResourceForeCastReportFilterStartEvents:
             assert result[0]["work_id"] == 1
             assert result[0]["event_phase"] == "Phase 1"
             assert result[0]["start_date"] == datetime(2024, 1, 15)  # Uses actual_date
+
+    def test_filter_start_events_skips_completed_phases(self, app):
+        """Test start events of completed phases are left out."""
+        with app.app_context():
+            from api.models.event_template import EventPositionEnum
+            report = EAResourceForeCastReport(filters=None, color_intensity=50)
+
+            completed_event = MagicMock()
+            completed_event.event_configuration.event_position.value = EventPositionEnum.START.value
+            completed_event.event_configuration.work_phase.is_completed = True
+
+            result = report._filter_start_events([completed_event])
+
+            assert result == []
+
+
+class TestEAResourceForeCastReportUpdateMonthLabels:
+    """Test _update_month_labels method."""
+
+    @staticmethod
+    def _labels_for(phase_start, phase_end):
+        report = EAResourceForeCastReport(filters=None, color_intensity=50)
+        report._set_month_labels(datetime(2026, 10, 15, tzinfo=CANADA_TIMEZONE))
+        works = [{"group": 1, "items": [{}]}]
+        start_events = {
+            1: [{
+                "event_phase": "Phase A",
+                "phase_start": phase_start,
+                "phase_end": phase_end,
+                "phase_color": "#FF0000",
+            }]
+        }
+        work = report._update_month_labels(works, start_events)[1][0]
+        return [work[label] for label in report.month_labels]
+
+    def test_last_column_includes_earlier_months(self, app):
+        """Test a phase that only runs Feb-Mar shows in the Feb-Apr column."""
+        with app.app_context():
+            labels = self._labels_for(datetime(2027, 2, 10), datetime(2027, 3, 20))
+
+            assert labels == ["", "", "", "Phase A"]
+
+    def test_single_month_columns(self, app):
+        """Test a phase spanning Nov-Jan shows in each single month column."""
+        with app.app_context():
+            labels = self._labels_for(datetime(2026, 11, 1), datetime(2027, 1, 31))
+
+            assert labels == ["Phase A", "Phase A", "Phase A", ""]
 
 
 class TestEAResourceForeCastReportGetQuarterSectionMetaData:
