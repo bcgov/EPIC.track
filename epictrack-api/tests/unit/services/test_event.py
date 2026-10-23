@@ -622,46 +622,90 @@ class TestEventServicePushEvents:
 class TestEventServicePushSubsequentEvents:
     """Test _push_subsequent_events method."""
 
+    @staticmethod
+    def _event(event_id, work_phase_id, position, anticipated, actual=None):
+        event = MagicMock()
+        event.id = event_id
+        event.anticipated_date = anticipated
+        event.actual_date = actual
+        event.event_position = position.value
+        event.event_configuration.work_phase_id = work_phase_id
+        event.event_configuration.event_position.value = position.value
+        event.event_configuration.event_category_id = None
+        return event
+
+    @staticmethod
+    def _push(event, work_phases, all_work_events, current_work_phase, delta, old_data):
+        with patch(
+            "api.services.event.EventConfigurationService.find_all_configurations_by_work",
+            return_value=[],
+        ), patch.object(EventService, "_handle_child_events"):
+            EventService._push_subsequent_events(
+                event, work_phases, all_work_events, 0, current_work_phase, delta, old_data,
+            )
+
     @pytest.mark.parametrize("legislated", [False, True])
     def test_end_event_actual_date_keeps_current_phase_end(self, app, legislated):
-        """Test entering a late END actual date with push does not push the completed phase end date."""
+        """Test a late END actual date with push does not push the completed phase end date."""
         with app.app_context():
             old_anticipated = datetime(2025, 12, 18, tzinfo=pytz.utc)
             new_actual = datetime(2026, 10, 15, tzinfo=pytz.utc)
             delta = (new_actual - old_anticipated).days
 
+            # _handle_work_phase_for_end_phase_end_event has already completed the phase
             current_phase = WorkPhase(
                 id=1, start_date=datetime(2025, 11, 18, tzinfo=pytz.utc),
-                end_date=new_actual, legislated=legislated,
+                end_date=new_actual, legislated=legislated, is_completed=True,
             )
             next_phase = WorkPhase(
                 id=2, start_date=datetime(2026, 1, 1, tzinfo=pytz.utc),
                 end_date=datetime(2026, 2, 1, tzinfo=pytz.utc), legislated=False,
             )
-            event = MagicMock()
-            event.id = 10
-            event.anticipated_date = new_actual
-            event.actual_date = new_actual
-            event.event_position = EventPositionEnum.END.value
-            event.event_configuration.event_position.value = EventPositionEnum.END.value
-            event.event_configuration.event_category_id = None
+            start = self._event(
+                1, 1, EventPositionEnum.START, datetime(2025, 11, 18, tzinfo=pytz.utc),
+                datetime(2025, 11, 18, tzinfo=pytz.utc),
+            )
+            end = self._event(2, 1, EventPositionEnum.END, new_actual, new_actual)
+            next_start = self._event(3, 2, EventPositionEnum.START, datetime(2026, 1, 1, tzinfo=pytz.utc))
 
-            with patch(
-                "api.services.event.EventConfigurationService.find_all_configurations_by_work",
-                return_value=[],
-            ), patch.object(EventService, "_handle_child_events"), patch.object(
-                EventService, "_find_work_phase_events", return_value=[]
-            ), patch.object(EventService, "find_event_index", return_value=0):
-                EventService._push_subsequent_events(
-                    event, [current_phase, next_phase], [], 0, current_phase, delta,
-                    {"anticipated_date": old_anticipated, "actual_date": None},
-                )
+            self._push(
+                end, [current_phase, next_phase], [start, end, next_start], current_phase, delta,
+                {"anticipated_date": old_anticipated, "actual_date": None},
+            )
 
             assert current_phase.end_date == new_actual
             assert next_phase.start_date == datetime(2026, 1, 1, tzinfo=pytz.utc) + timedelta(days=delta)
             assert next_phase.end_date == datetime(2026, 2, 1, tzinfo=pytz.utc) + timedelta(days=delta)
-            assert event.actual_date == new_actual
-            assert event.anticipated_date == new_actual
+            assert next_start.anticipated_date == datetime(2026, 1, 1, tzinfo=pytz.utc) + timedelta(days=delta)
+            assert end.actual_date == new_actual
+            assert end.anticipated_date == new_actual
+
+    def test_moved_event_pushes_events_it_passes(self, app):
+        """Test moving a milestone past later milestones still pushes them."""
+        with app.app_context():
+            old_date = datetime(2026, 1, 10, tzinfo=pytz.utc)
+            new_date = datetime(2026, 3, 20, tzinfo=pytz.utc)
+            delta = (new_date - old_date).days
+
+            phase = WorkPhase(
+                id=1, start_date=datetime(2026, 1, 1, tzinfo=pytz.utc),
+                end_date=datetime(2026, 6, 1, tzinfo=pytz.utc), legislated=False,
+            )
+            start = self._event(1, 1, EventPositionEnum.START, datetime(2026, 1, 1, tzinfo=pytz.utc))
+            moved = self._event(2, 1, EventPositionEnum.INTERMEDIATE, new_date)
+            feb = self._event(3, 1, EventPositionEnum.INTERMEDIATE, datetime(2026, 2, 1, tzinfo=pytz.utc))
+            mar = self._event(4, 1, EventPositionEnum.INTERMEDIATE, datetime(2026, 3, 1, tzinfo=pytz.utc))
+
+            self._push(
+                moved, [phase], [start, moved, feb, mar], phase, delta,
+                {"anticipated_date": old_date, "actual_date": None},
+            )
+
+            assert feb.anticipated_date == datetime(2026, 2, 1, tzinfo=pytz.utc) + timedelta(days=delta)
+            assert mar.anticipated_date == datetime(2026, 3, 1, tzinfo=pytz.utc) + timedelta(days=delta)
+            assert start.anticipated_date == datetime(2026, 1, 1, tzinfo=pytz.utc)
+            assert moved.anticipated_date == new_date
+            assert phase.end_date == datetime(2026, 6, 1, tzinfo=pytz.utc) + timedelta(days=delta)
 
 
 class TestEventServiceFindEventIndex:
