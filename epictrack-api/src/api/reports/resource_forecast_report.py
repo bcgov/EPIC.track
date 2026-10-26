@@ -472,8 +472,9 @@ class EAResourceForeCastReport(ReportFactory):
             work_data = group.get("items")
             work = work_data[0]
             for index, month in enumerate(self.months[1:]):
-                month_start = month.replace(day=1)
-                month_end = (month_start + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+                # Each bucket runs from the day after the previous bucket's end to the month date
+                month_start = self.months[index] + timedelta(days=1)
+                month_end = month
                 event_to_show = {"event_phase": "", "phase_color": "#FFFFFF"}
                 work_events = start_events.get(work_id, [])
                 sorted_events = sorted(work_events, key=lambda x: x["phase_end"].date())
@@ -526,6 +527,7 @@ class EAResourceForeCastReport(ReportFactory):
             for event in events
             if event.event_configuration.event_position.value
             == EventPositionEnum.START.value
+            and not event.event_configuration.work_phase.is_completed
         ]
         return start_events
 

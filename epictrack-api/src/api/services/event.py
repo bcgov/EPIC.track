@@ -1041,9 +1041,11 @@ class EventService:
             # if the event has actual and if event is end event
             # . This code has to be invoked only if the work phase is not current phase and doesn't have
             # actual date on the event
+            # event.actual_date still holds the old value here (see _push_subsequent_events),
+            # so check the completed flag set by _handle_work_phase_for_end_phase_end_event
             if (
                 each_work_phase.id != current_work_phase.id
-                or not event.actual_date
+                or not current_work_phase.is_completed
                 or not event.event_position == EventPositionEnum.END.value
             ):
                 each_work_phase.end_date = each_work_phase.end_date + timedelta(
