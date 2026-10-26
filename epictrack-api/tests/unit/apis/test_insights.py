@@ -199,3 +199,18 @@ def test_get_median_phase_underage_ignores_incomplete_phases(client, auth_header
         result = client.post(url, json=payload, headers=auth_header)
         assert result.status_code == HTTPStatus.OK
         assert [row["median_overage"] for row in result.json] == [10]
+
+
+def test_get_percent_phase_underage_ignores_incomplete_phases(client, auth_header):
+    """Test percent of phases with underage only counts completed phases, matching the trends table."""
+    for is_completed in (True, False):
+        work_phase = factory_work_phase_model()
+        work_phase.legislated = True
+        work_phase.number_of_days = 10
+        work_phase.is_completed = is_completed
+        work_phase.save()
+    url = urljoin(API_BASE_URL, "insights/phases")
+    payload = {"group_by": "percent_of_phases_with_overages", "filters": [], "is_underage_toggled": True}
+    result = client.post(url, json=payload, headers=auth_header)
+    assert result.status_code == HTTPStatus.OK
+    assert [(row["overage_count"], row["total_count"]) for row in result.json] == [(1, 1)]
