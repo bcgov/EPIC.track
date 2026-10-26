@@ -680,6 +680,40 @@ class TestEventServicePushSubsequentEvents:
             assert end.actual_date == new_actual
             assert end.anticipated_date == new_actual
 
+    @pytest.mark.parametrize("legislated", [False, True])
+    def test_end_event_anticipated_date_pushes_current_phase_end(self, app, legislated):
+        """Test moving the END anticipated date of a phase that is not completed shifts the phase end date."""
+        with app.app_context():
+            old_anticipated = datetime(2026, 2, 1, tzinfo=pytz.utc)
+            new_anticipated = datetime(2026, 3, 1, tzinfo=pytz.utc)
+            delta = (new_anticipated - old_anticipated).days
+
+            current_phase = WorkPhase(
+                id=1, start_date=datetime(2026, 1, 1, tzinfo=pytz.utc),
+                end_date=old_anticipated, legislated=legislated, is_completed=False,
+            )
+            next_phase = WorkPhase(
+                id=2, start_date=datetime(2026, 2, 2, tzinfo=pytz.utc),
+                end_date=datetime(2026, 4, 1, tzinfo=pytz.utc), legislated=False,
+            )
+            start = self._event(
+                1, 1, EventPositionEnum.START, datetime(2026, 1, 1, tzinfo=pytz.utc),
+                datetime(2026, 1, 1, tzinfo=pytz.utc),
+            )
+            end = self._event(2, 1, EventPositionEnum.END, new_anticipated)
+            next_start = self._event(3, 2, EventPositionEnum.START, datetime(2026, 2, 2, tzinfo=pytz.utc))
+
+            self._push(
+                end, [current_phase, next_phase], [start, end, next_start], current_phase, delta,
+                {"anticipated_date": old_anticipated, "actual_date": None},
+            )
+
+            assert current_phase.end_date == new_anticipated
+            assert next_phase.start_date == datetime(2026, 2, 2, tzinfo=pytz.utc) + timedelta(days=delta)
+            assert next_phase.end_date == datetime(2026, 4, 1, tzinfo=pytz.utc) + timedelta(days=delta)
+            assert end.anticipated_date == new_anticipated
+            assert end.actual_date is None
+
     def test_moved_event_pushes_events_it_passes(self, app):
         """Test moving a milestone past later milestones still pushes them."""
         with app.app_context():
