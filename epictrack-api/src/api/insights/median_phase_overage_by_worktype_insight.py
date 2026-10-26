@@ -56,6 +56,7 @@ class MedianPhaseOverageByWorktypeInsightGenerator:
         query = query.filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
+            WorkPhase.is_completed.is_(True),
             Work.work_state.not_in([WorkStateEnum.WITHDRAWN]),
             WorkType.is_active.is_(True),
             WorkType.is_deleted.is_(False),

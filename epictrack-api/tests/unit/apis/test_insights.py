@@ -22,6 +22,7 @@ from tests.utilities.factory_utils import (
     factory_staff_model,
     factory_work_first_nation_model,
     factory_work_model,
+    factory_work_phase_model,
 )
 from tests.utilities.helpers import prepare_work_payload
 from api.models.role import RoleEnum
@@ -182,3 +183,19 @@ def _set_up_work_object():
     work_data["work_lead_id"] = staff.id
     work_data["decision_by_id"] = staff.id
     return work_data
+
+
+def test_get_median_phase_underage_ignores_incomplete_phases(client, auth_header):
+    """Test median underage only counts completed phases, not phases yet to run."""
+    for is_completed, number_of_days in ((True, 10), (False, 120)):
+        work_phase = factory_work_phase_model()
+        work_phase.legislated = True
+        work_phase.number_of_days = number_of_days
+        work_phase.is_completed = is_completed
+        work_phase.save()
+    url = urljoin(API_BASE_URL, "insights/phases")
+    for group_by in ("median_phase_overage", "median_overage_by_worktype"):
+        payload = {"group_by": group_by, "filters": [], "is_underage_toggled": True}
+        result = client.post(url, json=payload, headers=auth_header)
+        assert result.status_code == HTTPStatus.OK
+        assert [row["median_overage"] for row in result.json] == [10]
