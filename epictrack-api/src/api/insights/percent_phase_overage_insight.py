@@ -74,6 +74,7 @@ class PercentPhaseOverageInsightGenerator:
         query = query.filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
+            WorkPhase.is_completed.is_(True),
             Work.work_state.not_in([WorkStateEnum.WITHDRAWN]),
             or_(
                 WorkPhase.legislated.is_(True),
