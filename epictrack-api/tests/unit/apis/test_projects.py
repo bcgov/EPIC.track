@@ -23,6 +23,10 @@ from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from werkzeug.datastructures import FileStorage
 
+from api.models.event import Event
+from api.models.event_category import EventCategoryEnum
+from api.models.event_configuration import EventConfiguration
+from api.models.outcome_configuration import OutcomeConfiguration
 from api.models.work import WorkStateEnum
 
 from tests.utilities.factory_scenarios import TestProjectInfo
@@ -32,6 +36,7 @@ from tests.utilities.factory_utils import (
     factory_staff_work_role_model,
     factory_work_model,
 )
+from tests.utilities.helpers import prepare_work_payload
 
 
 API_BASE_URL = "/api/v1/"
@@ -348,3 +353,138 @@ def test_project_team_members_requires_token(client):
     """The endpoint rejects an unauthenticated caller."""
     response = client.get(urljoin(API_BASE_URL, "projects/team-members"))
     assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+
+PROJECT_SUMMARY_FIELDS = {
+    "id", "name", "description", "latitude", "longitude", "ea_certificate", "epic_guid",
+    "type", "proponent", "region_env", "has_works_in_progress",
+}
+WORK_SUMMARY_FIELDS = {
+    "id", "title", "simple_title", "work_type", "work_state", "current_work_phase", "start_date",
+    "decision_date", "work_decision_date", "report_description", "epic_description", "decision",
+}
+
+
+def _other_project(name):
+    return factory_project_model(
+        {**TestProjectInfo.project1.value, "name": name, "abbreviation": name.upper()[:10]}
+    )
+
+
+def _project_summaries(client, auth_header):
+    response = client.get(urljoin(API_BASE_URL, "projects/summary"), headers=auth_header)
+    assert response.status_code == HTTPStatus.OK
+    return {project["id"]: project for project in response.json}
+
+
+def _work_summaries(client, auth_header, project_id):
+    response = client.get(urljoin(API_BASE_URL, f"projects/{project_id}/works/summary"), headers=auth_header)
+    assert response.status_code == HTTPStatus.OK
+    return response.json
+
+
+def test_project_summaries_carry_only_the_summary_fields(client, auth_header):
+    """A summary names the project's type, proponent and region and leaves out the rest."""
+    project = factory_project_model()
+
+    summary = _project_summaries(client, auth_header)[project.id]
+
+    assert set(summary) == PROJECT_SUMMARY_FIELDS
+    assert summary["name"] == project.name
+    assert summary["type"] == {"id": project.type_id, "name": project.type.name}
+    assert summary["proponent"] == {"id": project.proponent_id, "name": project.proponent.name}
+    assert summary["region_env"] == {"id": project.region_id_env, "name": project.region_env.name}
+    assert summary["has_works_in_progress"] is False
+
+
+def test_project_summaries_leave_out_inactive_and_deleted_projects(client, auth_header):
+    """Only active projects are summarised."""
+    active = factory_project_model()
+    inactive = _other_project("Inactive summary")
+    inactive.is_active = False
+    inactive.save()
+    deleted = _other_project("Deleted summary")
+    deleted.is_deleted = True
+    deleted.save()
+
+    summaries = _project_summaries(client, auth_header)
+
+    assert active.id in summaries
+    assert inactive.id not in summaries
+    assert deleted.id not in summaries
+
+
+def test_an_inactive_work_in_progress_marks_its_project(client, auth_header):
+    """is_active says whether Track still lists a work, not whether it is under way."""
+    work = factory_work_model()
+    work.is_active = False
+    work.save()
+
+    assert _project_summaries(client, auth_header)[work.project_id]["has_works_in_progress"] is True
+
+
+def test_only_a_live_work_in_progress_marks_its_project(client, auth_header):
+    """A completed work, or a deleted one in progress, leaves its project unmarked."""
+    completed = factory_work_model()
+    completed.work_state = WorkStateEnum.COMPLETED
+    completed.save()
+    deleted = factory_work_model()
+    deleted.is_deleted = True
+    deleted.save()
+
+    assert _project_summaries(client, auth_header)[completed.project_id]["has_works_in_progress"] is False
+
+
+def test_project_work_summaries_carry_only_the_summary_fields(client, auth_header):
+    """A work summary leaves out the work's staff, team and ministry."""
+    work = factory_work_model()
+
+    [summary] = _work_summaries(client, auth_header, work.project_id)
+
+    assert set(summary) == WORK_SUMMARY_FIELDS
+    assert summary["id"] == work.id
+    assert summary["title"] == work.title
+    assert summary["work_state"] == WorkStateEnum.IN_PROGRESS.value
+    assert summary["work_type"] == {"id": work.work_type_id, "name": work.work_type.name}
+    assert summary["decision"] is None
+
+
+def test_project_work_summaries_leave_out_deleted_works_and_other_projects(client, auth_header):
+    """Only the project's own works that are not deleted are summarised."""
+    kept = factory_work_model()
+    deleted = factory_work_model()
+    deleted.is_deleted = True
+    deleted.save()
+    elsewhere = factory_work_model()
+    elsewhere.project_id = _other_project("Elsewhere summary").id
+    elsewhere.save()
+
+    summaries = _work_summaries(client, auth_header, kept.project_id)
+
+    assert [summary["id"] for summary in summaries] == [kept.id]
+
+
+def test_project_work_summaries_carry_the_latest_decision(client, auth_header, session):
+    """A work's summary names the outcome of its completed decision milestone."""
+    response = client.post(urljoin(API_BASE_URL, "works"), json=prepare_work_payload(), headers=auth_header)
+    assert response.status_code == HTTPStatus.CREATED
+    work_id = response.json["id"]
+    decision_event, outcome = (
+        session.query(Event, OutcomeConfiguration)
+        .join(EventConfiguration, Event.event_configuration_id == EventConfiguration.id)
+        .join(OutcomeConfiguration, OutcomeConfiguration.event_configuration_id == EventConfiguration.id)
+        .filter(Event.work_id == work_id, EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value)
+        .first()
+    )
+    decision_event.actual_date = decision_event.anticipated_date
+    decision_event.outcome_id = outcome.id
+    session.commit()
+
+    summaries = _work_summaries(client, auth_header, response.json["project_id"])
+
+    assert {summary["id"]: summary["decision"] for summary in summaries}[work_id] == outcome.name
+
+
+def test_project_work_summaries_of_an_unknown_project_are_empty(client, auth_header):
+    """An id with no project behind it has no works."""
+    assert _work_summaries(client, auth_header, 999999) == []

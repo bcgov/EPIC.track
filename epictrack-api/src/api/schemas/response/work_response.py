@@ -10,6 +10,7 @@ from api.schemas.ea_act import EAActSchema
 from api.schemas.eao_team import EAOTeamSchema
 from api.schemas.federal_involvement import FederalInvolvementSchema
 from api.schemas.ministry import MinistrySchema
+from api.schemas.response.list_type_response import ListTypeResponseSchema
 from api.schemas.response.phase_response import PhaseResponseSchema
 from api.schemas.response.project_response import ProjectResponseSchema
 from api.schemas.response.staff_response import StaffResponseSchema
@@ -114,6 +115,29 @@ class WorkResponseSchema(
             works = list(works)
             self.context["referral_dates"] = Work.anticipated_referral_dates([work.id for work in works])
         return works
+
+
+class WorkSummaryResponseSchema(Schema):
+    """A work, without the staff, team and internal fields the full work response carries"""
+
+    id = fields.Int(metadata={"description": "The id of the work."})
+    title = fields.Str(metadata={"description": "Title of the work."})
+    simple_title = fields.Str(metadata={"description": "Title of the work without the project and work type."})
+    work_type = fields.Nested(ListTypeResponseSchema, metadata={"description": "Type of the work."})
+    work_state = fields.Method("get_work_state")
+    current_work_phase = fields.Nested(
+        ListTypeResponseSchema, metadata={"description": "Phase the work is currently in."}
+    )
+    start_date = fields.DateTime(metadata={"description": "Start date of the work."})
+    decision_date = fields.DateTime(metadata={"description": "Decision date of the work."})
+    work_decision_date = fields.DateTime(metadata={"description": "Date the work was decided."})
+    report_description = fields.Str(metadata={"description": "Description of the work for reports."})
+    epic_description = fields.Str(metadata={"description": "Description of the work for EPIC."})
+    decision = fields.Str(metadata={"description": "Outcome of the work's latest decision milestone."})
+
+    def get_work_state(self, obj: Work) -> str:
+        """Return the work state"""
+        return obj.work_state.value if obj.work_state else None
 
 
 class WorkStaffRoleResponseSchema(

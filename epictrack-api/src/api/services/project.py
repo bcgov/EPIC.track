@@ -34,7 +34,7 @@ from api.models.special_field import EntityEnum, SpecialField, FieldTypeEnum
 from api.models.staff_work_role import StaffWorkRole
 from api.models.sub_types import SubType
 from api.models.types import Type
-from api.models.work import Work
+from api.models.work import Work, WorkStateEnum
 from api.models.work_type import WorkType
 from api.schemas.types import TypeSchema
 from api.services import authorisation
@@ -80,6 +80,28 @@ class ProjectService:
                                            .filter(StaffWorkRole.staff_id == staff_id)
 
         return projects_query.all()
+
+    @classmethod
+    def find_summaries(cls):
+        """Find all active projects, each marked with whether it has a work in progress.
+
+        A work counts whether or not it is active: is_active says whether Track still lists
+        the work, not whether it is under way.
+        """
+        cls._check_auth(one_of_roles=[KeycloakRole.VIEW, KeycloakRole.LIMITED_VIEW])
+        has_works_in_progress = Project.works.any(
+            and_(Work.is_deleted.is_(False), Work.work_state == WorkStateEnum.IN_PROGRESS)
+        )
+        rows = (
+            db.session.query(Project, has_works_in_progress)
+            .options(joinedload(Project.type), joinedload(Project.proponent), joinedload(Project.region_env))
+            .filter(Project.is_active.is_(True), Project.is_deleted.is_(False))
+            .order_by(Project.id)
+            .all()
+        )
+        for project, in_progress in rows:
+            project.has_works_in_progress = in_progress
+        return [project for project, _ in rows]
 
     @classmethod
     def create_project(cls, payload: dict):

@@ -15,8 +15,8 @@
 """Test suite pinning what the limited_view role can and cannot reach.
 
 EPIC.compliance calls a small number of EPIC.track endpoints with the end user's
-own token. The limited_view role exists so those users do not need track's general
-view role.
+own token, and EPIC.map calls a few more with its service account. The limited_view
+role exists so neither needs track's general view role.
 """
 from copy import copy
 from datetime import date
@@ -34,6 +34,7 @@ from tests.utilities.factory_utils import (
     factory_pip_org_type_model,
     factory_project_model,
     factory_staff_model,
+    factory_work_model,
 )
 
 
@@ -195,6 +196,88 @@ def test_limited_view_can_get_first_nation_details(client, jwt):
     """
     factory_first_nation_model()
     url = urljoin(API_BASE_URL, "indigenous-nations/details")
+
+    response = client.get(url, headers=_limited_view_header(jwt))
+
+    assert response.status_code == HTTPStatus.OK
+
+
+def _no_role_header(jwt):
+    """Build an auth header for a valid token that carries no role at all."""
+    claims = {**TestJwtClaims.limited_view_role.value, "realm_access": {"roles": []}}
+    return factory_auth_header(jwt=jwt, claims=claims)
+
+
+def test_limited_view_can_list_project_summaries(client, jwt):
+    """limited_view lists active projects without their internal fields: EPIC.map's project dots."""
+    project = factory_project_model()
+    url = urljoin(API_BASE_URL, "projects/summary")
+
+    response = client.get(url, headers=_limited_view_header(jwt))
+
+    assert response.status_code == HTTPStatus.OK
+    assert project.id in [summary["id"] for summary in response.json]
+
+
+def test_limited_view_can_list_project_work_summaries(client, jwt):
+    """limited_view lists a project's works without their internal fields: EPIC.map's project card."""
+    work = factory_work_model()
+    url = urljoin(API_BASE_URL, f'projects/{work.project_id}/works/summary')
+
+    response = client.get(url, headers=_limited_view_header(jwt))
+
+    assert response.status_code == HTTPStatus.OK
+    assert [summary["id"] for summary in response.json] == [work.id]
+
+
+def test_a_token_without_a_view_role_cannot_list_summaries(client, jwt):
+    """The summaries are opened to limited_view, not to every token the realm issues."""
+    work = factory_work_model()
+
+    projects = client.get(urljoin(API_BASE_URL, "projects/summary"), headers=_no_role_header(jwt))
+    works = client.get(
+        urljoin(API_BASE_URL, f'projects/{work.project_id}/works/summary'), headers=_no_role_header(jwt)
+    )
+
+    assert projects.status_code == HTTPStatus.FORBIDDEN
+    assert works.status_code == HTTPStatus.FORBIDDEN
+
+
+def test_limited_view_cannot_list_works(client, jwt):
+    """limited_view reads works through the summary; the full work list stays closed."""
+    url = urljoin(API_BASE_URL, "works")
+
+    response = client.get(url, headers=_limited_view_header(jwt))
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+def test_limited_view_cannot_read_the_work_listing(client, jwt):
+    """limited_view reads works through the summary; the insights listing stays closed."""
+    url = urljoin(API_BASE_URL, "works/listing")
+
+    response = client.post(url, json={}, headers=_limited_view_header(jwt))
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+def test_limited_view_can_get_project_types(client, jwt):
+    """EPIC.map reads the project types for its Type menu.
+
+    The endpoint calls check_auth nowhere, so limited_view inherits it the way it
+    inherits project states. Pinned so that adding a guard there fails loudly
+    instead of emptying the map's menu.
+    """
+    url = urljoin(API_BASE_URL, "project-types")
+
+    response = client.get(url, headers=_limited_view_header(jwt))
+
+    assert response.status_code == HTTPStatus.OK
+
+
+def test_limited_view_can_get_regions(client, jwt):
+    """EPIC.map reads the ENV regions for its Region menu. Unguarded, as project types are."""
+    url = urljoin(API_BASE_URL, "regions?type=ENV")
 
     response = client.get(url, headers=_limited_view_header(jwt))
 

@@ -241,13 +241,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         )
         result["end_milestone"] = end_milestone
 
-        decision_milestones = [
-            event
-            for event in work_phase_events
-            if event.event_configuration.event_category_id
-            == EventCategoryEnum.DECISION.value
-            and event.actual_date
-        ]
+        decision_milestones = cls._decision_milestones(work_phase_events)
 
         result["decision_milestone"] = (
             decision_milestones[-1].name if decision_milestones else None
@@ -275,6 +269,41 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         if milestone_progress == 100 and any_incomplete_phase:
             milestone_progress = 90
         return milestone_progress
+
+    @staticmethod
+    def _decision_milestones(work_phase_events):
+        """Completed decision milestones, in the order of the given events."""
+        return [
+            event
+            for event in work_phase_events
+            if event.event_configuration.event_category_id
+            == EventCategoryEnum.DECISION.value
+            and event.actual_date
+        ]
+
+    @classmethod
+    def find_latest_decisions(cls, work_ids: List[int], event_service) -> Dict[int, Union[str, None]]:
+        """Return the outcome of each work's latest decision, or None where it has none.
+
+        Each phase's decision is the outcome of its last completed decision milestone, as in
+        find_work_phases_status; the latest is the phase decision with the latest actual date.
+        """
+        work_phases_dict = cls.find_work_phases_by_work_ids(work_ids)[0]
+        decisions = {}
+        for work_id in work_ids:
+            events = event_service.find_events(work_id, event_categories=[EventCategoryEnum.DECISION])
+            latest = None
+            for work_phase in work_phases_dict.get(work_id, []):
+                decision_milestones = cls._decision_milestones(cls._filter_sort_events(events, work_phase))
+                if not decision_milestones:
+                    continue
+                milestone = decision_milestones[-1]
+                if not (milestone.outcome and milestone.outcome.name):
+                    continue
+                if latest is None or milestone.actual_date > latest.actual_date:
+                    latest = milestone
+            decisions[work_id] = latest.outcome.name if latest else None
+        return decisions
 
     @classmethod
     def _filter_sort_events(cls, events, work_phase):

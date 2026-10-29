@@ -390,6 +390,71 @@ class TestGetMilestoneInformation:
         assert result["next_milestone"] == "Future Milestone"
 
 
+def _decision_event(event_id, work_phase_id, actual_date, outcome_name=None):
+    """Build a decision milestone event in the given work phase."""
+    anticipated_date = actual_date or datetime.datetime(2024, 6, 1, tzinfo=timezone.utc)
+    event = MagicMock(id=event_id, actual_date=actual_date, anticipated_date=anticipated_date)
+    event.event_configuration = MagicMock(
+        work_phase_id=work_phase_id, event_category_id=EventCategoryEnum.DECISION.value
+    )
+    if outcome_name is None:
+        event.outcome = None
+    else:
+        event.outcome = MagicMock()
+        event.outcome.name = outcome_name
+    return event
+
+
+class TestFindLatestDecisions:
+    """Tests for find_latest_decisions method."""
+
+    @patch.object(WorkPhaseService, "find_work_phases_by_work_ids")
+    def test_returns_the_decision_with_the_latest_date(self, mock_find_phases):
+        """The phase decision decided last wins, whatever the phase order."""
+        mock_find_phases.return_value = ({1: [MagicMock(id=10), MagicMock(id=11)]}, 2)
+        mock_event_service = MagicMock()
+        mock_event_service.find_events.return_value = [
+            _decision_event(100, 10, datetime.datetime(2024, 5, 1, tzinfo=timezone.utc), "Amendment Granted"),
+            _decision_event(101, 11, datetime.datetime(2024, 3, 1, tzinfo=timezone.utc), "Referred"),
+        ]
+
+        result = WorkPhaseService.find_latest_decisions([1], mock_event_service)
+
+        assert result == {1: "Amendment Granted"}
+        mock_event_service.find_events.assert_called_once_with(
+            1, event_categories=[EventCategoryEnum.DECISION]
+        )
+
+    @patch.object(WorkPhaseService, "find_work_phases_by_work_ids")
+    def test_a_phase_whose_last_decision_has_no_outcome_is_skipped(self, mock_find_phases):
+        """A phase's decision is its last completed decision milestone, as in its phase status."""
+        mock_find_phases.return_value = ({1: [MagicMock(id=10), MagicMock(id=11)]}, 2)
+        mock_event_service = MagicMock()
+        mock_event_service.find_events.return_value = [
+            _decision_event(100, 10, datetime.datetime(2024, 1, 1, tzinfo=timezone.utc), "Referred"),
+            _decision_event(101, 11, datetime.datetime(2024, 2, 1, tzinfo=timezone.utc), "Approved"),
+            _decision_event(102, 11, datetime.datetime(2024, 3, 1, tzinfo=timezone.utc)),
+        ]
+
+        result = WorkPhaseService.find_latest_decisions([1], mock_event_service)
+
+        assert result == {1: "Referred"}
+
+    @patch.object(WorkPhaseService, "find_work_phases_by_work_ids")
+    def test_a_work_without_a_completed_decision_has_none(self, mock_find_phases):
+        """An upcoming decision milestone is not a decision, nor is a work with no phases."""
+        mock_find_phases.return_value = ({1: [MagicMock(id=10)]}, 1)
+        mock_event_service = MagicMock()
+        mock_event_service.find_events.side_effect = [
+            [_decision_event(100, 10, None, "Approved")],
+            [],
+        ]
+
+        result = WorkPhaseService.find_latest_decisions([1, 2], mock_event_service)
+
+        assert result == {1: None, 2: None}
+
+
 class TestCalculateMilestoneProgress:
     """Tests for _calculate_milestone_progress private method."""
 
