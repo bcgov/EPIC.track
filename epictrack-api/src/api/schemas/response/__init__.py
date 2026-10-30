@@ -34,6 +34,7 @@ from .phase_response import PhaseResponseSchema
 from .phase_overage_responsibility_response import PhaseOverageResponsibilityResponseSchema
 from .project_response import (
     ProjectResponseSchema,
+    ProjectSummaryResponseSchema,
     ProjectTeamMemberSchema,
     ProjectTeamResponseSchema,
 )
@@ -64,6 +65,7 @@ from .work_response import (
     WorkResponseSchema,
     WorkStaffRoleResponseSchema,
     WorkStatusResponseSchema,
+    WorkSummaryResponseSchema,
     WorkPhaseByIdResponseSchema,
     WorkIssuesLatestUpdateResponseSchema,
 )

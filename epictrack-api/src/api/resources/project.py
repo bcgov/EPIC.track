@@ -20,7 +20,7 @@ from flask_restx import Namespace, Resource, cors
 from api.schemas import request as req
 from api.schemas import response as res
 from api.schemas.work_type import WorkTypeSchema
-from api.services import ProjectService
+from api.services import ProjectService, WorkService
 from api.utils import auth, constants, profiletime
 from api.utils.caching import AppCache
 from api.utils.file_upload import validate_excel_upload
@@ -139,6 +139,37 @@ class ProjectTeamMembers(Resource):
         project_id = args.get("project_id")
         teams = ProjectService.find_team_members(project_id)
         return res.ProjectTeamResponseSchema(many=True).dump(teams), HTTPStatus.OK
+
+
+@cors_preflight("GET")
+@API.route("/summary", methods=["GET", "OPTIONS"])
+class ProjectSummaries(Resource):
+    """Endpoint resource to return active projects without their internal fields."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get():
+        """Return a summary of every active project."""
+        projects = ProjectService.find_summaries()
+        return jsonify(res.ProjectSummaryResponseSchema(many=True).dump(projects)), HTTPStatus.OK
+
+
+@cors_preflight("GET")
+@API.route("/<int:project_id>/works/summary", methods=["GET", "OPTIONS"])
+class ProjectWorkSummaries(Resource):
+    """Endpoint resource to return a project's works without their internal fields."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(project_id):
+        """Return a summary of every work on a project."""
+        req.ProjectIdPathParameterSchema().load(request.view_args)
+        works = WorkService.find_project_work_summaries(project_id)
+        return jsonify(res.WorkSummaryResponseSchema(many=True).dump(works)), HTTPStatus.OK
 
 
 @cors_preflight("GET")
