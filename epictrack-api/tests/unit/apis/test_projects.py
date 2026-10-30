@@ -485,6 +485,35 @@ def test_project_work_summaries_carry_the_latest_decision(client, auth_header, s
     assert {summary["id"]: summary["decision"] for summary in summaries}[work_id] == outcome.name
 
 
-def test_project_work_summaries_of_an_unknown_project_are_empty(client, auth_header):
-    """An id with no project behind it has no works."""
-    assert _work_summaries(client, auth_header, 999999) == []
+def test_project_work_summaries_of_a_project_without_works_are_empty(client, auth_header):
+    """A project with no works is found, and has none."""
+    project = factory_project_model()
+
+    assert _work_summaries(client, auth_header, project.id) == []
+
+
+def test_project_work_summaries_of_an_inactive_project_are_listed(client, auth_header):
+    """An inactive project still exists, as it does for the project read by id."""
+    work = factory_work_model()
+    work.project.is_active = False
+    work.project.save()
+
+    assert [summary["id"] for summary in _work_summaries(client, auth_header, work.project_id)] == [work.id]
+
+
+def test_project_work_summaries_of_an_unknown_project_are_not_found(client, auth_header):
+    """An id with no project behind it is a 404, not an empty list."""
+    response = client.get(urljoin(API_BASE_URL, "projects/999999/works/summary"), headers=auth_header)
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_project_work_summaries_of_a_deleted_project_are_not_found(client, auth_header):
+    """A deleted project is not found, as it is for the project read by id."""
+    work = factory_work_model()
+    work.project.is_deleted = True
+    work.project.save()
+
+    response = client.get(urljoin(API_BASE_URL, f"projects/{work.project_id}/works/summary"), headers=auth_header)
+
+    assert response.status_code == HTTPStatus.NOT_FOUND

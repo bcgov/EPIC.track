@@ -243,6 +243,15 @@ def test_a_token_without_a_view_role_cannot_list_summaries(client, jwt):
     assert works.status_code == HTTPStatus.FORBIDDEN
 
 
+def test_a_token_without_a_view_role_cannot_tell_which_projects_exist(client, jwt):
+    """The role check runs before the project lookup, so an unknown id is a 403, not a 404."""
+    url = urljoin(API_BASE_URL, "projects/999999/works/summary")
+
+    response = client.get(url, headers=_no_role_header(jwt))
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+
+
 def test_limited_view_cannot_list_works(client, jwt):
     """limited_view reads works through the summary; the full work list stays closed."""
     url = urljoin(API_BASE_URL, "works")

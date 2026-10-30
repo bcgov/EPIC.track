@@ -118,8 +118,15 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def find_project_work_summaries(cls, project_id: int) -> List[Work]:
-        """Find a project's non-deleted works, each carrying the outcome of its latest decision."""
+        """Find a project's non-deleted works, each carrying the outcome of its latest decision.
+
+        A project that does not exist or is deleted is not found. The role check comes first,
+        so a token without one cannot tell which project ids exist.
+        """
         authorisation.check_auth(one_of_roles=(KeycloakRole.VIEW.value, KeycloakRole.LIMITED_VIEW.value))
+        project = Project.query.filter(Project.id == project_id, Project.is_deleted.is_(False)).one_or_none()
+        if project is None:
+            raise ResourceNotFoundError(f"Project with id '{project_id}' not found.")
         works = (
             Work.query.filter(Work.project_id == project_id, Work.is_deleted.is_(False))
             .options(joinedload(Work.work_type), joinedload(Work.current_work_phase))
