@@ -22,6 +22,7 @@ from api.schemas import response as res
 from api.services import ProponentService
 from api.utils import auth, profiletime
 from api.utils.file_upload import validate_excel_upload
+from api.utils.rate_limit import import_limit, limiter, lookup_limit
 from api.utils.util import cors_preflight
 
 
@@ -36,6 +37,7 @@ class ValidateProponent(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
+    @limiter.limit(lookup_limit)
     @profiletime
     def get():
         """Check for existing proponent."""
@@ -119,6 +121,7 @@ class ImportProponents(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
+    @limiter.limit(import_limit)
     @profiletime
     def post():
         """Import proponents"""

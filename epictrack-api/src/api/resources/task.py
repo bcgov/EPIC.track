@@ -23,6 +23,7 @@ from api.schemas import response as res
 from api.services import TaskService
 from api.utils import auth, profiletime
 from api.utils.file_upload import validate_excel_upload
+from api.utils.rate_limit import import_limit, limiter
 from api.utils.util import cors_preflight
 
 
@@ -162,6 +163,7 @@ class Templates(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
+    @limiter.limit(import_limit)
     @profiletime
     def post(work_phase_id):
         """Create new task template"""
@@ -178,6 +180,7 @@ class TemplateEvents(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
+    @limiter.limit(import_limit)
     @profiletime
     def post(template_id: int):
         """Return all task templates."""

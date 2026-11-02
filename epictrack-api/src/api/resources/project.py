@@ -24,6 +24,7 @@ from api.services import ProjectService
 from api.utils import auth, constants, profiletime
 from api.utils.caching import AppCache
 from api.utils.file_upload import validate_excel_upload
+from api.utils.rate_limit import import_limit, limiter, lookup_limit
 from api.utils.util import cors_preflight
 
 
@@ -114,6 +115,7 @@ class ValidateProject(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
+    @limiter.limit(lookup_limit)
     @profiletime
     def get():
         """Checks for existing projects."""
@@ -211,6 +213,7 @@ class ImportProjects(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
+    @limiter.limit(import_limit)
     @profiletime
     def post():
         """Import projects"""

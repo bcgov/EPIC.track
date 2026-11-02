@@ -72,7 +72,19 @@ describe("AxiosErrorHandler", () => {
           expect(error.response.status).to.equal(500);
         }
         expect(reduxStore.getState().loadingState.isLoading).to.equal(false);
+
+        try {
+          onError({
+            config: { method: "post" },
+            response: { status: 429, headers: { "retry-after": "42" } },
+          });
+          throw new Error("expected error to be thrown");
+        } catch (error: any) {
+          expect(error.response.status).to.equal(429);
+        }
       });
+
+      cy.contains("Too many requests. Please try again in 42 seconds.");
 
       cy.mount(<div>replacement</div>);
 

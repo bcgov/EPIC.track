@@ -30,6 +30,7 @@ from api.services.event import EventService
 from api.utils import auth, constants, profiletime
 from api.utils.caching import AppCache
 from api.utils.datetime_helper import get_start_of_day
+from api.utils.rate_limit import import_limit, limiter, lookup_limit
 from api.utils.util import cors_preflight
 from api.models.work_phase import WorkPhase as WorkPhaseModel
 
@@ -44,6 +45,7 @@ class ValidateWork(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
+    @limiter.limit(lookup_limit)
     @profiletime
     def get():
         """Check for existing works."""
@@ -657,6 +659,7 @@ class WorkFirstNationsImport(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
+    @limiter.limit(import_limit)
     @profiletime
     def post(work_id):
         """Return first nations based on work id"""

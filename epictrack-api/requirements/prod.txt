@@ -1,6 +1,7 @@
 gunicorn
 Flask<2.3
 Flask-Caching
+Flask-Limiter
 Flask-Migrate
 Flask-Moment
 Flask-SQLAlchemy==3.0.5

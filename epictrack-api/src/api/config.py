@@ -115,6 +115,18 @@ class _Config():  # pylint: disable=too-few-public-methods
     CACHE_TYPE = constants.CACHE_TYPE
     CACHE_DEFAULT_TIMEOUT = constants.CACHE_DEFAULT_TIMEOUT
 
+    # Per-user rate limits (flask-limiter syntax). Peak is ~100 users, so these only stop
+    # runaway clients; loosen via env if real users ever hit them.
+    RATE_LIMITS_ENABLED = _get_config('RATE_LIMITS_ENABLED', default='true').lower() == 'true'
+    RATE_LIMIT_DEFAULT = _get_config('RATE_LIMIT_DEFAULT', default='900/minute')
+    RATE_LIMIT_IMPORT = _get_config('RATE_LIMIT_IMPORT', default='30/minute;180/hour')
+    RATE_LIMIT_REPORT = _get_config('RATE_LIMIT_REPORT', default='90/minute;900/hour')
+    RATE_LIMIT_LOOKUP = _get_config('RATE_LIMIT_LOOKUP', default='360/minute')
+    # ponytail: memory:// counts per gunicorn worker (limit x workers); fine for 1 replica,
+    # point this at Redis if the API scales out.
+    RATELIMIT_STORAGE_URI = _get_config('RATELIMIT_STORAGE_URI', default='memory://')
+    RATELIMIT_HEADERS_ENABLED = True
+
     MIN_WORK_START_DATE = _get_config('MIN_WORK_START_DATE', default='1995-06-30')
 
 
@@ -130,6 +142,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
 
     DEBUG = True
     TESTING = True
+    RATE_LIMITS_ENABLED = False
 
     # POSTGRESQL
     DB_USER = _get_config('DATABASE_TEST_USERNAME', default='postgres')
