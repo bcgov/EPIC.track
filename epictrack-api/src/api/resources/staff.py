@@ -23,6 +23,7 @@ from api.schemas import response as res
 from api.services import StaffService
 from api.utils import auth, profiletime
 from api.utils.file_upload import validate_excel_upload
+from api.utils.rate_limit import import_limit, limiter, lookup_limit
 from api.utils.util import cors_preflight
 
 API = Namespace("staffs", description="Staffs")
@@ -129,6 +130,7 @@ class ValidateStaff(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
+    @limiter.limit(lookup_limit)
     @profiletime
     def get():
         """Checks for existing staffs."""
@@ -150,6 +152,7 @@ class StaffByEmail(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
+    @limiter.limit(lookup_limit)
     @profiletime
     def get(email):
         """Return a staff detail based on email."""
@@ -168,6 +171,7 @@ class ImportStaffs(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
+    @limiter.limit(import_limit)
     @profiletime
     def post():
         """Import staffs"""

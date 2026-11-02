@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { AxiosInstance } from "../../apiManager/http-request-handler";
 import { useAppDispatch } from "../../hooks";
 import { setLoadingState } from "../../services/loadingService";
+import { showNotification } from "../shared/notificationProvider";
 
 const AxiosErrorHandler = ({ ...props }) => {
   const dispatch = useAppDispatch();
@@ -49,6 +50,16 @@ const AxiosErrorHandler = ({ ...props }) => {
             //   // Handle Unauthorized here
             //   break;
             // // ... And so on
+            case 429: {
+              const retryAfter = error.response.headers?.["retry-after"];
+              showNotification(
+                `Too many requests. Please try again in ${
+                  retryAfter ? `${retryAfter} seconds` : "a moment"
+                }.`,
+                { type: "error" },
+              );
+              throw error;
+            }
             default:
               throw error;
           }

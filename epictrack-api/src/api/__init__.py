@@ -33,6 +33,7 @@ from api.utils.auth import jwt
 from api.utils.caching import AppCache
 from api.utils.json_encoder import CustomJSONEncoder
 from api.utils.logging import setup_logging
+from api.utils.rate_limit import limiter
 from api.utils.run_version import get_run_version
 
 
@@ -60,6 +61,9 @@ def create_app(run_mode=None):
         app.register_blueprint(API_BLUEPRINT)
         app.register_blueprint(OPS_BLUEPRINT)
 
+        limiter.exempt(OPS_BLUEPRINT)
+        limiter.init_app(app)
+
         setup_jwt_manager(app, jwt)
 
         @app.after_request
@@ -68,6 +72,8 @@ def create_app(run_mode=None):
             response.headers['API'] = f'eao_epictrack_api/{version}'
             # So that ERR responses don't raise CORS error in browser
             response.headers['Access-Control-Allow-Origin'] = '*'
+            # Let the web app read how long to wait after a 429
+            response.headers['Access-Control-Expose-Headers'] = 'Retry-After'
             return response
 
         @app.errorhandler(Exception)

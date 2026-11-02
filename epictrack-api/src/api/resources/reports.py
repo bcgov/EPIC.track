@@ -23,6 +23,7 @@ from api.schemas.event_calendar import EventCalendarSchema
 from api.services import ReportService
 from api.services.event import EventService
 from api.utils import auth, profiletime
+from api.utils.rate_limit import limiter, report_limit
 from api.utils.util import cors_preflight
 
 
@@ -55,6 +56,7 @@ class Report(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
+    @limiter.limit(report_limit)
     @profiletime
     def post(report_type):
         """Generate report from given date."""
@@ -86,6 +88,7 @@ class FileReport(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
+    @limiter.limit(report_limit)
     @profiletime
     def post(report_type):
         """Generate report from given date."""
