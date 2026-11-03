@@ -4,9 +4,10 @@ import { Palette } from "styles/theme";
 import Icons from "../../../icons";
 import { IconProps } from "../../../icons/type";
 import { ETLink } from "components/shared";
-import { If, Then } from "react-if";
+import { Else, If, Then } from "react-if";
 import { AboutContext } from "../AboutContext";
 import { WorkResource } from "models/workResource";
+import { safeExternalUrl } from "utils/urlUtils";
 
 interface ResourceLinkProps {
   url?: string;
@@ -21,6 +22,7 @@ const EditIcon: FC<IconProps> = Icons["PencilEditIcon"];
 const ResourceLink = ({ url, title, workResource }: ResourceLinkProps) => {
   const { setShowDeleteDialog, setShowEditDialog, setSelectedWorkResource } =
     useContext(AboutContext);
+  const href = safeExternalUrl(workResource?.link || url);
 
   return (
     <Box
@@ -46,18 +48,33 @@ const ResourceLink = ({ url, title, workResource }: ResourceLinkProps) => {
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: ".5rem" }}>
           <LinkIcon fill={`${Palette.primary.accent.main}`} />
-          <ETLink
-            to={`${workResource?.link || url}`}
-            target="_blank"
-            rel="noopener"
-            style={{
-              fontSize: "1rem",
-              fontWeight: 700,
-              lineHeight: "1.5rem",
-            }}
-          >
-            {workResource?.title || title}
-          </ETLink>
+          <If condition={href !== undefined}>
+            <Then>
+              <ETLink
+                to={href ?? ""}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: 700,
+                  lineHeight: "1.5rem",
+                }}
+              >
+                {workResource?.title || title}
+              </ETLink>
+            </Then>
+            <Else>
+              <span
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: 700,
+                  lineHeight: "1.5rem",
+                }}
+              >
+                {workResource?.title || title}
+              </span>
+            </Else>
+          </If>
         </Box>
         <If condition={workResource != null}>
           <Then>

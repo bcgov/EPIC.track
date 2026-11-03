@@ -454,10 +454,10 @@ class TestWorkResourceInfo(Enum):
 
     work_resource1 = {
         "title": fake.word(),
-        "link": fake.word()
+        "link": fake.url()
     }
 
     work_resource2 = {
         "title": fake.word(),
-        "link": fake.word()
+        "link": fake.url()
     }
