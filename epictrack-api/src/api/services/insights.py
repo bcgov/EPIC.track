@@ -27,7 +27,7 @@ class InsightService:  # pylint:disable=too-few-public-methods
     def fetch_work_insights(cls, group_by: str, filters: list = None, staff_id: int = None):
         """Fetch work insights"""
         cls._check_auth(one_of_roles=[KeycloakRole.VIEW])
-        current_app.logger.debug(f"Fetch work insights {group_by = } {filters = } {staff_id = }")
+        current_app.logger.debug(f"Fetch work insights {group_by=} {filters=} {staff_id=}")
         insight_generator: InsightGenerator = get_insight_generator(
             resource="works", group_by=group_by
         )
@@ -38,7 +38,7 @@ class InsightService:  # pylint:disable=too-few-public-methods
     def fetch_assessment_work_insights(cls, group_by: str, staff_id: int = None):
         """Fetch assessment work insights"""
         cls._check_auth(one_of_roles=[KeycloakRole.VIEW])
-        current_app.logger.debug(f"Fetch assessment work insights {group_by = }")
+        current_app.logger.debug(f"Fetch assessment work insights {group_by=}")
         insight_generator: InsightGenerator = get_insight_generator(
             resource="works", group_by=f"assessment_by_{group_by}"
         )
@@ -49,7 +49,7 @@ class InsightService:  # pylint:disable=too-few-public-methods
     def fetch_project_insights(cls, group_by: str, filters: list = None, staff_id: int = None):
         """Fetch project insights"""
         cls._check_auth(one_of_roles=[KeycloakRole.VIEW])
-        current_app.logger.debug(f"Fetch project insights {group_by = } {filters = } {staff_id = }")
+        current_app.logger.debug(f"Fetch project insights {group_by=} {filters=} {staff_id=}")
         insight_generator: InsightGenerator = get_insight_generator(
             resource="projects", group_by=group_by
         )
@@ -61,7 +61,7 @@ class InsightService:  # pylint:disable=too-few-public-methods
     def fetch_phase_insights(cls, group_by: str, filters: list = None, staff_id: int = None, is_underage_toggled: bool = False):
         """Fetch phase insights"""
         cls._check_auth(one_of_roles=[KeycloakRole.VIEW])
-        current_app.logger.debug(f"Fetch phase insights {group_by = } {filters = } {staff_id = } {is_underage_toggled = }")
+        current_app.logger.debug(f"Fetch phase insights {group_by=} {filters=} {staff_id=} {is_underage_toggled=}")
         insight_generator: InsightGenerator = get_insight_generator(
             resource="phases", group_by=group_by
         )

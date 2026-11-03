@@ -18,8 +18,9 @@ def _caller_key():
     (a forged token only gets its own bucket and is rejected with 401 anyway).
     """
     token_info = getattr(g, 'token_info', None)
-    if token_info and token_info.get('sub'):
-        return f"user:{token_info['sub']}"
+    sub = token_info.get('sub') if token_info else None
+    if sub:
+        return f"user:{sub}"
     # Hash only the token: auth accepts any case/spacing of "Bearer", which must not open new buckets.
     token = request.headers.get('Authorization', '').split()[-1:]
     if token:
