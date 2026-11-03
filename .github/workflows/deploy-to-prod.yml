@@ -3,6 +3,9 @@ name: Deploy to Prod
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 defaults:
   run:
     shell: bash
