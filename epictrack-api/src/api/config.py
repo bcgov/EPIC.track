@@ -70,7 +70,8 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-    SECRET_KEY = 'a secret'
+    # Never ship a usable default: an unset SECRET_KEY becomes a per-process random value.
+    SECRET_KEY = _get_config('SECRET_KEY', default=None) or os.urandom(24)
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
@@ -106,7 +107,7 @@ class _Config():  # pylint: disable=too-few-public-methods
     CONNECT_TIMEOUT = _get_config('CONNECT_TIMEOUT', default=60)
 
     TESTING = False
-    DEBUG = True
+    DEBUG = False
 
     # Reject oversized request bodies before they reach any handler; the Excel
     # import endpoints buffer uploads fully into memory, so this must stay bounded.
@@ -213,10 +214,7 @@ NrQw+2OdQACBJiEHsdZzAkBcsTk7frTH4yGx0VfHxXDPjfTj4wmD6gZIlcIr9lZg
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
     """Production environment configuration."""
 
-    SECRET_KEY = _get_config('SECRET_KEY', default=None)
-
-    if not SECRET_KEY:
-        SECRET_KEY = os.urandom(24)
+    if not _get_config('SECRET_KEY', default=None):
         print('WARNING: SECRET_KEY being set as a one-shot', file=sys.stderr)
 
     TESTING = False
@@ -227,7 +225,7 @@ class MigrationConfig(_Config):  # pylint: disable=too-few-public-methods
     """Config for db migration."""
 
     TESTING = False
-    DEBUG = True
+    DEBUG = False
 
     # POSTGRESQL
     DB_USER = _get_config('DATABASE_USERNAME')
