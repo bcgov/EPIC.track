@@ -141,8 +141,7 @@ const initKeycloak = async (dispatch: AppDispatch) => {
   }
 };
 
-const getToken = () =>
-  KeycloakData?.token ?? window.localStorage.getItem("authToken");
+const getToken = () => KeycloakData?.token;
 
 const doLogin = () => {
   if (KeycloakData) {

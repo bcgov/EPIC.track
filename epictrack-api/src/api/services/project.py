@@ -375,7 +375,6 @@ class ProjectService:
             lambda x: x.str.strip() if x.dtype == "object" else x
         )
         data_frame = data_frame.replace({np.nan: None})
-        data_frame = data_frame.replace({np.NaN: None})
         return data_frame
 
     @classmethod

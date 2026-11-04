@@ -64,3 +64,21 @@ def test_prod_config_secret_key(monkeypatch):  # pylint: disable=missing-docstri
     monkeypatch.setenv(key, 'SECRET_KEY')
     reload(config)
     assert config.ProdConfig().SECRET_KEY == 'SECRET_KEY'
+
+
+@pytest.mark.parametrize('config_class', ['DevConfig', 'TestConfig', 'ProdConfig', 'MigrationConfig'])
+def test_no_hardcoded_secret_key(monkeypatch, config_class):
+    """Assert no configuration falls back to a known SECRET_KEY when it is unset."""
+    monkeypatch.delenv('SECRET_KEY', raising=False)
+    reload(config)
+    assert getattr(config, config_class).SECRET_KEY not in (None, '', 'a secret')
+
+
+@pytest.mark.parametrize('config_class,debug', [
+    ('ProdConfig', False),
+    ('MigrationConfig', False),
+    ('DevConfig', True),
+])
+def test_debug_only_enabled_for_local_development(config_class, debug):
+    """Assert only DevConfig enables Flask debug; deployed configs do not."""
+    assert getattr(config, config_class).DEBUG is debug

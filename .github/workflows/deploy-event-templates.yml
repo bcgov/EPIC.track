@@ -22,6 +22,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+
 env:
   TEMPLATE_DIR: epictrack-api/src/api/templates/event_templates
 

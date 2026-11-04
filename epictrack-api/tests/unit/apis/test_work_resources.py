@@ -16,6 +16,8 @@
 from http import HTTPStatus
 from urllib.parse import urljoin
 
+import pytest
+
 from tests.utilities.factory_scenarios import TestWorkResourceInfo
 from tests.utilities.factory_utils import factory_work_model
 
@@ -39,6 +41,44 @@ def test_create_work_resource(client, auth_header):
     assert response.json.get('work_id') == work.id
 
 
+UNSAFE_LINKS = [
+    "javascript:alert(document.domain)",
+    "JavaScript:alert(1)",
+    "data:text/html,<script>alert(1)</script>",
+    "vbscript:msgbox(1)",
+    "ftp://example.com/file",
+    "not a url",
+]
+
+
+@pytest.mark.parametrize("link", UNSAFE_LINKS)
+def test_create_work_resource_rejects_non_http_link(client, auth_header, link):
+    """Test only http(s) links can be stored."""
+    work = factory_work_model()
+    request_payload = {"title": "Resource", "link": link, "work_id": work.id}
+
+    response = client.post(CREATE_URL, json=request_payload, headers=auth_header)
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+@pytest.mark.parametrize("link", UNSAFE_LINKS)
+def test_update_work_resource_rejects_non_http_link(client, auth_header, link):
+    """Test an existing resource cannot be updated to a non-http(s) link."""
+    work = factory_work_model()
+    request_payload = {**TestWorkResourceInfo.work_resource1.value, 'work_id': work.id}
+    create_response = client.post(CREATE_URL, json=request_payload, headers=auth_header)
+    work_resource_id = create_response.json.get('id')
+
+    response = client.put(
+        UPDATE_AND_DELETE_URL.format(work_resource_id=work_resource_id),
+        json={"link": link},
+        headers=auth_header,
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
 def test_get_work_resources_by_work_id(client, auth_header):
     """Test get work resources by work id."""
     # Arrange
@@ -59,7 +99,7 @@ def test_update_work_resource(client, auth_header):
     """Test update work resource."""
     # Arrange
     updated_title = "Updated Title"
-    updated_link = "Updated Link"
+    updated_link = "https://www.example.gov.bc.ca/updated"
     work = factory_work_model()
     request_payload = {**TestWorkResourceInfo.work_resource1.value, 'work_id': work.id}
     create_response = client.post(CREATE_URL, json=request_payload, headers=auth_header)

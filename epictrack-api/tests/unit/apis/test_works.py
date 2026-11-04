@@ -588,6 +588,34 @@ def test_work_notes(client, auth_header):
     assert response.json["issue_notes"] == payload["notes"]
 
 
+def test_work_notes_forbidden_for_non_editor_non_team_member(session, client, jwt):
+    """Test a view-only user who is not on the work's team cannot save notes."""
+    work = factory_work_model()
+    url = urljoin(API_BASE_URL, f"works/{work.id}/notes")
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.view_only_role)
+
+    response = client.patch(url, json=TestWorkNotesEnum.work_notes1.value, headers=headers)
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    session.refresh(work)
+    assert work.status_notes is None
+
+
+def test_work_notes_rejects_non_note_column(session, client, auth_header):
+    """Test note_type cannot be used to overwrite other Work columns."""
+    work = factory_work_model()
+    original_title = work.title
+    url = urljoin(API_BASE_URL, f"works/{work.id}/notes")
+
+    response = client.patch(
+        url, json={"note_type": "title", "notes": "overwritten"}, headers=auth_header
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    session.refresh(work)
+    assert work.title == original_title
+
+
 def test_work_first_notes(client, auth_header):
     """Test save work first notes"""
     work = factory_work_model()

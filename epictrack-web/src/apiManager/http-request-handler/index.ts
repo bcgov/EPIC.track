@@ -10,9 +10,7 @@ const GetRequest = <T>(url: string, params = {}, headers = {}) => {
     params: params,
     headers: {
       "Content-type": "application/json",
-      Authorization: `Bearer ${
-        UserService.getToken() || window.localStorage.getItem("authToken")
-      }`,
+      Authorization: `Bearer ${UserService.getToken()}`,
       ...headers,
     },
   });
@@ -23,9 +21,7 @@ const PostRequest = <T>(url: string, data = {}, params = {}, config = {}) => {
     params,
     headers: {
       "Content-type": "application/json",
-      Authorization: `Bearer ${
-        UserService.getToken() || window.localStorage.getItem("authToken")
-      }`,
+      Authorization: `Bearer ${UserService.getToken()}`,
     },
     ...config,
   });
@@ -36,9 +32,7 @@ const PutRequest = <T>(url: string, data = {}, params = {}) => {
     params,
     headers: {
       "Content-type": "application/json",
-      Authorization: `Bearer ${
-        UserService.getToken() || window.localStorage.getItem("authToken")
-      }`,
+      Authorization: `Bearer ${UserService.getToken()}`,
     },
   });
 };
@@ -48,9 +42,7 @@ const PatchRequest = <T>(url: string, data = {}) => {
     .patch<T>(url, data, {
       headers: {
         "Content-type": "application/json",
-        Authorization: `Bearer ${
-          UserService.getToken() || window.localStorage.getItem("authToken")
-        }`,
+        Authorization: `Bearer ${UserService.getToken()}`,
       },
     })
     .then((response) => {
@@ -67,9 +59,7 @@ const DeleteRequest = <T>(url: string, params = {}) => {
     params: params,
     headers: {
       "Content-type": "application/json",
-      Authorization: `Bearer ${
-        UserService.getToken() || window.localStorage.getItem("authToken")
-      }`,
+      Authorization: `Bearer ${UserService.getToken()}`,
     },
   });
 };
@@ -84,9 +74,7 @@ const MultipartFormPostRequest = <T>(
     params,
     headers: {
       "Content-type": "multipart/form-data",
-      Authorization: `Bearer ${
-        UserService.getToken() || window.localStorage.getItem("authToken")
-      }`,
+      Authorization: `Bearer ${UserService.getToken()}`,
     },
     ...config,
   });

@@ -49,7 +49,6 @@ class TaskTemplateService:
                 regex=True,
             )
         task_data = task_data.replace({np.nan: None})
-        task_data = task_data.replace({np.NaN: None})
         tasks = task_data.to_dict("records")
         cls.create_bulk_tasks(tasks)
         TaskTemplate.commit()
