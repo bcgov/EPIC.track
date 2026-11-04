@@ -86,7 +86,6 @@ class TaskService:
         data_frame = pd.read_excel(template_file)
         data_frame.rename(column_map, axis="columns", inplace=True)
         data_frame = data_frame.replace({np.nan: None})
-        data_frame = data_frame.replace({np.NaN: None})
         return data_frame.to_dict('records')
 
     @classmethod
