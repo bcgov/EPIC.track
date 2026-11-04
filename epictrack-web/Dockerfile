@@ -24,7 +24,7 @@ ENV PUBLIC_URL=/track
 RUN npm run build
 
 # Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx
-FROM nginx:1.17 as production-stage
+FROM nginx:1.30 AS production-stage
 RUN mkdir /app
 
 # RUN  touch /var/run/nginx.pid && \
