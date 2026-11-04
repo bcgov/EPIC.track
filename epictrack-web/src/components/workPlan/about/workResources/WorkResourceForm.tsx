@@ -9,10 +9,18 @@ import ControlledTextField from "components/shared/controlledInputComponents/Con
 import { hasPermission } from "components/shared/restricted";
 import { useAppSelector } from "hooks";
 import { ROLES } from "constants/application-constant";
+import { safeExternalUrl } from "utils/urlUtils";
 
 const schema = yup.object().shape({
   title: yup.string().required("Title is required"),
-  link: yup.string().required("Link is required"),
+  link: yup
+    .string()
+    .required("Link is required")
+    .test(
+      "http-url",
+      "Enter a full web address starting with http:// or https://",
+      (value) => safeExternalUrl(value) !== undefined,
+    ),
 });
 
 const WorkResourceForm = () => {

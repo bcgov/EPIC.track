@@ -7,6 +7,9 @@ on:
     paths:
       - "epictrack-api/**"
 
+permissions:
+  contents: read
+
 defaults:
   run:
     shell: bash  

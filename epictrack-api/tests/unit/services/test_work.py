@@ -7,6 +7,8 @@ import pytest
 from api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
 from api.services.work import WorkService
 from api.models.work import WorkStateEnum
+from api.utils.roles import Membership
+from api.utils.roles import Role as KeycloakRole
 
 
 class TestCheckExistence:
@@ -613,3 +615,71 @@ class TestFindStartAtValue:
 
         # eval("60 - 10") = 50, then adds number_of_days: 50 + 60 = 110
         assert result == 110
+
+
+class TestSaveNotes:
+    """Tests for save_notes method."""
+
+    @staticmethod
+    def _work():
+        return MagicMock(
+            title="Original title", status_notes=None, issue_notes=None, first_nation_notes=None
+        )
+
+    @patch("api.services.work.WorkService.find_by_id")
+    @patch("api.services.work.authorisation.check_auth")
+    def test_checks_edit_or_team_member_auth_for_the_work(self, mock_check_auth, mock_find_by_id):
+        """Test the caller must have edit role or be on the work's team."""
+        mock_find_by_id.return_value = self._work()
+
+        WorkService.save_notes(42, {"note_type": "status_notes", "notes": "n"})
+
+        mock_check_auth.assert_called_once_with(
+            one_of_roles=(Membership.TEAM_MEMBER.value, KeycloakRole.EDIT.value), work_id=42
+        )
+
+    @patch("api.services.work.WorkService.find_by_id")
+    @patch("api.services.work.authorisation.check_auth")
+    def test_does_not_write_when_auth_fails(self, mock_check_auth, mock_find_by_id):
+        """Test a denied caller cannot modify the work."""
+        mock_check_auth.side_effect = PermissionError("denied")
+        work = self._work()
+        mock_find_by_id.return_value = work
+
+        with pytest.raises(PermissionError):
+            WorkService.save_notes(42, {"note_type": "status_notes", "notes": "n"})
+
+        assert work.status_notes is None
+        work.save.assert_not_called()
+
+    @pytest.mark.parametrize("note_type", ["title", "is_active", "project_id", "__class__", None])
+    @patch("api.services.work.WorkService.find_by_id")
+    @patch("api.services.work.authorisation.check_auth")
+    def test_rejects_columns_outside_allowlist(self, mock_check_auth, mock_find_by_id, note_type):
+        """Test note_type cannot target arbitrary Work attributes."""
+        work = self._work()
+        mock_find_by_id.return_value = work
+
+        with pytest.raises(ResourceExistsError):
+            WorkService.save_notes(42, {"note_type": note_type, "notes": "overwritten"})
+
+        assert work.title == "Original title"
+        work.save.assert_not_called()
+
+    @pytest.mark.parametrize("note_type,column", [
+        ("status_notes", "status_notes"),
+        ("issue_notes", "issue_notes"),
+        ("first_nation_notes", "first_nation_notes"),
+        ("first_nation", "first_nation_notes"),
+    ])
+    @patch("api.services.work.WorkService.find_by_id")
+    @patch("api.services.work.authorisation.check_auth")
+    def test_saves_allowed_note_columns(self, mock_check_auth, mock_find_by_id, note_type, column):
+        """Test each allowed note type (and the first_nation alias) is saved."""
+        work = self._work()
+        mock_find_by_id.return_value = work
+
+        WorkService.save_notes(42, {"note_type": note_type, "notes": "saved"})
+
+        assert getattr(work, column) == "saved"
+        work.save.assert_called_once()

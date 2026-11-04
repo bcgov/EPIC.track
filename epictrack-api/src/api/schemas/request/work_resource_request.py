@@ -51,8 +51,11 @@ class WorkResourceBodySchema(RequestQueryParameterSchema):
         required=True,
     )
 
-    link = fields.Str(
+    # Only http(s) URLs; javascript:, data: etc. must never be stored as clickable links.
+    link = fields.Url(
         metadata={"description": "Link of the resource"},
+        schemes={"http", "https"},
+        require_tld=False,
         required=True,
     )
 
@@ -66,8 +69,10 @@ class WorkResourceUpdateBodySchema(RequestQueryParameterSchema):
         load_default=None,
     )
 
-    link = fields.Str(
+    link = fields.Url(
         metadata={"description": "Link of the resource"},
+        schemes={"http", "https"},
+        require_tld=False,
         required=False,
         load_default=None,
     )
