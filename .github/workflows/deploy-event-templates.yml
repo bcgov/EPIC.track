@@ -32,7 +32,8 @@ jobs:
   update-event-templates:
     runs-on: ubuntu-latest
     # Selects the correct GitHub environment so env-specific secrets are used
-    environment: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.environment) || (github.event_name == 'push' && 'dev') || (github.event_name == 'workflow_call' && inputs.environment) }}
+    # inputs is populated for both workflow_dispatch and workflow_call
+    environment: ${{ inputs.environment }}
 
     steps:
       - name: Checkout code
@@ -40,19 +41,10 @@ jobs:
 
       - name: Determine environment and API host
         id: setup
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
         run: |
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            ENVIRONMENT="dev"
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            ENVIRONMENT="${{ github.event.inputs.environment }}"
-          elif [[ "${{ github.event_name }}" == "workflow_call" ]]; then
-            ENVIRONMENT="${{ inputs.environment }}"
-          else
-            echo "Unknown trigger type"
-            exit 1
-          fi
-
-          case $ENVIRONMENT in
+          case "$ENVIRONMENT" in
             dev)
               API_HOST="epictrack-api-c8b80a-dev.apps.gold.devops.gov.bc.ca"
               KC_TOKEN_URL="https://dev.loginproxy.gov.bc.ca/auth/realms/eao-epic/protocol/openid-connect/token"
