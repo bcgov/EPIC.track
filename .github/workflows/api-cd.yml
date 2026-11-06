@@ -100,5 +100,5 @@ jobs:
     if: needs.check_template_changes.outputs.templates_changed == 'true'
     uses: ./.github/workflows/deploy-event-templates.yml
     with:
-      environment: "dev"
+      environment: ${{ github.event.inputs.environment || 'dev' }}
     secrets: inherit
