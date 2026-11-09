@@ -74,5 +74,5 @@ def build_project_payload(project_id: int) -> Optional[dict]:
     for event in events:
         events_by_phase[event.event_configuration.work_phase_id].append(event)
 
-    schema = DemiPayloadSchema(context={"phases": phases_by_work, "events": events_by_phase})
-    return schema.dump({"pushed_at": pushed_at, "complete": True, "project": project, "works": works})
+    schema = DemiPayloadSchema(context={"works": works, "phases": phases_by_work, "events": events_by_phase})
+    return schema.dump({"pushed_at": pushed_at, "project": project})

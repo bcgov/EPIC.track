@@ -143,19 +143,25 @@ def _seed():
         "project": {project.id: 1001},
         "work": {assessment.id: 2001, intake.id: 2002},
         "phase": {shown.id: 3001},
+        "phase_code": {phase_code.id: 6001},
     }
 
 
-def _with_fixture_ids(payload, ids, events):
+def _with_fixture_ids(payload, ids):
     """Swap database ids for the fixture's, so the comparison does not depend on sequence values."""
-    payload["project"]["id"] = ids["project"][payload["project"]["id"]]
-    for work in payload["works"]:
+    events, configurations = {}, {}
+    project = payload["project"]
+    project["id"] = ids["project"][project["id"]]
+    for work in project["works"]:
         work["id"] = ids["work"].get(work["id"], work["id"])
         work["project_id"] = ids["project"][work["project_id"]]
         for phase in work["phases"]:
             phase["id"] = ids["phase"].get(phase["id"], phase["id"])
+            phase["phase"]["id"] = ids["phase_code"][phase["phase"]["id"]]
             for event in phase["events"]:
                 event["id"] = events.setdefault(event["id"], 4001 + len(events))
+                configuration = event["event_configuration"]
+                configuration["id"] = configurations.setdefault(configuration["id"], 5001 + len(configurations))
     return payload
 
 
@@ -170,7 +176,7 @@ def test_payload_matches_fixture(session):
     assert STAFF_TEXT not in json.dumps(payload)
     expected = json.loads(FIXTURE.read_text())
     payload["pushedAt"] = expected["pushedAt"]
-    assert _with_fixture_ids(payload, ids, {}) == expected
+    assert _with_fixture_ids(payload, ids) == expected
 
 
 def test_deleted_project_has_no_payload(session):

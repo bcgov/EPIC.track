@@ -12,6 +12,7 @@ def _enum_value(value):
 class DemiEventConfigurationSchema(Schema):
     """The event configuration fields DEMI reads for a milestone"""
 
+    id = fields.Int(metadata={"description": "The id of the event configuration."})
     name = fields.Str(metadata={"description": "Template name of the event."})
     event_position = fields.Function(
         lambda obj: _enum_value(obj.event_position),
@@ -43,6 +44,7 @@ class DemiEventSchema(Schema):
 class DemiPhaseCodeSchema(Schema):
     """The phase code behind a work phase"""
 
+    id = fields.Int(metadata={"description": "The id of the phase code."})
     name = fields.Str(metadata={"description": "Name of the phase code."})
     ea_act_id = fields.Int(metadata={"description": "The id of the phase code's EA act."})
     ea_act = fields.Nested(ListTypeResponseSchema, metadata={"description": "EA act of the phase code."})
@@ -113,6 +115,11 @@ class DemiProjectSchema(Schema):
     ea_certificate = fields.Str(metadata={"description": "EA certificate number."})
     eac_signed = fields.Date(metadata={"description": "Date the EA certificate was signed."})
     eac_expires = fields.Date(metadata={"description": "Date the EA certificate expires."})
+    works = fields.Method("get_works")
+
+    def get_works(self, _obj):
+        """Works of the project, with their phases and events"""
+        return DemiWorkSchema(many=True, context=self.context).dump(self.context["works"])
 
 
 class DemiPayloadSchema(Schema):
@@ -122,10 +129,4 @@ class DemiPayloadSchema(Schema):
         data_key="pushedAt",
         metadata={"description": "Postgres clock_timestamp() in epoch ms, read before state."},
     )
-    complete = fields.Bool(metadata={"description": "Always true: works and phases are the whole list."})
     project = fields.Nested(DemiProjectSchema)
-    works = fields.Method("get_works")
-
-    def get_works(self, obj):
-        """Works of the project, with their phases and events"""
-        return DemiWorkSchema(many=True, context=self.context).dump(obj["works"])
