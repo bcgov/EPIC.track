@@ -100,6 +100,10 @@ class _Config():  # pylint: disable=too-few-public-methods
     KEYCLOAK_ADMIN_SECRET = _get_config('KEYCLOAK_ADMIN_SECRET')
     CONNECT_TIMEOUT = _get_config('CONNECT_TIMEOUT', default=60)
 
+    # APIM's /machine base URL for DEMI and its subscription key. An empty URL turns the push off.
+    DEMI_PUSH_URL = _get_config('DEMI_PUSH_URL', default='').strip()
+    DEMI_PUSH_KEY = _get_config('DEMI_PUSH_KEY', default='').strip()
+
     TESTING = False
     DEBUG = False
 

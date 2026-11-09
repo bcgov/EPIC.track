@@ -17,3 +17,4 @@ data:
   KEYCLOAK_BASE_URL: {{ .Values.auth.keycloak.uri }}
   KEYCLOAK_REALM_NAME: {{ .Values.auth.keycloak.realm }}
   CONNECT_TIMEOUT: "{{ .Values.python.connectTimeout }}"
+  DEMI_PUSH_URL: "{{ .Values.demi.pushUrl }}"
