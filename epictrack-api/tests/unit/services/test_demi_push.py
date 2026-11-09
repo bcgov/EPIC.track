@@ -136,6 +136,7 @@ UNAVAILABLE = _answer(503)
         ("PUT", _answer(504), "failed", "ERROR", 2),
         ("PUT", requests.ReadTimeout(), "failed", "ERROR", 2),
         ("PUT", requests.ConnectTimeout(), "failed", "ERROR", 2),
+        ("PUT", requests.ConnectionError(), "failed", "ERROR", 2),
         ("DELETE", _answer(200, {"action": "deleted"}), "sent", "INFO", 1),
         ("DELETE", _answer(200, {"action": "unchanged"}), "sent", "INFO", 1),
         ("DELETE", _answer(404), "gone", "INFO", 1),
@@ -145,6 +146,7 @@ UNAVAILABLE = _answer(503)
         ("DELETE", _answer(500), "failed", "ERROR", 2),
         ("DELETE", _answer(503), "failed", "ERROR", 2),
         ("DELETE", requests.ReadTimeout(), "failed", "ERROR", 2),
+        ("DELETE", requests.ConnectionError(), "failed", "ERROR", 2),
     ],
 )
 def test_each_answer_gets_its_log_line_and_retry(app, payloads, logs, method, answer, word, level, attempts):
@@ -165,7 +167,7 @@ def test_each_answer_gets_its_log_line_and_retry(app, payloads, logs, method, an
 
 @pytest.mark.parametrize(
     "first",
-    [UNAVAILABLE, TIMEOUT, _answer(409, {"code": "CREATED_BEHIND"})],
+    [UNAVAILABLE, TIMEOUT, requests.ConnectionError(), _answer(409, {"code": "CREATED_BEHIND"})],
 )
 def test_retry_rebuilds_the_payload_and_can_succeed(app, payloads, logs, first):
     """The retry carries current state, and a retry that lands logs as sent."""

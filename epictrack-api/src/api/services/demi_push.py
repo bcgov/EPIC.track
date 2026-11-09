@@ -100,7 +100,7 @@ def _pacer(interval, sleep, clock):
 
 
 def _send_project(project_id, method, transmit, sleep):
-    """Send one project, with one retry after a 5xx, a timeout or CREATED_BEHIND."""
+    """Send one project, with one retry after a 5xx, a timeout, a dropped connection or CREATED_BEHIND."""
     status = None
     for attempt in range(2):
         if attempt:
@@ -115,8 +115,8 @@ def _send_project(project_id, method, transmit, sleep):
                 return
         try:
             response = transmit(method, project_id, body)
-        except requests.Timeout:
-            status = "timeout"
+        except (requests.Timeout, requests.ConnectionError) as exc:
+            status = type(exc).__name__
             continue
         status = response.status_code
         answer = _answer(response)
