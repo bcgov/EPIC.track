@@ -11,13 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""All of the configuration for the service is captured here.
-
-All items are loaded,
-or have Constants defined here that are loaded into the Flask configuration.
-All modules and lookups get their configuration from the Flask config,
-rather than reading environment variables directly or by accessing this configuration directly.
-"""
+"""Service configuration; modules read it from the Flask config, never from the environment."""
 
 import os
 import sys
