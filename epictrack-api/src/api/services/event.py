@@ -1422,7 +1422,8 @@ class EventService:
             .order_by(ActionConfiguration.sort_order)
             .all()
         )
-        demi_marks.mark(work_id=event.work_id)
+        if action_configurations:
+            demi_marks.mark(work_id=event.work_id)
         for action_configuration in action_configurations:
             action_handler = ActionHandler(ActionEnum(action_configuration.action_id))
             action_handler.apply(event, action_configuration.additional_params)

@@ -15,6 +15,7 @@
 from copy import copy
 from http import HTTPStatus
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 from urllib.parse import urljoin
 
@@ -22,7 +23,12 @@ import pytest
 from werkzeug.datastructures import FileStorage
 
 from api.models import Event, Project, Staff, Work
+from api.models.action_configuration import ActionConfiguration
+from api.models.special_field import EntityEnum
 from api.services.event import EventService
+from api.services.special_field import SpecialFieldService
+from api.services.sync_form_data import SyncFormDataService
+from api.utils import demi_marks
 from api.utils.demi_marks import DemiMarks, committed_marks, mark_entity
 from tests.unit.apis.test_event_actions_auth import _complete_event, _work_with_pending_create_work_decision
 from tests.utilities.factory_scenarios import TestJwtClaims, TestProjectInfo, TestWorkInfo
@@ -36,6 +42,7 @@ API_BASE_URL = "/api/v1/"
 def seen(app, monkeypatch):
     """Turn marking on, and record each request's committed marks the way an after_request hook reads them."""
     monkeypatch.setitem(app.config, "DEMI_PUSH_URL", "http://demi.invalid")
+    monkeypatch.setitem(app.config, "DEMI_PUSH_KEY", "test-subscription-key")
     recorded = []
 
     def record(response):
@@ -213,12 +220,99 @@ def test_mark_entity_marks_mirrored_models_only(app, session):
         assert committed_marks().project_ids(session) == {work.project_id}
 
 
-def test_no_push_url_marks_none(app, client, auth_header, monkeypatch, seen):
-    """Without a DEMI push URL nothing is marked."""
-    monkeypatch.setitem(app.config, "DEMI_PUSH_URL", None)
+@pytest.mark.parametrize("setting", ["DEMI_PUSH_URL", "DEMI_PUSH_KEY"])
+def test_push_config_missing_marks_none(app, client, auth_header, monkeypatch, seen, setting):
+    """Without both the DEMI push URL and its key nothing is marked."""
+    monkeypatch.setitem(app.config, setting, "")
     project = factory_project_model()
 
     response = client.delete(urljoin(API_BASE_URL, f"projects/{project.id}"), headers=auth_header)
 
     assert response.status_code == HTTPStatus.OK
     assert not seen[-1]
+
+
+@pytest.mark.parametrize("target, attribute", [(demi_marks, "_note_row"), (DemiMarks, "merge")])
+def test_marking_bug_cannot_fail_the_write(client, auth_header, monkeypatch, target, attribute):
+    """A bug in the flush or commit listener leaves the user's write answering 2xx."""
+    project = factory_project_model()
+
+    def bug(*_args, **_kwargs):
+        raise RuntimeError("marking bug")
+
+    monkeypatch.setattr(target, attribute, bug)
+
+    response = client.delete(urljoin(API_BASE_URL, f"projects/{project.id}"), headers=auth_header)
+
+    assert response.status_code == HTTPStatus.OK
+
+
+def test_assigning_the_same_value_marks_none(app, session):
+    """A row in session.dirty with no net change is not a write worth pushing."""
+    project = factory_project_model()
+
+    with app.test_request_context():
+        project.name = str(project.name)
+        session.commit()
+
+        assert not committed_marks()
+
+
+def test_process_actions_without_configurations_marks_none(app, client, jwt, session):
+    """An outcome with no active action configurations changes nothing, so it marks nothing."""
+    _, event, outcome_config = _work_with_pending_create_work_decision(client, jwt, session)
+    event.actual_date = event.anticipated_date
+    session.query(ActionConfiguration).filter_by(outcome_configuration_id=outcome_config.id).update(
+        {"is_active": False}
+    )
+    session.commit()
+
+    with app.test_request_context(), patch("api.services.event.ActionHandler"):
+        EventService._process_actions(event, outcome_config.id)  # pylint: disable=protected-access
+        session.commit()
+
+        assert not committed_marks()
+
+
+def test_import_proponents_marks_all(client, auth_header, seen):
+    """A proponent import can touch any project, so it marks them all."""
+    file_path = Path("./src/api/templates/master_templates/Proponents.xlsx").resolve()
+    with open(file_path, "rb") as stream:
+        response = client.post(
+            urljoin(API_BASE_URL, "proponents/import"),
+            data={"file": FileStorage(stream=stream, filename="proponents.xlsx")},
+            content_type="multipart/form-data",
+            headers=auth_header,
+        )
+
+    assert response.status_code == HTTPStatus.CREATED
+    assert seen[-1].all_projects
+
+
+def test_special_field_query_update_marks_project(app, session):
+    """The special field write goes through Query.update, which only the helper can see."""
+    project = factory_project_model()
+    entry = SimpleNamespace(
+        time_range=SimpleNamespace(upper=None),
+        entity=EntityEnum.PROJECT.value,
+        entity_id=project.id,
+        field_name="name",
+        field_value="Renamed through a special field",
+    )
+
+    with app.test_request_context():
+        SpecialFieldService._update_original_model(entry)  # pylint: disable=protected-access
+        session.commit()
+
+        assert committed_marks().project_ids(session) == {project.id}
+
+
+def test_sync_deletions_marks_parent_project(app, session):
+    """Sync-form-data deletions go through Query.update, which only the helper can see."""
+    work = factory_work_model()
+
+    with app.test_request_context():
+        SyncFormDataService._sync_deletions("work_phases", [0], {"work_id": work.id})  # pylint: disable=protected-access
+        session.commit()
+
+        assert committed_marks().project_ids(session) == {work.project_id}

@@ -57,7 +57,7 @@ def create_app(run_mode=None):
         AppCache.configure_cache(run_mode, app)
         # pylint: disable=import-outside-toplevel
         from api.resources import API_BLUEPRINT, OPS_BLUEPRINT
-        from api.services.demi_push import start_push
+        from api.services.demi_push import log_missing_key, start_push
 
         app.register_blueprint(API_BLUEPRINT)
         app.register_blueprint(OPS_BLUEPRINT)
@@ -76,6 +76,8 @@ def create_app(run_mode=None):
             # Let the web app read how long to wait after a 429
             response.headers['Access-Control-Expose-Headers'] = 'Retry-After'
             return response
+
+        log_missing_key(app)
 
         @app.after_request
         def push_to_demi(response):  # pylint: disable=unused-variable

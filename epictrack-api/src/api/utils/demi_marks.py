@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Request-scoped marks of the projects a committed write changed, for the push to DEMI."""
+import logging
 from dataclasses import dataclass, field
+from functools import wraps
 
 from flask import current_app, has_request_context, request
 from sqlalchemy import event, inspect, select
@@ -77,7 +79,10 @@ def _lookup(session, wanted, key, values) -> set:
 
 def _state(create=True):
     """Return this request's pending and committed marks, or None when push is off."""
-    if not has_request_context() or not current_app.config.get("DEMI_PUSH_URL"):
+    if not has_request_context():
+        return None
+    config = current_app.config
+    if not config.get("DEMI_PUSH_URL") or not config.get("DEMI_PUSH_KEY"):
         return None
     if not create:
         return request.environ.get(ENVIRON_KEY)
@@ -132,6 +137,21 @@ def _note_row(pending: DemiMarks, obj, dirty: bool):
         pending.delete_project_ids |= ids
 
 
+def _guarded(listener):
+    """Log a marking bug instead of failing the user's write."""
+
+    @wraps(listener)
+    def guarded(*args):
+        try:
+            listener(*args)
+        except Exception:  # noqa: B902 # pylint: disable=broad-except
+            # The logger by name: a session can flush with no app context, where current_app raises.
+            logging.getLogger("api").exception("demi-marks failed listener=%s", listener.__name__)
+
+    return guarded
+
+
+@_guarded
 def _after_flush(session, _flush_context):
     state = _state()
     if state is None:
@@ -139,11 +159,13 @@ def _after_flush(session, _flush_context):
     for obj in session.new:
         _note_row(state["pending"], obj, dirty=False)
     for obj in session.dirty:
-        _note_row(state["pending"], obj, dirty=True)
+        if session.is_modified(obj):
+            _note_row(state["pending"], obj, dirty=True)
     for obj in session.deleted:
         _note_row(state["pending"], obj, dirty=False)
 
 
+@_guarded
 def _after_commit(_session):
     state = _state(create=False)
     if state:
@@ -151,6 +173,7 @@ def _after_commit(_session):
         state["pending"] = DemiMarks()
 
 
+@_guarded
 def _after_rollback(_session):
     state = _state(create=False)
     if state:
