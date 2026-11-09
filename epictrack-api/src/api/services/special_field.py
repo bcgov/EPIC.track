@@ -24,6 +24,7 @@ from api.exceptions import ResourceNotFoundError, BadRequestError
 from api.models import SpecialField, db
 from api.models.role import RoleEnum
 from api.models.special_field import EntityEnum
+from api.utils import demi_marks
 from api.utils.constants import SPECIAL_FIELD_ENTITY_MODEL_MAPS
 from api.utils.roles import Membership, Role as KeycloakRole
 from api.services import authorisation
@@ -224,6 +225,7 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
             except KeyError:
                 model_class = None
             if model_class:
+                demi_marks.mark_entity(model_class, special_field_entry.entity_id)
                 model_class.query.filter(
                     model_class.id == special_field_entry.entity_id
                 ).update({special_field_entry.field_name: special_field_entry.field_value})

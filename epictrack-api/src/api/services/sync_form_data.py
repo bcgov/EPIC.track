@@ -18,6 +18,7 @@ import json
 from flask import current_app
 from inflector import English, Inflector
 from api.models import db
+from api.utils import demi_marks
 
 from api.utils.helpers import find_model_from_table_name
 
@@ -121,6 +122,7 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
             model_class = find_model_from_table_name(model_name)
             old_entries = model_class.query.filter(model_class.id.notin_(object_ids)).filter_by(**foreign_keys)
             current_app.logger.info(f'Marking {old_entries.all()} for model {model_name} as deleted')
+            demi_marks.mark(**foreign_keys)
             old_entries.update({"is_deleted": True}, synchronize_session='fetch')
 
     @classmethod
