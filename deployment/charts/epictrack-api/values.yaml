@@ -48,7 +48,7 @@ demi:
   pushUrl: ""
   # Created by hand in each namespace, with key DEMI_PUSH_KEY.
   secret: demi-api-details
-cdogs:  
+cdogs:
   tokenEndpoint: https://test.loginproxy.gov.bc.ca/auth/realms/comsvcauth/protocol/openid-connect/token
   apiEndpoint: https://cdogs-test.api.gov.bc.ca/api/v2
   clientId:
