@@ -8,6 +8,7 @@ from api.models.work_phase import WorkPhase
 from api.models.work_calendar_event import WorkCalendarEvent
 from api.models.calendar_event import CalendarEvent
 from api.models.task_event import TaskEvent
+from api.utils import demi_marks
 
 from .common import deactivate_calendar_events_by_configuration_ids
 
@@ -50,9 +51,11 @@ class SetPhasesStatus(ActionFactory):
                 event.is_active = False
                 event.update(event.as_dict(recursive=False), commit=False)
             # Set the current work phase completed as there will be no more
-            db.session.query(WorkPhase).filter(
+            current_phase = db.session.query(WorkPhase).filter(
                 WorkPhase.id == source_event.event_configuration.work_phase_id
-            ).update({WorkPhase.is_completed: True})
+            )
+            demi_marks.mark_rows(current_phase)
+            current_phase.update({WorkPhase.is_completed: True})
             source_event_ids = list(map(lambda x: x.id, events_to_be_updated))
             self.deactivate_calendar_events(source_event_ids)
         self._deactivate_phases_and_events(work_phase_ids)
@@ -98,15 +101,15 @@ class SetPhasesStatus(ActionFactory):
 
     def _deactivate_phases_and_events(self, work_phase_ids: [int]) -> None:
         """Deactivate given work phases and its events"""
-        db.session.query(WorkPhase).filter(WorkPhase.id.in_(work_phase_ids)).update(
-            {WorkPhase.is_active: False}
-        )
+        phases = db.session.query(WorkPhase).filter(WorkPhase.id.in_(work_phase_ids))
+        demi_marks.mark_rows(phases)
+        phases.update({WorkPhase.is_active: False})
         event_configurations = db.session.query(EventConfiguration).filter(
             EventConfiguration.work_phase_id.in_(work_phase_ids)
         )
         event_configuration_ids = list(map(lambda x: x.id, event_configurations))
-        db.session.query(Event).filter(
-            Event.event_configuration_id.in_(event_configuration_ids)
-        ).update({Event.is_active: False})
+        events = db.session.query(Event).filter(Event.event_configuration_id.in_(event_configuration_ids))
+        demi_marks.mark_rows(events)
+        events.update({Event.is_active: False})
         deactivate_calendar_events_by_configuration_ids(event_configuration_ids)
         self.deactivate_task_events(work_phase_ids)

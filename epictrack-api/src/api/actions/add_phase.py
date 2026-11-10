@@ -14,6 +14,7 @@ from api.models.event_template import (
 from api.models.event_category import PRIMARY_CATEGORIES
 from api.services.event_template import EventTemplateService
 from api.schemas import response as res
+from api.utils import demi_marks
 
 
 # pylint: disable= import-outside-toplevel, too-many-locals
@@ -106,11 +107,13 @@ class AddPhase(ActionFactory):
 
     def preset_sort_order(self, source_event, number_of_new_work_phases: int) -> None:
         """Adjust the sort order of the existing work phases for the new ones"""
-        db.session.query(WorkPhase).filter(
+        later_phases = db.session.query(WorkPhase).filter(
             WorkPhase.sort_order
             > source_event.event_configuration.work_phase.sort_order,
             WorkPhase.work_id == source_event.work_id,
-        ).update(
+        )
+        demi_marks.mark_rows(later_phases)
+        later_phases.update(
             {WorkPhase.sort_order: WorkPhase.sort_order + number_of_new_work_phases}
         )
 

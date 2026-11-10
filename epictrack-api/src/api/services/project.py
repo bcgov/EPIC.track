@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 from flask import current_app
 from psycopg2.extras import DateTimeTZRange
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import joinedload
 
 from api.exceptions import BadRequestError, ResourceExistsError, ResourceNotFoundError
@@ -281,7 +281,6 @@ class ProjectService:
     def import_projects(cls, file: IO):  # pylint: disable=too-many-locals
         """Import proponents"""
         cls._check_auth(one_of_roles=[KeycloakRole.CREATE])
-        demi_marks.mark_all()
         data = cls._read_excel(file)
         proponent_names = set(data["proponent_id"].to_list())
         type_names = set(data["type_id"].to_list())
@@ -323,6 +322,9 @@ class ProjectService:
         data = cls._update_or_delete_old_projects(data)
         data = data.to_dict("records")
         db.session.bulk_insert_mappings(Project, data)
+        demi_marks.mark_rows(
+            db.session.query(Project).filter(Project.name.in_([row["name"] for row in data])), demi_marks.CREATE
+        )
         special_history_mappings = []
         time_range = DateTimeTZRange(datetime.now(), None, bounds="[)")
         for project_data in data:
@@ -530,6 +532,11 @@ class ProjectService:
 
         # Update existing entries to be active
         to_update = existing_projects & project_names
+        demi_marks.mark_rows(
+            existing_projects_qry.filter(
+                Project.name.in_(to_update), or_(Project.is_active.is_(False), Project.is_deleted.is_(True))
+            )
+        )
         enabled_count = existing_projects_qry.filter(
             Project.name.in_(to_update)
         ).update({"is_active": True, "is_deleted": False})

@@ -225,10 +225,9 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
             except KeyError:
                 model_class = None
             if model_class:
-                demi_marks.mark_entity(model_class, special_field_entry.entity_id)
-                model_class.query.filter(
-                    model_class.id == special_field_entry.entity_id
-                ).update({special_field_entry.field_name: special_field_entry.field_value})
+                rows = model_class.query.filter(model_class.id == special_field_entry.entity_id)
+                demi_marks.mark_rows(rows, column=special_field_entry.field_name)
+                rows.update({special_field_entry.field_name: special_field_entry.field_value})
             cls.run_other_related_updates(special_field_entry)
 
     @classmethod

@@ -122,7 +122,9 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
             model_class = find_model_from_table_name(model_name)
             old_entries = model_class.query.filter(model_class.id.notin_(object_ids)).filter_by(**foreign_keys)
             current_app.logger.info(f'Marking {old_entries.all()} for model {model_name} as deleted')
-            demi_marks.mark(**foreign_keys)
+            # A project leaves DEMI only through an ORM is_deleted flip.
+            if model_name != "projects":
+                demi_marks.mark_rows(old_entries, demi_marks.DELETE)
             old_entries.update({"is_deleted": True}, synchronize_session='fetch')
 
     @classmethod

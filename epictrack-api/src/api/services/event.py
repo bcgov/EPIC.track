@@ -1393,10 +1393,11 @@ class EventService:
 
         if event.actual_date:
             raise UnprocessableEntityError("Locked events cannot be deleted")
-        demi_marks.mark(work_id=event.work_id)
-        db.session.query(Event).filter(
+        events = db.session.query(Event).filter(
             or_(Event.id == event_id, Event.source_event_id == event_id)
-        ).update({"is_active": False, "is_deleted": True})
+        )
+        demi_marks.mark_rows(events, demi_marks.DELETE)
+        events.update({"is_active": False, "is_deleted": True})
         db.session.commit()
         return "Deleted successfully"
 
@@ -1422,8 +1423,6 @@ class EventService:
             .order_by(ActionConfiguration.sort_order)
             .all()
         )
-        if action_configurations:
-            demi_marks.mark(work_id=event.work_id)
         for action_configuration in action_configurations:
             action_handler = ActionHandler(ActionEnum(action_configuration.action_id))
             action_handler.apply(event, action_configuration.additional_params)
