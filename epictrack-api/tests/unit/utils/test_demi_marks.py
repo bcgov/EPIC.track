@@ -24,6 +24,10 @@ import pytest
 from sqlalchemy import event as sa_event
 from werkzeug.datastructures import FileStorage
 
+from api.actions.add_phase import AddPhase
+from api.actions.set_events_status import SetEventsStatus
+from api.actions.set_phases_status import SetPhasesStatus
+from api.actions.set_project_status import SetProjectStatus
 from api.models import Event, EventConfiguration, Project, Work, WorkPhase
 from api.models.special_field import EntityEnum
 from api.services.project import ProjectService
@@ -68,6 +72,16 @@ def _created_work(client, auth_header, session):
 
 def _op(marks, table, row_id):
     return marks.rows.get((table, row_id), {}).get("op")
+
+
+def test_create_then_delete_drops_the_mark():
+    """A row created and deleted in one request never reached DEMI, so no DELETE is sent for it."""
+    marks = DemiMarks()
+
+    marks.add("works", 1, "create")
+    marks.add("works", 1, "delete")
+
+    assert not marks
 
 
 def test_new_work_marks_create(client, auth_header, session, seen):
@@ -184,6 +198,88 @@ def test_complete_event_marks_the_event(client, jwt, session, seen):
 
     assert response.status_code == HTTPStatus.OK, response.json
     assert _op(seen[-1], "events", event.id) == "update"
+
+
+def _first_event(session, work):
+    """The first milestone of the work's first phase, so every later phase is in reach of an action."""
+    return (
+        session.query(Event)
+        .join(EventConfiguration, Event.event_configuration_id == EventConfiguration.id)
+        .join(WorkPhase, EventConfiguration.work_phase_id == WorkPhase.id)
+        .filter(Event.work_id == work.id)
+        .order_by(WorkPhase.sort_order, EventConfiguration.sort_order)
+        .first()
+    )
+
+
+def _later_phase(session, source_event):
+    return (
+        session.query(WorkPhase)
+        .filter(
+            WorkPhase.work_id == source_event.work_id,
+            WorkPhase.sort_order > source_event.event_configuration.work_phase.sort_order,
+        )
+        .order_by(WorkPhase.sort_order)
+        .first()
+    )
+
+
+def _later_phase_event(session, source_event):
+    return (
+        session.query(Event)
+        .join(EventConfiguration, Event.event_configuration_id == EventConfiguration.id)
+        .filter(EventConfiguration.work_phase_id == _later_phase(session, source_event).id)
+        .first()
+    )
+
+
+@pytest.mark.parametrize(
+    "run, expected",
+    [
+        (
+            lambda event: SetProjectStatus().run(event, {"is_active": False}),
+            lambda session, event: ("projects", event.work.project_id),
+        ),
+        (
+            lambda event: SetEventsStatus().run(event, [{"this_event": True, "is_active": False}]),
+            lambda session, event: ("events", event.id),
+        ),
+        (
+            lambda event: SetPhasesStatus().run(event, {"all_future_phases": True}),
+            lambda session, event: ("work_phases", event.event_configuration.work_phase_id),
+        ),
+        (
+            lambda event: SetPhasesStatus().run(event, {"all_future_phases": True}),
+            lambda session, event: ("work_phases", _later_phase(session, event).id),
+        ),
+        (
+            lambda event: SetPhasesStatus().run(event, {"all_future_phases": True}),
+            lambda session, event: ("events", _later_phase_event(session, event).id),
+        ),
+        (
+            lambda event: AddPhase().preset_sort_order(event, 1),
+            lambda session, event: ("work_phases", _later_phase(session, event).id),
+        ),
+    ],
+    ids=[
+        "set_project_status",
+        "set_events_status",
+        "set_phases_status_current_phase",
+        "set_phases_status_later_phase",
+        "set_phases_status_later_event",
+        "add_phase_later_phase",
+    ],
+)
+def test_action_marks_the_rows_it_updates(app, client, auth_header, session, run, expected):
+    """An action writes through Query.update, which only its own mark makes visible to the push."""
+    source_event = _first_event(session, _created_work(client, auth_header, session))
+    table, row_id = expected(session, source_event)
+
+    with app.test_request_context():
+        run(source_event)
+        session.commit()
+
+        assert _op(committed_marks(), table, row_id) == "update"
 
 
 def test_delete_event_marks_it_and_linked_events_delete(client, auth_header, session, seen):
@@ -360,6 +456,19 @@ def test_sync_deletions_marks_each_row_delete(app, client, auth_header, session)
         session.commit()
 
         assert _op(committed_marks(), "work_phases", phase.id) == "delete"
+
+
+def test_sync_deletions_marks_no_project(app, session):
+    """Sync-form-data never sends a bulk project delete; a project leaves DEMI only through an ORM flip."""
+    project = factory_project_model()
+
+    with app.test_request_context():
+        SyncFormDataService._sync_deletions(  # pylint: disable=protected-access
+            "projects", [0], {"proponent_id": project.proponent_id}
+        )
+        session.commit()
+
+        assert ("projects", project.id) not in committed_marks().rows
 
 
 @pytest.mark.parametrize("setting", ["DEMI_PUSH_URL", "DEMI_PUSH_KEY"])
