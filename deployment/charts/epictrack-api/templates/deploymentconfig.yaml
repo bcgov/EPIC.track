@@ -179,6 +179,18 @@ spec:
               configMapKeyRef:
                 name: {{ .Chart.Name }}
                 key: CONNECT_TIMEOUT
+          - name: DEMI_PUSH_URL
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Chart.Name }}
+                key: DEMI_PUSH_URL
+                optional: true
+          - name: DEMI_PUSH_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.demi.secret }}
+                key: DEMI_PUSH_KEY
+                optional: true
         ports:
           - containerPort: 8080
             protocol: TCP

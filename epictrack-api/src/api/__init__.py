@@ -57,6 +57,7 @@ def create_app(run_mode=None):
         AppCache.configure_cache(run_mode, app)
         # pylint: disable=import-outside-toplevel
         from api.resources import API_BLUEPRINT, OPS_BLUEPRINT
+        from api.services.demi_push import start_push
 
         app.register_blueprint(API_BLUEPRINT)
         app.register_blueprint(OPS_BLUEPRINT)
@@ -74,6 +75,11 @@ def create_app(run_mode=None):
             response.headers['Access-Control-Allow-Origin'] = '*'
             # Let the web app read how long to wait after a 429
             response.headers['Access-Control-Expose-Headers'] = 'Retry-After'
+            return response
+
+        @app.after_request
+        def push_to_demi(response):  # pylint: disable=unused-variable
+            start_push(app)
             return response
 
         @app.errorhandler(Exception)

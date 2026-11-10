@@ -11,13 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""All of the configuration for the service is captured here.
-
-All items are loaded,
-or have Constants defined here that are loaded into the Flask configuration.
-All modules and lookups get their configuration from the Flask config,
-rather than reading environment variables directly or by accessing this configuration directly.
-"""
+"""Service configuration; modules read it from the Flask config, never from the environment."""
 
 import os
 import sys
@@ -105,6 +99,10 @@ class _Config():  # pylint: disable=too-few-public-methods
     KEYCLOAK_ADMIN_CLIENT = _get_config('KEYCLOAK_ADMIN_CLIENT')
     KEYCLOAK_ADMIN_SECRET = _get_config('KEYCLOAK_ADMIN_SECRET')
     CONNECT_TIMEOUT = _get_config('CONNECT_TIMEOUT', default=60)
+
+    # APIM's /machine base URL for DEMI and its subscription key. An empty URL turns the push off.
+    DEMI_PUSH_URL = _get_config('DEMI_PUSH_URL', default='').strip()
+    DEMI_PUSH_KEY = _get_config('DEMI_PUSH_KEY', default='').strip()
 
     TESTING = False
     DEBUG = False

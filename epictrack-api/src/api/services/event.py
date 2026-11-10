@@ -52,7 +52,7 @@ from api.schemas.response import EventResponseSchema
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
 from api.services.work_phase import WorkPhaseService
-from api.utils import util
+from api.utils import demi_marks, util
 from api.application_constants import MIN_WORK_START_DATE
 
 from ..utils.roles import Membership
@@ -1393,6 +1393,7 @@ class EventService:
 
         if event.actual_date:
             raise UnprocessableEntityError("Locked events cannot be deleted")
+        demi_marks.mark(work_id=event.work_id)
         db.session.query(Event).filter(
             or_(Event.id == event_id, Event.source_event_id == event_id)
         ).update({"is_active": False, "is_deleted": True})
@@ -1421,6 +1422,7 @@ class EventService:
             .order_by(ActionConfiguration.sort_order)
             .all()
         )
+        demi_marks.mark(work_id=event.work_id)
         for action_configuration in action_configurations:
             action_handler = ActionHandler(ActionEnum(action_configuration.action_id))
             action_handler.apply(event, action_configuration.additional_params)

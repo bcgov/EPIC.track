@@ -19,6 +19,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
 from api.models.history import versioned_session
+from api.utils import demi_marks
 
 
 # by convention in the Flask community these are lower case,
@@ -27,3 +28,4 @@ db = SQLAlchemy()  # pylint: disable=invalid-name
 ma = Marshmallow()
 
 versioned_session(db.session)
+demi_marks.register()

@@ -40,6 +40,7 @@ from api.schemas.types import TypeSchema
 from api.services import authorisation
 from api.services.special_field import SpecialFieldService
 from api.services.work import WorkService
+from api.utils import demi_marks
 from api.utils.enums import ProjectCodeMethod
 from api.utils.roles import Role as KeycloakRole
 from api.utils.token_info import TokenInfo
@@ -280,6 +281,7 @@ class ProjectService:
     def import_projects(cls, file: IO):  # pylint: disable=too-many-locals
         """Import proponents"""
         cls._check_auth(one_of_roles=[KeycloakRole.CREATE])
+        demi_marks.mark_all()
         data = cls._read_excel(file)
         proponent_names = set(data["proponent_id"].to_list())
         type_names = set(data["type_id"].to_list())
