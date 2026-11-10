@@ -1,0 +1,21 @@
+{
+  "pushedAt": 1762675200000,
+  "project": {
+    "id": 1001,
+    "name": "Payload Contract Mine",
+    "description": "Open pit copper mine",
+    "epic_guid": null,
+    "latitude": "54.7804",
+    "longitude": "-127.1743",
+    "address": "Near Smithers, BC",
+    "abbreviation": "PCMINE",
+    "is_active": true,
+    "proponent": {"id": 1, "name": "445026 BC Limited"},
+    "sub_type": {"id": 1, "name": "Power Plants"},
+    "type": {"id": 1, "name": "Energy - Electricity"},
+    "project_state": {"id": 2, "name": "Pre Work"},
+    "ea_certificate": "M24-01",
+    "eac_signed": "2024-05-01",
+    "eac_expires": null
+  }
+}

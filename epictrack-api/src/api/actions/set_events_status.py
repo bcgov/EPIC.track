@@ -3,6 +3,7 @@
 from api.actions.base import ActionFactory
 from api.models import db, PRIMARY_CATEGORIES
 from api.models.event import Event
+from api.utils import demi_marks
 
 from .common import find_configuration, deactivate_calendar_events_by_configuration_ids
 
@@ -19,9 +20,9 @@ class SetEventsStatus(ActionFactory):
             for event_params in params:
                 event_configuration = find_configuration(source_event, event_params)
                 event_configuration_ids.append(event_configuration.id)
-                db.session.query(Event).filter(
-                    Event.event_configuration_id == event_configuration.id
-                ).update({Event.is_active: event_params.get("is_active")})
+                events = db.session.query(Event).filter(Event.event_configuration_id == event_configuration.id)
+                demi_marks.mark_rows(events)
+                events.update({Event.is_active: event_params.get("is_active")})
         elif params.get("all_future_events") is not None:
             events = EventService.find_events(
                 source_event.work_id,

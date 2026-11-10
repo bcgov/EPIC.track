@@ -1,0 +1,95 @@
+{
+  "pushedAt": 1762675200000,
+  "workTypeId": 6,
+  "work": {
+    "id": 2001,
+    "project_id": 1001,
+    "work_type_id": 6,
+    "work_type": {"id": 6, "name": "Assessment"},
+    "simple_title": "North Pit",
+    "ea_act": {"id": 3, "name": "EA Act (2018)"},
+    "start_date": "2024-01-15T08:00:00+00:00",
+    "is_active": true,
+    "work_state": "IN_PROGRESS",
+    "work_decision_date": null,
+    "anticipated_decision_date": "2025-06-30T07:00:00+00:00",
+    "phases": [
+      {
+        "id": 3001,
+        "work_id": 2001,
+        "name": "Effects Assessment",
+        "start_date": "2024-01-15T08:00:00+00:00",
+        "end_date": "2024-04-15T07:00:00+00:00",
+        "number_of_days": 90,
+        "legislated": true,
+        "sort_order": 1,
+        "is_completed": false,
+        "is_suspended": false,
+        "suspended_date": null,
+        "phase": {
+          "id": 6001,
+          "name": "Effects Assessment",
+          "ea_act_id": 3,
+          "ea_act": {"id": 3, "name": "EA Act (2018)"},
+          "work_type": {"id": 6, "name": "Assessment"}
+        },
+        "events": [
+          {
+            "id": 4001,
+            "work_id": 2001,
+            "work_phase_id": 3001,
+            "name": "Assessment start",
+            "anticipated_date": "2024-02-01T08:00:00+00:00",
+            "actual_date": "2024-02-02T08:00:00+00:00",
+            "number_of_days": 1,
+            "outcome_name": null,
+            "event_configuration": {
+              "id": 5001,
+              "name": "Assessment start template",
+              "event_position": "START",
+              "event_type_id": 1,
+              "visibility": "MANDATORY",
+              "sort_order": 1
+            }
+          },
+          {
+            "id": 4002,
+            "work_id": 2001,
+            "work_phase_id": 3001,
+            "name": "Hidden check-in",
+            "anticipated_date": "2024-02-01T08:00:00+00:00",
+            "actual_date": "2024-02-02T08:00:00+00:00",
+            "number_of_days": 1,
+            "outcome_name": null,
+            "event_configuration": {
+              "id": 5002,
+              "name": "Hidden check-in template",
+              "event_position": "INTERMEDIATE",
+              "event_type_id": 1,
+              "visibility": "HIDDEN",
+              "sort_order": 2
+            }
+          },
+          {
+            "id": 4003,
+            "work_id": 2001,
+            "work_phase_id": 3001,
+            "name": "Decision",
+            "anticipated_date": "2024-02-01T08:00:00+00:00",
+            "actual_date": "2024-02-02T08:00:00+00:00",
+            "number_of_days": 1,
+            "outcome_name": "Certificate Issued",
+            "event_configuration": {
+              "id": 5003,
+              "name": "Decision template",
+              "event_position": "END",
+              "event_type_id": 1,
+              "visibility": "MANDATORY",
+              "sort_order": 3
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

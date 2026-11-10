@@ -6,6 +6,7 @@ from api.models import db
 from api.models.special_field import EntityEnum, FieldTypeEnum
 from api.models.work import Work, WorkStateEnum, EndingWorkStateEnum
 from api.services.special_field import SpecialFieldService
+from api.utils import demi_marks
 from .change_phase_end_event import ChangePhaseEndEvent
 
 
@@ -34,7 +35,9 @@ class SetWorkState(ActionFactory):
             is_active = False
             is_completed = True
             work_decision_date = source_event.actual_date
-        db.session.query(Work).filter(Work.id == source_event.work_id).update(
+        work = db.session.query(Work).filter(Work.id == source_event.work_id)
+        demi_marks.mark_rows(work)
+        work.update(
             {Work.work_state: work_state, Work.is_active: is_active, Work.is_completed: is_completed, Work.work_decision_date: work_decision_date}
         )
         work_state_special_field_data = {

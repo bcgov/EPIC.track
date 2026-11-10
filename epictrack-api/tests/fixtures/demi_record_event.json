@@ -1,0 +1,22 @@
+{
+  "pushedAt": 1762675200000,
+  "workTypeId": 6,
+  "event": {
+    "id": 4001,
+    "work_id": 2001,
+    "work_phase_id": 3001,
+    "name": "Decision",
+    "anticipated_date": "2024-02-01T08:00:00+00:00",
+    "actual_date": "2024-02-02T08:00:00+00:00",
+    "number_of_days": 1,
+    "outcome_name": "Certificate Issued",
+    "event_configuration": {
+      "id": 5001,
+      "name": "Decision template",
+      "event_position": "END",
+      "event_type_id": 1,
+      "visibility": "MANDATORY",
+      "sort_order": 3
+    }
+  }
+}
