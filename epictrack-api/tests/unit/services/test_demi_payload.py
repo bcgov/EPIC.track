@@ -1,19 +1,23 @@
-"""Contract test for the project payload Track pushes to DEMI."""
+"""Contract tests for the records Track pushes to DEMI."""
 import json
 import time
 from pathlib import Path
+
+import pytest
 
 from api.models import (
     PRIMARY_CATEGORIES, Event, EventCategoryEnum, EventConfiguration, EventTemplate, OutcomeConfiguration, PhaseCode)
 from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.project import ProjectStateEnum
-from api.services.demi_payload import build_project_payload
+from api.services.demi_payload import resolve_record
 from tests.utilities.factory_utils import factory_project_model, factory_work_model, factory_work_phase_model
 
-FIXTURE = Path(__file__).resolve().parents[2] / "fixtures" / "demi_project_payload.json"
+FIXTURES = Path(__file__).resolve().parents[2] / "fixtures"
 STAFF_TEXT = "STAFF-ONLY"
+FIXTURE_STAMP = 1762675200000
 NON_PRIMARY_CATEGORY = next(category for category in EventCategoryEnum if category not in PRIMARY_CATEGORIES)
+MANDATORY = (EventPositionEnum.INTERMEDIATE, EventTemplateVisibilityEnum.MANDATORY)
 
 PROJECT = {
     "name": "Payload Contract Mine",
@@ -45,6 +49,7 @@ def _work(project, work_type_id, is_active=True, is_deleted=False):
     })
     work.project_id = project.id
     work.is_deleted = is_deleted
+    work.simple_title = "North Pit"
     work.status_notes = f"{STAFF_TEXT} status"
     work.issue_notes = f"{STAFF_TEXT} issue"
     work.first_nation_notes = f"{STAFF_TEXT} first nation"
@@ -108,7 +113,9 @@ def _event(phase, name, sort_order, position, visibility, outcome=None, category
     ).save()
 
 
-def _seed():
+@pytest.fixture
+def seeded(session):
+    """One project with a shown work, phase and events, plus rows each feed rule leaves out."""
     project = factory_project_model(PROJECT)
     project.project_state_id = ProjectStateEnum.PRE_WORK.value
     project.ea_certificate = "M24-01"
@@ -123,66 +130,136 @@ def _seed():
     shown = _phase(assessment, phase_code, "Effects Assessment", sort_order=1)
     _event(shown, "Assessment start", 1, EventPositionEnum.START, EventTemplateVisibilityEnum.MANDATORY)
     _event(shown, "Hidden check-in", 2, EventPositionEnum.INTERMEDIATE, EventTemplateVisibilityEnum.HIDDEN)
-    _event(shown, "Decision", 3, EventPositionEnum.END, EventTemplateVisibilityEnum.MANDATORY,
-           outcome="Certificate Issued")
-    hidden = _phase(assessment, phase_code, "Internal review", sort_order=2,
-                    visibility=PhaseVisibilityEnum.HIDDEN)
-    _event(hidden, "Inside hidden phase", 1, EventPositionEnum.START, EventTemplateVisibilityEnum.MANDATORY)
+    decision = _event(shown, "Decision", 3, EventPositionEnum.END, EventTemplateVisibilityEnum.MANDATORY,
+                      outcome="Certificate Issued")
+    hidden = _phase(assessment, phase_code, "Internal review", sort_order=2, visibility=PhaseVisibilityEnum.HIDDEN)
     _flag(_phase(assessment, phase_code, "Inactive phase", sort_order=3), is_active=False)
     _flag(_phase(assessment, phase_code, "Deleted phase", sort_order=4), is_deleted=True)
-    mandatory = (EventPositionEnum.INTERMEDIATE, EventTemplateVisibilityEnum.MANDATORY)
-    _flag(_event(shown, "Inactive event", 4, *mandatory), is_active=False)
-    _flag(_event(shown, "Deleted event", 5, *mandatory), is_deleted=True)
-    _event(shown, "Non-primary event", 6, *mandatory, category=NON_PRIMARY_CATEGORY)
-
-    intake = _work(project, work_type_id=4, is_active=False)
-    deleted = _work(project, work_type_id=6, is_deleted=True)
-    _phase(deleted, phase_code, "Deleted work phase", sort_order=1)
+    _flag(_event(shown, "Inactive event", 4, *MANDATORY), is_active=False)
+    _flag(_event(shown, "Deleted event", 5, *MANDATORY), is_deleted=True)
+    _event(shown, "Non-primary event", 6, *MANDATORY, category=NON_PRIMARY_CATEGORY)
 
     return {
-        "project": {project.id: 1001},
-        "work": {assessment.id: 2001, intake.id: 2002},
-        "phase": {shown.id: 3001},
-        "phase_code": {phase_code.id: 6001},
+        "project": project,
+        "phase_code": phase_code,
+        "work": assessment,
+        "phase": shown,
+        "hidden_phase": hidden,
+        "event": decision,
+        "ids": {
+            "project": {project.id: 1001},
+            "work": {assessment.id: 2001},
+            "phase": {shown.id: 3001},
+            "phase_code": {phase_code.id: 6001},
+            "event": {},
+            "configuration": {},
+        },
     }
 
 
-def _with_fixture_ids(payload, ids):
-    """Swap database ids for the fixture's, so the comparison does not depend on sequence values."""
-    events, configurations = {}, {}
-    project = payload["project"]
-    project["id"] = ids["project"][project["id"]]
-    for work in project["works"]:
-        work["id"] = ids["work"].get(work["id"], work["id"])
+def _swap(ids, kind, value, start):
+    return ids[kind].setdefault(value, start + len(ids[kind]))
+
+
+def _event_ids(event, ids):
+    event["id"] = _swap(ids, "event", event["id"], 4001)
+    event["work_id"] = ids["work"][event["work_id"]]
+    event["work_phase_id"] = ids["phase"][event["work_phase_id"]]
+    configuration = event["event_configuration"]
+    configuration["id"] = _swap(ids, "configuration", configuration["id"], 5001)
+
+
+def _phase_ids(phase, ids):
+    phase["id"] = ids["phase"][phase["id"]]
+    phase["work_id"] = ids["work"][phase["work_id"]]
+    phase["phase"]["id"] = ids["phase_code"][phase["phase"]["id"]]
+    for event in phase.get("events", []):
+        _event_ids(event, ids)
+
+
+def _with_fixture_ids(body, ids):
+    """Swap database ids and the stamp for the fixture's, so the comparison does not depend on sequences."""
+    body["pushedAt"] = FIXTURE_STAMP
+    if "project" in body:
+        body["project"]["id"] = ids["project"][body["project"]["id"]]
+    if "work" in body:
+        work = body["work"]
+        work["id"] = ids["work"][work["id"]]
         work["project_id"] = ids["project"][work["project_id"]]
-        for phase in work["phases"]:
-            phase["id"] = ids["phase"].get(phase["id"], phase["id"])
-            phase["phase"]["id"] = ids["phase_code"][phase["phase"]["id"]]
-            for event in phase["events"]:
-                event["id"] = events.setdefault(event["id"], 4001 + len(events))
-                configuration = event["event_configuration"]
-                configuration["id"] = configurations.setdefault(configuration["id"], 5001 + len(configurations))
-    return payload
+        for phase in work.get("phases", []):
+            _phase_ids(phase, ids)
+    if "phase" in body:
+        _phase_ids(body["phase"], ids)
+    if "event" in body:
+        _event_ids(body["event"], ids)
+    return body
 
 
-def test_payload_matches_fixture(session):
-    """Deleted works, hidden phases and staff text stay out; inactive and unmirrored works go in."""
-    ids = _seed()
+@pytest.mark.parametrize(
+    "table, row, nested, fixture",
+    [
+        ("projects", "project", False, "demi_record_project.json"),
+        ("works", "work", False, "demi_record_work.json"),
+        ("works", "work", True, "demi_record_new_work.json"),
+        ("work_phases", "phase", False, "demi_record_phase.json"),
+        ("events", "event", False, "demi_record_event.json"),
+    ],
+)
+def test_record_matches_fixture(seeded, table, row, nested, fixture):
+    """Each record holds its own fields, and a new work its shown phases and primary events, never staff text."""
     before = int(time.time() * 1000)
 
-    payload = build_project_payload(next(iter(ids["project"])))
+    record = resolve_record(table, seeded[row].id, nested=nested)
 
-    assert before - 1000 <= payload["pushedAt"] <= int(time.time() * 1000) + 1000
-    assert STAFF_TEXT not in json.dumps(payload)
-    expected = json.loads(FIXTURE.read_text())
-    payload["pushedAt"] = expected["pushedAt"]
-    assert _with_fixture_ids(payload, ids) == expected
+    assert before - 1000 <= record.body["pushedAt"] <= int(time.time() * 1000) + 1000
+    assert STAFF_TEXT not in json.dumps(record.body)
+    expected = json.loads((FIXTURES / fixture).read_text())
+    assert _with_fixture_ids(record.body, seeded["ids"]) == expected
 
 
-def test_deleted_project_has_no_payload(session):
-    """A PUT is only built for a live project."""
-    project = factory_project_model(PROJECT)
-    project.is_deleted = True
-    project.save()
+@pytest.mark.parametrize("column, value", [("is_deleted", True), ("is_active", False)])
+def test_deleted_or_inactive_event_sends_delete(seeded, column, value):
+    """An event that left the feed is removed from DEMI."""
+    _flag(seeded["event"], **{column: value})
 
-    assert build_project_payload(project.id) is None
+    assert resolve_record("events", seeded["event"].id).delete
+
+
+@pytest.mark.parametrize(
+    "column, value", [("is_deleted", True), ("is_active", False), ("visibility", PhaseVisibilityEnum.HIDDEN)]
+)
+def test_phase_leaving_the_feed_sends_delete(seeded, column, value):
+    """A deleted, inactive or hidden phase is removed from DEMI."""
+    _flag(seeded["phase"], **{column: value})
+
+    assert resolve_record("work_phases", seeded["phase"].id).delete
+
+
+def test_non_primary_event_sends_nothing(seeded):
+    """Only milestone categories reach DEMI."""
+    event = Event.query.filter(Event.name == "Non-primary event").one()
+
+    assert resolve_record("events", event.id) is None
+
+
+def test_event_in_phase_outside_the_feed_sends_nothing(seeded):
+    """The phase's own DELETE removed the event, so a send would only hit a missing parent."""
+    event = _event(seeded["hidden_phase"], "Inside hidden phase", 1, *MANDATORY)
+
+    assert resolve_record("events", event.id) is None
+
+
+@pytest.mark.parametrize("values, delete", [({"is_deleted": True}, True), ({"is_active": False}, False)])
+def test_deleted_work_is_excluded_and_inactive_work_included(seeded, values, delete):
+    """Works mirror every non-deleted work, active or not."""
+    _flag(seeded["work"], **values)
+
+    assert resolve_record("works", seeded["work"].id).delete is delete
+
+
+def test_deleted_project_sends_delete_and_no_child(seeded):
+    """A deleted project is removed whole, so its records send nothing of their own."""
+    _flag(seeded["project"], is_deleted=True)
+
+    assert resolve_record("projects", seeded["project"].id).delete
+    assert resolve_record("works", seeded["work"].id) is None
