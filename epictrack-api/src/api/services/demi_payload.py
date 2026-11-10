@@ -9,10 +9,12 @@ from sqlalchemy.orm import joinedload
 from api.models import PRIMARY_CATEGORIES, Event, EventConfiguration, PhaseCode, Project, Work, WorkPhase, db
 from api.models.phase_code import PhaseVisibilityEnum
 from api.schemas.response.demi_payload import (
-    DemiEventSchema, DemiPayloadSchema, DemiProjectSchema, DemiWorkPhaseSchema, DemiWorkSchema)
+    DemiEventSchema, DemiProjectSchema, DemiWorkPhaseSchema, DemiWorkSchema)
 
 
 PRIMARY_CATEGORY_IDS = {category.value for category in PRIMARY_CATEGORIES}
+# The tables with a record of their own, parents first.
+RECORD_TABLES = ("projects", "works", "work_phases", "events")
 
 
 @dataclass
@@ -80,32 +82,6 @@ def _phases_and_events(work_ids):
     for event in events:
         events_by_phase[event.event_configuration.work_phase_id].append(event)
     return phases_by_work, events_by_phase
-
-
-def build_project_payload(project_id: int) -> Optional[dict]:
-    """Return the PUT body for a live project, or None when it is missing or deleted."""
-    pushed_at = _stamp()
-    project = (
-        Project.query.filter(Project.id == project_id, Project.is_deleted.is_(False))
-        .options(
-            joinedload(Project.proponent),
-            joinedload(Project.sub_type),
-            joinedload(Project.type),
-            joinedload(Project.project_state),
-        )
-        .first()
-    )
-    if project is None:
-        return None
-    works = (
-        Work.query.filter(Work.project_id == project_id, Work.is_deleted.is_(False))
-        .options(joinedload(Work.work_type), joinedload(Work.ea_act), joinedload(Work.project))
-        .order_by(Work.id)
-        .all()
-    )
-    phases_by_work, events_by_phase = _phases_and_events([work.id for work in works])
-    schema = DemiPayloadSchema(context={"works": works, "phases": phases_by_work, "events": events_by_phase})
-    return schema.dump({"pushed_at": pushed_at, "project": project})
 
 
 def _project_record(project_id, pushed_at, _nested):
@@ -200,6 +176,25 @@ _RECORDS = {
     "work_phases": _phase_record,
     "events": _event_record,
 }
+
+
+def related_rows(table: str, row_id: int) -> list:
+    """Return the records a lookup row's change shows in: a proponent's projects, a template's events."""
+    if table == "proponents":
+        query = Project.query.filter(Project.proponent_id == row_id, Project.is_deleted.is_(False))
+        return [("projects", project_id) for (project_id,) in query.with_entities(Project.id)]
+    column = {"event_configurations": Event.event_configuration_id, "outcome_configurations": Event.outcome_id}.get(table)
+    if column is None:
+        return []
+    return [("events", event_id) for (event_id,) in Event.query.filter(column == row_id).with_entities(Event.id)]
+
+
+def work_ids_of(table: str, row_ids) -> dict:
+    """Return each phase's or event's work id, by row id."""
+    if not row_ids:
+        return {}
+    model = WorkPhase if table == "work_phases" else Event
+    return dict(model.query.filter(model.id.in_(row_ids)).with_entities(model.id, model.work_id))
 
 
 def resolve_record(table: str, record_id: int, nested: bool = False) -> Optional[DemiRecord]:

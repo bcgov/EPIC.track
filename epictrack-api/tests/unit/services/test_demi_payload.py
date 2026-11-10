@@ -10,7 +10,7 @@ from api.models import (
 from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.project import ProjectStateEnum
-from api.services.demi_payload import resolve_record
+from api.services.demi_payload import related_rows, resolve_record, work_ids_of
 from tests.utilities.factory_utils import factory_project_model, factory_work_model, factory_work_phase_model
 
 FIXTURES = Path(__file__).resolve().parents[2] / "fixtures"
@@ -255,6 +255,33 @@ def test_deleted_work_is_excluded_and_inactive_work_included(seeded, values, del
     _flag(seeded["work"], **values)
 
     assert resolve_record("works", seeded["work"].id).delete is delete
+
+
+def test_proponent_change_reaches_its_live_projects(seeded):
+    """DEMI keeps the proponent name on each project, so a proponent change resends its live projects."""
+    gone = factory_project_model({**PROJECT, "name": "Deleted sibling", "abbreviation": "PCGONE"})
+    _flag(gone, is_deleted=True)
+
+    rows = related_rows("proponents", seeded["project"].proponent_id)
+
+    assert ("projects", seeded["project"].id) in rows
+    assert ("projects", gone.id) not in rows
+
+
+def test_template_change_reaches_its_events(seeded):
+    """A renamed event configuration or outcome resends the events that show its name."""
+    event = seeded["event"]
+
+    assert related_rows("event_configurations", event.event_configuration_id) == [("events", event.id)]
+    assert related_rows("outcome_configurations", event.outcome_id) == [("events", event.id)]
+
+
+def test_work_ids_of_maps_children_to_their_work(seeded):
+    """The sender folds a new work's phases and events into its POST by these work ids."""
+    work_id = seeded["work"].id
+
+    assert work_ids_of("work_phases", [seeded["phase"].id]) == {seeded["phase"].id: work_id}
+    assert work_ids_of("events", [seeded["event"].id]) == {seeded["event"].id: work_id}
 
 
 def test_deleted_project_sends_delete_and_no_child(seeded):

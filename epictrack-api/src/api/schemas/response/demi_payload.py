@@ -127,20 +127,3 @@ class DemiProjectSchema(Schema):
     ea_certificate = fields.Str(metadata={"description": "EA certificate number."})
     eac_signed = fields.Date(metadata={"description": "Date the EA certificate was signed."})
     eac_expires = fields.Date(metadata={"description": "Date the EA certificate expires."})
-    works = fields.Method("get_works")
-
-    def get_works(self, _obj):
-        """Works of the project, when the caller grouped them"""
-        if "works" not in self.context:
-            return missing
-        return DemiWorkSchema(many=True, context=self.context).dump(self.context["works"])
-
-
-class DemiPayloadSchema(Schema):
-    """Body of PUT /track/projects/:id on DEMI"""
-
-    pushed_at = fields.Int(
-        data_key="pushedAt",
-        metadata={"description": "Postgres clock_timestamp() in epoch ms, read before state."},
-    )
-    project = fields.Nested(DemiProjectSchema)
