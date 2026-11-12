@@ -18,13 +18,13 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "@tiptap/extension-color": "^3.21.0",
-    "@tiptap/extension-link": "^3.21.0",
-    "@tiptap/extension-placeholder": "^3.21.0",
-    "@tiptap/extension-text-style": "^3.21.0",
-    "@tiptap/extension-underline": "^3.21.0",
-    "@tiptap/react": "^3.21.0",
-    "@tiptap/starter-kit": "^3.21.0",
+    "@tiptap/extension-color": "^3.33.1",
+    "@tiptap/extension-link": "^3.33.1",
+    "@tiptap/extension-placeholder": "^3.33.1",
+    "@tiptap/extension-text-style": "^3.33.1",
+    "@tiptap/extension-underline": "^3.33.1",
+    "@tiptap/react": "^3.33.1",
+    "@tiptap/starter-kit": "^3.33.1",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.13",
     "@types/react": "^18.3.12",
@@ -48,7 +48,7 @@
     "react-if": "^4.1.5",
     "react-imask": "^7.6.1",
     "react-redux": "^8.1.3",
-    "react-router-dom": "^6.27.0",
+    "react-router-dom": "^7.18.5",
     "react-scroll-sync": "^0.11.2",
     "react-select": "^5.8.2",
     "recharts": "^2.13.3",
@@ -83,7 +83,7 @@
   },
   "devDependencies": {
     "@cypress/code-coverage": "^4.0.2",
-    "@faker-js/faker": "^8.4.1",
+    "@faker-js/faker": "^10.6.0",
     "@testing-library/cypress": "^10.0.2",
     "@types/canvas-confetti": "^1.6.4",
     "@types/color": "^3.0.6",
@@ -96,12 +96,11 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "prettier": "^3.3.3",
-    "prettier-eslint": "^16.3.0",
     "ts-node": "^10.9.2",
     "vite": "^6.3.5",
     "vite-plugin-istanbul": "^8.0.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.12"
   },
   "overrides": {
     "typescript": "^4.9.5",
@@ -112,6 +111,16 @@
     "underscore": "^1.13.8",
     "@tootallnate/once": "^3.0.1",
     "jsonpath": "^1.1.1",
-    "serialize-javascript": "^6.0.2"
+    "serialize-javascript": "^6.0.2",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    },
+    "nyc": {
+      "glob": "^14.0.2"
+    },
+    "test-exclude": {
+      "glob": "^14.0.2",
+      "minimatch": "^11.0.1"
+    }
   }
 }
