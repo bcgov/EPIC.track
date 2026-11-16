@@ -6,7 +6,8 @@ const tsPlugin = require("@typescript-eslint/eslint-plugin");
 // backend rewrite and the DEMI move touch has been migrated.
 const apiBoundaryPatterns = [
   {
-    group: ["**/apiManager/**", "apiManager/**"],
+    // ApiError is what the domain modules throw, so anything may import it.
+    group: ["**/apiManager/**", "apiManager/**", "!**/apiManager/apiError"],
     message: "Call the domain module in src/api instead of the HTTP client.",
   },
   {
