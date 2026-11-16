@@ -9,6 +9,7 @@ declare global {
       VITE_APP_ENV?: string;
       VITE_APP_VERSION?: string;
       VITE_CENTRE_API_URL?: string;
+      VITE_DEMI_API_URL?: string;
     };
   }
 }
@@ -29,9 +30,23 @@ const KC_REALM = getEnvValue("VITE_KEYCLOAK_REALM");
 const APP_ENVIRONMENT = getEnvValue("VITE_APP_ENV");
 const APP_VERSION = getEnvValue("VITE_APP_VERSION");
 const CENTRE_API_URL = getEnvValue("VITE_CENTRE_API_URL");
+// Full base URL including any version path; empty means DEMI is off.
+const DEMI_API_URL = getEnvValue("VITE_DEMI_API_URL");
+
+const TRACK_API_BASE_URL = `${API_URL}/api/v1/`;
+
+export interface ApiConfig {
+  track: { baseUrl: string };
+  demi: { baseUrl: string };
+}
 
 export const AppConfig = {
-  apiUrl: `${API_URL}/api/v1/`,
+  /** Alias of apis.track.baseUrl for older code. */
+  apiUrl: TRACK_API_BASE_URL,
+  apis: {
+    track: { baseUrl: TRACK_API_BASE_URL },
+    demi: { baseUrl: DEMI_API_URL },
+  } as ApiConfig,
   appUrl: APP_URL,
   environment: APP_ENVIRONMENT,
   version: APP_VERSION,
