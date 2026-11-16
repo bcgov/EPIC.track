@@ -36,7 +36,7 @@ const StatusView = () => {
   };
 
   const latestApprovedStatus = statuses.find((status) => status.is_approved);
-  const statusStalenss = work?.is_complete
+  const statusStalenss = work?.is_completed
     ? StalenessEnum.GOOD
     : calculateStatusStaleness(
         latestApprovedStatus,

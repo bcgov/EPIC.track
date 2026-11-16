@@ -1,5 +1,4 @@
-import { GroupBase } from "react-select/dist/declarations/src/types";
-import { Props } from "react-select";
+import { GroupBase, Props } from "react-select";
 
 export interface OptionType {
   readonly value: string | number;

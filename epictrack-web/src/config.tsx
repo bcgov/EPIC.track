@@ -1,10 +1,4 @@
 declare global {
-  interface ImportMeta {
-    env: Record<string, string | undefined>;
-  }
-
-  interface ImportMetaEnv extends Record<string, string | undefined> {}
-
   interface Window {
     _env_?: {
       VITE_API_URL?: string;
@@ -19,7 +13,9 @@ declare global {
   }
 }
 
-const getEnvValue = (key: string) => {
+type EnvKey = keyof NonNullable<Window["_env_"]>;
+
+const getEnvValue = (key: EnvKey): string => {
   return window._env_?.[key] || import.meta.env[key] || "";
 };
 

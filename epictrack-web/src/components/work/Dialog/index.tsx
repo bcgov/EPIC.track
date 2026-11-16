@@ -56,7 +56,11 @@ export const WorkDialog = ({
 
   const saveWork = async (data: any) => {
     try {
-      workId ? await editWork(data) : await createWork(data);
+      if (workId) {
+        await editWork(data);
+      } else {
+        await createWork(data);
+      }
       showNotification("Work saved successfully", {
         type: "success",
       });

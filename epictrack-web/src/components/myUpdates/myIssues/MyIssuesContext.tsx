@@ -28,7 +28,7 @@ interface MyIssueContextProps {
   setLoadingMoreIssues: React.Dispatch<React.SetStateAction<boolean>>;
   sortOrder: string;
   setSortOrder: React.Dispatch<React.SetStateAction<string>>;
-  userWorkIds?: Number[];
+  userWorkIds?: number[];
   // Issues modal controls
   isIssueDialogOpen: boolean;
   showIssueDialog: (Issues?: WorkIssueDashboardItem) => void;
@@ -115,7 +115,7 @@ export const MyIssuesProvider = ({
   const [isIssueDialogOpen, setIsIssueDialogOpen] = useState(false);
   const [selectedIssue, setSelectedIssue] =
     useState<WorkIssueDashboardItem | null>(null);
-  const [userWorkIds, setUserWorkIds] = useState<Number[]>([]);
+  const [userWorkIds, setUserWorkIds] = useState<number[]>([]);
 
   const showIssueDialog = useCallback((Issues?: WorkIssueDashboardItem) => {
     setSelectedIssue(Issues ?? null);

@@ -360,8 +360,8 @@ export const SpecialFieldGrid = ({
           variant="contained"
           startIcon={<AddIcon fill={Palette.white} />}
           onClick={() => {
-            tableInstance && tableInstance.setCreatingRow(true);
-            tableInstance && tableInstance.setEditingRow(null);
+            tableInstance?.setCreatingRow(true);
+            tableInstance?.setEditingRow(null);
             resetErrors();
           }}
         >
