@@ -7,7 +7,7 @@ import {
 } from "material-react-table";
 import { TableFilter } from "./TableFilter";
 
-export function getStatusFilter<T extends Object>(props: {
+export function getStatusFilter<T extends object>(props: {
   column: MRT_Column<T, unknown>;
   header: MRT_Header<T>;
   table: MRT_TableInstance<T>;

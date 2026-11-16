@@ -1,12 +1,12 @@
 import React from "react";
-import { CheckboxProps } from "@mui/material";
+import { SwitchProps } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 import { CustomSwitch } from "../CustomSwitch";
 import * as tokens from "../../../styles/designTokens";
 
 type IFormSwitchProps = {
   name: string;
-} & CheckboxProps;
+} & SwitchProps;
 
 const ControlledSwitch: React.ForwardRefRenderFunction<
   HTMLButtonElement,

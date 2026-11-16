@@ -16,4 +16,5 @@ data:
         "VITE_KEYCLOAK_REALM": "{{ .Values.keycloak.realm }}",
         "VITE_APP_ENV": "{{ .Values.app.env }}",
         "VITE_CENTRE_API_URL": "{{ .Values.app.centreApiUrl }}",
+        "VITE_DEMI_API_URL": "{{ .Values.app.demiApiUrl }}",
       }

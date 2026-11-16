@@ -52,9 +52,9 @@ const OverageResponsibilityForm = ({
 }: OverageResponsibilityFormProps) => {
   const { selectedWorkPhase } = useContext(WorkplanContext);
 
-  const responsibilityOptions: OptionType[] = Object.values(
-    OverageResponsibilityEnum,
-  ).map((val) => ({ value: val, label: val }));
+  const responsibilityOptions = Object.values(OverageResponsibilityEnum).map(
+    (val) => ({ value: val, label: val }),
+  );
 
   const methods = useForm({
     resolver: yupResolver(schema),

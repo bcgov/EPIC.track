@@ -46,4 +46,10 @@ These will run the same linting and testing checks that automatically run when s
 
 ##### Linting with npm
 
-You can also use `npm lintfix` and `npm lint` to fix more common liting errors.
+`npm run lint` runs the same checks as the CI linting job, in order:
+
+1. Prettier formatting (`npm run lintfix` fixes these)
+1. ESLint on `src`
+1. `npm run typecheck`, the TypeScript check of the app code
+
+Cypress specs and `__test__` folders are not linted or typechecked yet. ESLint also skips the insights screens, which are moving to Centre.

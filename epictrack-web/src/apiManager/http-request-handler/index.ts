@@ -1,16 +1,14 @@
-import axios from "axios";
-import UserService from "../../services/userService";
-import { AppConfig } from "../../config";
+// Legacy Track API helpers returning raw AxiosResponses; new code uses src/api.
+// The Track client's interceptor adds the Authorization header.
+import { trackClient } from "../clients";
 
-const instance = axios.create({
-  baseURL: AppConfig.apiUrl,
-});
+const instance = trackClient.raw;
+
 const GetRequest = <T>(url: string, params = {}, headers = {}) => {
   return instance.get<T>(url, {
     params: params,
     headers: {
       "Content-type": "application/json",
-      Authorization: `Bearer ${UserService.getToken()}`,
       ...headers,
     },
   });
@@ -21,7 +19,6 @@ const PostRequest = <T>(url: string, data = {}, params = {}, config = {}) => {
     params,
     headers: {
       "Content-type": "application/json",
-      Authorization: `Bearer ${UserService.getToken()}`,
     },
     ...config,
   });
@@ -32,7 +29,6 @@ const PutRequest = <T>(url: string, data = {}, params = {}) => {
     params,
     headers: {
       "Content-type": "application/json",
-      Authorization: `Bearer ${UserService.getToken()}`,
     },
   });
 };
@@ -42,7 +38,6 @@ const PatchRequest = <T>(url: string, data = {}) => {
     .patch<T>(url, data, {
       headers: {
         "Content-type": "application/json",
-        Authorization: `Bearer ${UserService.getToken()}`,
       },
     })
     .then((response) => {
@@ -59,7 +54,6 @@ const DeleteRequest = <T>(url: string, params = {}) => {
     params: params,
     headers: {
       "Content-type": "application/json",
-      Authorization: `Bearer ${UserService.getToken()}`,
     },
   });
 };
@@ -74,51 +68,17 @@ const MultipartFormPostRequest = <T>(
     params,
     headers: {
       "Content-type": "multipart/form-data",
-      Authorization: `Bearer ${UserService.getToken()}`,
     },
     ...config,
   });
 };
 
-interface OSSRequestOptions {
-  amzDate: string;
-  authHeader: string;
-}
-export const OSSGetRequest = <T>(
-  url: string,
-  requestOptions: OSSRequestOptions,
-) => {
-  return instance.get<T>(url, {
-    headers: {
-      "X-Amz-Date": requestOptions.amzDate,
-      Authorization: requestOptions.authHeader,
-    },
-    responseType: "blob",
-  });
-};
-
-export const OSSPutRequest = <T>(
-  url: string,
-  data: File,
-  requestOptions: OSSRequestOptions,
-) => {
-  return instance.put<T>(url, data, {
-    headers: {
-      "X-Amz-Date": requestOptions.amzDate,
-      Authorization: requestOptions.authHeader,
-    },
-  });
-};
-
-// eslint-disable-next-line import/no-anonymous-default-export
 export default {
   GetRequest,
   PostRequest,
   PutRequest,
   PatchRequest,
   DeleteRequest,
-  OSSGetRequest,
-  OSSPutRequest,
   MultipartFormPostRequest,
 };
 

@@ -11,6 +11,7 @@ import {
 } from "./userSlice";
 import { AppConfig } from "../../config";
 import http from "../../apiManager/http-request-handler";
+import { setTokenProvider } from "../../apiManager/auth";
 import Endpoints from "../../constants/api-endpoint";
 import { UserDetail } from "./type";
 import staffService from "../staffService/staffService";
@@ -142,6 +143,7 @@ const initKeycloak = async (dispatch: AppDispatch) => {
 };
 
 const getToken = () => KeycloakData?.token;
+setTokenProvider(getToken);
 
 const doLogin = () => {
   if (KeycloakData) {

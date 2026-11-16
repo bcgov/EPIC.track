@@ -83,7 +83,7 @@ export const generateMockWork = (): Work => ({
   epic_description: faker.lorem.sentence(),
   is_cac_recommended: faker.datatype.boolean(),
   is_active: faker.datatype.boolean(),
-  is_complete: faker.datatype.boolean(),
+  is_completed: faker.datatype.boolean(),
   is_high_priority: faker.datatype.boolean(),
   is_deleted: faker.datatype.boolean(),
   start_date: faker.date.recent().toISOString(),

@@ -3,6 +3,8 @@ app:
   url: epictrack-web-{{ .Release.Namespace }}.apps.gold.devops.gov.bc.ca
   api: https://epictrack-api-{{ .Release.Namespace }}.apps.gold.devops.gov.bc.ca
   centreApiUrl: https://centre-api-{{ .Release.Namespace }}.apps.gold.devops.gov.bc.ca
+  # DEMI's browser-facing API URL. Empty until projects and works move to DEMI.
+  demiApiUrl: ""
   env: dev
 resources:
   cpu:

@@ -55,7 +55,7 @@ class WorkService implements ServiceBase {
   }
 
   async getWorkIdsByStaff(staffId: number) {
-    return await http.GetRequest<Number[]>(
+    return await http.GetRequest<number[]>(
       Endpoints.Works.WORKS_BY_STAFF.replace(":staff_id", staffId.toString()),
     );
   }

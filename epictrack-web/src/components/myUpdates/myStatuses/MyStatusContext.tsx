@@ -28,7 +28,7 @@ interface MyStatusContextProps {
   setLoadingMoreStatuses: React.Dispatch<React.SetStateAction<boolean>>;
   sortOrder: string;
   setSortOrder: React.Dispatch<React.SetStateAction<string>>;
-  userWorkIds?: Number[];
+  userWorkIds?: number[];
   // Status modal controls
   isStatusDialogOpen: boolean;
   showStatusDialog: (status?: StatusDashboardItem) => void;
@@ -118,7 +118,7 @@ export const MyStatusesProvider = ({
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] =
     useState<StatusDashboardItem | null>(null);
-  const [userWorkIds, setUserWorkIds] = useState<Number[]>([]);
+  const [userWorkIds, setUserWorkIds] = useState<number[]>([]);
 
   const showStatusDialog = useCallback((status?: StatusDashboardItem) => {
     setSelectedStatus(status ?? null);

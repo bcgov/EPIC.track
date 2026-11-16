@@ -928,12 +928,7 @@ const EventList = () => {
               <Typography color={Palette.primary.accent.main}>
                 {Object.keys(rowSelection).length} selected
               </Typography>
-              <Divider
-                variant="middle"
-                flexItem
-                orientation="vertical"
-                sx={{ borderColor: Palette.neutral[300] }}
-              />
+              <Divider variant="middle" flexItem orientation="vertical" />
               <FilterSelect
                 options={staffSelectOptions}
                 isMulti

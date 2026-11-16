@@ -7,7 +7,10 @@ import { ETParagraph } from "../../shared";
 import { Palette } from "../../../styles/theme";
 import * as tokens from "../../../styles/designTokens";
 
-const extendedMoment = extendMoment(moment);
+const extendedMoment = extendMoment(
+  // moment-range is typed against `import * as moment`; the runtime value is the default export.
+  moment as unknown as Parameters<typeof extendMoment>[0],
+);
 
 const Month = ({
   month,
