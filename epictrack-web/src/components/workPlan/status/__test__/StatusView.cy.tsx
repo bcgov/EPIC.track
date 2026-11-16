@@ -9,7 +9,7 @@ describe("StatusView", () => {
         value={{
           ...initialWorkPlanContext,
           isActiveTeamMember: true,
-          work: { is_complete: false } as any,
+          work: { is_completed: false } as any,
           statusStalenessSetting: {
             staleness_length: 1,
             warning_length: 0,
@@ -59,7 +59,7 @@ describe("StatusView", () => {
         value={{
           ...initialWorkPlanContext,
           isActiveTeamMember: true,
-          work: { is_complete: false } as any,
+          work: { is_completed: false } as any,
           statusStalenessSetting: {
             staleness_length: 999,
             warning_length: 500,
