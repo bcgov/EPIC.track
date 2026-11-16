@@ -7,15 +7,26 @@ import { BrowserRouter } from "react-router-dom";
 import { Work } from "models/work";
 
 import ProjectDetails from "..";
-import { generateMockWork } from "../../../../../../../cypress/support/mocks";
+import {
+  generateMockProjectSummary,
+  generateMockWork,
+} from "../../../../../../../cypress/support/mocks";
 import dayjs from "dayjs";
 import { MONTH_DAY_YEAR } from "constants/application-constant";
+import { AppConfig } from "config";
+import { store } from "store";
+import { projectsQueryApi } from "api/projects";
 
 const mockWork: Work = {
   ...generateMockWork(),
   is_deleted: false,
   is_active: true,
 };
+const mockProject = {
+  ...generateMockProjectSummary(),
+  id: mockWork.project_id,
+};
+const projectUrl = `${AppConfig.apiUrl}projects/${mockWork.project_id}`;
 
 const initContextWrapper = () => {
   const ContextWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -39,6 +50,8 @@ const initContextWrapper = () => {
 describe("About Project", () => {
   const [ContextWrapper] = initContextWrapper();
   beforeEach(() => {
+    store.dispatch(projectsQueryApi.util.resetApiState());
+    cy.intercept("GET", projectUrl, { body: mockProject }).as("project");
     cy.mount(
       <ContextWrapper>
         <ProjectDetails />
@@ -47,18 +60,28 @@ describe("About Project", () => {
   });
 
   it("Project Details are displayed", () => {
-    cy.get("p").contains(mockWork.project.proponent.name).should("be.visible");
-    cy.get("p").contains(mockWork.project.description).should("be.visible");
-    cy.get("p").contains(mockWork.project.type.name).should("be.visible");
-    cy.get("p").contains(mockWork.project.address).should("be.visible");
-    cy.get("p").contains(mockWork.project.region_env.name).should("be.visible");
+    cy.wait("@project");
+    cy.get("p").contains(mockProject.proponent.name).should("be.visible");
+    cy.get("p").contains(mockProject.description).should("be.visible");
+    cy.get("p").contains(mockProject.type.name).should("be.visible");
+    cy.get("p").contains(mockProject.address).should("be.visible");
+    cy.get("p").contains(mockProject.region_env.name).should("be.visible");
+    cy.get("p").contains(mockProject.region_flnro.name).should("be.visible");
+    cy.get("p").contains(mockProject.abbreviation).should("be.visible");
     cy.get("p")
-      .contains(mockWork.project.region_flnro.name)
+      .contains(dayjs(mockProject.created_at).format(MONTH_DAY_YEAR))
       .should("be.visible");
-    cy.get("p").contains(mockWork.project.abbreviation).should("be.visible");
-    cy.get("p")
-      .contains(dayjs(mockWork.project.created_at).format(MONTH_DAY_YEAR))
-      .should("be.visible");
+  });
+
+  it("tells the user when the project can't be loaded", () => {
+    store.dispatch(projectsQueryApi.util.resetApiState());
+    cy.intercept("GET", projectUrl, { statusCode: 500, body: {} });
+    cy.mount(
+      <ContextWrapper>
+        <ProjectDetails />
+      </ContextWrapper>,
+    );
+    cy.contains("Couldn't load project details").should("exist");
   });
 
   it("opens project dialog when edit is clicked", () => {

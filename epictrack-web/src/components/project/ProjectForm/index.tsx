@@ -9,9 +9,8 @@ import { Proponent } from "../../../models/proponent";
 import { Region } from "../../../models/region";
 import { Type } from "../../../models/type";
 import { SubType } from "../../../models/subtype";
-import subTypeService from "../../../services/subTypeService";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
-import { projectService } from "../../../services/projectService/projectService";
+import { projectsApi } from "api/projects";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
 
@@ -20,10 +19,7 @@ import { ProjectNameSpecialField } from "./ProjectNameSpecialField";
 import { Restricted } from "../../shared/restricted";
 import { ROLES } from "../../../constants/application-constant";
 import { ListType } from "models/code";
-import RegionService from "services/regionService";
-import { REGIONS } from "../../../components/shared/constants";
-import { typeService } from "services/typeService";
-import proponentService from "services/proponentService/proponentService";
+import { showNotification } from "components/shared/notificationProvider";
 import { useAppSelector } from "hooks";
 import { sort } from "utils";
 import ControlledDatePicker from "components/shared/controlledInputComponents/ControlledDatePicker";
@@ -38,11 +34,7 @@ const schema = yup.object().shape({
       message: "Project with the given name already exists",
       test: async (value, { parent }) => {
         if (value) {
-          const validateProjectResult = await projectService.checkProjectExists(
-            value,
-            parent["id"],
-          );
-          return !(validateProjectResult.data as any)["exists"] as boolean;
+          return !(await projectsApi.checkExists(value, parent["id"]));
         }
         return true;
       },
@@ -131,12 +123,8 @@ export default function ProjectForm({
   const formValues = useWatch({ control });
 
   const getSubTypesByType = useCallback(async () => {
-    const subTypeResult = await subTypeService.getSubTypeByType(
-      formValues.type_id,
-    );
-    if (subTypeResult.status === 200) {
-      setSubTypes(subTypeResult.data as SubType[]);
-    }
+    if (!formValues.type_id) return;
+    setSubTypes(await projectsApi.listSubTypes(formValues.type_id));
   }, [formValues]);
 
   useEffect(() => {
@@ -146,9 +134,7 @@ export default function ProjectForm({
   }, [getSubTypesByType, formValues.type_id, project]);
 
   useEffect(() => {
-    getRegions();
-    getTypes();
-    getProponents();
+    getFormOptions();
   }, []);
 
   const typeChange = () => {
@@ -163,10 +149,9 @@ export default function ProjectForm({
     if (!formValues.name || Boolean(project)) return;
 
     try {
-      const response = await projectService.createProjectAbbreviation(
+      const generatedAbbreviation = await projectsApi.suggestAbbreviation(
         formValues.name,
       );
-      const generatedAbbreviation = response.data as string;
       resetField("abbreviation");
       setValue("abbreviation", generatedAbbreviation);
     } catch (error) {
@@ -183,33 +168,17 @@ export default function ProjectForm({
 
   const abbreviation = watch("abbreviation");
 
-  const getRegions = async () => {
-    const envRegionsResult = await RegionService.getRegions(REGIONS.ENV);
-    if (envRegionsResult.status === 200) {
-      const envRegions = envRegionsResult.data as ListType[];
-      setEnvRegions(envRegions);
-    }
-    const nrsRegionsResult = await RegionService.getRegions(REGIONS.FLNR);
-    if (nrsRegionsResult.status === 200) {
-      const nrsRegions = nrsRegionsResult.data as ListType[];
-      setNRSRegions(nrsRegions);
-    }
-  };
-
-  const getTypes = async () => {
-    const typesResult = await typeService.getAll();
-    if (typesResult.status === 200) {
-      const types = typesResult.data as ListType[];
-      setTypes(types);
-    }
-  };
-
-  const getProponents = async () => {
-    const proponentsResult = await proponentService.getAll();
-    if (proponentsResult.status === 200) {
-      let proponents = proponentsResult.data as Proponent[];
-      proponents = sort(proponents, "name");
-      setProponents(proponents);
+  const getFormOptions = async () => {
+    try {
+      const options = await projectsApi.getFormOptions();
+      setEnvRegions(options.envRegions);
+      setNRSRegions(options.nrsRegions);
+      setTypes(options.types);
+      setProponents(sort(options.proponents, "name"));
+    } catch {
+      showNotification("Could not load project form options", {
+        type: "error",
+      });
     }
   };
 
