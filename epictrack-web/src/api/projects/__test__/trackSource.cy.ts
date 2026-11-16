@@ -146,7 +146,13 @@ describe("Track projects source", () => {
 
   it("keeps the Track query parameters", () => {
     cy.then(() => trackProjectsSource.listOptions());
-    cy.wait("@listOptions");
+    cy.wait("@listOptions")
+      .its("request.query")
+      .should("deep.equal", { return_type: "list_type" });
+    cy.then(() => trackProjectsSource.listOptions({ withWorks: true }));
+    cy.wait("@listOptions")
+      .its("request.query")
+      .should("deep.equal", { return_type: "list_type", with_works: "true" });
     cy.then(() => trackProjectsSource.checkExists("Taken Project", 1));
     cy.wait("@exists")
       .its("request.query")

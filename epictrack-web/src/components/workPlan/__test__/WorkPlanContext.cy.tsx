@@ -3,6 +3,7 @@ import { MemoryRouter as Router } from "react-router-dom";
 import { Button } from "@mui/material";
 import { WorkplanContext, WorkplanProvider } from "../WorkPlanContext";
 import { workService } from "../../../services/workService/workService";
+import { worksApi } from "api/works";
 import { statusService } from "../../../services/statusService/statusService";
 import { issueService } from "../../../services/issueService";
 import stalenessSettingsService from "../../../services/stalenessSettingsService";
@@ -29,17 +30,12 @@ const WorkplanHarness = () => {
 
 describe("WorkPlanContext", () => {
   beforeEach(() => {
-    cy.stub(workService, "getById")
+    cy.stub(worksApi, "get")
       .as("getById")
       .resolves({
-        status: 200,
-        data: {
-          id: 101,
-          current_work_phase_id: 2,
-          project: {
-            name: "River Project",
-          },
-        },
+        id: 101,
+        current_work_phase_id: 2,
+        project: { id: 7, name: "River Project" },
       } as any);
 
     cy.stub(workService, "getWorkTeamMembers")
@@ -132,7 +128,7 @@ describe("WorkPlanContext", () => {
       </Router>,
     );
 
-    cy.get("@getById").should("have.been.calledWith", "101");
+    cy.get("@getById").should("have.been.calledWith", 101);
     cy.get("@getWorkTeamMembers").should("have.been.calledWith", 101);
     cy.get("@getWorkPhases").should("have.been.calledWith", "101");
     cy.get("@getWorkFirstNations").should("have.been.calledWith", 101);

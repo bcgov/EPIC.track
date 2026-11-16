@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Box, Button, Grid } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
-import { Work } from "../../models/work";
-import { workService } from "../../services/workService/workService";
+import { WorkListItem } from "../../models/work";
+import { worksApi } from "api/works";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { ETPageContainer } from "components/shared";
 import { ETChip } from "components/shared/chip/ETChip";
@@ -32,7 +32,7 @@ const WorkList = () => {
   const [states, setStates] = useState<string[]>([]);
   const [teams, setTeams] = useState<string[]>([]);
   const [workId, setWorkId] = useState<number>();
-  const [works, setWorks] = useState<Work[]>([]);
+  const [works, setWorks] = useState<WorkListItem[]>([]);
   const [workTypes, setWorkTypes] = useState<string[]>([]);
   const [cachedFilters, setCachedFilters] = useCachedState<ColumnFilter[]>(
     All_WORKS_FILTERS_CACHE_KEY,
@@ -53,16 +53,12 @@ const WorkList = () => {
   const loadWorks = async () => {
     setLoadingWorks(true);
     try {
-      const response = await workService.getAll();
-      if (response.status !== 200) {
-        setWorks([]);
-        setLoadingWorks(false);
-        throw new Error("Could not fetch works");
-      }
-      setWorks(sort(response.data, "title"));
-      setLoadingWorks(false);
+      setWorks(sort(await worksApi.list(), "title"));
     } catch (error) {
+      setWorks([]);
       showNotification("Could not load Works", { type: "error" });
+    } finally {
+      setLoadingWorks(false);
     }
   };
 
@@ -106,7 +102,7 @@ const WorkList = () => {
       }
       const codes = works
         .map((w) => {
-          const workKey = key as keyof Work;
+          const workKey = key as keyof WorkListItem;
           return w[workKey] ? (w[workKey] as any)[accessor] : null;
         })
         .filter(
@@ -124,7 +120,7 @@ const WorkList = () => {
     (value) => value,
   );
 
-  const columns = useMemo<MRT_ColumnDef<Work>[]>(
+  const columns = useMemo<MRT_ColumnDef<WorkListItem>[]>(
     () => [
       {
         accessorKey: "title",
@@ -326,7 +322,7 @@ const WorkList = () => {
         filterVariant: "multi-select",
         filterSelectOptions: statuses,
         filterFn: "multiSelectFilter",
-        Filter: getStatusFilter<Work>,
+        Filter: getStatusFilter<WorkListItem>,
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && <ETChip active label="Active" />}

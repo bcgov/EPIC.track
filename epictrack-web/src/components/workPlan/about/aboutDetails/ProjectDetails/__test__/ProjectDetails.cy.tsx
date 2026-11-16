@@ -19,7 +19,6 @@ import { projectsQueryApi } from "api/projects";
 
 const mockWork: Work = {
   ...generateMockWork(),
-  is_deleted: false,
   is_active: true,
 };
 const mockProject = {

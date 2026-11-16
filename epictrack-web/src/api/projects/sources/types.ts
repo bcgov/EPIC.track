@@ -20,8 +20,8 @@ export interface ProjectsSource {
   get(id: number): Promise<Project>;
   getSummary(id: number): Promise<ProjectSummary>;
   list(): Promise<Project[]>;
-  /** For dropdowns. */
-  listOptions(): Promise<ProjectRef[]>;
+  /** For dropdowns; `withWorks` keeps only projects that have works. */
+  listOptions(filter?: { withWorks?: boolean }): Promise<ProjectRef[]>;
   create(input: ProjectInput): Promise<Project>;
   update(id: number, input: ProjectInput): Promise<Project>;
   checkExists(name: string, excludeId?: number): Promise<boolean>;

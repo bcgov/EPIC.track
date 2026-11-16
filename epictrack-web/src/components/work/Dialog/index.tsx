@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import WorkForm from "../WorkForm";
 import TrackDialog from "components/shared/TrackDialog";
-import { Work } from "models/work";
-import { workService } from "services/workService/workService";
+import { Work, WorkInput } from "models/work";
+import { worksApi } from "api/works";
 import { showNotification } from "components/shared/notificationProvider";
 import { useAppSelector } from "hooks";
 import { hasPermission } from "components/shared/restricted";
@@ -37,8 +37,7 @@ export const WorkDialog = ({
   const fetchWork = useCallback(async () => {
     if (!workId) return;
     try {
-      const response = await workService.getById(String(workId));
-      setWork(response.data);
+      setWork(await worksApi.get(workId));
     } catch (error) {
       showNotification("Could not load Work", {
         type: "error",
@@ -46,20 +45,12 @@ export const WorkDialog = ({
     }
   }, [workId]);
 
-  const createWork = async (data: any) => {
-    await workService.create(data);
-  };
-
-  const editWork = async (data: any) => {
-    await workService.update(data, String(workId));
-  };
-
-  const saveWork = async (data: any) => {
+  const saveWork = async (input: WorkInput) => {
     try {
       if (workId) {
-        await editWork(data);
+        await worksApi.update(workId, input);
       } else {
-        await createWork(data);
+        await worksApi.create(input);
       }
       showNotification("Work saved successfully", {
         type: "success",

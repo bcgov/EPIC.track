@@ -1,16 +1,8 @@
 import Endpoints from "../../constants/api-endpoint";
 import http from "../../apiManager/http-request-handler";
-import { Project } from "models/project";
 
 // Track-owned calls under /projects; project data goes through api/projects.
 class ProjectService {
-  async getAll(return_type?: string, with_works?: boolean) {
-    return await http.GetRequest<Project[]>(Endpoints.Projects.PROJECTS, {
-      return_type,
-      with_works,
-    });
-  }
-
   async getWorkTypes(projectId: number, workId: number) {
     return await http.GetRequest(
       Endpoints.Projects.WORK_TYPES.replace(

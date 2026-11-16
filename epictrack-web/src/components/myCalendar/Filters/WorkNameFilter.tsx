@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Autocomplete, Chip, TextField } from "@mui/material";
-import { workService } from "services/workService/workService";
+import { worksApi } from "api/works";
 
 interface Work {
   id: number;
@@ -22,8 +22,7 @@ export const WorkNameFilter = ({
   useEffect(() => {
     const fetchWorks = async () => {
       try {
-        const response = await workService.getOptions();
-        const works: Work[] = response.data
+        const works: Work[] = (await worksApi.listOptions())
           .map((w) => ({
             id: w.id,
             name: w.title,

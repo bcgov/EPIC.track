@@ -3,9 +3,8 @@ import { Box, Divider, Grid, InputAdornment, Tooltip } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import Moment from "moment";
 import dayjs from "dayjs";
-import { defaultWork, Work } from "models/work";
+import { defaultWork, Work, WorkInput } from "models/work";
 import { ListType } from "models/code";
 import { Ministry } from "models/ministry";
 import { POSITION_ENUM } from "models/position";
@@ -18,6 +17,8 @@ import { projectsApi } from "api/projects";
 import staffService from "services/staffService/staffService";
 import { substitutionActService } from "services/substitutionActService";
 import { workService } from "services/workService/workService";
+import { worksApi } from "api/works";
+import { isApiError } from "apiManager/apiError";
 import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
 import { hasPermission } from "../../shared/restricted";
 import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
@@ -59,16 +60,14 @@ const schema = yup.object<Work>().shape({
       exclusive: true,
       message: "Work with the given title already exists",
       test: async (value, { parent }) => {
-        if (value) {
-          const validateWorkResult = await workService.checkWorkExists(
-            value,
-            parent["id"],
-          );
-          return validateWorkResult.data
-            ? (!(validateWorkResult.data as any)["exists"] as boolean)
-            : true;
+        if (!value) return true;
+        try {
+          return !(await worksApi.checkExists(value, parent["id"]));
+        } catch (error) {
+          // Offline: let the save report the failure.
+          if (isApiError(error) && error.isNetwork) return true;
+          throw error;
         }
-        return true;
       },
     }),
   simple_title: yup.string().default(""),
@@ -84,7 +83,7 @@ const InfoIcon: FC<IconProps> = icons["InfoIcon"];
 type WorkFormProps = {
   work: Work | null;
   fetchWork: () => void;
-  saveWork: (data: any) => void;
+  saveWork: (input: WorkInput) => void;
   setDisableDialogSave?: (disable: boolean) => void;
 };
 
@@ -316,7 +315,6 @@ export default function WorkForm({
   }, []);
 
   const onSubmitHandler = async (data: any) => {
-    data.start_date = Moment(data.start_date).format();
     saveWork(data);
   };
 

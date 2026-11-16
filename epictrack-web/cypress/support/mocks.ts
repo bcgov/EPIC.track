@@ -19,7 +19,7 @@ export const generateMockStaff = (): Staff => ({
     name: faker.lorem.word(),
     sort_order: faker.number.int(),
   },
-  idir_user_id: ""
+  idir_user_id: "",
 });
 
 export const generateMockProjectSummary = (): ProjectSummary => ({
@@ -53,14 +53,14 @@ export const generateMockMinistry = (): Ministry => ({
       name: faker.lorem.word(),
       sort_order: faker.number.int(),
     },
-    idir_user_id: ""
+    idir_user_id: "",
   },
   abbreviation: faker.lorem.word(),
   combined: faker.lorem.word(),
   minister_id: 0,
   sort_order: 0,
   date_created: "",
-  date_closed: ""
+  date_closed: "",
 });
 
 export const generateMockListType = (): ListType => ({
@@ -82,7 +82,6 @@ export const generateMockWork = (): Work => ({
   is_active: faker.datatype.boolean(),
   is_completed: faker.datatype.boolean(),
   is_high_priority: faker.datatype.boolean(),
-  is_deleted: faker.datatype.boolean(),
   start_date: faker.date.recent().toISOString(),
   anticipated_decision_date: faker.date.future().toISOString(),
   decision_date: faker.date.future().toISOString(),
@@ -145,6 +144,6 @@ export const generateMockWorkPhaseAdditionalInfo =
     end_milestone: {
       name: faker.lorem.word(),
       actual_date: "",
-      anticipated_date: ""
-    }
+      anticipated_date: "",
+    },
   });

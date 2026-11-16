@@ -1,6 +1,6 @@
 import React from "react";
 import { WorkNameFilter } from "../WorkNameFilter";
-import { workService } from "services/workService/workService";
+import { worksApi } from "api/works";
 
 const WorkNameFilterHarness = () => {
   const [searchOptions, setSearchOptions] = React.useState({
@@ -20,12 +20,10 @@ const WorkNameFilterHarness = () => {
 
 describe("WorkNameFilter", () => {
   it("loads and sorts work options alphabetically", () => {
-    cy.stub(workService, "getOptions").resolves({
-      data: [
-        { id: 2, title: "Zulu Work" },
-        { id: 1, title: "Alpha Work" },
-      ],
-    } as any);
+    cy.stub(worksApi, "listOptions").resolves([
+      { id: 2, title: "Zulu Work" },
+      { id: 1, title: "Alpha Work" },
+    ]);
 
     cy.mount(<WorkNameFilterHarness />);
 
@@ -38,12 +36,10 @@ describe("WorkNameFilter", () => {
   });
 
   it("updates selected work ids when a work is selected", () => {
-    cy.stub(workService, "getOptions").resolves({
-      data: [
-        { id: 11, title: "North Work" },
-        { id: 12, title: "South Work" },
-      ],
-    } as any);
+    cy.stub(worksApi, "listOptions").resolves([
+      { id: 11, title: "North Work" },
+      { id: 12, title: "South Work" },
+    ]);
 
     cy.mount(<WorkNameFilterHarness />);
 
@@ -57,7 +53,7 @@ describe("WorkNameFilter", () => {
   });
 
   it("stops loading and remains usable when loading works fails", () => {
-    cy.stub(workService, "getOptions").rejects(new Error("load failed"));
+    cy.stub(worksApi, "listOptions").rejects(new Error("load failed"));
 
     cy.mount(<WorkNameFilterHarness />);
 

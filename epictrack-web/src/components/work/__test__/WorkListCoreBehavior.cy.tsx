@@ -1,6 +1,6 @@
 import { MemoryRouter as Router } from "react-router-dom";
 import WorkList from "../WorkList";
-import { workService } from "services/workService/workService";
+import { worksApi } from "api/works";
 import { store } from "store";
 import { userDetails } from "services/userService/userSlice";
 import { ROLES } from "constants/application-constant";
@@ -40,10 +40,7 @@ const mountWorkList = (
   });
 
   cy.then(() => {
-    cy.stub(workService, "getAll").resolves({
-      status: 200,
-      data: works,
-    } as any);
+    cy.stub(worksApi, "list").resolves(works);
 
     cy.mount(
       <Router>
@@ -57,33 +54,30 @@ describe("WorkList core behavior", () => {
   it("renders normalized work-state labels and status chips", () => {
     dispatchRoles([]);
 
-    cy.stub(workService, "getAll").resolves({
-      status: 200,
-      data: [
-        {
-          id: 1,
-          title: "Alpha Work",
-          work_state: "IN_PROGRESS",
-          is_active: true,
-          project: { name: "Project A" },
-          ea_act: { name: "2018" },
-          work_type: { name: "EA" },
-          eao_team: { name: "Team One" },
-          current_work_phase: { name: "Review" },
-        },
-        {
-          id: 2,
-          title: "Beta Work",
-          work_state: "IN_PROGRESS",
-          is_active: false,
-          project: { name: "Project B" },
-          ea_act: { name: "2002" },
-          work_type: { name: "Amendment" },
-          eao_team: { name: "Team Two" },
-          current_work_phase: { name: "Decision" },
-        },
-      ],
-    } as any);
+    cy.stub(worksApi, "list").resolves([
+      {
+        id: 1,
+        title: "Alpha Work",
+        work_state: "IN_PROGRESS",
+        is_active: true,
+        project: { name: "Project A" },
+        ea_act: { name: "2018" },
+        work_type: { name: "EA" },
+        eao_team: { name: "Team One" },
+        current_work_phase: { name: "Review" },
+      },
+      {
+        id: 2,
+        title: "Beta Work",
+        work_state: "IN_PROGRESS",
+        is_active: false,
+        project: { name: "Project B" },
+        ea_act: { name: "2002" },
+        work_type: { name: "Amendment" },
+        eao_team: { name: "Team Two" },
+        current_work_phase: { name: "Decision" },
+      },
+    ] as any);
 
     cy.mount(
       <Router>
@@ -101,10 +95,7 @@ describe("WorkList core behavior", () => {
   it("shows a disabled Create Work button when user lacks create role", () => {
     dispatchRoles([]);
 
-    cy.stub(workService, "getAll").resolves({
-      status: 200,
-      data: [],
-    } as any);
+    cy.stub(worksApi, "list").resolves([]);
 
     cy.mount(
       <Router>
@@ -118,10 +109,7 @@ describe("WorkList core behavior", () => {
   it("shows an enabled Create Work button when user has create role", () => {
     dispatchRoles([ROLES.CREATE]);
 
-    cy.stub(workService, "getAll").resolves({
-      status: 200,
-      data: [],
-    } as any);
+    cy.stub(worksApi, "list").resolves([]);
 
     cy.mount(
       <Router>
@@ -132,13 +120,10 @@ describe("WorkList core behavior", () => {
     cy.contains("button", "Create Work").should("not.be.disabled");
   });
 
-  it("shows notification when works API returns a non-200 response", () => {
+  it("shows notification when the works fail to load", () => {
     dispatchRoles([]);
 
-    cy.stub(workService, "getAll").resolves({
-      status: 500,
-      data: [],
-    } as any);
+    cy.stub(worksApi, "list").rejects(new Error("load failed"));
 
     cy.mount(
       <Router>

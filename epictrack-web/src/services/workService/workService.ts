@@ -1,7 +1,5 @@
 import Endpoints from "../../constants/api-endpoint";
 import http from "../../apiManager/http-request-handler";
-import ServiceBase from "../common/serviceBase";
-import { MasterBase } from "../../models/type";
 import { StaffWorkRole } from "../../models/staff";
 import { WorkFirstNation } from "../../models/firstNation";
 import { Work, WorkPhase } from "../../models/work";
@@ -11,49 +9,9 @@ import { WorkResource } from "models/workResource";
 interface WorkPhaseResponse {
   work_phase: WorkPhase;
 }
-export interface WorkOption {
-  id: number;
-  title: string;
-}
 
-class WorkService implements ServiceBase {
-  async getOptions() {
-    return await http.GetRequest<WorkOption[]>(
-      `${Endpoints.Works.WORKS}/options`,
-    );
-  }
-
-  async getAll(is_active = undefined) {
-    return await http.GetRequest<Work[]>(Endpoints.Works.WORKS, { is_active });
-  }
-
-  async create(data: MasterBase) {
-    return await http.PostRequest(Endpoints.Works.WORKS, JSON.stringify(data));
-  }
-
-  async update(data: MasterBase, id: string) {
-    return await http.PutRequest(
-      Endpoints.Works.WORKS + `/${id}`,
-      JSON.stringify(data),
-    );
-  }
-
-  async getById(id: string) {
-    return await http.GetRequest<Work>(Endpoints.Works.WORKS + `/${id}`);
-  }
-
-  async delete(id?: string) {
-    return await http.DeleteRequest(Endpoints.Works.WORKS + `/${id}`);
-  }
-
-  async checkWorkExists(title: string, id?: string) {
-    const encodedTitle = encodeURIComponent(title);
-    return await http.GetRequest(
-      Endpoints.Works.WORKS +
-        `/exists?title=${encodedTitle}${id ? "&work_id=" + id : ""}`,
-    );
-  }
-
+// Track-owned calls under /works; work data goes through api/works.
+class WorkService {
   async getWorkIdsByStaff(staffId: number) {
     return await http.GetRequest<number[]>(
       Endpoints.Works.WORKS_BY_STAFF.replace(":staff_id", staffId.toString()),
