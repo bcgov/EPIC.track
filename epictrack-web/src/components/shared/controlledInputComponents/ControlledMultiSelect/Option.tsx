@@ -1,13 +1,6 @@
 import { Box, Checkbox } from "@mui/material";
 import { components, OptionProps } from "react-select";
 
-interface CustomSelectProps {
-  filterProps?: {
-    selectedOptions: string[];
-    getOptionValue: (data: any) => string;
-  };
-}
-
 const Option = ({
   getStyles,
   isDisabled,
@@ -16,7 +9,7 @@ const Option = ({
   innerProps,
   isMulti,
   ...rest
-}: OptionProps & { selectProps: CustomSelectProps }) => {
+}: OptionProps) => {
   const { filterProps } = rest.selectProps;
 
   let isSelected = false;

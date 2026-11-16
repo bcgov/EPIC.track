@@ -53,7 +53,7 @@
     "react-select": "^5.8.2",
     "recharts": "^2.13.3",
     "sass": "^1.80.7",
-    "typescript": "^4.9.5",
+    "typescript": "^5.9.3",
     "web-vitals": "^4.2.3",
     "yup": "^1.4.0"
   },
@@ -63,7 +63,8 @@
     "build": "VITE_APP_VERSION=$npm_package_version vite build",
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
-    "lint": "prettier --check \"./src/**/*.{js,jsx,ts,tsx}\"",
+    "lint": "prettier --check \"./src/**/*.{js,jsx,ts,tsx}\" && eslint src && npm run typecheck",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "lintfix": "prettier --write \"./src/**/*.{js,jsx,tsx,ts}\"",
     "format": "prettier --write .",
     "cypress": "NODE_OPTIONS='--max-old-space-size=4096' npx cypress run --component --headless --browser chrome",
@@ -104,7 +105,6 @@
     "vitest": "^3.2.4"
   },
   "overrides": {
-    "typescript": "^4.9.5",
     "nth-check": "^2.1.1",
     "postcss": "^8.4.31",
     "dompurify": "^3.3.1",

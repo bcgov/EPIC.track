@@ -17,7 +17,12 @@
     "noEmit": true,
     "types": ["cypress", "node", "vite/client"],
     "jsx": "react-jsx",
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "paths": {
+      "react-select/dist/declarations/*": [
+        "../node_modules/react-select/dist/declarations/*"
+      ]
+    }
   },
   "include": ["src", "cypress"]
 }

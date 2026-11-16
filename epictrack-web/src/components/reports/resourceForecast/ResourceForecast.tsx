@@ -134,7 +134,7 @@ export default function ResourceForecast() {
           (p) => !columnVisibility[p],
         ),
         filter_search: (() => {
-          let result: Record<string, any> = {};
+          const result: Record<string, any> = {};
           columnFilters.forEach((filter) => {
             if (
               filter.value !== undefined &&

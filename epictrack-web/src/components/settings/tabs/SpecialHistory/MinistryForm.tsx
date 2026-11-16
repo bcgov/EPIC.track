@@ -59,7 +59,8 @@ const MinistryForm = ({ setDisableDialogSave }: MinistryFormProps) => {
   };
 
   useEffect(() => {
-    reset(ministry);
+    // The form schema types minister_id as a string; the API sends a number.
+    reset((ministry ?? undefined) as unknown as Parameters<typeof reset>[0]);
   }, [reset, ministry]);
 
   useEffect(() => {

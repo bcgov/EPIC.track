@@ -10,7 +10,10 @@ import EventDetails from "./components/EventDetails";
 import ReportService from "../../services/reportService";
 import { Palette } from "../../styles/theme";
 
-const extendedMoment = extendMoment(moment);
+const extendedMoment = extendMoment(
+  // moment-range is typed against `import * as moment`; the runtime value is the default export.
+  moment as unknown as Parameters<typeof extendMoment>[0],
+);
 
 const titleStyle: SxProps = {
   gridColumn: "span 7",
