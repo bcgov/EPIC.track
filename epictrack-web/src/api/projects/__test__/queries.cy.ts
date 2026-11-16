@@ -7,6 +7,10 @@ const apiPath = new URL(AppConfig.apis.track.baseUrl, window.location.origin)
 const projectPath = `${apiPath}projects/1`;
 const selectSummary = () =>
   projectsQueryApi.endpoints.getProjectSummary.select(1)(store.getState());
+// The store updates after cy.wait resolves, so retry until it has.
+const summaryShould = (
+  check: (summary: ReturnType<typeof selectSummary>) => void,
+) => cy.wrap(null).should(() => check(selectSummary()));
 
 describe("projects queries", () => {
   let summaryRequests: number;
@@ -26,7 +30,7 @@ describe("projects queries", () => {
       projectsQueryApi.endpoints.getProjectSummary.initiate(1),
     );
     cy.wait("@summary");
-    cy.then(() => expect(selectSummary().data?.name).to.equal("Before"));
+    summaryShould((summary) => expect(summary.data?.name).to.equal("Before"));
 
     cy.then(() =>
       store
@@ -39,7 +43,7 @@ describe("projects queries", () => {
         .unwrap(),
     );
     cy.wait("@summary");
-    cy.then(() => selectSummary().data?.name).should("equal", "After");
+    summaryShould((summary) => expect(summary.data?.name).to.equal("After"));
     cy.then(() => subscription.unsubscribe());
   });
 
@@ -52,6 +56,7 @@ describe("projects queries", () => {
       projectsQueryApi.endpoints.getProjectSummary.initiate(1),
     );
     cy.wait("@summary");
+    summaryShould((summary) => expect(summary.status).to.equal("fulfilled"));
 
     cy.then(() =>
       store.dispatch(
