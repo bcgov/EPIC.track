@@ -13,11 +13,16 @@
 # limitations under the License.
 """Provides the WSGI entry point for running the application
 """
+import gc
+
 from api import create_app
 
 
 # Openshift s2i expects a lower case name of application
 application = create_app()  # pylint: disable=invalid-name
+
+# Workers fork after this under --preload; frozen objects stay shared with them.
+gc.freeze()
 
 if __name__ == "__main__":
     application.run(port=3200)
