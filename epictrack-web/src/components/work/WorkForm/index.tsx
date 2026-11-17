@@ -16,7 +16,7 @@ import { ministryService } from "services/ministryService";
 import { projectsApi } from "api/projects";
 import staffService from "services/staffService/staffService";
 import { substitutionActService } from "services/substitutionActService";
-import { workService } from "services/workService/workService";
+import { workTypesApi } from "api/workTypes";
 import { worksApi } from "api/works";
 import { isApiError } from "apiManager/apiError";
 import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
@@ -262,11 +262,7 @@ export default function WorkForm({
   };
 
   const getWorkTypes = async () => {
-    const workTypeResult = await workService.getWorkTypes();
-    if (workTypeResult.status === 200) {
-      const workType = workTypeResult.data as ListType[];
-      setWorkTypes(workType);
-    }
+    setWorkTypes(await workTypesApi.list());
   };
 
   const getEAOTeams = async () => {

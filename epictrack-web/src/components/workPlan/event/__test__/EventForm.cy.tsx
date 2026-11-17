@@ -11,7 +11,7 @@ import { actSectionService } from "services/actSectionService/actSectionService"
 import staffService from "services/staffService/staffService";
 import { outcomeConfigurationService } from "services/outcomeConfigurationService/outcomeConfigurationService";
 import { configurationService } from "services/configurationService/configurationService";
-import { workService } from "services/workService/workService";
+import { workPhasesApi } from "api/workPhases";
 import {
   WorkplanContext,
   initialWorkPlanContext,
@@ -65,10 +65,7 @@ describe("EventForm", () => {
       data: [{ id: 1, name: "Section 1" }],
     } as any);
 
-    cy.stub(workService, "getWorkPhaseAdditionalInfo").resolves({
-      status: 200,
-      data: [],
-    } as any);
+    cy.stub(workPhasesApi, "getInfo").resolves(undefined);
   });
 
   it("submits updated milestone details", () => {
@@ -446,10 +443,7 @@ describe("EventForm", () => {
   });
 
   it("disables anticipated date when selecting an end event at phase start", () => {
-    (workService.getWorkPhaseAdditionalInfo as any).resolves({
-      status: 200,
-      data: [{ milestone_progress: 0 }],
-    } as any);
+    (workPhasesApi.getInfo as any).resolves({ milestone_progress: 0 });
 
     const endEvent = {
       ...baseEvent,

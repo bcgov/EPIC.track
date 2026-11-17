@@ -1,4 +1,4 @@
-import { WorkPlanFilters } from "./MyWorkPlanContext";
+import { WorkPlanFilters } from "models/workplan";
 
 export const MY_WORKLAN_FILTERS: { [key in keyof WorkPlanFilters]: string } = {
   teams: "my-workplan-teams",

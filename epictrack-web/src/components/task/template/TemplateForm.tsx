@@ -11,9 +11,9 @@ import ControlledSelectV2 from "../../shared/controlledInputComponents/Controlle
 import { showNotification } from "../../shared/notificationProvider";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import { eaActService } from "services/eaActService";
-import phaseService from "services/phaseService";
+import { workPhasesApi } from "api/workPhases";
+import { workTypesApi } from "api/workTypes";
 import { templateService } from "services/taskService/templateService";
-import { workService } from "services/workService/workService";
 
 export default function TemplateForm({ ...props }) {
   const [eaActs, setEAActs] = useState<ListType[]>([]);
@@ -48,13 +48,12 @@ export default function TemplateForm({ ...props }) {
   const formValues = useWatch({ control });
 
   const getPhaseByWorkTypeEAact = useCallback(async () => {
-    const phaseResult = await phaseService.getPhaseByWorkTypeEAact(
-      formValues.ea_act_id,
-      formValues.work_type_id,
+    setPhases(
+      await workPhasesApi.listPhaseCodes(
+        Number(formValues.ea_act_id),
+        Number(formValues.work_type_id),
+      ),
     );
-    if (phaseResult.status === 200) {
-      setPhases(phaseResult.data as ListType[]);
-    }
   }, [formValues.ea_act_id, formValues.work_type_id]);
 
   const getEAActs = async () => {
@@ -66,11 +65,7 @@ export default function TemplateForm({ ...props }) {
   };
 
   const getWorkTypes = async () => {
-    const workTypeResult = await workService.getWorkTypes();
-    if (workTypeResult.status === 200) {
-      const workType = workTypeResult.data as ListType[];
-      setWorkTypes(workType);
-    }
+    setWorkTypes(await workTypesApi.list());
   };
 
   useEffect(() => {

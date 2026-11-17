@@ -7,6 +7,7 @@ import { EVENT_STATUS } from "../../../../models/taskEvent";
 import { taskEventService } from "../../../../services/taskEventService/taskEventService";
 import { eventService } from "../../../../services/eventService/eventService";
 import { workService } from "../../../../services/workService/workService";
+import { workPhasesApi } from "api/workPhases";
 import { responsibilityService } from "../../../../services/responsibilityService/responsibilityService";
 import { templateService } from "../../../../services/taskService/templateService";
 import { store } from "../../../../store";
@@ -63,15 +64,9 @@ describe("EventList", { retries: 2 }, () => {
         ],
       } as any);
 
-    cy.stub(workService, "checkTemplateUploadStatus")
+    cy.stub(workPhasesApi, "getTemplateUploadStatus")
       .as("checkTemplateUploadStatus")
-      .resolves({
-        status: 200,
-        data: {
-          template_available: false,
-          task_added: false,
-        },
-      } as any);
+      .resolves({ template_available: false, task_added: false });
 
     cy.stub(responsibilityService, "getResponsibilities")
       .as("getResponsibilities")
@@ -213,13 +208,10 @@ describe("EventList", { retries: 2 }, () => {
   it("enables add task for active team member and disables template button after template upload", () => {
     const userEmail = store.getState().user.userDetail.email;
 
-    (workService.checkTemplateUploadStatus as any).resolves({
-      status: 200,
-      data: {
-        template_available: true,
-        task_added: true,
-      },
-    } as any);
+    (workPhasesApi.getTemplateUploadStatus as any).resolves({
+      template_available: true,
+      task_added: true,
+    });
 
     cy.mount(
       <Router>
@@ -304,13 +296,10 @@ describe("EventList", { retries: 2 }, () => {
   it("opens task template dialog when template import is available", () => {
     const userEmail = store.getState().user.userDetail.email;
 
-    (workService.checkTemplateUploadStatus as any).resolves({
-      status: 200,
-      data: {
-        template_available: true,
-        task_added: false,
-      },
-    } as any);
+    (workPhasesApi.getTemplateUploadStatus as any).resolves({
+      template_available: true,
+      task_added: false,
+    });
 
     cy.mount(
       <Router>
@@ -793,13 +782,10 @@ describe("EventList", { retries: 2 }, () => {
   it("cleans up selected phase state on unmount when template prompt is shown", () => {
     const setSelectedWorkPhase = cy.stub().as("setSelectedWorkPhase");
 
-    (workService.checkTemplateUploadStatus as any).resolves({
-      status: 200,
-      data: {
-        template_available: true,
-        task_added: false,
-      },
-    } as any);
+    (workPhasesApi.getTemplateUploadStatus as any).resolves({
+      template_available: true,
+      task_added: false,
+    });
 
     cy.mount(
       <Router>
@@ -834,13 +820,10 @@ describe("EventList", { retries: 2 }, () => {
   });
 
   it("imports tasks from template after confirmation", () => {
-    (workService.checkTemplateUploadStatus as any).resolves({
-      status: 200,
-      data: {
-        template_available: true,
-        task_added: false,
-      },
-    } as any);
+    (workPhasesApi.getTemplateUploadStatus as any).resolves({
+      template_available: true,
+      task_added: false,
+    });
 
     cy.stub(templateService, "getTemplatesByParams")
       .as("getTemplatesByParams")
@@ -1112,13 +1095,10 @@ describe("EventList", { retries: 2 }, () => {
   });
 
   it("shows template available notification when templates are available", () => {
-    (workService.checkTemplateUploadStatus as any).resolves({
-      status: 200,
-      data: {
-        template_available: true,
-        task_added: false,
-      },
-    } as any);
+    (workPhasesApi.getTemplateUploadStatus as any).resolves({
+      template_available: true,
+      task_added: false,
+    });
 
     cy.mount(
       <Router>
@@ -1189,13 +1169,10 @@ describe("EventList", { retries: 2 }, () => {
   });
 
   it("does not show template available notification when tasks were already imported", () => {
-    (workService.checkTemplateUploadStatus as any).resolves({
-      status: 200,
-      data: {
-        template_available: true,
-        task_added: true,
-      },
-    } as any);
+    (workPhasesApi.getTemplateUploadStatus as any).resolves({
+      template_available: true,
+      task_added: true,
+    });
 
     cy.mount(
       <Router>
@@ -1229,13 +1206,10 @@ describe("EventList", { retries: 2 }, () => {
   });
 
   it("returns to template list when upload confirmation is cancelled", () => {
-    (workService.checkTemplateUploadStatus as any).resolves({
-      status: 200,
-      data: {
-        template_available: true,
-        task_added: false,
-      },
-    } as any);
+    (workPhasesApi.getTemplateUploadStatus as any).resolves({
+      template_available: true,
+      task_added: false,
+    });
 
     cy.stub(templateService, "getTemplatesByParams")
       .as("getTemplatesByParams")

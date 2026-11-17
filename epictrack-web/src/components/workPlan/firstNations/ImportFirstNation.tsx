@@ -18,6 +18,7 @@ import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import { ETCaption2, ETParagraph } from "../../shared";
 import { Palette } from "../../../styles/theme";
 import { projectService } from "../../../services/projectService/projectService";
+import { workTypesApi } from "api/workTypes";
 import { IconProps } from "../../icons/type";
 import Icons from "../../icons";
 
@@ -56,20 +57,17 @@ const ImportFirstNation = (props: ImportFirstNationsProps) => {
   React.useEffect(() => {
     const getWorkTypes = async () => {
       try {
-        const result = await projectService.getWorkTypes(
-          Number(ctx.work?.project_id),
-          Number(ctx.work?.id),
-        );
-        if (result.status === 200) {
-          const workTypes = (result.data as any[]).filter(
-            (p) => p["is_active"] === true,
-          );
-          if (workTypes.length > 0)
-            setWorkTypes([
-              { name: `All Work Types` },
-              ...workTypes,
-            ] as ListType[]);
-        }
+        const workTypes = (
+          await workTypesApi.listInProject(
+            Number(ctx.work?.project_id),
+            Number(ctx.work?.id),
+          )
+        ).filter((workType) => workType.is_active);
+        if (workTypes.length > 0)
+          setWorkTypes([
+            { name: `All Work Types` },
+            ...workTypes,
+          ] as ListType[]);
       } catch (e) {
         showNotification(COMMON_ERROR_MESSAGE, {
           type: "error",

@@ -20,18 +20,14 @@ import {
   MilestoneEvent,
 } from "models/event";
 import { EVENT_STATUS, statusOptions, TaskEvent } from "models/taskEvent";
-import {
-  TemplateStatus,
-  WorkPhase,
-  WorkPhaseAdditionalInfo,
-} from "models/work";
+import { TemplateStatus } from "models/work";
 import { ListType } from "models/code";
 import { setLoadingState } from "services/loadingService";
 import { eventService } from "services/eventService/eventService";
 import { responsibilityService } from "services/responsibilityService/responsibilityService";
 import { taskEventService } from "services/taskEventService/taskEventService";
-import { workService } from "services/workService/workService";
 import { worksApi } from "api/works";
+import { workPhasesApi } from "api/workPhases";
 import { OptionType } from "../../shared/filterSelect/type";
 import { showNotification } from "../../shared/notificationProvider";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
@@ -390,10 +386,7 @@ const EventList = () => {
   const getWorkPhases = useCallback(async () => {
     if (work?.id) {
       setLoading(true);
-      const workPhasesResult = await workService.getWorkPhases(
-        String(work?.id),
-      );
-      const workPhases = workPhasesResult.data as WorkPhaseAdditionalInfo[];
+      const workPhases = await workPhasesApi.listForWork(work.id);
       setWorkPhases(workPhases);
       setLoading(false);
       return workPhases;
@@ -470,12 +463,10 @@ const EventList = () => {
   };
   const handleExportToSheet = useCallback(async () => {
     try {
-      const binaryReponse = await workService.downloadWorkplan(
+      const workPlan = await workPhasesApi.downloadWorkPlan(
         Number(selectedWorkPhase?.work_phase.id),
       );
-      const url = window.URL.createObjectURL(
-        new Blob([(binaryReponse as any).data]),
-      );
+      const url = window.URL.createObjectURL(workPlan);
       const link = document.createElement("a");
       link.href = url;
       const fileName = `${work?.project.name}_${work?.title}_${selectedWorkPhase?.work_phase.phase.name}`;
@@ -580,11 +571,9 @@ const EventList = () => {
         closeSnackbar(notificationId.current);
         notificationId.current = null;
       }
-      const response = await workService.checkTemplateUploadStatus(
+      const templateUploadStatus = await workPhasesApi.getTemplateUploadStatus(
         Number(selectedWorkPhase.work_phase.id),
       );
-      const templateUploadStatus: TemplateStatus =
-        response.data as TemplateStatus;
       setTemplateAvailable(templateUploadStatus);
       if (
         templateUploadStatus.template_available &&
@@ -621,9 +610,7 @@ const EventList = () => {
     const isCompleted = selectedWorkPhase?.work_phase.is_completed;
     if (workPhaseId) {
       try {
-        const workPhase = (await workService.getWorkPhaseById(
-          Number(workPhaseId),
-        )) as WorkPhase;
+        const workPhase = await workPhasesApi.get(Number(workPhaseId));
 
         if (workPhase?.is_completed && !isCompleted) {
           dispatch(showConfetti(true));

@@ -5,6 +5,12 @@ export interface PhaseOverageResponsibility {
   work_phase_id: number;
 }
 
+export interface OverageResponsibilityInput {
+  work_phase_id: number;
+  responsibility: OverageResponsibilityEnum;
+  work_id?: number;
+}
+
 export enum OverageResponsibilityEnum {
   PROPONENT = "Proponent",
   EAO = "EAO",

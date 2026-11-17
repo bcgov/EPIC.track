@@ -2,13 +2,8 @@ import Endpoints from "../../constants/api-endpoint";
 import http from "../../apiManager/http-request-handler";
 import { StaffWorkRole } from "../../models/staff";
 import { WorkFirstNation } from "../../models/firstNation";
-import { Work, WorkPhase } from "../../models/work";
-import { WorkType } from "../../models/workType";
-import { AxiosResponse } from "axios";
+import { Work } from "../../models/work";
 import { WorkResource } from "models/workResource";
-interface WorkPhaseResponse {
-  work_phase: WorkPhase;
-}
 
 // Track-owned calls under /works; work data goes through api/works.
 class WorkService {
@@ -74,69 +69,6 @@ class WorkService {
       workStaffId.toString(),
     )}`;
     return await http.GetRequest(query);
-  }
-
-  async getWorkPhases(workId: string) {
-    return await http.GetRequest(Endpoints.Works.WORKS + `/${workId}/phases`);
-  }
-
-  async getWorkPhaseById(workPhaseId: number): Promise<WorkPhase | null> {
-    try {
-      const endpoint = Endpoints.Works.GET_WORK_PHASE_BY_ID.replace(
-        ":work_phase_id",
-        workPhaseId.toString(),
-      );
-      const result: AxiosResponse<WorkPhaseResponse> =
-        await http.GetRequest(endpoint);
-
-      if (!result.data || !result.data.work_phase) {
-        console.error(`No work phase found with ID: ${workPhaseId}`);
-        return null;
-      }
-
-      return result.data.work_phase;
-    } catch (error) {
-      console.error(`Error fetching work phase with ID: ${workPhaseId}`, error);
-      return null;
-    }
-  }
-
-  async getWorkPhaseAdditionalInfo(
-    workId: number,
-    phaseId: number,
-  ): Promise<any> {
-    const query = `${Endpoints.Works.WORK_PHASE_ADDITIONAL_INFO.replace(
-      ":work_id",
-      workId.toString(),
-    ).replace(":phase_id", phaseId.toString())}`;
-    return await http.GetRequest(query);
-  }
-
-  async downloadWorkplan(workPhaseId: number) {
-    return await http.PostRequest(
-      Endpoints.Works.DOWNLOAD_WORK_PLAN + `?work_phase_id=${workPhaseId}`,
-      {},
-      {},
-      {
-        responseType: "blob",
-      },
-    );
-  }
-
-  async checkTemplateUploadStatus(workPhaseId: number) {
-    const url = Endpoints.Works.CHECK_TEMPLATE_UPLOAD_STATUS.replace(
-      ":work_phase_id",
-      workPhaseId.toString(),
-    );
-    return await http.GetRequest(url);
-  }
-
-  async savePhaseResponsibilityNotes(workPhaseId: number, notes: string) {
-    const url = Endpoints.Works.WORK_PHASE_RESPONSIBILITY_NOTES.replace(
-      ":work_phase_id",
-      workPhaseId.toString(),
-    );
-    return await http.PatchRequest(url, { notes });
   }
 
   async saveFirstNationNotes(workId: number, notes: string) {
@@ -223,10 +155,6 @@ class WorkService {
       indigenous_nation_id,
       work_indigenous_nation_id,
     });
-  }
-
-  async getWorkTypes() {
-    return await http.GetRequest<WorkType[]>(Endpoints.WorkTypes.GET_ALL);
   }
 
   async getWorkResources(workId: number) {

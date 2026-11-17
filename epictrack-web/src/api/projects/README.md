@@ -22,7 +22,7 @@ are moving to DEMI, and the browser will call DEMI directly.
 Calls under `/projects` whose data Track owns stay on the Track client in
 `services/projectService`, and will stay in Track after the move:
 
-- `projects/:id/work-types`
+- `projects/:id/work-types` (in `api/workTypes`)
 - `projects/:id/first-nations` and `projects/:id/first-nation-available`
 
 Project special-field history (proponent and name history in the project form)

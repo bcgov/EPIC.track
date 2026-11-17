@@ -3,8 +3,8 @@ import { WorkStateFilter } from "components/myWorkplans/Filters/WorkStateFilter"
 import {
   MyWorkplansContext,
   defaultSearchOptions,
-  WorkPlanSearchOptions,
 } from "components/myWorkplans/MyWorkPlanContext";
+import { WorkPlanSearchOptions } from "models/workplan";
 import { MY_WORKPLAN_VIEW } from "components/myWorkplans/type";
 
 const Harness = () => {

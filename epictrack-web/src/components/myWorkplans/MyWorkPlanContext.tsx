@@ -5,9 +5,13 @@ import {
   useMemo,
   useState,
 } from "react";
-import { WorkPlan } from "models/workplan";
+import {
+  WorkPlan,
+  WorkPlanFilters,
+  WorkPlanSearchOptions,
+} from "models/workplan";
 import { StalenessSettings } from "models/settings";
-import { workplanService } from "services/workplanService";
+import { workplansApi } from "api/workplans";
 import stalenessSettingsService from "services/stalenessSettingsService";
 import { WORK_STATE } from "../shared/constants";
 import { useAppSelector } from "../../hooks";
@@ -34,19 +38,6 @@ interface MyWorkplanContextProps {
   sortKey: string;
   setSortKey: React.Dispatch<React.SetStateAction<string>>;
 }
-export type WorkPlanFilters = {
-  teams: string[];
-  work_states: string[];
-  regions: string[];
-  project_types: string[];
-  work_types: string[];
-  text: string;
-};
-
-export type WorkPlanSearchOptions = WorkPlanFilters & {
-  staff_id: number | null;
-};
-
 // used in WorkStateFilter as default value for the Filter Select
 export const DEFAULT_WORK_STATE = WORK_STATE.IN_PROGRESS;
 
@@ -127,32 +118,21 @@ export const MyWorkplansProvider = ({
   const fetchWorkplans = useCallback(
     async (page: number, shouldAppend = false) => {
       try {
-        const result = await workplanService.getAll(
+        const result = await workplansApi.list({
           page,
-          PAGE_SIZE,
+          size: PAGE_SIZE,
           sortOrder,
           sortKey,
-          searchOptions,
-        );
-        if (!result || !result.data) {
-          setWorkplans([]);
-          setTotalWorkplans(0);
-          setLoadingWorkplans(false);
-          showNotification("Failed to load Workplans", {
-            type: "error",
-            duration: 3000,
-          });
-          return;
-        }
+          search: searchOptions,
+        });
         setPage(page);
         setWorkplans((prev) =>
-          shouldAppend
-            ? [...prev, ...result.data.items]
-            : [...result.data.items],
+          shouldAppend ? [...prev, ...result.items] : [...result.items],
         );
-        setTotalWorkplans(result.data.total);
+        setTotalWorkplans(result.total);
         setLoadingWorkplans(false);
       } catch (error) {
+        setLoadingWorkplans(false);
         showNotification(COMMON_ERROR_MESSAGE, {
           type: "error",
         });

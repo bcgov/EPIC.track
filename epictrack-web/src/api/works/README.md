@@ -22,16 +22,19 @@ A work's project details come from `useProjectSummary(work.project_id)` in
 
 ## What is not here
 
-Calls under `/works` whose data Track owns stay on the Track client in
-`services/workService` (and later their own modules), and will stay in Track
-after the move:
+Calls under `/works` whose data Track owns stay on the Track client, and will
+stay in Track after the move:
 
-- phases, events, tasks and templates
+- phases, the work plan download and overage responsibilities, in
+  `api/workPhases`
+- the My Workplans dashboard (`works/dashboard`), which joins phase, status and
+  staff data, in `api/workplans`
+- events, tasks and templates
 - the work team (`works/:id/staff-roles`) and works by staff
   (`works/by-staff/:id`), which reads the team
-- first nations, resources, notes and the work plan download
-- the My Workplans dashboard (`works/dashboard`), which joins phase, status and
-  staff data
+- first nations, resources and notes
+
+The last three are still in `services/workService` and its siblings.
 
 ## Switching to DEMI
 

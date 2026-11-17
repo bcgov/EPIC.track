@@ -159,6 +159,8 @@ const eventCalendarBranchEndpoints: Endpoint[] = [
       body: {
         work_phase: {
           id: 44,
+          name: "Phase",
+          phase: { id: 1, name: "Phase" },
           legislated: false,
           is_suspended: false,
           start_date: getCurrentMonthIso(-8),

@@ -15,7 +15,7 @@ import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import { TaskEvent } from "models/taskEvent";
 import { Work, WorkPhase } from "models/work";
-import { workService } from "services/workService/workService";
+import { workPhasesApi } from "api/workPhases";
 import { worksApi } from "api/works";
 
 export interface CalendarSearchOptions {
@@ -240,10 +240,13 @@ export const EventCalendarProvider = ({
       // always fetch work
       const workPromise = worksApi.get(work_id);
 
-      // conditionally fetch workPhase
+      // conditionally fetch workPhase; the drawer still opens without it
       const phasePromise =
         event.type === EVENT_TYPE.MILESTONE
-          ? workService.getWorkPhaseById(phase_id)
+          ? workPhasesApi.get(phase_id).catch((error) => {
+              console.error(`Error fetching work phase ${phase_id}`, error);
+              return null;
+            })
           : Promise.resolve(null);
 
       // fetch event details (milestone or task)
@@ -259,7 +262,7 @@ export const EventCalendarProvider = ({
       ]);
 
       setWork(workRes);
-      if (phaseRes) setWorkPhase(phaseRes as WorkPhase);
+      if (phaseRes) setWorkPhase(phaseRes);
 
       if (event.type === EVENT_TYPE.MILESTONE && eventRes.status === 200) {
         setMilestoneEvent(eventRes.data as MilestoneEvent);

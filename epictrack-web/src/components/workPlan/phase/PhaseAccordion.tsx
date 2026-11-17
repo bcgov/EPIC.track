@@ -25,11 +25,9 @@ import { IconProps } from "../../icons/type";
 import { Palette } from "../../../styles/theme";
 import { MONTH_DAY_YEAR, ROLES } from "constants/application-constant";
 import { PhaseAccordionProps } from "./type";
-import phaseOverageResponsibilityService from "services/phaseOverageResponsibilityService";
-import { workService } from "services/workService/workService";
+import { workPhasesApi } from "api/workPhases";
 import {
   OverageResponsibilityEnum,
-  OverageResponsibilityLookup,
   PhaseOverageResponsibility,
 } from "models/phaseOverageResponsibilities";
 import { WorkTypeEnum } from "models/workType";
@@ -130,7 +128,8 @@ const PhaseAccordion = ({
     : `Upcoming ${isLegislated ? "Legislated " : ""}Phase`;
   const daysAhead = phase.total_number_of_days - phase.days_taken;
   const hasOverage = daysAhead < 0;
-  const isNextEventEndEvent = phase.next_milestone === phase.end_milestone.name;
+  const isNextEventEndEvent =
+    phase.next_milestone === phase.end_milestone?.name;
 
   const isSelectedPhase = useMemo<boolean>(
     () => phase.work_phase.id === selectedWorkPhase?.work_phase.id,
@@ -158,11 +157,9 @@ const PhaseAccordion = ({
 
   const getPhaseOverageResponsibilities = useCallback(async () => {
     try {
-      const overageResponsibilityData =
-        await phaseOverageResponsibilityService.getAllByPhaseId(
-          phase.work_phase.id.toString(),
-        );
-      setOverageResponsibilities(overageResponsibilityData.data);
+      setOverageResponsibilities(
+        await workPhasesApi.listOverageResponsibilities(phase.work_phase.id),
+      );
     } catch (error) {
       showNotification("Could not load phase overage responsibilities.", {
         duration: 3000,
@@ -198,7 +195,7 @@ const PhaseAccordion = ({
     try {
       if (!selectedWorkPhase) return;
       // 1. Patch notes on the phase
-      await workService.savePhaseResponsibilityNotes(
+      await workPhasesApi.saveOverageNotes(
         selectedWorkPhase.work_phase.id,
         data.notes,
       );
@@ -212,17 +209,15 @@ const PhaseAccordion = ({
       );
       // 2. Add new responsibilities
       for (const r of toAdd) {
-        await phaseOverageResponsibilityService.create({
+        await workPhasesApi.addOverageResponsibility({
           work_phase_id: selectedWorkPhase.work_phase.id,
-          responsibility: OverageResponsibilityLookup[r],
+          responsibility: r,
           work_id: work?.id,
         });
       }
       // 3. Remove responsibilities
       for (const er of toRemove) {
-        await phaseOverageResponsibilityService.delete(String(er.id), {
-          work_id: work?.id,
-        });
+        await workPhasesApi.removeOverageResponsibility(er.id, work?.id);
       }
       onSuccess();
       getWorkPhases();
