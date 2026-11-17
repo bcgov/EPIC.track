@@ -12,6 +12,7 @@ Work phases stay in Track after projects and works move to DEMI.
 | `dto.ts`           | Track response and request shapes                                                                                          |
 | `mapper.ts`        | DTO to frontend type, field by field                                                                                       |
 | `workPhasesApi.ts` | The calls: phases of a work, phase details, template status, the work plan download, phase codes, overage responsibilities |
+| `rules.ts`         | When a phase's overage needs a responsibility                                                                              |
 
 ## When the phase rewrite lands
 
@@ -22,4 +23,4 @@ error in its readers once it leaves the type.
 The works mapper (`api/works/sources/track.ts`) maps `Work.current_work_phase`
 with `toWorkPhase`, so it follows any change here.
 
-Events, tasks and templates are not here yet; they move in their own modules.
+Events are in `api/events`; tasks and templates move in their own modules.

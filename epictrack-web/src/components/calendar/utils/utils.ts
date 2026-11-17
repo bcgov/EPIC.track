@@ -1,6 +1,6 @@
 import { LEGEND_ITEMS } from "../constants";
-import { EventCategory, EventsGridModel, EventType } from "models/event";
-import { EVENT_TYPE } from "components/workPlan/phase/type";
+import { EventsGridModel } from "models/event";
+import { calendarIconKey } from "api/events";
 
 /**
  * Returns an array of Dates (and nulls for empty slots) representing
@@ -63,12 +63,5 @@ export function resolveEventIconName(
   event: EventsGridModel,
   icons: Record<string, string>,
 ): string {
-  if (event.type === EVENT_TYPE.TASK) return icons["Task"];
-  if (event.event_configuration.event_type_id === EventType.SUBMISSION)
-    return icons["Submission"];
-  if (event.event_configuration.event_category_id === EventCategory.DECISION)
-    return icons["Decision"];
-  if (event.event_configuration.event_category_id === EventCategory.PCP)
-    return icons["PCP"];
-  return icons["Milestone"];
+  return icons[calendarIconKey(event)];
 }

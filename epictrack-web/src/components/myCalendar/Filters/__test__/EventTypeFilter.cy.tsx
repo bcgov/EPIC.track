@@ -25,7 +25,7 @@ describe("EventTypeFilter", () => {
   it("applies selected event types", () => {
     cy.mount(
       <EventCalendarProvider
-        initialSearchOptions={{ event_types: ["include_tasks:true"] } as any}
+        initialSearchOptions={{ event_types: ["task"] } as any}
       >
         <EventTypeFilter />
         <SearchOptionsProbe />
@@ -42,10 +42,7 @@ describe("EventTypeFilter", () => {
       (option) => option.label === "Decision",
     )?.value;
 
-    cy.get("[data-cy='event-types']").should(
-      "contain.text",
-      "include_tasks:true",
-    );
+    cy.get("[data-cy='event-types']").should("contain.text", "task");
     cy.get("[data-cy='event-types']").should(
       "contain.text",
       String(decisionValue),

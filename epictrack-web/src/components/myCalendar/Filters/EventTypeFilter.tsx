@@ -1,17 +1,17 @@
 import { useMemo } from "react";
 import FilterSelect from "components/shared/filterSelect/FilterSelect";
 import { useEventCalendarContext } from "components/calendar/EventCalendarContext";
-import { EventCategory, EventType } from "models/event";
+import { CalendarEventFilter } from "models/event";
 
-export const EVENT_TYPE_OPTIONS = [
-  {
-    label: "Milestone",
-    value: `event_category:${EventCategory.MILESTONE}`,
-  },
-  { label: "Task", value: "include_tasks:true" },
-  { label: "Decision", value: `event_category:${EventCategory.DECISION}` },
-  { label: "PCP", value: `event_category:${EventCategory.PCP}` },
-  { label: "Submission", value: `event_type:${EventType.SUBMISSION}` },
+export const EVENT_TYPE_OPTIONS: {
+  label: string;
+  value: CalendarEventFilter;
+}[] = [
+  { label: "Milestone", value: "milestone" },
+  { label: "Task", value: "task" },
+  { label: "Decision", value: "decision" },
+  { label: "PCP", value: "pcp" },
+  { label: "Submission", value: "submission" },
 ];
 
 export const EventTypeFilter = () => {
@@ -20,7 +20,7 @@ export const EventTypeFilter = () => {
   const value = useMemo(() => {
     // If no selected values, default to all options
     const selected = EVENT_TYPE_OPTIONS.filter((option) =>
-      searchOptions.event_types.includes(String(option.value)),
+      searchOptions.event_types.includes(option.value),
     );
     return selected.length > 0 ? selected : EVENT_TYPE_OPTIONS;
   }, [searchOptions.event_types]);
@@ -35,20 +35,20 @@ export const EventTypeFilter = () => {
           // fallback to all options if nothing selected
           setSearchOptions((prev) => ({
             ...prev,
-            event_types: EVENT_TYPE_OPTIONS.map((o) => String(o.value)),
+            event_types: EVENT_TYPE_OPTIONS.map((o) => o.value),
           }));
           return;
         }
         setSearchOptions((prev) => ({
           ...prev,
-          event_types: value as string[],
+          event_types: value as CalendarEventFilter[],
         }));
       }}
       filterClearedCallback={() => {
         // reset to all options when cleared
         setSearchOptions((prev) => ({
           ...prev,
-          event_types: EVENT_TYPE_OPTIONS.map((o) => String(o.value)),
+          event_types: EVENT_TYPE_OPTIONS.map((o) => o.value),
         }));
       }}
       value={value}

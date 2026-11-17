@@ -277,7 +277,14 @@ describe("Track events api", () => {
   it("maps calendar milestones and sends the filters as the backend reads them", () => {
     cy.then(() =>
       eventsApi.listCalendar({
-        event_types: ["event_category:4"],
+        event_types: [
+          "milestone",
+          "task",
+          "decision",
+          "pcp",
+          "submission",
+          "start_end_milestone",
+        ],
         project_types: [],
         regions: ["2"],
         staff_id: null,
@@ -297,8 +304,13 @@ describe("Track events api", () => {
     ]);
     cy.wait("@calendar").then(({ request }) => {
       const params = new URL(request.url).searchParams;
+      // "task" loads from tasks/calendar, so it has no milestone param.
       expect(params.getAll("event_types[]")).to.deep.equal([
+        "event_category:1",
         "event_category:4",
+        "event_category:5",
+        "event_type:9",
+        "event_position:START,END",
       ]);
       expect(params.getAll("regions[]")).to.deep.equal(["2"]);
       expect(params.getAll("work_ids[]")).to.deep.equal(["101"]);

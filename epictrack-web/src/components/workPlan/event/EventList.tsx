@@ -11,19 +11,21 @@ import {
 import { MRT_RowSelectionState } from "material-react-table";
 import { Box, Button, Divider, Grid, Tooltip, Typography } from "@mui/material";
 import { SnackbarKey, closeSnackbar } from "notistack";
-import Moment from "moment";
 import { When } from "react-if";
-import {
-  EventPosition,
-  EventsGridModel,
-  EventTemplateVisibility,
-  MilestoneEvent,
-} from "models/event";
-import { EVENT_STATUS, statusOptions, TaskEvent } from "models/taskEvent";
+import { EventsGridModel, MilestoneEvent } from "models/event";
+import { statusOptions, TaskEvent } from "models/taskEvent";
 import { TemplateStatus } from "models/work";
 import { ListType } from "models/code";
 import { setLoadingState } from "services/loadingService";
-import { eventsApi } from "api/events";
+import {
+  canDeleteRow,
+  compareEventRows,
+  eventsApi,
+  findEndEvent,
+  isEndEvent,
+  isEndEventOutOfOrder,
+  milestoneToRow,
+} from "api/events";
 import { responsibilityService } from "services/responsibilityService/responsibilityService";
 import { taskEventService } from "services/taskEventService/taskEventService";
 import { worksApi } from "api/works";
@@ -38,7 +40,7 @@ import { Palette } from "styles/theme";
 import { showConfetti } from "styles/uiStateSlice";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
 import { getErrorMessage } from "../../../utils/axiosUtils";
-import { dateUtils, naturalSortCollator } from "../../../utils";
+import { dateUtils } from "../../../utils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import TaskForm from "../task/TaskForm";
 import ImportTaskEvent from "../task/ImportTaskEvent";
@@ -99,14 +101,7 @@ const EventList = () => {
   const fetchAbortControllerRef = useRef<AbortController | null>(null);
   const prevCurrentPhaseIdRef = useRef<number | undefined>();
 
-  const endEvent = useMemo(
-    () =>
-      events.find(
-        (event) =>
-          event.event_configuration?.event_position === EventPosition.END,
-      ),
-    [events],
-  );
+  const endEvent = useMemo(() => findEndEvent(events), [events]);
 
   const isEventFormFieldLocked = useMemo(() => {
     return !!milestoneEvent?.actual_date;
@@ -119,25 +114,7 @@ const EventList = () => {
       setShowEndEventWarningBox(false);
       return;
     }
-    const endEventIndex = events.indexOf(endEvent);
-    const mandatoryEventIndices = events.reduce<number[]>(
-      (indices, event, index) => {
-        if (event.visibility === EventTemplateVisibility.MANDATORY) {
-          indices.push(index);
-        }
-        return indices;
-      },
-      [],
-    );
-    // Check if any mandatory event comes after the end event
-    if (
-      mandatoryEventIndices.length > 0 &&
-      endEventIndex < Math.max(...mandatoryEventIndices)
-    ) {
-      setShowEndEventWarningBox(true);
-      return;
-    }
-    setShowEndEventWarningBox(false);
+    setShowEndEventWarningBox(isEndEventOutOfOrder(events));
   }, [endEvent, events, selectedWorkPhase, setShowEndEventWarningBox]);
 
   useEffect(() => {
@@ -196,23 +173,7 @@ const EventList = () => {
       let result: EventsGridModel[] = [];
       try {
         const milestones = await eventsApi.listForPhase(phaseId);
-        result = milestones.map((milestone) => {
-          const element: any = { ...milestone };
-          element.type = EVENT_TYPE.MILESTONE;
-          element.start_date = element.actual_date || element.anticipated_date;
-          element.is_complete = !!element.actual_date;
-          const actualToTodayDiff = Moment(element.start_date).diff(
-            Moment(),
-            "days",
-          );
-          element.status = element.is_complete
-            ? EVENT_STATUS.COMPLETED
-            : actualToTodayDiff <= 0
-              ? EVENT_STATUS.INPROGRESS
-              : EVENT_STATUS.NOT_STARTED;
-          element.visibility = element.event_configuration.visibility;
-          return element;
-        });
+        result = milestones.map((milestone) => milestoneToRow(milestone));
       } catch (e) {
         // Error handling deferred to getCombinedEvents to avoid
         // premature setLoading(false) while parallel requests are in-flight
@@ -244,94 +205,7 @@ const EventList = () => {
           data.forEach((array: EventsGridModel[]) => {
             result = result.concat(array);
           });
-          result = result.sort((eventX, eventY) => {
-            // START milestone should be first, END milestone should be last
-            if (
-              eventX.event_configuration?.event_position ===
-                EventPosition.START ||
-              (eventY.event_configuration?.event_position ===
-                EventPosition.END &&
-                eventY.is_complete)
-            ) {
-              return -1;
-            }
-            if (
-              eventY.event_configuration?.event_position ===
-                EventPosition.START ||
-              (eventX.event_configuration?.event_position ===
-                EventPosition.END &&
-                eventX.is_complete)
-            ) {
-              return 1;
-            }
-            // Next priorit is for dates, lower dates comes first
-            const diff = Moment(eventX.start_date).diff(
-              eventY.start_date,
-              "days",
-            );
-            if (diff < 0) {
-              return -1;
-            }
-            if (diff > 0) {
-              return 1;
-            }
-            // Next if the dates are equal, then
-            if (
-              Moment(eventX.start_date).diff(eventY.start_date, "days") === 0
-            ) {
-              // If both events are MILESTONE, sort it based on the visibility
-              if (
-                eventX.type === EVENT_TYPE.MILESTONE &&
-                eventY.type === EVENT_TYPE.MILESTONE
-              ) {
-                // If both events are either MANDATORY OR OPTIONAL, sort is based on its autogenerated datebase ids
-                if (
-                  (eventX.visibility === EventTemplateVisibility.MANDATORY &&
-                    eventY.visibility === EventTemplateVisibility.MANDATORY) ||
-                  (eventX.visibility === EventTemplateVisibility.OPTIONAL &&
-                    eventY.visibility === EventTemplateVisibility.OPTIONAL)
-                ) {
-                  return eventX.id < eventY.id ? -1 : 1;
-                }
-                // MANDATORY should be shown first, then OPTIONAL
-                if (
-                  eventX.visibility === EventTemplateVisibility.MANDATORY ||
-                  eventY.visibility === EventTemplateVisibility.OPTIONAL
-                ) {
-                  return -1;
-                }
-                if (
-                  eventY.visibility === EventTemplateVisibility.MANDATORY ||
-                  eventX.visibility === EventTemplateVisibility.OPTIONAL
-                ) {
-                  return 1;
-                }
-              }
-              // If both events are either MILESTONE or TASK, sort is based on its autogenerated database ids
-              if (
-                (eventX.type === EVENT_TYPE.MILESTONE &&
-                  eventY.type === EVENT_TYPE.MILESTONE) ||
-                (eventX.type === EVENT_TYPE.TASK &&
-                  eventY.type === EVENT_TYPE.TASK)
-              ) {
-                return naturalSortCollator.compare(eventX.name, eventY.name);
-              }
-              // MILESTONE should shows first, then TASK
-              if (
-                eventX.type === EVENT_TYPE.MILESTONE ||
-                eventY.type === EVENT_TYPE.TASK
-              ) {
-                return -1;
-              }
-              if (
-                eventY.type === EVENT_TYPE.MILESTONE ||
-                eventX.type === EVENT_TYPE.TASK
-              ) {
-                return 1;
-              }
-            }
-            return diff;
-          });
+          result = result.sort(compareEventRows);
           setEvents(result);
           setLoading(false);
         })
@@ -412,9 +286,7 @@ const EventList = () => {
       }
     });
     getTemplateUploadStatus();
-    if (
-      milestoneEvent?.event_configuration?.event_position === EventPosition.END
-    ) {
+    if (isEndEvent(milestoneEvent?.event_configuration)) {
       getWorkPhaseById();
     }
     setMilestoneEvent(undefined);
@@ -512,10 +384,7 @@ const EventList = () => {
       setShowTaskForm(row.type === EVENT_TYPE.TASK);
     }
     dispatch(setLoadingState(false));
-    setShowDeleteMilestoneButton(
-      (row.type === EVENT_TYPE.MILESTONE || row.type === EVENT_TYPE.TASK) &&
-        !(row.visibility === EventTemplateVisibility.MANDATORY),
-    );
+    setShowDeleteMilestoneButton(canDeleteRow(row));
   };
 
   const onAddTask = () => {

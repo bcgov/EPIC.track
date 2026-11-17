@@ -1,16 +1,16 @@
 import { useMemo } from "react";
 import FilterSelect from "components/shared/filterSelect/FilterSelect";
 import { useEventCalendarContext } from "components/calendar/EventCalendarContext";
-import { EventCategory, EventType } from "models/event";
+import { CalendarEventFilter } from "models/event";
 
-export const EAO_EVENT_TYPE_OPTIONS = [
-  {
-    label: "Milestone (specific)",
-    value: `event_position:START,END`,
-  },
-  { label: "Decision", value: `event_category:${EventCategory.DECISION}` },
-  { label: "PCP", value: `event_category:${EventCategory.PCP}` },
-  { label: "Submission", value: `event_type:${EventType.SUBMISSION}` },
+export const EAO_EVENT_TYPE_OPTIONS: {
+  label: string;
+  value: CalendarEventFilter;
+}[] = [
+  { label: "Milestone (specific)", value: "start_end_milestone" },
+  { label: "Decision", value: "decision" },
+  { label: "PCP", value: "pcp" },
+  { label: "Submission", value: "submission" },
 ];
 
 export const EaoEventTypeFilter = () => {
@@ -19,7 +19,7 @@ export const EaoEventTypeFilter = () => {
   const value = useMemo(() => {
     // If no selected values, default to all options
     const selected = EAO_EVENT_TYPE_OPTIONS.filter((option) =>
-      searchOptions.event_types.includes(String(option.value)),
+      searchOptions.event_types.includes(option.value),
     );
     return selected.length > 0 ? selected : EAO_EVENT_TYPE_OPTIONS;
   }, [searchOptions.event_types]);
@@ -34,20 +34,20 @@ export const EaoEventTypeFilter = () => {
           // fallback to all options if nothing selected
           setSearchOptions((prev) => ({
             ...prev,
-            event_types: EAO_EVENT_TYPE_OPTIONS.map((o) => String(o.value)),
+            event_types: EAO_EVENT_TYPE_OPTIONS.map((o) => o.value),
           }));
           return;
         }
         setSearchOptions((prev) => ({
           ...prev,
-          event_types: value as string[],
+          event_types: value as CalendarEventFilter[],
         }));
       }}
       filterClearedCallback={() => {
         // reset to all options when cleared
         setSearchOptions((prev) => ({
           ...prev,
-          event_types: EAO_EVENT_TYPE_OPTIONS.map((o) => String(o.value)),
+          event_types: EAO_EVENT_TYPE_OPTIONS.map((o) => o.value),
         }));
       }}
       value={value}

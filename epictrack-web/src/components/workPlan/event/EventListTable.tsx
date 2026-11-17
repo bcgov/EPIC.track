@@ -2,7 +2,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { EVENT_TYPE } from "../phase/type";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import Icons from "../../icons";
-import { EventPosition, EventsGridModel } from "../../../models/event";
+import { EventsGridModel } from "../../../models/event";
+import { isStartOrEndEvent } from "api/events";
 import { MRT_ColumnDef, MRT_RowSelectionState } from "material-react-table";
 import { ETGridTitle, ETParagraph, IButton } from "../../shared";
 import { dateUtils } from "../../../utils";
@@ -147,9 +148,7 @@ const EventListTable = ({
           ? ({ cell, row, renderedCellValue }) => (
               <ETGridTitle
                 to="#"
-                bold={[EventPosition.START, EventPosition.END].includes(
-                  row.original.event_configuration?.event_position,
-                )}
+                bold={isStartOrEndEvent(row.original.event_configuration)}
                 onClick={(event: any) => onRowClick(event, row.original)}
                 enableTooltip={true}
                 tooltip={cell.getValue<string>()}
