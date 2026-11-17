@@ -16,4 +16,22 @@ describe("TrackDialog", () => {
     );
     cy.get('div[role="dialog"]').contains("Test Content").should("be.visible");
   });
+
+  it("keeps its own props off the dialog's DOM", () => {
+    cy.mount(
+      <TrackDialog
+        open={true}
+        dialogTitle="Test Dialog"
+        formId="test-form"
+        okButtonText="Save"
+        isActionsRequired
+      />,
+    );
+    cy.contains("button", "Save").should("be.visible");
+    cy.get(".MuiDialog-root").should(($root) => {
+      ["dialogtitle", "formid", "okbuttontext"].forEach((name) =>
+        expect($root).not.to.have.attr(name),
+      );
+    });
+  });
 });
