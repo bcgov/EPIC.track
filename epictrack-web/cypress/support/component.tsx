@@ -100,3 +100,16 @@ Cypress.Commands.add("mount", (component, options = {}) => {
 
 // Example use:
 // cy.mount(<MyComponent />)
+
+// Answer any API request a spec did not mock with an empty 200 instead of
+// letting it reach the dev server. Unmocked requests used to 404 there, and
+// most components do not catch failed fetches, so the unhandled rejection
+// failed whichever test or hook happened to be running when it settled --
+// a different test on each CI run. Intercepts registered by a spec take
+// precedence over this one (Cypress runs the most recent matching handler
+// first), and specs that test error handling stub the service directly.
+beforeEach(() => {
+  cy.intercept({ url: /\/api\/v1\// }, (req) => {
+    req.reply({ statusCode: 200, body: [] });
+  });
+});
