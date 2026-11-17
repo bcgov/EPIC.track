@@ -8,6 +8,7 @@ import { taskEventService } from "../../../../services/taskEventService/taskEven
 import { eventsApi } from "api/events";
 import { workService } from "../../../../services/workService/workService";
 import { workPhasesApi } from "api/workPhases";
+import { worksApi } from "api/works";
 import { responsibilityService } from "../../../../services/responsibilityService/responsibilityService";
 import { templateService } from "../../../../services/taskService/templateService";
 import { store } from "../../../../store";
@@ -71,6 +72,14 @@ describe("EventList", { retries: 2 }, () => {
         status: 200,
         data: [{ id: 1, name: "EAO" }],
       } as any);
+
+    // A save or delete reloads the phases and the work; the global [] reply is not a work.
+    cy.stub(workPhasesApi, "listForWork")
+      .as("listWorkPhases")
+      .resolves([selectedWorkPhase] as any);
+    cy.stub(worksApi, "get")
+      .as("getWork")
+      .resolves({ id: 101, title: "Bridge Work" } as any);
   });
 
   it("loads events and renders suspended warning", () => {
@@ -692,6 +701,7 @@ describe("EventList", { retries: 2 }, () => {
     });
 
     cy.get("@deleteTasks").should("have.been.called");
+    cy.get("@getWork").should("have.been.calledWith", 101);
   });
 
   it("opens a task from row click", () => {
