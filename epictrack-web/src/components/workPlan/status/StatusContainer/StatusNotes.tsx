@@ -27,7 +27,7 @@ const StatusNotes = () => {
         "status_notes",
       );
       if (result.status === 200) {
-        setWork(result.data);
+        setWork((current) => current && { ...current, status_notes: value });
         showNotification("Notes saved successfully", {
           type: "success",
           duration: 1000,

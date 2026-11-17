@@ -17,7 +17,6 @@ import {
 
 const mockWork: Work = {
   ...generateMockWork(),
-  is_deleted: false,
   is_active: true,
 };
 

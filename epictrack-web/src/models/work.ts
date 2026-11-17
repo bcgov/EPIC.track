@@ -16,7 +16,6 @@ export interface Work extends MasterBase {
   is_active: boolean;
   is_completed: boolean;
   is_high_priority: boolean;
-  is_deleted: boolean;
   start_date: string;
   anticipated_decision_date: string;
   decision_date: string;
@@ -50,7 +49,7 @@ export interface Work extends MasterBase {
   responsible_epd: Staff;
   work_lead: Staff;
   work_type: ListType;
-  current_work_phase: WorkPhase;
+  current_work_phase: WorkPhase | null;
   substitution_act: ListType;
   eac_decision_by: Staff;
   decision_by: Staff;
@@ -61,6 +60,43 @@ export interface Work extends MasterBase {
   }[];
   rel_staff?: Staff[];
   work_phase_status?: WorkPhaseAdditionalInfo[];
+}
+
+export interface WorkListItem {
+  id: number;
+  title: string;
+  is_active: boolean;
+  work_state: string;
+  project: ProjectRef;
+  ea_act: { name: string };
+  work_type: { name: string };
+  eao_team: { name: string };
+  current_work_phase: { name: string } | null;
+}
+
+export interface WorkOption {
+  id: number;
+  title: string;
+}
+
+export interface WorkInput {
+  simple_title?: string;
+  report_description?: string;
+  epic_description?: string | null;
+  start_date?: string | Date;
+  ea_act_id?: number;
+  work_type_id?: number;
+  project_id?: number;
+  ministry_id?: number;
+  federal_involvement_id?: number;
+  substitution_act_id?: number | null;
+  eao_team_id?: number | null;
+  responsible_epd_id?: number | null;
+  work_lead_id?: number | null;
+  decision_by_id?: number | null;
+  is_active?: boolean;
+  is_high_priority?: boolean;
+  is_cac_recommended?: boolean;
 }
 
 export interface WorkPhase extends MasterBase {

@@ -24,7 +24,6 @@ Calls under `/projects` whose data Track owns stay on the Track client in
 
 - `projects/:id/work-types`
 - `projects/:id/first-nations` and `projects/:id/first-nation-available`
-- `projects?with_works=true` (My Workplans name filter; moves to the works module)
 
 Project special-field history (proponent and name history in the project form)
 still goes through `services/specialFieldService`. Decide where it lives when
@@ -53,7 +52,8 @@ DEMI owns projects.
 - **Stable IDs.** Works store `project_id`, today Track's project ID (also the
   ID Track pushes to DEMI). DEMI must keep it, or the DEMI source must map it.
 - **Data.** Every `ProjectsSource` operation: summary and full project, list
-  and dropdown options, create and update, the duplicate-name check,
+  and dropdown options (optionally only projects that have works), create and
+  update, the duplicate-name check,
   abbreviation suggestions, project types, and the form lookups (types,
   sub-types, proponents, ENV and NRS regions).
 - **Summary fields.** `ProjectSummary` needs id, name, description,

@@ -16,6 +16,7 @@ import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import { TaskEvent } from "models/taskEvent";
 import { Work, WorkPhase } from "models/work";
 import { workService } from "services/workService/workService";
+import { worksApi } from "api/works";
 
 export interface CalendarSearchOptions {
   event_types: string[];
@@ -237,7 +238,7 @@ export const EventCalendarProvider = ({
       const { work_id, phase_id, event } = calendarEvent;
 
       // always fetch work
-      const workPromise = workService.getById(String(work_id));
+      const workPromise = worksApi.get(work_id);
 
       // conditionally fetch workPhase
       const phasePromise =
@@ -257,7 +258,7 @@ export const EventCalendarProvider = ({
         eventPromise,
       ]);
 
-      if (workRes.status === 200) setWork(workRes.data as Work);
+      setWork(workRes);
       if (phaseRes) setWorkPhase(phaseRes as WorkPhase);
 
       if (event.type === EVENT_TYPE.MILESTONE && eventRes.status === 200) {

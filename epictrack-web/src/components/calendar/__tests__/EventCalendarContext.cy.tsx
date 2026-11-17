@@ -72,7 +72,11 @@ const endpoints: Endpoint[] = [
     url: `${AppConfig.apiUrl}works/101`,
     response: {
       statusCode: 200,
-      body: { id: 101, title: "Work Alpha" },
+      body: {
+        id: 101,
+        title: "Work Alpha",
+        project: { id: 1, name: "Project Alpha" },
+      },
     },
   },
   {

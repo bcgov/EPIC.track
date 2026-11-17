@@ -9,7 +9,6 @@ import {
 } from "react";
 import debounce from "lodash/debounce";
 import { Box, Grid, SxProps } from "@mui/material";
-import { Work } from "../../../models/work";
 import { FN_RESOURCES } from "../../../constants/application-constant";
 import { Palette } from "../../../styles/theme";
 import { workService } from "../../../services/workService/workService";
@@ -64,7 +63,9 @@ const FirstNationContainer = () => {
         value,
       );
       if (result.status === 200) {
-        ctx.setWork(result.data as Work);
+        ctx.setWork(
+          (current) => current && { ...current, first_nation_notes: value },
+        );
         showNotification("Notes saved successfully", {
           type: "success",
           duration: 1000,

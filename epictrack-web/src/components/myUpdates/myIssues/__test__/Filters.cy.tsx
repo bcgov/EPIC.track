@@ -2,7 +2,7 @@ import { mount } from "cypress/react";
 import Filters from "../Filters";
 import { MyIssuesContext } from "../MyIssuesContext";
 import { issuesContextValue } from "../../../../../cypress/support/common";
-import * as projectService from "services/projectService/projectService";
+import { projectsApi } from "api/projects";
 
 describe("My Issues Filters", () => {
   it("renders all filter components", () => {
@@ -27,12 +27,10 @@ describe("My Issues Filters", () => {
     const mockSetSearchOptions = cy.stub().as("setSearchOptions");
     const mockSetSortOrder = cy.stub().as("setSortOrder");
 
-    cy.stub(projectService.projectService, "getAll").resolves({
-      data: [
-        { id: 1, name: "Project A" },
-        { id: 2, name: "Project B" },
-      ],
-    });
+    cy.stub(projectsApi, "listOptions").resolves([
+      { id: 1, name: "Project A" },
+      { id: 2, name: "Project B" },
+    ]);
 
     mount(
       <MyIssuesContext.Provider

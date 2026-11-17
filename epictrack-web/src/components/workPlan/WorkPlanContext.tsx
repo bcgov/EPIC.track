@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useSearchParams } from "../../hooks/useSearchParams";
 import { workService } from "../../services/workService/workService";
+import { worksApi } from "api/works";
 import { Work, WorkPhaseAdditionalInfo } from "../../models/work";
 import { StaffWorkRole } from "../../models/staff";
 import { ACTIVE_STATUS } from "../../constants/application-constant";
@@ -129,8 +130,7 @@ export const WorkplanProvider = ({
 
   const getWorkById = useCallback(async () => {
     if (workId) {
-      const work = await workService.getById(String(workId));
-      setWork(work.data as Work);
+      setWork(await worksApi.get(Number(workId)));
     }
   }, [workId]);
 

@@ -154,10 +154,13 @@ export const trackProjectsSource: ProjectsSource = {
   list: async () =>
     (await trackClient.get<TrackProjectDto[]>("projects")).map(toProject),
 
-  listOptions: async () =>
+  listOptions: async (filter) =>
     (
       await trackClient.get<TrackNamedDto[]>("projects", {
-        params: { return_type: "list_type" },
+        params: {
+          return_type: "list_type",
+          with_works: filter?.withWorks || undefined,
+        },
       })
     ).map(toProjectRef),
 

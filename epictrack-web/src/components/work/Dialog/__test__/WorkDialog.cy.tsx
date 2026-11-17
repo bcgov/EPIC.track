@@ -1,9 +1,11 @@
 import { AppConfig } from "config";
+import { worksApi } from "api/works";
 import { WorkDialog } from "..";
 import {
   Endpoint,
   setupIntercepts,
 } from "../../../../../cypress/support/utils";
+import { generateMockWork } from "../../../../../cypress/support/mocks";
 
 const endpoints: Endpoint[] = [
   {
@@ -80,5 +82,46 @@ describe("WorkDialog", () => {
     cy.contains("button", "Cancel").click();
 
     cy.get("@setOpen").should("have.been.calledWith", false);
+  });
+
+  it("saves an edit through worksApi and calls back", () => {
+    const work = {
+      ...generateMockWork(),
+      id: 5,
+      ea_act_id: 1,
+      work_type_id: 1,
+      project_id: 1,
+      ministry_id: 1,
+      federal_involvement_id: 1,
+      substitution_act_id: 1,
+      eao_team_id: 1,
+      responsible_epd_id: 1,
+      work_lead_id: 1,
+      decision_by_id: 1,
+    };
+    cy.stub(worksApi, "get").resolves(work);
+    cy.stub(worksApi, "checkExists").resolves(false);
+    cy.stub(worksApi, "update").as("update").resolves(work);
+    const saveWorkCallback = cy.stub().as("saveWorkCallback");
+
+    cy.mount(
+      <WorkDialog
+        open={true}
+        setOpen={cy.stub()}
+        workId={5}
+        isActiveTeamMember={true}
+        saveWorkCallback={saveWorkCallback}
+      />,
+    );
+
+    cy.contains(work.title).should("exist");
+    cy.contains("button", "Save").click();
+
+    cy.get("@update").should(
+      "have.been.calledWith",
+      5,
+      Cypress.sinon.match({ simple_title: work.simple_title, project_id: 1 }),
+    );
+    cy.get("@saveWorkCallback").should("have.been.calledOnce");
   });
 });

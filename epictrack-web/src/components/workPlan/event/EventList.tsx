@@ -22,7 +22,6 @@ import {
 import { EVENT_STATUS, statusOptions, TaskEvent } from "models/taskEvent";
 import {
   TemplateStatus,
-  Work,
   WorkPhase,
   WorkPhaseAdditionalInfo,
 } from "models/work";
@@ -32,6 +31,7 @@ import { eventService } from "services/eventService/eventService";
 import { responsibilityService } from "services/responsibilityService/responsibilityService";
 import { taskEventService } from "services/taskEventService/taskEventService";
 import { workService } from "services/workService/workService";
+import { worksApi } from "api/works";
 import { OptionType } from "../../shared/filterSelect/type";
 import { showNotification } from "../../shared/notificationProvider";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
@@ -402,9 +402,7 @@ const EventList = () => {
 
   const getWorkById = useCallback(async () => {
     if (work?.id) {
-      const result = await workService.getById(String(work.id));
-      const workResult = result.data as Work;
-      setWork(workResult);
+      setWork(await worksApi.get(work.id));
     }
   }, [setWork, work?.id]);
 

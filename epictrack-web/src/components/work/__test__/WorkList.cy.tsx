@@ -54,7 +54,6 @@ const generateMockWork = (): Work => {
     is_active: faker.datatype.boolean(),
     is_completed: faker.datatype.boolean(),
     is_high_priority: faker.datatype.boolean(),
-    is_deleted: faker.datatype.boolean(),
     start_date: faker.date.past().toISOString(),
     anticipated_decision_date: faker.date.future().toISOString(),
     decision_date: faker.date.future().toISOString(),
