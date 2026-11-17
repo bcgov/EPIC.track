@@ -49,6 +49,8 @@ const taskCalendarItems: CalendarItem[] = [
       name: "Task One",
       start_date: "2026-03-12T00:00:00.000Z",
       number_of_days: 3,
+      assignees: [],
+      responsibilities: [],
     },
     phase_name: "Phase Alpha",
     phase_id: 11,

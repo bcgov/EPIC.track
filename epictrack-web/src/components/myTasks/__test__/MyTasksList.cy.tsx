@@ -327,12 +327,6 @@ describe("MyTasksList", () => {
   });
 
   it("does not refresh when delete is unsuccessful", () => {
-    cy.on("uncaught:exception", (err) => {
-      if (err.message.includes("Request failed with status code 500")) {
-        return false;
-      }
-    });
-
     const userState = store.getState().user.userDetail;
     store.dispatch(
       userDetails({
@@ -365,6 +359,7 @@ describe("MyTasksList", () => {
     cy.contains("button", "Delete").click({ force: true });
     cy.contains("button", "Yes").click({ force: true });
     cy.wait("@deleteTaskFailure");
+    cy.contains("Failed to delete Task").should("exist");
     cy.get("@getMyTasksFailureScenario.all").should("have.length", 1);
     cy.contains("Draft Review Task").should("exist");
   });

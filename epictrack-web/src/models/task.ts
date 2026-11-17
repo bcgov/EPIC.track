@@ -1,24 +1,21 @@
-import { Work } from "./work";
-import { EventsGridModel } from "./event";
+import type { TaskEventItem } from "./taskEvent";
+
+/** A task in a task template. */
 export interface Task {
+  id: number;
   name: string;
   start_at: number;
   number_of_days: number;
   template_id: number;
   tips: string;
+  responsibility_id: number | null;
 }
 
-export interface MyTask extends EventsGridModel {
-  id: number;
-  work: Work;
-  notes: string;
-  start_date: string;
-  end_date: string;
-  assigned: string;
-  tips: string;
-  work_phase_id: number;
-  responsibilities: Responsibility[];
-}
+/** A task on My Tasks, with its work. */
+export type MyTask = TaskEventItem & {
+  work: { id: number; title: string; notes: string };
+  end_date?: string;
+};
 
 export interface Responsibility {
   id: number;

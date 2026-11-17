@@ -71,16 +71,6 @@ const Endpoints = {
     GET_USER_GROUPS: "users/groups",
     UPDATE_USER_GROUPS: "users/:userId/groups",
   },
-  Templates: {
-    TEMPLATES: "task-templates",
-  },
-  TaskEvents: {
-    EVENTS: "tasks/events",
-    TASKS: "tasks",
-    MY_TASKS: "tasks/events/staff-work/:staff_id",
-    IMPORT_TASKS: "tasks/work_phase/:work_phase_id/sheet",
-    CALENDAR_TASKS: "tasks/calendar",
-  },
   Responsibilities: {
     RESPONSIBILITIES: "/responsibilities",
   },

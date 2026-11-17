@@ -12,7 +12,7 @@ import {
   MilestoneEvent,
 } from "models/event";
 import { eventsApi } from "api/events";
-import { taskEventService } from "services/taskEventService/taskEventService";
+import { tasksApi } from "api/tasks";
 import { EVENT_TYPE } from "../workPlan/phase/type";
 import dateUtils from "utils/dateUtils";
 import { showNotification } from "components/shared/notificationProvider";
@@ -139,21 +139,14 @@ export const EventCalendarProvider = ({
     try {
       const eventPromise = eventsApi.listCalendar(searchOptions);
 
-      let taskPromise: Promise<any> | null = null;
+      const taskPromise = searchOptions.event_types.includes("task")
+        ? tasksApi.listCalendar(searchOptions)
+        : Promise.resolve([]);
 
-      if (searchOptions.event_types.includes("task")) {
-        taskPromise = taskEventService.getCalendarTasks({
-          ...searchOptions,
-          event_types: [],
-        });
-      }
-
-      const [eventItems, taskResult] = await Promise.all([
+      const [eventItems, taskItems] = await Promise.all([
         eventPromise,
-        taskPromise ?? Promise.resolve({ data: { items: [] } }),
+        taskPromise,
       ]);
-
-      const taskItems = (taskResult?.data?.items || []) as any[];
 
       const mappedEvents = eventItems.map((element) => ({
         event: {
@@ -176,7 +169,7 @@ export const EventCalendarProvider = ({
       }));
       const mappedTasks = taskItems.map((element) => ({
         event: {
-          ...element.event,
+          ...(element.event as any),
           end_date: dateUtils
             .add(element.event.start_date, element.event.number_of_days, "days")
             .toISOString(),
@@ -241,10 +234,10 @@ export const EventCalendarProvider = ({
           : Promise.resolve(null);
       const taskPromise =
         event.type === EVENT_TYPE.TASK
-          ? taskEventService.getById(event.id)
+          ? tasksApi.get(event.id)
           : Promise.resolve(null);
 
-      const [workRes, phaseRes, milestoneRes, eventRes] = await Promise.all([
+      const [workRes, phaseRes, milestoneRes, taskRes] = await Promise.all([
         workPromise,
         phasePromise,
         milestonePromise,
@@ -256,15 +249,8 @@ export const EventCalendarProvider = ({
 
       if (milestoneRes) {
         setMilestoneEvent(milestoneRes);
-      } else if (eventRes && eventRes.status === 200) {
-        const taskEvent = eventRes.data as TaskEvent;
-        taskEvent.assignee_ids = (eventRes.data as any)["assignees"].map(
-          (p: any) => p["assignee_id"],
-        );
-        taskEvent.responsibility_ids = (eventRes.data as any)[
-          "responsibilities"
-        ].map((p: any) => p["responsibility_id"]);
-        setTaskEvent(taskEvent);
+      } else if (taskRes) {
+        setTaskEvent(taskRes);
       }
     } catch {
       showNotification(COMMON_ERROR_MESSAGE, { type: "error" });

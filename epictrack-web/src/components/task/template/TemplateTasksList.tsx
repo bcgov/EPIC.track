@@ -5,8 +5,8 @@ import { RESULT_STATUS } from "../../../constants/application-constant";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import { Task } from "../../../models/task";
 import TrackDialog from "../../shared/TrackDialog";
-import { Template } from "../../../models/template";
-import { templateService } from "../../../services/taskService/templateService";
+import { TaskTemplate as Template } from "../../../models/template";
+import { taskTemplatesApi } from "api/taskTemplates";
 
 const TemplateTaskList = ({ ...props }) => {
   const [tasks, setTasks] = React.useState<Task[]>([]);
@@ -21,10 +21,7 @@ const TemplateTaskList = ({ ...props }) => {
       setResultStatus(RESULT_STATUS.LOADING);
       try {
         if (templateId === undefined) return;
-        const taskResult = await templateService.getTemplateTasks(templateId);
-        if (taskResult.status === 200) {
-          setTasks(taskResult.data as never);
-        }
+        setTasks(await taskTemplatesApi.listTasks(templateId));
       } catch (error) {
         console.error("Tasks List: ", error);
       } finally {
@@ -37,10 +34,7 @@ const TemplateTaskList = ({ ...props }) => {
     async (templateId: number | undefined) => {
       try {
         if (templateId === undefined) return;
-        const templateResult = await templateService.getTemplate(templateId);
-        if (templateResult.status === 200) {
-          setTemplate(templateResult.data as never);
-        }
+        setTemplate(await taskTemplatesApi.get(templateId));
       } catch (error) {
         console.error("Get template: ", error);
       }
@@ -77,16 +71,12 @@ const TemplateTaskList = ({ ...props }) => {
   );
 
   const handleApproval = async (event: any) => {
-    const result = await templateService.patchTemplate(templateId, {
-      is_active: !template?.is_active,
-    });
-    if (result.status === 200) {
-      setAlertContentText(
-        `Template ${template?.is_active ? "Deactivated" : "Activated"}`,
-      );
-      setOpenAlertDialog(true);
-      props.onApproval();
-    }
+    await taskTemplatesApi.setActive(templateId, !template?.is_active);
+    setAlertContentText(
+      `Template ${template?.is_active ? "Deactivated" : "Activated"}`,
+    );
+    setOpenAlertDialog(true);
+    props.onApproval();
   };
 
   return (

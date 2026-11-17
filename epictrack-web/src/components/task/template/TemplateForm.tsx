@@ -13,7 +13,7 @@ import { getErrorMessage } from "../../../utils/axiosUtils";
 import { eaActService } from "services/eaActService";
 import { workPhasesApi } from "api/workPhases";
 import { workTypesApi } from "api/workTypes";
-import { templateService } from "services/taskService/templateService";
+import { taskTemplatesApi } from "api/taskTemplates";
 
 export default function TemplateForm({ ...props }) {
   const [eaActs, setEAActs] = useState<ListType[]>([]);
@@ -82,13 +82,11 @@ export default function TemplateForm({ ...props }) {
   const onSubmitHandler = async (data: any) => {
     try {
       data["template_file"] = data["template_file"][0];
-      const result = await templateService.createTemplate(data);
-      if (result.status === 201) {
-        showNotification("Template details inserted", {
-          type: "success",
-        });
-        props.onSubmitSuccess();
-      }
+      await taskTemplatesApi.create(data);
+      showNotification("Template details inserted", {
+        type: "success",
+      });
+      props.onSubmitSuccess();
       reset();
     } catch (e) {
       const message = getErrorMessage(e);

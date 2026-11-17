@@ -36,7 +36,8 @@ const endpoints: Endpoint[] = [
     method: "PUT",
     url: `${AppConfig.apiUrl}tasks/events/42`,
     response: {
-      body: { id: 42 },
+      // TaskEventResponseSchema always sends the assignee and responsibility lists.
+      body: { id: 42, assignees: [], responsibilities: [] },
     },
   },
 ];

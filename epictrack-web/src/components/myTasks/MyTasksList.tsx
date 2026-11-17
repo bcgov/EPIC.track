@@ -34,7 +34,7 @@ import { IconProps } from "components/icons/type";
 import { MONTH_DAY_YEAR, ROLES } from "constants/application-constant";
 import { MyTask } from "models/task";
 import { EVENT_STATUS, statusOptions, TaskEvent } from "models/taskEvent";
-import { taskEventService } from "services/taskEventService/taskEventService";
+import { tasksApi } from "api/tasks";
 import { useAppSelector } from "hooks";
 import { useCachedState } from "hooks/useCachedFilters";
 import { dateUtils } from "utils";
@@ -91,22 +91,17 @@ export default function MyTasksList() {
   const getMyTasks = useCallback(async (): Promise<MyTask[]> => {
     const result: [] = [];
     try {
-      const taskResult = await taskEventService.getMyTasks(
-        Number(user.staffId),
-      );
-
-      if (taskResult.status === 200) {
-        const tasksWithEndDates = (taskResult.data as MyTask[]).map((task) => {
-          const startDate = new Date(task.start_date);
-          const endDate = new Date(startDate);
-          endDate.setDate(startDate.getDate() + task.number_of_days);
-          return {
-            ...task,
-            end_date: dateUtils.formatDate(String(endDate), MONTH_DAY_YEAR),
-          };
-        });
-        setMyTasks(tasksWithEndDates);
-      }
+      const tasks = await tasksApi.listMine(Number(user.staffId));
+      const tasksWithEndDates = tasks.map((task) => {
+        const startDate = new Date(task.start_date);
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + task.number_of_days);
+        return {
+          ...task,
+          end_date: dateUtils.formatDate(String(endDate), MONTH_DAY_YEAR),
+        };
+      });
+      setMyTasks(tasksWithEndDates);
     } catch (e) {
       console.log("Error fetching my tasks", e);
     }
@@ -127,17 +122,12 @@ export default function MyTasksList() {
   }, [getMyTasks]);
 
   const deleteTasks = async () => {
-    const response = await taskEventService.deleteTasks({
-      task_ids: task?.id ? task.id : null,
-      work_id: task?.work?.id,
-    });
     try {
-      if (response.status === 200) {
-        showNotification("Deleted successfully", {
-          type: "success",
-        });
-        onSaveHandler();
-      }
+      await tasksApi.removeMany(task?.id ? [task.id] : [], task?.work?.id);
+      showNotification("Deleted successfully", {
+        type: "success",
+      });
+      onSaveHandler();
     } catch (e) {
       showNotification("Failed to delete Task", {
         type: "error",

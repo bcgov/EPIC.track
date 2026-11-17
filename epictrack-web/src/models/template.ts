@@ -12,6 +12,24 @@ export interface Template extends ListType {
   is_active: boolean;
 }
 
-export interface TemplateApprove {
+/** A task template as the template screens show it. */
+export interface TaskTemplate {
+  id: number;
+  name: string;
+  ea_act_id: number;
+  work_type_id: number;
+  phase_id: number;
+  ea_act: ListType;
+  work_type: ListType;
+  phase: ListType;
   is_active: boolean;
+}
+
+/** The template upload form, posted as multipart. */
+export interface TemplateInput {
+  name: string;
+  ea_act_id: number;
+  work_type_id: number;
+  phase_id: number;
+  template_file: File;
 }

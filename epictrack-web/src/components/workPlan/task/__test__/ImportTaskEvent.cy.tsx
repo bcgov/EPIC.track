@@ -7,6 +7,15 @@ import {
   setupIntercepts,
 } from "../../../../../cypress/support/utils";
 
+const templateLookups = {
+  ea_act_id: 3,
+  work_type_id: 6,
+  phase_id: 2,
+  ea_act: { id: 3, name: "EA Act (2018)" },
+  work_type: { id: 6, name: "Assessment" },
+  phase: { id: 2, name: "Early Engagement" },
+};
+
 const endpoints: Endpoint[] = [
   {
     name: "getTemplates",
@@ -14,8 +23,9 @@ const endpoints: Endpoint[] = [
     url: `${AppConfig.apiUrl}task-templates*`,
     response: {
       body: [
-        { id: 11, name: "Template A", is_active: true },
-        { id: 22, name: "Template B", is_active: true },
+        // TaskTemplateResponseSchema always nests these (non-null foreign keys).
+        { id: 11, name: "Template A", is_active: true, ...templateLookups },
+        { id: 22, name: "Template B", is_active: true, ...templateLookups },
       ],
     },
   },

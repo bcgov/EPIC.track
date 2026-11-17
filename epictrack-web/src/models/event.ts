@@ -2,6 +2,7 @@ import { EVENT_TYPE } from "../components/workPlan/phase/type";
 import EventConfiguration from "./eventConfiguration";
 import { Staff } from "./staff";
 import { EVENT_STATUS } from "./taskEvent";
+import type { TaskEventItem } from "./taskEvent";
 
 export interface EventsGridModel {
   start_date: string;
@@ -90,6 +91,15 @@ export type CalendarEventFilter =
   | "pcp"
   | "submission"
   | "start_end_milestone";
+
+/** A task on My Calendar, with its work and phase. */
+export interface CalendarTask {
+  event: TaskEventItem;
+  work_id: number;
+  work_name: string;
+  phase_id: number;
+  phase_name: string;
+}
 
 export interface CalendarSearchOptions {
   event_types: CalendarEventFilter[];

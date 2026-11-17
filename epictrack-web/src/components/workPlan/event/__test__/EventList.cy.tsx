@@ -4,13 +4,14 @@ import { EventProvider } from "../EventContext";
 import { WorkplanContext, initialWorkPlanContext } from "../../WorkPlanContext";
 import { EVENT_TYPE } from "../../phase/type";
 import { EVENT_STATUS } from "../../../../models/taskEvent";
-import { taskEventService } from "../../../../services/taskEventService/taskEventService";
+import { tasksApi } from "api/tasks";
+import { ApiError } from "apiManager/apiError";
 import { eventsApi } from "api/events";
 import { workService } from "../../../../services/workService/workService";
 import { workPhasesApi } from "api/workPhases";
 import { worksApi } from "api/works";
 import { responsibilityService } from "../../../../services/responsibilityService/responsibilityService";
-import { templateService } from "../../../../services/taskService/templateService";
+import { taskTemplatesApi } from "api/taskTemplates";
 import { store } from "../../../../store";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 
@@ -29,23 +30,20 @@ const selectedWorkPhase = {
 
 describe("EventList", { retries: 2 }, () => {
   beforeEach(() => {
-    cy.stub(taskEventService, "getAll")
+    cy.stub(tasksApi, "listForPhase")
       .as("getAllTasks")
-      .resolves({
-        status: 200,
-        data: [
-          {
-            id: 101,
-            name: "Submit package",
-            start_date: "2026-03-05T00:00:00.000Z",
-            number_of_days: 3,
-            assignees: [],
-            responsibilities: [],
-            status: EVENT_STATUS.INPROGRESS,
-            notes: '{"blocks":[],"entityMap":{}}',
-          },
-        ],
-      } as any);
+      .resolves([
+        {
+          id: 101,
+          name: "Submit package",
+          start_date: "2026-03-05T00:00:00.000Z",
+          number_of_days: 3,
+          assignees: [],
+          responsibilities: [],
+          status: EVENT_STATUS.INPROGRESS,
+          notes: '{"blocks":[],"entityMap":{}}',
+        },
+      ] as any);
 
     cy.stub(eventsApi, "listForPhase")
       .as("getMilestones")
@@ -656,9 +654,7 @@ describe("EventList", { retries: 2 }, () => {
   });
 
   it("deletes selected task rows from the bulk action bar", () => {
-    cy.stub(taskEventService, "deleteTasks")
-      .as("deleteTasks")
-      .resolves({ status: 200 } as any);
+    cy.stub(tasksApi, "removeMany").as("deleteTasks").resolves();
 
     cy.mount(
       <Router>
@@ -704,6 +700,61 @@ describe("EventList", { retries: 2 }, () => {
     cy.get("@getWork").should("have.been.calledWith", 101);
   });
 
+  it("shows the error when deleting tasks fails", () => {
+    cy.stub(tasksApi, "removeMany")
+      .as("deleteTasks")
+      .rejects(
+        new ApiError({
+          client: "track",
+          status: 500,
+          message: "Could not delete the tasks",
+        }),
+      );
+
+    cy.mount(
+      <Router>
+        <WorkplanContext.Provider
+          value={{
+            ...initialWorkPlanContext,
+            team: [],
+            work: {
+              id: 101,
+              title: "Bridge Work",
+              current_work_phase_id: 12,
+              project: {
+                name: "Bridge Project",
+              },
+            } as any,
+            workPhases: [selectedWorkPhase],
+            selectedWorkPhase,
+            setSelectedWorkPhase: cy.stub(),
+            setWork: cy.stub(),
+            setWorkPhases: cy.stub(),
+          }}
+        >
+          <EventProvider>
+            <EventList />
+          </EventProvider>
+        </WorkplanContext.Provider>
+      </Router>,
+    );
+
+    cy.contains("Submit package")
+      .parents("tr")
+      .first()
+      .find('input[type="checkbox"]')
+      .check({ force: true });
+
+    cy.contains("selected").should("exist");
+    cy.contains("button", "Delete").click({ force: true });
+    cy.contains('[role="dialog"]', "Delete").within(() => {
+      cy.contains("button", "Yes").click({ force: true });
+    });
+
+    cy.get("@deleteTasks").should("have.been.called");
+    cy.contains("Could not delete the tasks").should("exist");
+  });
+
   it("opens a task from row click", () => {
     const userEmail = store.getState().user.userDetail.email;
 
@@ -721,17 +772,14 @@ describe("EventList", { retries: 2 }, () => {
         ],
       } as any);
 
-    cy.stub(taskEventService, "getById")
+    cy.stub(tasksApi, "get")
       .as("getTaskById")
       .resolves({
-        status: 200,
-        data: {
-          id: 101,
-          name: "Submit package",
-          assignees: [],
-          responsibilities: [],
-          notes: '{"blocks":[],"entityMap":{}}',
-        },
+        id: 101,
+        name: "Submit package",
+        assignees: [],
+        responsibilities: [],
+        notes: '{"blocks":[],"entityMap":{}}',
       } as any);
     cy.mount(
       <Router>
@@ -823,34 +871,28 @@ describe("EventList", { retries: 2 }, () => {
       task_added: false,
     });
 
-    cy.stub(templateService, "getTemplatesByParams")
+    cy.stub(taskTemplatesApi, "listFor")
       .as("getTemplatesByParams")
-      .resolves({
-        status: 200,
-        data: [
-          {
-            id: 901,
-            name: "Readiness Template",
-            is_active: true,
-          },
-        ],
-      } as any);
+      .resolves([
+        {
+          id: 901,
+          name: "Readiness Template",
+          is_active: true,
+        },
+      ] as any);
 
-    cy.stub(templateService, "getTemplateTasks")
+    cy.stub(taskTemplatesApi, "listTasks")
       .as("getTemplateTasks")
-      .resolves({
-        status: 200,
-        data: [
-          {
-            id: 1,
-            name: "Prepare Package",
-          },
-        ],
-      } as any);
+      .resolves([
+        {
+          id: 1,
+          name: "Prepare Package",
+        },
+      ] as any);
 
-    cy.stub(taskEventService, "importTasksFromTemplate")
+    cy.stub(tasksApi, "importFromTemplate")
       .as("importTasksFromTemplate")
-      .resolves({ status: 201 } as any);
+      .resolves();
 
     const userEmail = store.getState().user.userDetail.email;
 
@@ -909,11 +951,7 @@ describe("EventList", { retries: 2 }, () => {
       cy.contains("button", "Upload").click();
     });
 
-    cy.get("@importTasksFromTemplate").should(
-      "have.been.calledWith",
-      { work_phase_id: 12 },
-      901,
-    );
+    cy.get("@importTasksFromTemplate").should("have.been.calledWith", 901, 12);
   });
 
   it("shows an error notification when milestone details fail to load", () => {
@@ -977,9 +1015,7 @@ describe("EventList", { retries: 2 }, () => {
   });
 
   it("shows an error notification when task details fail to load", () => {
-    cy.stub(taskEventService, "getById")
-      .as("getTaskById")
-      .rejects(new Error("boom"));
+    cy.stub(tasksApi, "get").as("getTaskById").rejects(new Error("boom"));
 
     const userEmail = store.getState().user.userDetail.email;
 
@@ -1026,9 +1062,7 @@ describe("EventList", { retries: 2 }, () => {
   });
 
   it("applies bulk assign updates", () => {
-    cy.stub(taskEventService, "patchTasks")
-      .as("patchTasks")
-      .resolves({ status: 200 } as any);
+    cy.stub(tasksApi, "updateMany").as("patchTasks").resolves();
 
     const userEmail = store.getState().user.userDetail.email;
 
@@ -1085,6 +1119,72 @@ describe("EventList", { retries: 2 }, () => {
     cy.get("@patchTasks")
       .its("firstCall.args.0")
       .should("include", { work_id: 101 });
+  });
+
+  it("shows the error when a bulk assign fails", () => {
+    cy.stub(tasksApi, "updateMany")
+      .as("patchTasks")
+      .rejects(
+        new ApiError({
+          client: "track",
+          status: 500,
+          message: "Could not update the tasks",
+        }),
+      );
+
+    const userEmail = store.getState().user.userDetail.email;
+
+    cy.mount(
+      <Router>
+        <WorkplanContext.Provider
+          value={{
+            ...initialWorkPlanContext,
+            team: [
+              {
+                is_active: true,
+                staff_id: 10,
+                staff: {
+                  email: userEmail,
+                  full_name: "Active User",
+                  first_name: "Active",
+                  last_name: "User",
+                },
+              },
+            ] as any,
+            work: {
+              id: 101,
+              title: "Bridge Work",
+              current_work_phase_id: 12,
+              project: {
+                name: "Bridge Project",
+              },
+            } as any,
+            workPhases: [selectedWorkPhase],
+            selectedWorkPhase,
+            setSelectedWorkPhase: cy.stub(),
+            setWork: cy.stub(),
+            setWorkPhases: cy.stub(),
+          }}
+        >
+          <EventProvider>
+            <EventList />
+          </EventProvider>
+        </WorkplanContext.Provider>
+      </Router>,
+    );
+
+    cy.contains("Submit package")
+      .parents("tr")
+      .first()
+      .find('input[type="checkbox"]')
+      .check({ force: true });
+
+    cy.contains("Assign To").click({ force: true });
+    cy.contains("Active User").click({ force: true });
+    cy.contains("Apply").click({ force: true });
+
+    cy.get("@patchTasks").should("have.callCount", 1);
+    cy.contains("Could not update the tasks").should("exist");
   });
 
   it("shows template available notification when templates are available", () => {
@@ -1204,25 +1304,19 @@ describe("EventList", { retries: 2 }, () => {
       task_added: false,
     });
 
-    cy.stub(templateService, "getTemplatesByParams")
+    cy.stub(taskTemplatesApi, "listFor")
       .as("getTemplatesByParams")
-      .resolves({
-        status: 200,
-        data: [
-          {
-            id: 901,
-            name: "Readiness Template",
-            is_active: true,
-          },
-        ],
-      } as any);
+      .resolves([
+        {
+          id: 901,
+          name: "Readiness Template",
+          is_active: true,
+        },
+      ] as any);
 
-    cy.stub(templateService, "getTemplateTasks")
+    cy.stub(taskTemplatesApi, "listTasks")
       .as("getTemplateTasks")
-      .resolves({
-        status: 200,
-        data: [{ id: 1, name: "Prepare Package" }],
-      } as any);
+      .resolves([{ id: 1, name: "Prepare Package" }] as any);
 
     const userEmail = store.getState().user.userDetail.email;
 
