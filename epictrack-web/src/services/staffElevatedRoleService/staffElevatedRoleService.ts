@@ -2,9 +2,8 @@ import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
 import { StaffElevatedRole } from "../../models/staff";
 import { MasterBase } from "../../models/type";
-import ServiceBase from "../common/serviceBase";
 
-class StaffElevatedRoleService implements ServiceBase {
+class StaffElevatedRoleService {
   async getAll(is_active = true) {
     return await http.GetRequest<StaffElevatedRole[]>(
       Endpoints.StaffsElevatedRoles.STAFF_ELEVATED_ROLES,

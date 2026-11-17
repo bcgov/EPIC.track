@@ -29,4 +29,4 @@ If categories, types or template positions change, update `ids.ts` and
 `rules.ts`. `__test__/rules.cy.ts` lists today's result for every rule, so it
 shows which decisions the change moves.
 
-Task events and the task calendar are still in `services/taskEventService`.
+Task events and the task calendar are in `api/tasks`.

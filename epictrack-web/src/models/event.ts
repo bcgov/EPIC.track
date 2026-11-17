@@ -1,8 +1,13 @@
-import { EVENT_TYPE } from "../components/workPlan/phase/type";
 import EventConfiguration from "./eventConfiguration";
 import { Staff } from "./staff";
 import { EVENT_STATUS } from "./taskEvent";
 import type { TaskEventItem } from "./taskEvent";
+
+/** A work plan or calendar row's kind; not the backend's EventType. */
+export enum EVENT_TYPE {
+  MILESTONE = "Milestone",
+  TASK = "Task",
+}
 
 export interface EventsGridModel {
   start_date: string;

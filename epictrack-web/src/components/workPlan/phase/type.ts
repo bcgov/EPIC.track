@@ -9,7 +9,4 @@ export interface PhaseAccordionProps {
   isCurrentPhase?: boolean;
 }
 
-export enum EVENT_TYPE {
-  MILESTONE = "Milestone",
-  TASK = "Task",
-}
+export { EVENT_TYPE } from "../../../models/event";

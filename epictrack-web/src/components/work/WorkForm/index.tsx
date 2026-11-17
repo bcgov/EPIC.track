@@ -16,7 +16,7 @@ import { ministryService } from "services/ministryService";
 import { projectsApi } from "api/projects";
 import staffService from "services/staffService/staffService";
 import { substitutionActService } from "services/substitutionActService";
-import { workTypesApi } from "api/workTypes";
+import { defaultReportDescription, workTypesApi } from "api/workTypes";
 import { worksApi } from "api/works";
 import { isApiError } from "apiManager/apiError";
 import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
@@ -38,7 +38,6 @@ import { IconProps } from "../../icons/type";
 import icons from "../../icons";
 import { WorkFormSpecialField } from "./WorkFormSpecialField";
 import { useIsActiveTeamMember } from "components/workPlan/utils";
-import { defaultWorkTypeReportDescriptions } from "models/workType";
 
 const maxTitleLength = 150;
 const schema = yup.object<Work>().shape({
@@ -167,7 +166,7 @@ export default function WorkForm({
 
     // Get template based on work type, otherwise use default work description
     const template =
-      defaultWorkTypeReportDescriptions[Number(workTypeId)] ||
+      defaultReportDescription(Number(workTypeId)) ||
       defaultWork.report_description;
 
     setValue("report_description", template);

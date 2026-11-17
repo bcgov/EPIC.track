@@ -7,7 +7,7 @@ import { projectInsightsApi } from "services/rtkQuery/projectInsights";
 import { workInsightsApi } from "services/rtkQuery/workInsights";
 import { workStaffInsightsApi } from "services/rtkQuery/workStaffInsights";
 import { phaseInsightsApi } from "services/rtkQuery/phaseInsights";
-import { projectsQueryApi } from "api/projects/queries";
+import { projectsQueryApi } from "api/projects";
 
 export const store = configureStore({
   reducer: {

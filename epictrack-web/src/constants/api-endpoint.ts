@@ -14,16 +14,8 @@ const Endpoints = {
     STAFF_ELEVATED_ROLES: "staff-elevated-roles",
   },
   Projects: {
-    PROJECTS: "projects",
     FIRST_NATIONS: "projects/:project_id/first-nations",
     FIRST_NATION_AVAILABLE: "projects/:project_id/first-nation-available",
-    PROJECT_ABBREVIATION: "projects/abbreviation",
-  },
-  ProjectTypes: {
-    GET_ALL: "project-types",
-  },
-  Codes: {
-    GET_CODES: "codes",
   },
   IndigenousNations: {
     INDIGENOUS_NATIONS: "indigenous-nations",
@@ -36,7 +28,6 @@ const Endpoints = {
     PROPONENTS: "proponents",
   },
   Works: {
-    WORKS: "works",
     WORKS_BY_STAFF: "works/by-staff/:staff_id",
     WORK_RESOURCES: "works/resources",
     WORK_RESOURCES_ACTIVE: "works/resources?is_active=true",
@@ -48,7 +39,6 @@ const Endpoints = {
     DOWNLOAD_WORK_FIRST_NATIONS: "works/:work_id/first-nations/download",
     WORK_FIRST_NATION: "works/first-nations/:work_first_nation_id",
     WORK_IMPORT_FIRST_NATIONS: "works/:work_id/first-nations/import",
-    GET_ALL_WORK_TYPES: "works/types",
   },
   WorkIssues: {
     GET_ALL: "work-issues/dashboard",
@@ -62,14 +52,6 @@ const Endpoints = {
   WorkStatuses: {
     WORK_STATUSES: "work/:work_id/statuses",
     GET_ALL: "work-statuses/dashboard",
-  },
-  SubTypes: {
-    SUB_TYPES: "sub-types",
-  },
-  Users: {
-    USERS: "users",
-    GET_USER_GROUPS: "users/groups",
-    UPDATE_USER_GROUPS: "users/:userId/groups",
   },
   Responsibilities: {
     RESPONSIBILITIES: "/responsibilities",
@@ -93,9 +75,6 @@ const Endpoints = {
   },
   EAAct: {
     GET_ALL: "/ea-acts",
-  },
-  Type: {
-    GET_ALL: "/types",
   },
   FederalInvolvement: {
     GET_ALL: "/federal-involvements",
@@ -130,7 +109,6 @@ const Endpoints = {
     UPDATE_STALENESS_BY_TYPE: "/staleness-settings/:staleness_type",
   },
   WorkResources: {
-    WORK_RESOURCES: "/work-resources",
     GET_WORK_RESOURCES_BY_WORK: "/work-resources?work_id=:work_id",
     WORK_RESOURCE_BY_ID: "/work-resources/:work_resource_id",
   },

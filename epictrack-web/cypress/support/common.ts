@@ -164,29 +164,6 @@ export const mockCalendarEvents = [
   },
 ];
 
-export function createMockMasterContext(defaultItem: any, _data?: any) {
-  return {
-    item: defaultItem,
-    setFormId: cy.stub(),
-    setTitle: cy.stub(),
-    setId: cy.stub(),
-    onSave: cy.stub(),
-    title: "Data",
-    data: [..._data],
-    loading: false,
-    setItem: cy.stub(),
-    setShowDeleteDialog: cy.stub(),
-    setShowModalForm: cy.stub(),
-    getData: cy.stub(),
-    setService: cy.stub(),
-    setForm: cy.stub(),
-    onDialogClose: cy.stub(),
-    setFormStyle: cy.stub(),
-    getById: cy.stub(),
-    setDialogProps: cy.stub(),
-  };
-}
-
 export function testTableFiltering(
   tableHeaderName: string,
   propertyToTest: string,
