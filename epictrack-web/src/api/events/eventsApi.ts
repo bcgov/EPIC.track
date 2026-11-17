@@ -18,6 +18,7 @@ import {
 } from "./dto";
 import {
   toCalendarMilestone,
+  toCalendarQuery,
   toDateCheck,
   toEventConfiguration,
   toMilestoneEvent,
@@ -92,7 +93,7 @@ export const eventsApi = {
     (
       await trackClient.get<{ items: TrackCalendarItemDto[] }>(
         "milestones/calendar",
-        { params: { ...query } },
+        { params: toCalendarQuery(query) },
       )
     ).items.map(toCalendarMilestone),
 

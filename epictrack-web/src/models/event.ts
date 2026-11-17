@@ -82,8 +82,17 @@ export interface CalendarMilestone {
   phase_name: string;
 }
 
+/** My Calendar's event filters; api/events turns them into query params. */
+export type CalendarEventFilter =
+  | "milestone"
+  | "task"
+  | "decision"
+  | "pcp"
+  | "submission"
+  | "start_end_milestone";
+
 export interface CalendarSearchOptions {
-  event_types: string[];
+  event_types: CalendarEventFilter[];
   project_types: string[];
   regions: string[];
   staff_id: number | null;
@@ -104,23 +113,6 @@ export interface MilestoneEventDateCheck {
   phase_end_push_required: boolean;
   subsequent_event_push_required: boolean;
   days_pushed: number;
-}
-export enum EventCategory {
-  MILESTONE = 1,
-  EXTENSION = 2,
-  SUSPENSION = 3,
-  DECISION = 4,
-  PCP = 5,
-  CALENDAR = 6,
-  FINANCE = 7,
-  SPECIAL_EXTENSION = 8,
-}
-export enum EventType {
-  OPEN_HOUSE = 23,
-  VIRTUAL_OPEN_HOUSE = 24,
-  TIME_LIMIT_SUSPENSION = 12,
-  TIME_LIMIT_RESUMPTION = 38,
-  SUBMISSION = 9,
 }
 
 export enum EventPosition {

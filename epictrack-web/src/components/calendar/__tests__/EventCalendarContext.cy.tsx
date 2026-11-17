@@ -248,7 +248,7 @@ describe("EventCalendarContext", () => {
     cy.mount(
       <EventCalendarProvider
         initialSearchOptions={{
-          event_types: ["include_tasks:true"],
+          event_types: ["task"],
           project_types: [],
           regions: [],
           staff_id: null,

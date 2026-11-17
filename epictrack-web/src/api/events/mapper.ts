@@ -1,7 +1,9 @@
 import Moment from "moment";
 import { ListType } from "models/code";
 import {
+  CalendarEventFilter,
   CalendarMilestone,
+  CalendarSearchOptions,
   EventPosition,
   EventTemplateVisibility,
   MilestoneEvent,
@@ -17,6 +19,7 @@ import {
   TrackMilestoneWriteDto,
   TrackNamedOptionDto,
 } from "./dto";
+import { EventCategory, EventType } from "./ids";
 
 // MilestoneEventBodyParameterSchema's fields; anything else is dropped.
 const WRITABLE_FIELDS = [
@@ -72,6 +75,25 @@ export const toMilestoneEvent = (
   topic: dto.topic,
   event_configuration_id: dto.event_configuration_id,
   event_configuration: toEventConfiguration(dto.event_configuration),
+});
+
+const CALENDAR_FILTER_PARAMS: Record<
+  Exclude<CalendarEventFilter, "task">,
+  string
+> = {
+  milestone: `event_category:${EventCategory.MILESTONE}`,
+  decision: `event_category:${EventCategory.DECISION}`,
+  pcp: `event_category:${EventCategory.PCP}`,
+  submission: `event_type:${EventType.SUBMISSION}`,
+  start_end_milestone: "event_position:START,END",
+};
+
+/** Tasks come from their own endpoint, so "task" has no milestone param. */
+export const toCalendarQuery = (query: CalendarSearchOptions) => ({
+  ...query,
+  event_types: query.event_types.flatMap((filter) =>
+    filter === "task" ? [] : [CALENDAR_FILTER_PARAMS[filter]],
+  ),
 });
 
 export const toCalendarMilestone = (

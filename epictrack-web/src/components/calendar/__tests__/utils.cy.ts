@@ -6,7 +6,7 @@ import {
   resolveEventIconName,
 } from "components/calendar/utils/utils";
 import { EVENT_TYPE } from "components/workPlan/phase/type";
-import { EventCategory, EventType } from "models/event";
+import { EventCategory, EventType } from "api/events/ids";
 
 describe("calendar utils", () => {
   it("getNDaysArray returns padded month grid", () => {

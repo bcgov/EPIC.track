@@ -1,7 +1,8 @@
 import EventForm from "../EventForm";
 import { EventProvider } from "../EventContext";
 import { AppConfig } from "config";
-import { EventCategory, EventPosition, EventType } from "models/event";
+import { EventPosition } from "models/event";
+import { EventCategory, EventType } from "api/events/ids";
 import {
   Endpoint,
   setupIntercepts,

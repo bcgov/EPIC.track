@@ -73,7 +73,7 @@ describe("EaoEventTypeFilter", () => {
 
     cy.get("[data-cy='event-types']").should(
       "contain.text",
-      "event_position:START,END",
+      "start_end_milestone",
     );
     cy.get("[data-cy='event-types']").should("not.have.text", "");
   });

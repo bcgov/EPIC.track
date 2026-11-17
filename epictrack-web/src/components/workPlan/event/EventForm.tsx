@@ -32,9 +32,23 @@ import {
 } from "../../../constants/application-constant";
 import { EVENT_TYPE } from "../phase/type";
 import { OUTCOME_ID } from "./constants";
-import { POSITION_ENUM } from "models/position";
-import { eventsApi } from "api/events";
-import { isApiError } from "apiManager/apiError";
+import {
+  DECISION_MAKER_POSITION_IDS,
+  dateLabels,
+  defaultAnticipatedDate,
+  eventInputs,
+  eventsApi,
+  findResumptionConfiguration,
+  isAnticipatedDateLocked,
+  isPushPreconfirmed,
+  isPushRequired,
+  isStartEvent as isStartPositionEvent,
+  isUnprocessableEventError,
+  requiresActSection,
+  requiresDecisionInputs,
+  requiresNumberOfDays,
+  showsDatePushWarning,
+} from "api/events";
 import { workPhasesApi } from "api/workPhases";
 import staffService from "services/staffService/staffService";
 import { getErrorMessage } from "../../../utils/axiosUtils";
@@ -42,10 +56,7 @@ import { dateUtils } from "../../../utils";
 import { ListType } from "models/code";
 import { Staff } from "models/staff";
 import {
-  EventCategory,
-  EventPosition,
   EventTemplateVisibility,
-  EventType,
   EventsGridModel,
   MilestoneEvent,
   MilestoneEventDateCheck,
@@ -133,33 +144,22 @@ const EventForm = ({
           .required("Please select milestone type"),
         anticipated_date: yup.string().required("Please select start date"),
         number_of_days: yup.string().when([], {
-          is: () =>
-            selectedConfiguration?.multiple_days === true ||
-            selectedConfiguration?.event_category_id ===
-              EventCategory.EXTENSION,
+          is: () => requiresNumberOfDays(selectedConfiguration),
           then: () => yup.string().required("Number of days is required"),
           otherwise: () => yup.string().nullable(),
         }),
         [OUTCOME_ID]: yup.string().when([], {
-          is: () =>
-            actualAdded &&
-            selectedConfiguration?.event_category_id === EventCategory.DECISION,
+          is: () => requiresDecisionInputs(selectedConfiguration, actualAdded),
           then: () => yup.string().required("Please select the decision"),
           otherwise: () => yup.string().nullable(),
         }),
         decision_maker_id: yup.string().when([], {
-          is: () =>
-            actualAdded &&
-            selectedConfiguration?.event_category_id === EventCategory.DECISION,
+          is: () => requiresDecisionInputs(selectedConfiguration, actualAdded),
           then: () => yup.string().required("Please select the decision maker"),
           otherwise: () => yup.string().nullable(),
         }),
         act_section_id: yup.string().when([], {
-          is: () =>
-            selectedConfiguration?.event_category_id ===
-              EventCategory.EXTENSION ||
-            selectedConfiguration?.event_type_id ===
-              EventType.TIME_LIMIT_SUSPENSION,
+          is: () => requiresActSection(selectedConfiguration),
           then: () => yup.string().required("Please select the act section"),
           otherwise: () => yup.string().nullable(),
         }),
@@ -189,12 +189,10 @@ const EventForm = ({
   const disableAnticipatedDate = useMemo(
     () =>
       isFormFieldsLocked ||
-      Boolean(
-        selectedConfiguration?.id &&
-        selectedWorkPhase?.legislated &&
-        workPhaseAdditionalInfo &&
-        workPhaseAdditionalInfo?.milestone_progress === 0 &&
-        selectedConfiguration?.event_position === EventPosition.END,
+      isAnticipatedDateLocked(
+        selectedConfiguration,
+        selectedWorkPhase?.legislated,
+        workPhaseAdditionalInfo?.milestone_progress,
       ),
     [
       isFormFieldsLocked,
@@ -205,15 +203,13 @@ const EventForm = ({
   );
 
   const pushRequired = useMemo(
-    () =>
-      dateCheckStatus?.subsequent_event_push_required &&
-      event?.event_configuration.event_category_id !== EventCategory.EXTENSION,
+    () => isPushRequired(dateCheckStatus, event),
     [dateCheckStatus, event],
   );
 
   const getDecisionMakers = useCallback(async () => {
     const result = await staffService.getActiveStaffByPosition(
-      [POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER, POSITION_ENUM.ADM].join(","),
+      DECISION_MAKER_POSITION_IDS,
     );
     if (result.status === 200) {
       const decisionMakers = result.data as Staff[];
@@ -241,28 +237,24 @@ const EventForm = ({
   }, [work]);
 
   useEffect(() => {
-    if (
-      actualAdded &&
-      selectedConfiguration?.event_category_id === EventCategory.DECISION
-    ) {
+    if (requiresDecisionInputs(selectedConfiguration, actualAdded)) {
       getDecisionMakers();
     }
-  }, [
-    actualAdded,
-    getDecisionMakers,
-    selectedConfiguration?.event_category_id,
-  ]);
+  }, [actualAdded, getDecisionMakers, selectedConfiguration]);
 
   const showDatePushWarning = useMemo(
     () =>
-      dateCheckStatus?.phase_end_push_required &&
-      selectedWorkPhase?.legislated &&
-      selectedConfiguration?.event_category_id !== EventCategory.EXTENSION,
-    [
-      dateCheckStatus,
-      selectedConfiguration?.event_category_id,
-      selectedWorkPhase,
-    ],
+      showsDatePushWarning(
+        dateCheckStatus,
+        selectedWorkPhase?.legislated,
+        selectedConfiguration,
+      ),
+    [dateCheckStatus, selectedConfiguration, selectedWorkPhase],
+  );
+
+  const inputs = useMemo(
+    () => eventInputs(selectedConfiguration, actualAdded),
+    [selectedConfiguration, actualAdded],
   );
 
   const isMilestoneTypeDisabled = useMemo(
@@ -286,24 +278,16 @@ const EventForm = ({
     () =>
       event &&
       selectedConfiguration &&
-      selectedConfiguration?.event_position === EventPosition.START,
+      isStartPositionEvent(selectedConfiguration),
     [event, selectedConfiguration],
   );
 
   const anticipatedDefaultValue = useMemo(() => {
     if (event) return event.anticipated_date;
-    else if (
-      selectedConfiguration &&
-      selectedConfiguration.start_at !== undefined &&
-      selectedWorkPhase?.start_date !== undefined
-    ) {
-      const startAtDate = new Date(selectedWorkPhase.start_date);
-      const newDate = new Date(
-        startAtDate.getTime() +
-          selectedConfiguration.start_at * 24 * 60 * 60 * 1000,
-      );
-      return newDate;
-    } else return selectedWorkPhase?.start_date;
+    return defaultAnticipatedDate(
+      selectedConfiguration,
+      selectedWorkPhase?.start_date,
+    );
   }, [event, selectedWorkPhase, selectedConfiguration]);
 
   const actualReferenceDate = useMemo(() => {
@@ -347,19 +331,9 @@ const EventForm = ({
   }, [anticipatedDefaultValue, event, setValue]);
 
   useEffect(() => {
-    if (
-      selectedConfiguration &&
-      selectedConfiguration.event_category_id === EventCategory.EXTENSION
-    ) {
-      setAnticipatedLabel("Anticipated Order Date");
-      setActualDateLabel("Actual Order Date");
-    } else if (selectedConfiguration && selectedConfiguration.multiple_days) {
-      setAnticipatedLabel("Anticipated Start Date");
-      setActualDateLabel("Actual Start Date");
-    } else {
-      setAnticipatedLabel("Anticipated Date");
-      setActualDateLabel("Actual Date");
-    }
+    const labels = dateLabels(selectedConfiguration);
+    setAnticipatedLabel(labels.anticipated);
+    setActualDateLabel(labels.actual);
   }, [selectedConfiguration]);
 
   useEffect(() => {
@@ -399,18 +373,16 @@ const EventForm = ({
       configurations.length > 0 &&
       !event
     ) {
-      const config = configurations.filter(
-        (p) => p.event_type_id === EventType.TIME_LIMIT_RESUMPTION,
-      );
-      if (!config || config.length === 0) {
+      const resumption = findResumptionConfiguration(configurations);
+      if (!resumption) {
         showNotification(MISSING_RESUMPTION_ERROR, {
           type: "warning",
         });
       } else {
-        setSelectedConfiguration(config[0]);
+        setSelectedConfiguration(resumption);
         reset({
-          event_configuration_id: config[0].id,
-          name: config[0].name,
+          event_configuration_id: resumption.id,
+          name: resumption.name,
         });
       }
     }
@@ -538,20 +510,13 @@ const EventForm = ({
     pushEventConfirmed = false,
     confirmSaveInLocked = false,
   ) => {
-    pushEventConfirmed =
-      pushEventConfirmed ||
-      event?.event_configuration.event_category_id === EventCategory.EXTENSION;
+    pushEventConfirmed = pushEventConfirmed || isPushPreconfirmed(event);
     try {
       const formData = data ?? getValues();
       const dataToBeSubmitted = {
         ...formData,
         notes: notes,
       };
-      pushEventConfirmed =
-        pushEventConfirmed ||
-        (event?.event_configuration.event_category_id ===
-          EventCategory.EXTENSION &&
-          !!dataToBeSubmitted?.actual_date);
       if (showLockConfirmDialog(dataToBeSubmitted) && !confirmSaveInLocked) {
         setShowEventLockDialog(true);
         setLockDialogError(""); // Clear any previous errors
@@ -569,12 +534,7 @@ const EventForm = ({
     } catch (e: any) {
       const message = getErrorMessage(e);
       // If it's an UnprocessableEventError or UnprocessableEndEventError and the lock dialog is open, show error in dialog
-      if (
-        isApiError(e) &&
-        (e.code === "UnprocessableEventError" ||
-          e.code === "UnprocessableEndEventError") &&
-        showEventLockDialog
-      ) {
+      if (isUnprocessableEventError(e) && showEventLockDialog) {
         setLockDialogError(message);
         showNotification("Failed to update milestone details", {
           type: "error",
@@ -816,12 +776,7 @@ const EventForm = ({
               borderTop: `1px solid ${Palette.neutral.bg.dark}`,
             }}
           >
-            <If
-              condition={
-                selectedConfiguration?.event_category_id ===
-                EventCategory.EXTENSION
-              }
-            >
+            <If condition={inputs.extension}>
               <Then>
                 <ExtensionInput
                   isFormFieldsLocked={isFormFieldsLocked}
@@ -829,7 +784,7 @@ const EventForm = ({
                 />
               </Then>
               <Else>
-                <When condition={selectedConfiguration?.multiple_days}>
+                <When condition={inputs.multipleDays}>
                   <MultiDaysInput
                     endDateRef={endDateRef}
                     isFormFieldsLocked={isFormFieldsLocked}
@@ -839,44 +794,20 @@ const EventForm = ({
                 </When>
               </Else>
             </If>
-            <When
-              condition={
-                selectedConfiguration?.event_category_id ===
-                  EventCategory.PCP &&
-                ![EventType.OPEN_HOUSE, EventType.VIRTUAL_OPEN_HOUSE].includes(
-                  selectedConfiguration?.event_type_id,
-                )
-              }
-            >
+            <When condition={inputs.pcp}>
               <PCPInput />
             </When>
-            <When
-              condition={[
-                EventType.OPEN_HOUSE,
-                EventType.VIRTUAL_OPEN_HOUSE,
-              ].includes(Number(selectedConfiguration?.event_type_id))}
-            >
+            <When condition={inputs.singleDayPcp}>
               <SingleDayPCPInput />
             </When>
-            <When
-              condition={
-                actualAdded &&
-                selectedConfiguration?.event_category_id ===
-                  EventCategory.DECISION
-              }
-            >
+            <When condition={inputs.decision}>
               <DecisionInput
                 isFormFieldsLocked={isFormFieldsLocked}
                 configurationId={selectedConfiguration?.id}
                 decisionMakers={decisionMakers}
               />
             </When>
-            <When
-              condition={
-                selectedConfiguration?.event_type_id ===
-                EventType.TIME_LIMIT_SUSPENSION
-              }
-            >
+            <When condition={inputs.suspension}>
               <ExtensionSuspensionInput
                 isFormFieldsLocked={isFormFieldsLocked}
               />

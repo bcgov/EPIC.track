@@ -25,12 +25,14 @@ import { IconProps } from "../../icons/type";
 import { Palette } from "../../../styles/theme";
 import { MONTH_DAY_YEAR, ROLES } from "constants/application-constant";
 import { PhaseAccordionProps } from "./type";
-import { workPhasesApi } from "api/workPhases";
+import {
+  isOverageResponsibilityRequired as overageResponsibilityRequired,
+  workPhasesApi,
+} from "api/workPhases";
 import {
   OverageResponsibilityEnum,
   PhaseOverageResponsibility,
 } from "models/phaseOverageResponsibilities";
-import { WorkTypeEnum } from "models/workType";
 import OverageResponsibilityForm from "./overageResponsibility/OverageResponsibilityForm";
 import { useIsActiveTeamMember } from "../utils";
 import WarningBox from "components/shared/warningBox";
@@ -116,10 +118,10 @@ const PhaseAccordion = ({
   const isActiveTeamMember = useIsActiveTeamMember();
   const isCompleted = phase.work_phase.is_completed;
   const isLegislated = phase.work_phase.legislated;
-  const isOverageResponsibilityRequired =
-    isLegislated ||
-    work?.work_type_id === WorkTypeEnum.AMENDMENT ||
-    work?.work_type_id === WorkTypeEnum.JOINT_COMPLEX_AMENDMENT;
+  const isOverageResponsibilityRequired = overageResponsibilityRequired(
+    isLegislated,
+    work?.work_type_id,
+  );
   const responsibilitiesText = overageResponsibilities
     ?.map((r) => r.responsibility)
     .join(", ");

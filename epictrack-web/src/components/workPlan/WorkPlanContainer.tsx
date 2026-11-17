@@ -169,7 +169,7 @@ const WorkPlanContainer = () => {
                 regions: [],
                 work_types: [],
                 project_types: [],
-                event_types: ["include_tasks:true"],
+                event_types: ["task"],
                 work_ids: ctx.work?.id ? [ctx.work?.id] : [],
                 staff_id: null,
                 year: new Date().getFullYear(),
