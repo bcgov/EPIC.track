@@ -62,7 +62,6 @@ export interface TaskEventInput {
   notes?: string;
   assignee_ids?: string[];
   status?: string;
-  source_work_id?: number;
 }
 
 /** Sets one field on several tasks. */

@@ -12,10 +12,6 @@ export interface Template extends ListType {
   is_active: boolean;
 }
 
-export interface TemplateApprove {
-  is_active: boolean;
-}
-
 /** A task template as the template screens show it. */
 export interface TaskTemplate {
   id: number;

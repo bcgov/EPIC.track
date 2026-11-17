@@ -27,7 +27,6 @@ const WRITABLE_FIELDS = [
   "notes",
   "assignee_ids",
   "status",
-  "source_work_id",
 ] as const satisfies readonly (keyof TaskEventInput)[];
 
 const toAssignee = (dto: TrackTaskAssigneeDto): Assignee => ({

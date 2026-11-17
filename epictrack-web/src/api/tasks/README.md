@@ -8,7 +8,7 @@ Tasks and templates stay in Track after projects and works move to DEMI.
 
 | File                              | Purpose                                                                                        |
 | --------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `tasks/dto.ts`, `tasks/mapper.ts` | Task event shapes, the mappers, and the 10-field write whitelist                               |
+| `tasks/dto.ts`, `tasks/mapper.ts` | Task event shapes, the mappers, and the 9-field write whitelist                                |
 | `tasks/tasksApi.ts`               | A phase's tasks, one task, saves, bulk update and delete, My Tasks, the task calendar, imports |
 | `taskTemplates/*`                 | Templates, their tasks, upload, activation and delete                                          |
 

@@ -609,7 +609,9 @@ const EventList = () => {
       setShowDeleteDialog(false);
       getCombinedEvents();
       onSaveHandler();
-    } catch (e) {}
+    } catch (e) {
+      showNotification(getErrorMessage(e), { type: "error" });
+    }
   };
 
   const deleteMilestone = async () => {
@@ -621,7 +623,9 @@ const EventList = () => {
       setShowDeleteDialog(false);
       getCombinedEvents();
       onSaveHandler();
-    } catch (e) {}
+    } catch (e) {
+      showNotification(getErrorMessage(e), { type: "error" });
+    }
   };
 
   const handleDelete = () => {
