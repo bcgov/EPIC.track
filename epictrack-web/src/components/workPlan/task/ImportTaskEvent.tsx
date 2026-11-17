@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import { ListType } from "../../../models/code";
-import { templateService } from "../../../services/taskService/templateService";
+import { taskTemplatesApi } from "api/taskTemplates";
 import { WorkplanContext } from "../WorkPlanContext";
 import { showNotification } from "../../shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
@@ -54,17 +54,12 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
 
   const getTemplates = useCallback(async () => {
     try {
-      const result = await templateService.getTemplatesByParams(
-        Number(ctx.work?.ea_act_id),
-        Number(ctx.work?.work_type_id),
-        Number(ctx.selectedWorkPhase?.work_phase.phase.id),
-      );
-      if (result.status === 200) {
-        const templatesData = (result.data as any[]).filter(
-          (p) => p["is_active"] === true,
-        );
-        setTemplates(templatesData as ListType[]);
-      }
+      const templates = await taskTemplatesApi.listFor({
+        eaActId: Number(ctx.work?.ea_act_id),
+        workTypeId: Number(ctx.work?.work_type_id),
+        phaseId: Number(ctx.selectedWorkPhase?.work_phase.phase.id),
+      });
+      setTemplates(templates.filter((template) => template.is_active));
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
         type: "error",
@@ -74,10 +69,7 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
 
   const getTemplateTasks = async (templateId: number) => {
     try {
-      const result = await templateService.getTemplateTasks(templateId);
-      if (result.status === 200) {
-        setTasks(result.data as ListType[]);
-      }
+      setTasks(await taskTemplatesApi.listTasks(templateId));
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
         type: "error",

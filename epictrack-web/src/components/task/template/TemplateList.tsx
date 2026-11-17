@@ -4,13 +4,13 @@ import { Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, Grid, IconButton } from "@mui/material";
 import { RESULT_STATUS, ROLES } from "../../../constants/application-constant";
 import TemplateForm from "./TemplateForm";
-import { Template } from "../../../models/template";
+import { TaskTemplate as Template } from "../../../models/template";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import TrackDialog from "../../shared/TrackDialog";
 import { ETGridTitle, ETPageContainer } from "../../shared";
 import TemplateTaskList from "./TemplateTasksList";
 import { ETChip } from "../../shared/chip/ETChip";
-import { templateService } from "../../../services/taskService/templateService";
+import { taskTemplatesApi } from "api/taskTemplates";
 import { getSelectFilterOptions } from "../../shared/MasterTrackTable/utils";
 import { TableFilter } from "../../shared/filterSelect/TableFilter";
 import { useAppSelector } from "../../../hooks";
@@ -51,10 +51,7 @@ const TemplateList = () => {
   const getTemplates = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
-      const templateResult = await templateService.getTemplates();
-      if (templateResult.status === 200) {
-        setTemplates(templateResult.data as never);
-      }
+      setTemplates(await taskTemplatesApi.list());
     } catch (error) {
       console.error("Template List: ", error);
     } finally {
@@ -94,12 +91,10 @@ const TemplateList = () => {
   };
 
   const deleteTemplate = async (templateId?: number) => {
-    const result = await templateService.deleteTemplate(templateId);
-    if (result.status === 200) {
-      setDeleteTemplateId(undefined);
-      setShowDeleteDialog(false);
-      getTemplates();
-    }
+    await taskTemplatesApi.remove(Number(templateId));
+    setDeleteTemplateId(undefined);
+    setShowDeleteDialog(false);
+    getTemplates();
   };
 
   const columns = React.useMemo<MRT_ColumnDef<Template>[]>(

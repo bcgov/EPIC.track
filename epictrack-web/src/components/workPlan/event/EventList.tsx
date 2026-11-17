@@ -27,7 +27,7 @@ import {
   milestoneToRow,
 } from "api/events";
 import { responsibilityService } from "services/responsibilityService/responsibilityService";
-import { taskEventService } from "services/taskEventService/taskEventService";
+import { tasksApi } from "api/tasks";
 import { worksApi } from "api/works";
 import { workPhasesApi } from "api/workPhases";
 import { OptionType } from "../../shared/filterSelect/type";
@@ -143,17 +143,15 @@ const EventList = () => {
     async (phaseId: number): Promise<EventsGridModel[]> => {
       let result: EventsGridModel[] = [];
       try {
-        const taskResult = await taskEventService.getAll(phaseId);
-
-        if (taskResult.status === 200) {
-          result = (taskResult.data as EventsGridModel[]).map((element) => {
-            element.type = EVENT_TYPE.TASK;
-            element.end_date = dateUtils
-              .add(element.start_date, element.number_of_days, "days")
-              .toISOString();
-            return element;
-          });
-        }
+        const tasks = await tasksApi.listForPhase(phaseId);
+        result = tasks.map((task) => {
+          const element: any = { ...task };
+          element.type = EVENT_TYPE.TASK;
+          element.end_date = dateUtils
+            .add(element.start_date, element.number_of_days, "days")
+            .toISOString();
+          return element;
+        });
       } catch (e) {
         // Error handling deferred to getCombinedEvents to avoid
         // premature setLoading(false) while parallel requests are in-flight
@@ -309,21 +307,17 @@ const EventList = () => {
 
   const onTemplateConfirmationSaveHandler = async () => {
     try {
-      const result = await taskEventService.importTasksFromTemplate(
-        {
-          work_phase_id: selectedWorkPhase?.work_phase.id,
-        },
+      await tasksApi.importFromTemplate(
         Number(selectedTemplateId),
+        selectedWorkPhase?.work_phase.id,
       );
-      if (result.status === 201) {
-        showNotification("Task events uploaded", {
-          type: "success",
-        });
-        setShowTemplateConfirmation(false);
-        await getCombinedEvents();
-        setSelectedTemplateId(undefined);
-        getTemplateUploadStatus();
-      }
+      showNotification("Task events uploaded", {
+        type: "success",
+      });
+      setShowTemplateConfirmation(false);
+      await getCombinedEvents();
+      setSelectedTemplateId(undefined);
+      getTemplateUploadStatus();
     } catch (e) {
       const message = getErrorMessage(e);
       showNotification(message, {
@@ -354,12 +348,8 @@ const EventList = () => {
     if (!file || !selectedWorkPhase?.work_phase.id) {
       return;
     }
-    const formData = new FormData();
-    formData.append("file", file);
     try {
-      await taskEventService.importTasks(selectedWorkPhase?.work_phase.id, {
-        template_file: file,
-      });
+      await tasksApi.importSheet(selectedWorkPhase.work_phase.id, file);
       showNotification("Tasks imported successfully", {
         type: "success",
       });
@@ -408,19 +398,7 @@ const EventList = () => {
 
   const getTaskEvent = async (eventId: number) => {
     try {
-      const result = await taskEventService.getById(Number(eventId));
-      if (result.status === 200) {
-        const assignee_ids: any[] = (result.data as any)["assignees"].map(
-          (p: any) => p["assignee_id"],
-        );
-        const responsibility_ids: any[] = (result.data as any)[
-          "responsibilities"
-        ].map((p: any) => p["responsibility_id"]);
-        const taskEvent = result.data as TaskEvent;
-        taskEvent.assignee_ids = assignee_ids;
-        taskEvent.responsibility_ids = responsibility_ids;
-        setTaskEvent(taskEvent);
-      }
+      setTaskEvent(await tasksApi.get(Number(eventId)));
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
         type: "error",
@@ -532,20 +510,18 @@ const EventList = () => {
         assignee_ids,
         work_id: work?.id,
       };
-      const result = await taskEventService.patchTasks(data);
       try {
-        if (result.status === 200) {
-          showNotification("Tasks assigned", {
-            type: "success",
-          });
-          getCombinedEvents();
+        await tasksApi.updateMany(data);
+        showNotification("Tasks assigned", {
+          type: "success",
+        });
+        getCombinedEvents();
 
-          const highlightedRows = Object.keys(rowSelection).map((id) => ({
-            type: EVENT_TYPE.TASK,
-            id: Number(id),
-          }));
-          handleHighlightRows(highlightedRows);
-        }
+        const highlightedRows = Object.keys(rowSelection).map((id) => ({
+          type: EVENT_TYPE.TASK,
+          id: Number(id),
+        }));
+        handleHighlightRows(highlightedRows);
       } catch (e) {
         const message = getErrorMessage(e);
         showNotification(message, {
@@ -566,20 +542,18 @@ const EventList = () => {
         responsibility_ids,
         work_id: work?.id,
       };
-      const result = await taskEventService.patchTasks(data);
       try {
-        if (result.status === 200) {
-          showNotification("Responsible entities updated", {
-            type: "success",
-          });
-          getCombinedEvents();
+        await tasksApi.updateMany(data);
+        showNotification("Responsible entities updated", {
+          type: "success",
+        });
+        getCombinedEvents();
 
-          const highlightedRows = Object.keys(rowSelection).map((id) => ({
-            type: EVENT_TYPE.TASK,
-            id: Number(id),
-          }));
-          handleHighlightRows(highlightedRows);
-        }
+        const highlightedRows = Object.keys(rowSelection).map((id) => ({
+          type: EVENT_TYPE.TASK,
+          id: Number(id),
+        }));
+        handleHighlightRows(highlightedRows);
       } catch (e) {
         const message = getErrorMessage(e);
         showNotification(message, {
@@ -597,20 +571,18 @@ const EventList = () => {
         status,
         work_id: work?.id,
       };
-      const result = await taskEventService.patchTasks(data);
       try {
-        if (result.status === 200) {
-          showNotification("Progress updated", {
-            type: "success",
-          });
-          getCombinedEvents();
+        await tasksApi.updateMany(data);
+        showNotification("Progress updated", {
+          type: "success",
+        });
+        getCombinedEvents();
 
-          const highlightedRows = Object.keys(rowSelection).map((id) => ({
-            type: EVENT_TYPE.TASK,
-            id: Number(id),
-          }));
-          handleHighlightRows(highlightedRows);
-        }
+        const highlightedRows = Object.keys(rowSelection).map((id) => ({
+          type: EVENT_TYPE.TASK,
+          id: Number(id),
+        }));
+        handleHighlightRows(highlightedRows);
       } catch (e) {
         const message = getErrorMessage(e);
         showNotification(message, {
@@ -621,32 +593,22 @@ const EventList = () => {
     [getCombinedEvents, handleHighlightRows, rowSelection, work?.id],
   );
 
-  const taskData = () => {
-    if (Object.keys(rowSelection).length === 0) {
-      return {
-        task_ids: taskEvent?.id,
-        work_id: work?.id,
-      };
-    } else {
-      return {
-        task_ids: Object.keys(rowSelection).join(","),
-        work_id: work?.id,
-      };
-    }
+  // The selected rows, or the task open in the form.
+  const selectedTaskIds = () => {
+    const rowIds = Object.keys(rowSelection);
+    if (rowIds.length > 0) return rowIds;
+    return taskEvent?.id ? [taskEvent.id] : [];
   };
 
   const deleteTasks = async () => {
-    const data = taskData();
-    const response = await taskEventService.deleteTasks(data);
     try {
-      if (response.status === 200) {
-        showNotification("Deleted successfully", {
-          type: "success",
-        });
-        setShowDeleteDialog(false);
-        getCombinedEvents();
-        onSaveHandler();
-      }
+      await tasksApi.removeMany(selectedTaskIds(), work?.id);
+      showNotification("Deleted successfully", {
+        type: "success",
+      });
+      setShowDeleteDialog(false);
+      getCombinedEvents();
+      onSaveHandler();
     } catch (e) {}
   };
 

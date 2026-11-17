@@ -9,20 +9,20 @@ import {
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import Moment from "moment";
 import { Grid } from "@mui/material";
 import { ETFormLabel } from "../../shared";
-import { TaskEvent, statusOptions } from "../../../models/taskEvent";
+import {
+  TaskEvent,
+  TaskEventInput,
+  statusOptions,
+} from "../../../models/taskEvent";
 import dayjs, { Dayjs } from "dayjs";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { Palette } from "../../../styles/theme";
 import { Staff } from "../../../models/staff";
 import { WorkplanContext } from "../WorkPlanContext";
 import { workService } from "../../../services/workService/workService";
-import {
-  taskEventService,
-  TaskEventMutationRequest,
-} from "../../../services/taskEventService/taskEventService";
+import { tasksApi } from "api/tasks";
 import { showNotification } from "../../shared/notificationProvider";
 import { ListType } from "../../../models/code";
 import RichTextEditor from "../../shared/richTextEditor";
@@ -149,27 +149,24 @@ const TaskForm = ({
 
   const statuses = useMemo(() => statusOptions, []);
 
-  const createTask = async (data: TaskEventMutationRequest) => {
-    const createResult = await taskEventService.create(data);
+  const createTask = async (data: TaskEventInput) => {
+    const created = await tasksApi.create(data);
     showNotification("Task details inserted", {
       type: "success",
     });
     handleHighlightRows([
       {
         type: EVENT_TYPE.TASK,
-        id: createResult.data.id,
+        id: created.id,
       },
     ]);
-    return createResult;
+    return created;
   };
 
-  const updateTask = async (data: TaskEventMutationRequest) => {
+  const updateTask = async (data: TaskEventInput) => {
     if (!taskEvent?.id) return;
 
-    const updateResult = await taskEventService.update(
-      data,
-      Number(taskEvent?.id),
-    );
+    const updated = await tasksApi.update(Number(taskEvent?.id), data);
     showNotification("Task details updated", {
       type: "success",
     });
@@ -179,10 +176,10 @@ const TaskForm = ({
         id: Number(taskEvent?.id),
       },
     ]);
-    return updateResult;
+    return updated;
   };
 
-  const saveTask = async (data: TaskEventMutationRequest) => {
+  const saveTask = async (data: TaskEventInput) => {
     if (taskEvent) {
       return updateTask(data);
     }
@@ -194,7 +191,6 @@ const TaskForm = ({
       const dataToSave = {
         ...data,
         work_phase_id: Number(effectivePhaseId),
-        start_date: Moment(data.start_date).format(),
         number_of_days:
           data.number_of_days.toString() === "" ? 0 : data.number_of_days,
         notes: notes ?? "",

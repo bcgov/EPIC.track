@@ -4,13 +4,13 @@ import { EventProvider } from "../EventContext";
 import { WorkplanContext, initialWorkPlanContext } from "../../WorkPlanContext";
 import { EVENT_TYPE } from "../../phase/type";
 import { EVENT_STATUS } from "../../../../models/taskEvent";
-import { taskEventService } from "../../../../services/taskEventService/taskEventService";
+import { tasksApi } from "api/tasks";
 import { eventsApi } from "api/events";
 import { workService } from "../../../../services/workService/workService";
 import { workPhasesApi } from "api/workPhases";
 import { worksApi } from "api/works";
 import { responsibilityService } from "../../../../services/responsibilityService/responsibilityService";
-import { templateService } from "../../../../services/taskService/templateService";
+import { taskTemplatesApi } from "api/taskTemplates";
 import { store } from "../../../../store";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 
@@ -29,23 +29,20 @@ const selectedWorkPhase = {
 
 describe("EventList", { retries: 2 }, () => {
   beforeEach(() => {
-    cy.stub(taskEventService, "getAll")
+    cy.stub(tasksApi, "listForPhase")
       .as("getAllTasks")
-      .resolves({
-        status: 200,
-        data: [
-          {
-            id: 101,
-            name: "Submit package",
-            start_date: "2026-03-05T00:00:00.000Z",
-            number_of_days: 3,
-            assignees: [],
-            responsibilities: [],
-            status: EVENT_STATUS.INPROGRESS,
-            notes: '{"blocks":[],"entityMap":{}}',
-          },
-        ],
-      } as any);
+      .resolves([
+        {
+          id: 101,
+          name: "Submit package",
+          start_date: "2026-03-05T00:00:00.000Z",
+          number_of_days: 3,
+          assignees: [],
+          responsibilities: [],
+          status: EVENT_STATUS.INPROGRESS,
+          notes: '{"blocks":[],"entityMap":{}}',
+        },
+      ] as any);
 
     cy.stub(eventsApi, "listForPhase")
       .as("getMilestones")
@@ -656,9 +653,7 @@ describe("EventList", { retries: 2 }, () => {
   });
 
   it("deletes selected task rows from the bulk action bar", () => {
-    cy.stub(taskEventService, "deleteTasks")
-      .as("deleteTasks")
-      .resolves({ status: 200 } as any);
+    cy.stub(tasksApi, "removeMany").as("deleteTasks").resolves();
 
     cy.mount(
       <Router>
@@ -721,17 +716,14 @@ describe("EventList", { retries: 2 }, () => {
         ],
       } as any);
 
-    cy.stub(taskEventService, "getById")
+    cy.stub(tasksApi, "get")
       .as("getTaskById")
       .resolves({
-        status: 200,
-        data: {
-          id: 101,
-          name: "Submit package",
-          assignees: [],
-          responsibilities: [],
-          notes: '{"blocks":[],"entityMap":{}}',
-        },
+        id: 101,
+        name: "Submit package",
+        assignees: [],
+        responsibilities: [],
+        notes: '{"blocks":[],"entityMap":{}}',
       } as any);
     cy.mount(
       <Router>
@@ -823,34 +815,28 @@ describe("EventList", { retries: 2 }, () => {
       task_added: false,
     });
 
-    cy.stub(templateService, "getTemplatesByParams")
+    cy.stub(taskTemplatesApi, "listFor")
       .as("getTemplatesByParams")
-      .resolves({
-        status: 200,
-        data: [
-          {
-            id: 901,
-            name: "Readiness Template",
-            is_active: true,
-          },
-        ],
-      } as any);
+      .resolves([
+        {
+          id: 901,
+          name: "Readiness Template",
+          is_active: true,
+        },
+      ] as any);
 
-    cy.stub(templateService, "getTemplateTasks")
+    cy.stub(taskTemplatesApi, "listTasks")
       .as("getTemplateTasks")
-      .resolves({
-        status: 200,
-        data: [
-          {
-            id: 1,
-            name: "Prepare Package",
-          },
-        ],
-      } as any);
+      .resolves([
+        {
+          id: 1,
+          name: "Prepare Package",
+        },
+      ] as any);
 
-    cy.stub(taskEventService, "importTasksFromTemplate")
+    cy.stub(tasksApi, "importFromTemplate")
       .as("importTasksFromTemplate")
-      .resolves({ status: 201 } as any);
+      .resolves();
 
     const userEmail = store.getState().user.userDetail.email;
 
@@ -909,11 +895,7 @@ describe("EventList", { retries: 2 }, () => {
       cy.contains("button", "Upload").click();
     });
 
-    cy.get("@importTasksFromTemplate").should(
-      "have.been.calledWith",
-      { work_phase_id: 12 },
-      901,
-    );
+    cy.get("@importTasksFromTemplate").should("have.been.calledWith", 901, 12);
   });
 
   it("shows an error notification when milestone details fail to load", () => {
@@ -977,9 +959,7 @@ describe("EventList", { retries: 2 }, () => {
   });
 
   it("shows an error notification when task details fail to load", () => {
-    cy.stub(taskEventService, "getById")
-      .as("getTaskById")
-      .rejects(new Error("boom"));
+    cy.stub(tasksApi, "get").as("getTaskById").rejects(new Error("boom"));
 
     const userEmail = store.getState().user.userDetail.email;
 
@@ -1026,9 +1006,7 @@ describe("EventList", { retries: 2 }, () => {
   });
 
   it("applies bulk assign updates", () => {
-    cy.stub(taskEventService, "patchTasks")
-      .as("patchTasks")
-      .resolves({ status: 200 } as any);
+    cy.stub(tasksApi, "updateMany").as("patchTasks").resolves();
 
     const userEmail = store.getState().user.userDetail.email;
 
@@ -1204,25 +1182,19 @@ describe("EventList", { retries: 2 }, () => {
       task_added: false,
     });
 
-    cy.stub(templateService, "getTemplatesByParams")
+    cy.stub(taskTemplatesApi, "listFor")
       .as("getTemplatesByParams")
-      .resolves({
-        status: 200,
-        data: [
-          {
-            id: 901,
-            name: "Readiness Template",
-            is_active: true,
-          },
-        ],
-      } as any);
+      .resolves([
+        {
+          id: 901,
+          name: "Readiness Template",
+          is_active: true,
+        },
+      ] as any);
 
-    cy.stub(templateService, "getTemplateTasks")
+    cy.stub(taskTemplatesApi, "listTasks")
       .as("getTemplateTasks")
-      .resolves({
-        status: 200,
-        data: [{ id: 1, name: "Prepare Package" }],
-      } as any);
+      .resolves([{ id: 1, name: "Prepare Package" }] as any);
 
     const userEmail = store.getState().user.userDetail.email;
 

@@ -73,6 +73,8 @@ const eventCalendarBranchEndpoints: Endpoint[] = [
               name: "Current Month Task",
               start_date: getCurrentMonthIso(1),
               number_of_days: 2,
+              assignees: [],
+              responsibilities: [],
             },
             phase_name: "Planning",
             phase_id: 44,

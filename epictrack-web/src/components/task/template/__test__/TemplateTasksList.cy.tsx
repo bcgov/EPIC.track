@@ -27,10 +27,17 @@ const endpoints: Endpoint[] = [
     method: "GET",
     url: `${AppConfig.apiUrl}task-templates/77*`,
     response: {
+      // TaskTemplateResponseSchema always nests these (non-null foreign keys).
       body: {
         id: 77,
         name: "Template A",
         is_active: true,
+        ea_act_id: 3,
+        work_type_id: 6,
+        phase_id: 2,
+        ea_act: { id: 3, name: "EA Act (2018)" },
+        work_type: { id: 6, name: "Assessment" },
+        phase: { id: 2, name: "Early Engagement" },
       },
     },
   },
