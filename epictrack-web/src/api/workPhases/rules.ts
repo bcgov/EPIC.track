@@ -1,4 +1,4 @@
-import { WorkTypeEnum } from "models/workType";
+import { WorkTypeEnum } from "../workTypes/ids";
 
 /** Overage needs a responsibility in legislated phases and in amendment works. */
 export const isOverageResponsibilityRequired = (

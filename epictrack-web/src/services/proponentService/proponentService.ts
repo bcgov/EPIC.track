@@ -1,10 +1,9 @@
 import Endpoints from "../../constants/api-endpoint";
 import http from "../../apiManager/http-request-handler";
-import ServiceBase from "../common/serviceBase";
 import { MasterBase } from "../../models/type";
 import { Proponent } from "models/proponent";
 
-class ProponentService implements ServiceBase {
+class ProponentService {
   async getAll() {
     return await http.GetRequest<Proponent[]>(Endpoints.Proponents.PROPONENTS);
   }

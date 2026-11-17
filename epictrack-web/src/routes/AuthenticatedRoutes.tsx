@@ -10,7 +10,6 @@ import ProponentList from "../components/proponent/ProponentList";
 import WorkList from "../components/work/WorkList";
 import ProjectList from "../components/project/ProjectList";
 import TemplateList from "../components/task/template/TemplateList";
-import { MasterProvider } from "../components/shared/MasterContext";
 import WorkPlan from "../components/workPlan";
 import EventCalendar from "../components/eventCalendar/EventCalendar";
 import { ROLES } from "../constants/application-constant";
@@ -43,24 +42,10 @@ const AuthenticatedRoutes = () => {
   return (
     <Routes>
       <Route element={<AuthGate allowed={[ROLES.EXTENDED_EDIT]} />}>
-        <Route
-          path="/list-management/staffs"
-          element={
-            <MasterProvider key={"/list-management/staffs"}>
-              <StaffList />
-            </MasterProvider>
-          }
-        />
+        <Route path="/list-management/staffs" element={<StaffList />} />
       </Route>
       <Route element={<AuthGate allowed={[ROLES.EXTENDED_EDIT]} />}>
-        <Route
-          path="/list-management/projects"
-          element={
-            <MasterProvider key={"/list-management/projects"}>
-              <ProjectList />
-            </MasterProvider>
-          }
-        />
+        <Route path="/list-management/projects" element={<ProjectList />} />
       </Route>
       <Route
         path="/reports/referral-schedule"
@@ -81,31 +66,13 @@ const AuthenticatedRoutes = () => {
       >
         <Route
           path="/list-management/first-nations"
-          element={
-            <MasterProvider key={"/list-management/first-nations"}>
-              <IndigenousNationList />
-            </MasterProvider>
-          }
+          element={<IndigenousNationList />}
         />
       </Route>
       <Route element={<AuthGate allowed={[ROLES.EXTENDED_EDIT]} />}>
-        <Route
-          path="/list-management/proponents"
-          element={
-            <MasterProvider key={"/list-management/proponents"}>
-              <ProponentList />
-            </MasterProvider>
-          }
-        />
+        <Route path="/list-management/proponents" element={<ProponentList />} />
       </Route>
-      <Route
-        path="/works"
-        element={
-          <MasterProvider key={"/works"}>
-            <WorkList />
-          </MasterProvider>
-        }
-      />
+      <Route path="/works" element={<WorkList />} />
       <Route path="/work-plan" element={<WorkPlan />} />
       <Route element={<AuthGate allowed={[ROLES.MANAGE_USERS]} />}>
         <Route path="/admin/settings" element={<Settings />} />

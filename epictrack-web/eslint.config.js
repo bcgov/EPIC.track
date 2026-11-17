@@ -1,9 +1,7 @@
 const tsParser = require("@typescript-eslint/parser");
 const tsPlugin = require("@typescript-eslint/eslint-plugin");
 
-// Code outside the API layer must go through src/api/<domain>, not the HTTP
-// client or raw endpoint paths. Warnings for now; errors once every domain the
-// backend rewrite and the DEMI move touch has been migrated.
+// The import boundary around src/api; src/api/README.md explains it.
 const apiBoundaryPatterns = [
   {
     // ApiError is what the domain modules throw, so anything may import it.
@@ -14,7 +12,18 @@ const apiBoundaryPatterns = [
     group: ["**/constants/api-endpoint", "constants/api-endpoint"],
     message: "Endpoint paths belong inside src/api/<domain>.",
   },
+  {
+    group: ["api/*/*", "**/api/*/*"],
+    message:
+      "Import src/api/<domain> through its index; DTOs, mappers and ID enums stay inside src/api.",
+  },
 ];
+
+const noComponentsPattern = {
+  group: ["components/**", "**/components/**"],
+  message:
+    "src/api and src/models sit below the screens; move the shared type down.",
+};
 
 module.exports = [
   {
@@ -50,7 +59,7 @@ module.exports = [
       ...tsPlugin.configs.recommended.rules,
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": ["warn", { args: "none" }],
-      "no-restricted-imports": ["warn", { patterns: apiBoundaryPatterns }],
+      "no-restricted-imports": ["error", { patterns: apiBoundaryPatterns }],
     },
   },
   {
@@ -58,9 +67,24 @@ module.exports = [
     rules: { "@typescript-eslint/no-require-imports": "off" },
   },
   {
+    files: ["src/models/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        { patterns: [...apiBoundaryPatterns, noComponentsPattern] },
+      ],
+    },
+  },
+  {
+    // src/api may use the HTTP client and other domains' internals.
+    files: ["src/api/**"],
+    rules: {
+      "no-restricted-imports": ["error", { patterns: [noComponentsPattern] }],
+    },
+  },
+  {
     // Allowed to use the HTTP client directly.
     files: [
-      "src/api/**",
       "src/apiManager/**",
       "src/services/**",
       "src/components/axiosErrorHandler/**",

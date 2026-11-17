@@ -1,18 +1,10 @@
-import {
-  FC,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { Box, Button, Grid } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import { Switch, Case } from "react-if";
 import { ETGridTitle, ETPageContainer, ETParagraph } from "components/shared";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import TrackDialog from "components/shared/TrackDialog";
-import { MasterContext } from "components/shared/MasterContext";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import {
   BLANK_OPTION,
@@ -75,7 +67,6 @@ export default function MyTasksList() {
       },
     ],
   );
-  const ctx = useContext(MasterContext);
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
   const [myTasks, setMyTasks] = useState<MyTask[]>([]);
@@ -107,10 +98,6 @@ export default function MyTasksList() {
     }
     return Promise.resolve(result);
   }, [user.staffId, setMyTasks]);
-
-  useEffect(() => {
-    ctx.setForm(<></>);
-  }, [ctx]);
 
   const handleEdit = (task: MyTask) => {
     setTask(task);
@@ -489,7 +476,6 @@ export default function MyTasksList() {
               sorting: [{ id: "start_date", desc: false }],
             }}
             state={{
-              isLoading: ctx.loading,
               showGlobalFilter: true,
               columnFilters,
             }}

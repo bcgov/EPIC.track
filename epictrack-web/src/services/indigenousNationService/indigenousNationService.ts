@@ -1,10 +1,9 @@
 import Endpoints from "../../constants/api-endpoint";
 import http from "../../apiManager/http-request-handler";
-import ServiceBase from "../common/serviceBase";
 import { MasterBase } from "models/type";
 import { FirstNation } from "models/firstNation";
 
-class IndigenousNationService implements ServiceBase {
+class IndigenousNationService {
   async getAll(is_active = false) {
     return await http.GetRequest<FirstNation[]>(
       Endpoints.IndigenousNations.INDIGENOUS_NATIONS,

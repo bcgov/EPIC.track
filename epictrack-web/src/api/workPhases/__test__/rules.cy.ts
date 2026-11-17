@@ -1,4 +1,4 @@
-import { WorkTypeEnum } from "models/workType";
+import { WorkTypeEnum } from "api/workTypes/ids";
 import { isOverageResponsibilityRequired } from "../rules";
 
 describe("work phase rules", () => {

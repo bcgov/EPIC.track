@@ -1,7 +1,7 @@
 import Moment from "moment";
 import { isApiError } from "apiManager/apiError";
-import { EVENT_TYPE } from "components/workPlan/phase/type";
 import {
+  EVENT_TYPE,
   EventPosition,
   EventsGridModel,
   EventTemplateVisibility,

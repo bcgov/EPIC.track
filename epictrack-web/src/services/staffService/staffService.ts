@@ -2,9 +2,8 @@ import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
 import { Staff } from "../../models/staff";
 import { MasterBase } from "../../models/type";
-import ServiceBase from "../common/serviceBase";
 
-class StaffService implements ServiceBase {
+class StaffService {
   async getAll(is_active = false) {
     return await http.GetRequest<Staff[]>(Endpoints.Staffs.STAFFS, {
       is_active,

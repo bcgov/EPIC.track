@@ -3,10 +3,8 @@ import { store } from "../../../store";
 import { Box, Button } from "@mui/material";
 import {
   mockStaffs,
-  createMockMasterContext,
   generateMockProject,
 } from "../../../../cypress/support/common";
-import { MasterContext } from "components/shared/MasterContext";
 import { ETGridTitle } from "..";
 import { MRT_ColumnDef } from "material-react-table";
 import { MemoryRouter as Router } from "react-router-dom";
@@ -78,37 +76,33 @@ describe("MasterTrackTable", () => {
 
     cy.mount(
       <Router>
-        <MasterContext.Provider
-          value={createMockMasterContext(projects, projects)}
-        >
-          <MasterTrackTable
-            columns={columns}
-            data={projects}
-            initialState={{
-              sorting: [
-                {
-                  id: "name",
-                  desc: false,
-                },
-              ],
-            }}
-            state={{
-              isLoading: false,
-              showGlobalFilter: true,
-            }}
-            renderTopToolbarCustomActions={() => (
-              <Box
-                sx={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "right",
-                }}
-              >
-                <Button>Render Top Toolbar</Button>
-              </Box>
-            )}
-          />
-        </MasterContext.Provider>
+        <MasterTrackTable
+          columns={columns}
+          data={projects}
+          initialState={{
+            sorting: [
+              {
+                id: "name",
+                desc: false,
+              },
+            ],
+          }}
+          state={{
+            isLoading: false,
+            showGlobalFilter: true,
+          }}
+          renderTopToolbarCustomActions={() => (
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "right",
+              }}
+            >
+              <Button>Render Top Toolbar</Button>
+            </Box>
+          )}
+        />
       </Router>,
     );
   });
