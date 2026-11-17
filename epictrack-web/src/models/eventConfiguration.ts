@@ -7,7 +7,7 @@ export default interface EventConfiguration {
   event_type_id: number;
   multiple_days: boolean;
   event_position: EventPosition;
-  visibilty_mode: EventTemplateVisibility;
+  visibility: EventTemplateVisibility;
   work_phase_id: number;
   start_at?: number;
 }

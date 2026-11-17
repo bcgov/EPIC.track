@@ -6,11 +6,9 @@ import {
   Endpoint,
   setupIntercepts,
 } from "../../../../../cypress/support/utils";
-import { eventService } from "services/eventService/eventService";
-import { actSectionService } from "services/actSectionService/actSectionService";
+import { eventsApi } from "api/events";
+import { ApiError } from "apiManager/apiError";
 import staffService from "services/staffService/staffService";
-import { outcomeConfigurationService } from "services/outcomeConfigurationService/outcomeConfigurationService";
-import { configurationService } from "services/configurationService/configurationService";
 import { workPhasesApi } from "api/workPhases";
 import {
   WorkplanContext,
@@ -24,7 +22,23 @@ const endpoints: Endpoint[] = [
     method: "PUT",
     url: `${AppConfig.apiUrl}milestones/events/77*`,
     response: {
-      body: { id: 77 },
+      // EventResponseSchema always nests the event configuration.
+      body: {
+        id: 77,
+        name: "Decision issued updated",
+        event_configuration_id: 9,
+        event_configuration: {
+          id: 9,
+          name: "Decision Milestone",
+          event_category_id: EventCategory.MILESTONE,
+          event_type_id: 1,
+          multiple_days: false,
+          event_position: EventPosition.INTERMEDIATE,
+          visibility: "OPTIONAL",
+          work_phase_id: 55,
+          start_at: null,
+        },
+      },
     },
   },
 ];
@@ -40,7 +54,7 @@ const existingEvent = {
     event_type_id: 1,
     multiple_days: false,
     event_position: EventPosition.INTERMEDIATE,
-    visibilty_mode: "OPTIONAL",
+    visibility: "OPTIONAL",
     work_phase_id: 55,
   },
   anticipated_date: "2026-03-20T00:00:00.000Z",
@@ -60,10 +74,9 @@ describe("EventForm", () => {
   beforeEach(() => {
     setupIntercepts(endpoints);
 
-    cy.stub(actSectionService, "getActSectionsByEaAct").resolves({
-      status: 200,
-      data: [{ id: 1, name: "Section 1" }],
-    } as any);
+    cy.stub(eventsApi, "listActSections").resolves([
+      { id: 1, name: "Section 1" },
+    ]);
 
     cy.stub(workPhasesApi, "getInfo").resolves(undefined);
   });
@@ -91,9 +104,9 @@ describe("EventForm", () => {
   });
 
   it("submits an unlocked milestone update when actual date is not provided", () => {
-    cy.stub(eventService, "update")
+    cy.stub(eventsApi, "update")
       .as("updateMilestoneDirect")
-      .resolves({ status: 200, data: { id: 77 } } as any);
+      .resolves({ id: 77 } as any);
 
     const onSave = cy.stub().as("onSave");
 
@@ -261,12 +274,9 @@ describe("EventForm", () => {
         data: [{ id: 1, full_name: "Decision Maker" }],
       } as any);
 
-    cy.stub(outcomeConfigurationService, "getOutcomeConfigurations")
+    cy.stub(eventsApi, "listOutcomes")
       .as("getOutcomeConfigurations")
-      .resolves({
-        status: 200,
-        data: [{ id: 5, name: "Approved" }],
-      } as any);
+      .resolves([{ id: 5, name: "Approved" }]);
 
     const decisionEvent = {
       ...existingEvent,
@@ -301,7 +311,7 @@ describe("EventForm", () => {
         data: [{ id: 1, full_name: "Decision Maker" }],
       } as any);
 
-    cy.stub(outcomeConfigurationService, "getOutcomeConfigurations")
+    cy.stub(eventsApi, "listOutcomes")
       .as("getOutcomeConfigurations")
       .rejects(new Error("boom"));
 
@@ -330,21 +340,18 @@ describe("EventForm", () => {
   });
 
   it("prefills resumption milestone config when creating in a suspended phase", () => {
-    cy.stub(configurationService, "getAll")
+    cy.stub(eventsApi, "listConfigurations")
       .as("getConfigurations")
-      .resolves({
-        status: 200,
-        data: [
-          {
-            id: 301,
-            name: "Resume Clock",
-            event_category_id: EventCategory.MILESTONE,
-            event_type_id: EventType.TIME_LIMIT_RESUMPTION,
-            multiple_days: false,
-            event_position: EventPosition.INTERMEDIATE,
-          },
-        ],
-      } as any);
+      .resolves([
+        {
+          id: 301,
+          name: "Resume Clock",
+          event_category_id: EventCategory.MILESTONE,
+          event_type_id: EventType.TIME_LIMIT_RESUMPTION,
+          multiple_days: false,
+          event_position: EventPosition.INTERMEDIATE,
+        },
+      ] as any);
 
     cy.mount(
       <WorkplanContext.Provider
@@ -386,21 +393,18 @@ describe("EventForm", () => {
   });
 
   it("shows warning when suspended phase has no resumption milestone config", () => {
-    cy.stub(configurationService, "getAll")
+    cy.stub(eventsApi, "listConfigurations")
       .as("getConfigurations")
-      .resolves({
-        status: 200,
-        data: [
-          {
-            id: 302,
-            name: "Optional Milestone",
-            event_category_id: EventCategory.MILESTONE,
-            event_type_id: EventType.SUBMISSION,
-            multiple_days: false,
-            event_position: EventPosition.INTERMEDIATE,
-          },
-        ],
-      } as any);
+      .resolves([
+        {
+          id: 302,
+          name: "Optional Milestone",
+          event_category_id: EventCategory.MILESTONE,
+          event_type_id: EventType.SUBMISSION,
+          multiple_days: false,
+          event_position: EventPosition.INTERMEDIATE,
+        },
+      ] as any);
 
     cy.mount(
       <WorkplanContext.Provider
@@ -485,5 +489,131 @@ describe("EventForm", () => {
     );
 
     cy.get("#anticipated_date").should("be.disabled");
+  });
+  it("creates a milestone through eventsApi with the phase id and push flag", () => {
+    cy.stub(eventsApi, "listConfigurations").resolves([
+      {
+        id: 301,
+        name: "Resume Clock",
+        event_category_id: EventCategory.MILESTONE,
+        event_type_id: EventType.TIME_LIMIT_RESUMPTION,
+        multiple_days: false,
+        event_position: EventPosition.INTERMEDIATE,
+      },
+    ] as any);
+    cy.stub(eventsApi, "checkDatePush").resolves({
+      phase_end_push_required: false,
+      subsequent_event_push_required: false,
+      days_pushed: 0,
+    });
+    cy.stub(eventsApi, "create")
+      .as("create")
+      .resolves({ id: 501 } as any);
+    const onSave = cy.stub().as("onSave");
+
+    cy.mount(
+      <WorkplanContext.Provider
+        value={{
+          ...initialWorkPlanContext,
+          work: {
+            id: 101,
+            start_date: "2026-03-01T00:00:00.000Z",
+          } as any,
+          workPhases: [
+            {
+              work_phase: {
+                id: 55,
+                legislated: true,
+                is_completed: false,
+              },
+            },
+          ] as any,
+          selectedWorkPhase: {
+            work_phase: {
+              id: 55,
+              start_date: "2026-03-01T00:00:00.000Z",
+              legislated: true,
+              is_suspended: true,
+            },
+            milestone_progress: 0,
+          } as any,
+        }}
+      >
+        <EventProvider>
+          <EventForm onSave={onSave} isFormFieldsLocked={false} />
+        </EventProvider>
+      </WorkplanContext.Provider>,
+    );
+
+    cy.get('input[placeholder="Title"]').should("have.value", "Resume Clock");
+    cy.get("#event-form").submit();
+
+    cy.get("@create").should("have.been.calledOnce");
+    cy.get("@create")
+      .its("firstCall.args")
+      .then(([workPhaseId, input, pushEvents]) => {
+        expect(workPhaseId).to.equal(55);
+        expect(input.name).to.equal("Resume Clock");
+        // The select holds its value as a string, which the API parses.
+        expect(Number(input.event_configuration_id)).to.equal(301);
+        expect(pushEvents).to.equal(false);
+      });
+    cy.get("@onSave").should("have.been.called");
+  });
+
+  it("shows the server's message in the lock dialog when the save is rejected", () => {
+    cy.stub(eventsApi, "checkDatePush").resolves({
+      phase_end_push_required: false,
+      subsequent_event_push_required: false,
+      days_pushed: 0,
+    });
+    cy.stub(eventsApi, "update")
+      .as("update")
+      .rejects(
+        new ApiError({
+          client: "track",
+          status: 422,
+          code: "UnprocessableEventError",
+          message: "The milestone date is outside the phase.",
+        }),
+      );
+
+    cy.mount(
+      <WorkplanContext.Provider
+        value={{
+          ...initialWorkPlanContext,
+          selectedWorkPhase: {
+            work_phase: {
+              id: 55,
+              start_date: "2026-03-01T00:00:00.000Z",
+              legislated: true,
+              is_suspended: false,
+            },
+          } as any,
+        }}
+      >
+        <EventProvider>
+          <EventForm
+            onSave={cy.stub()}
+            event={baseEvent}
+            isFormFieldsLocked={false}
+          />
+        </EventProvider>
+      </WorkplanContext.Provider>,
+    );
+
+    // Typing is reset by the field's onDateChange, so pick from the calendar.
+    cy.get("#actual_date")
+      .parents(".MuiFormControl-root")
+      .first()
+      .find("button")
+      .click();
+    cy.contains('[role="gridcell"]', /^22$/).click();
+    cy.get("#event-form").submit();
+    cy.contains("Lock this Milestone?").should("exist");
+    cy.contains('[role="dialog"] button', "Yes").click();
+
+    cy.get("@update").should("have.been.calledOnce");
+    cy.contains("The milestone date is outside the phase.").should("exist");
   });
 });

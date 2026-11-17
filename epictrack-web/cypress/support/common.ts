@@ -2,7 +2,12 @@ import { Staff } from "models/staff";
 import { faker } from "@faker-js/faker";
 import { Project } from "models/project";
 import { Type } from "models/type";
-import { CalendarEvent, EventPosition, EventsGridModel, EventTemplateVisibility } from "models/event";
+import {
+  CalendarEvent,
+  EventPosition,
+  EventsGridModel,
+  EventTemplateVisibility,
+} from "models/event";
 import { EVENT_TYPE } from "components/workPlan/phase/type";
 import dayjs from "dayjs";
 import { EVENT_STATUS } from "models/taskEvent";
@@ -20,7 +25,7 @@ export const mockStaffs: Staff[] = [
     is_active: true,
     position_id: 2 /* add more missing properties here */,
     position: { name: "REL", id: 1, sort_order: 0 },
-    idir_user_id: ""
+    idir_user_id: "",
   },
   {
     id: 2,
@@ -32,7 +37,7 @@ export const mockStaffs: Staff[] = [
     is_active: false,
     position_id: 2 /* add more missing properties here */,
     position: { name: "Position1", id: 2, sort_order: 1 },
-    idir_user_id: ""
+    idir_user_id: "",
   },
   {
     id: 3,
@@ -44,19 +49,21 @@ export const mockStaffs: Staff[] = [
     is_active: true,
     position_id: 1,
     position: { name: "REL", id: 1, sort_order: 0 },
-    idir_user_id: ""
+    idir_user_id: "",
   },
   // Add more mock Staff objects as needed
 ];
 
-export const generateMockEvent = (overrides?: Partial<EventsGridModel>): EventsGridModel => {
+export const generateMockEvent = (
+  overrides?: Partial<EventsGridModel>,
+): EventsGridModel => {
   const startOfMonth = dayjs().startOf("month").toDate();
   const endOfMonth = dayjs().endOf("month").toDate();
 
   const start = faker.date.between({ from: startOfMonth, to: endOfMonth });
   const end = faker.date.between({
     from: dayjs(start).add(1, "day").toDate(),
-    to: dayjs(start).add(5, "day").toDate()
+    to: dayjs(start).add(5, "day").toDate(),
   });
   const number_of_days = dayjs(end).diff(dayjs(start), "day") + 1;
 
@@ -116,34 +123,46 @@ export const mockEventsGrid: CalendarEvent[] = [
   },
 ];
 
-export const mockCalendarEvents =
-[
+export const mockCalendarEvents = [
   {
-    "event": {
-      "id": 1,
-      "name": "Kickoff Meeting",
-      "anticipated_date": "2025-09-15T09:00:00Z",
-      "actual_date": "2025-09-15T10:00:00Z",
+    event: {
+      id: 1,
+      name: "Kickoff Meeting",
+      anticipated_date: "2025-09-15T09:00:00Z",
+      actual_date: "2025-09-15T10:00:00Z",
+      event_configuration: {
+        id: 1,
+        name: "Kickoff Meeting",
+        event_category_id: 1,
+        visibility: "MANDATORY",
+        start_at: null,
+      },
     },
-    "phase_name": "Initiation",
-    "phase_id": 11,
-    "work_name": "Project Alpha",
-    "work_id": 101
+    phase_name: "Initiation",
+    phase_id: 11,
+    work_name: "Project Alpha",
+    work_id: 101,
   },
   {
-    "event": {
-      "id": 2,
-      "name": "Draft Report Due",
-      "anticipated_date": "2025-09-20T00:00:00Z",
-      "actual_date": "2025-09-20T23:59:59Z",
+    event: {
+      id: 2,
+      name: "Draft Report Due",
+      anticipated_date: "2025-09-20T00:00:00Z",
+      actual_date: "2025-09-20T23:59:59Z",
+      event_configuration: {
+        id: 2,
+        name: "Draft Report Due",
+        event_category_id: 1,
+        visibility: "MANDATORY",
+        start_at: null,
+      },
     },
-    "phase_name": "Reporting",
-    "phase_id": 12,
-    "work_name": "Project Beta",
-    "work_id": 102
-  }
-]
-
+    phase_name: "Reporting",
+    phase_id: 12,
+    work_name: "Project Beta",
+    work_id: 102,
+  },
+];
 
 export function createMockMasterContext(defaultItem: any, _data?: any) {
   return {
@@ -170,7 +189,7 @@ export function createMockMasterContext(defaultItem: any, _data?: any) {
 
 export function testTableFiltering(
   tableHeaderName: string,
-  propertyToTest: string
+  propertyToTest: string,
 ) {
   cy.contains("div", tableHeaderName)
     .closest(".MuiTableCell-root")
@@ -236,58 +255,56 @@ export const generateMockProject = (() => {
 })();
 
 export type CypressStubFunction =
-  | Cypress.Agent<sinon.SinonStub>
-  | (() => void)
-  | undefined;
+  Cypress.Agent<sinon.SinonStub> | (() => void) | undefined;
 
 export const makeWorkplanContextStub = (
-    overrides: Partial<WorkplanContextProps> = {}
-  ): WorkplanContextProps => ({
-    firstNations: [],
-    getWorkById: cy.stub().resolves(),
-    getWorkStatuses: cy.stub().resolves(),
-    getWorkPhases: cy.stub().resolves(),
-    issues: [],
-    loadData: cy.stub().resolves(),
-    loading: false,
-    loadIssues: cy.stub().resolves(),
-    isActiveTeamMember: true,
-    issueStalenessSetting: undefined,
-    selectedStaff: undefined,
-    selectedWorkPhase: undefined,
-    setFirstNations: cy.stub(),
-    setIssues: cy.stub(),
-    setSelectedStaff: cy.stub(),
-    setSelectedWorkPhase: cy.stub(),
-    setStatuses: cy.stub(),
-    setTeam: cy.stub(),
-    setWork: cy.stub(),
-    setWorkPhases: cy.stub(),
-    statuses: [],
-    statusStalenessSetting: undefined,
-    team: [],
-    work: undefined,
-    workPhases: [],
-    ...overrides,
-  });
+  overrides: Partial<WorkplanContextProps> = {},
+): WorkplanContextProps => ({
+  firstNations: [],
+  getWorkById: cy.stub().resolves(),
+  getWorkStatuses: cy.stub().resolves(),
+  getWorkPhases: cy.stub().resolves(),
+  issues: [],
+  loadData: cy.stub().resolves(),
+  loading: false,
+  loadIssues: cy.stub().resolves(),
+  isActiveTeamMember: true,
+  issueStalenessSetting: undefined,
+  selectedStaff: undefined,
+  selectedWorkPhase: undefined,
+  setFirstNations: cy.stub(),
+  setIssues: cy.stub(),
+  setSelectedStaff: cy.stub(),
+  setSelectedWorkPhase: cy.stub(),
+  setStatuses: cy.stub(),
+  setTeam: cy.stub(),
+  setWork: cy.stub(),
+  setWorkPhases: cy.stub(),
+  statuses: [],
+  statusStalenessSetting: undefined,
+  team: [],
+  work: undefined,
+  workPhases: [],
+  ...overrides,
+});
 
-export const issuesContextValue={
-    ...defaultSearchOptions,
-    issues: [],
-    loadingIssues: false,
-    lazyLoadMoreIssues: () => {},
-    totalIssues: 0,
-    searchOptions: defaultSearchOptions,
-    setSearchOptions: () => {},
-    loadingMoreIssues: false,
-    setLoadingMoreIssues: () => {},
-    issueStalenessSettings: undefined,
-    sortOrder: "desc",
-    setSortOrder: () => {},
-    refetchIssues: () => {},
-    userWorkIds: [],
-    isIssueDialogOpen: false,
-    showIssueDialog: () => {},
-    hideIssueDialog: () => {},
-    selectedIssue: null,
-    }
+export const issuesContextValue = {
+  ...defaultSearchOptions,
+  issues: [],
+  loadingIssues: false,
+  lazyLoadMoreIssues: () => {},
+  totalIssues: 0,
+  searchOptions: defaultSearchOptions,
+  setSearchOptions: () => {},
+  loadingMoreIssues: false,
+  setLoadingMoreIssues: () => {},
+  issueStalenessSettings: undefined,
+  sortOrder: "desc",
+  setSortOrder: () => {},
+  refetchIssues: () => {},
+  userWorkIds: [],
+  isIssueDialogOpen: false,
+  showIssueDialog: () => {},
+  hideIssueDialog: () => {},
+  selectedIssue: null,
+};

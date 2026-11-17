@@ -4,7 +4,7 @@ import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../../shared";
 import ControlledSelectV2 from "../../../shared/controlledInputComponents/ControlledSelectV2";
 import { ListType } from "../../../../models/code";
 import { useFormContext } from "react-hook-form";
-import { actSectionService } from "services/actSectionService/actSectionService";
+import { eventsApi } from "api/events";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { showNotification } from "../../../shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "../../../../constants/application-constant";
@@ -26,21 +26,17 @@ const ExtensionSuspensionInput = (props: ExtensionSuspensionInputProps) => {
   const ctx = useContext(WorkplanContext);
 
   useEffect(() => {
-    const getActSections = async () => {
+    const eaActId = ctx.work?.ea_act_id;
+    const getActSections = async (eaActId: number) => {
       try {
-        const result = await actSectionService.getActSectionsByEaAct(
-          ctx.work?.ea_act_id,
-        );
-        if (result.status === 200) {
-          setActSections(result.data as ListType[]);
-        }
+        setActSections(await eventsApi.listActSections(eaActId));
       } catch (e) {
         showNotification(COMMON_ERROR_MESSAGE, {
           type: "error",
         });
       }
     };
-    getActSections();
+    if (eaActId) getActSections(eaActId);
   }, [ctx.work?.ea_act_id]);
 
   return (

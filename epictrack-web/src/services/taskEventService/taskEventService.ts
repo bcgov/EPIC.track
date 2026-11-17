@@ -1,7 +1,7 @@
 import { TaskEvent } from "../../models/taskEvent";
 import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
-import { CalendarSearchOptions } from "components/calendar/EventCalendarContext";
+import { CalendarSearchOptions } from "models/event";
 
 export type TaskEventMutationRequest = {
   name: string;

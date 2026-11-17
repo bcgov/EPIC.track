@@ -1,7 +1,5 @@
-import {
-  CalendarSearchOptions,
-  EventCalendarProvider,
-} from "./EventCalendarContext";
+import { CalendarSearchOptions } from "models/event";
+import { EventCalendarProvider } from "./EventCalendarContext";
 import EventCalendarContainer from "./EventCalendarContainer";
 
 interface CalendarProps {

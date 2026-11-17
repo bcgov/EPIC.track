@@ -2,7 +2,6 @@ import { EVENT_TYPE } from "../components/workPlan/phase/type";
 import EventConfiguration from "./eventConfiguration";
 import { Staff } from "./staff";
 import { EVENT_STATUS } from "./taskEvent";
-import { WorkPhase } from "./work";
 
 export interface EventsGridModel {
   start_date: string;
@@ -54,6 +53,46 @@ export interface MilestoneEvent {
   decision_maker_id: number;
 }
 
+/** The fields a milestone save accepts. */
+export interface MilestoneEventInput {
+  name?: string;
+  description?: string;
+  anticipated_date?: string;
+  actual_date?: string | null;
+  number_of_days?: number;
+  event_configuration_id?: number;
+  outcome_id?: number;
+  notes?: string;
+  high_priority?: boolean;
+  act_section_id?: number;
+  reason?: string;
+  decision_maker_id?: number;
+  number_of_attendees?: number;
+  number_of_responses?: number;
+  start_at?: string;
+  topic?: string;
+}
+
+/** A milestone on My Calendar, with its work and phase. */
+export interface CalendarMilestone {
+  event: MilestoneEvent;
+  work_id: number;
+  work_name: string;
+  phase_id: number;
+  phase_name: string;
+}
+
+export interface CalendarSearchOptions {
+  event_types: string[];
+  project_types: string[];
+  regions: string[];
+  staff_id: number | null;
+  work_ids: number[];
+  work_types: string[];
+  year: number;
+  teams: string[];
+}
+
 export interface Assignee {
   id: number;
   is_active: boolean;
@@ -62,8 +101,6 @@ export interface Assignee {
   assignee: Staff;
 }
 export interface MilestoneEventDateCheck {
-  work_phase_to_be_exceeded: WorkPhase;
-  event: MilestoneEvent;
   phase_end_push_required: boolean;
   subsequent_event_push_required: boolean;
   days_pushed: number;

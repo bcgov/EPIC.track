@@ -6,7 +6,7 @@ import { useFormContext } from "react-hook-form";
 import { ListType } from "../../../../models/code";
 import { showNotification } from "../../../shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "../../../../constants/application-constant";
-import { outcomeConfigurationService } from "../../../../services/outcomeConfigurationService/outcomeConfigurationService";
+import { eventsApi } from "api/events";
 import { Staff } from "../../../../models/staff";
 import { OUTCOME_ID } from "../constants";
 
@@ -31,13 +31,7 @@ const DecisionInput = ({
   useEffect(() => {
     const getOutcomes = async () => {
       try {
-        const result =
-          await outcomeConfigurationService.getOutcomeConfigurations(
-            Number(configurationId),
-          );
-        if (result.status === 200) {
-          setOutcomes(result.data as any[]);
-        }
+        setOutcomes(await eventsApi.listOutcomes(Number(configurationId)));
       } catch (e) {
         showNotification(COMMON_ERROR_MESSAGE, {
           type: "error",

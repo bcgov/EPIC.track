@@ -10,7 +10,6 @@ import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import dayjs from "dayjs";
-import Moment from "moment";
 import { Else, If, Then, When } from "react-if";
 import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
 import { Palette } from "../../../styles/theme";
@@ -34,10 +33,10 @@ import {
 import { EVENT_TYPE } from "../phase/type";
 import { OUTCOME_ID } from "./constants";
 import { POSITION_ENUM } from "models/position";
-import { eventService } from "services/eventService/eventService";
+import { eventsApi } from "api/events";
+import { isApiError } from "apiManager/apiError";
 import { workPhasesApi } from "api/workPhases";
 import staffService from "services/staffService/staffService";
-import { configurationService } from "services/configurationService/configurationService";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import { dateUtils } from "../../../utils";
 import { ListType } from "models/code";
@@ -419,13 +418,12 @@ const EventForm = ({
 
   const getConfigurations = useCallback(async () => {
     try {
-      const result = await configurationService.getAll(
-        Number(selectedWorkPhase?.id),
-        [EventTemplateVisibility.OPTIONAL, EventTemplateVisibility.SUGGESTED],
+      setConfigurations(
+        await eventsApi.listConfigurations(Number(selectedWorkPhase?.id), [
+          EventTemplateVisibility.OPTIONAL,
+          EventTemplateVisibility.SUGGESTED,
+        ]),
       );
-      if (result.status === 200) {
-        setConfigurations(result.data as any[]);
-      }
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
         type: "error",
@@ -447,13 +445,7 @@ const EventForm = ({
    */
   const eventDateCheck = useCallback(async () => {
     try {
-      const result = await eventService.check_event_for_date_push(
-        getValues(),
-        event?.id,
-      );
-      if (result.status === 200) {
-        setDateCheckStatus(result.data as MilestoneEventDateCheck);
-      }
+      setDateCheckStatus(await eventsApi.checkDatePush(getValues(), event?.id));
     } catch (e) {}
   }, [event?.id, getValues]);
 
@@ -486,9 +478,9 @@ const EventForm = ({
 
   const createEvent = useCallback(
     async (data: MilestoneEvent, pushEventConfirmed: boolean) => {
-      const createdResult = await eventService.create(
-        data,
+      const created = await eventsApi.create(
         Number(selectedWorkPhase?.id),
+        data,
         pushEvents || pushEventConfirmed,
       );
       showNotification("Milestone details inserted", {
@@ -497,11 +489,11 @@ const EventForm = ({
       handleHighlightRows([
         {
           type: EVENT_TYPE.MILESTONE,
-          id: createdResult.data.id,
+          id: created.id,
         },
       ]);
 
-      return createdResult;
+      return created;
     },
     [handleHighlightRows, pushEvents, selectedWorkPhase?.id],
   );
@@ -511,9 +503,9 @@ const EventForm = ({
       if (!event) {
         return;
       }
-      const updatedResult = await eventService.update(
-        data,
+      const updated = await eventsApi.update(
         Number(event.id),
+        data,
         pushEvents || pushEventConfirmed,
       );
       showNotification("Milestone details updated", {
@@ -525,7 +517,7 @@ const EventForm = ({
           id: event.id,
         },
       ]);
-      return updatedResult;
+      return updated;
     },
     [event, handleHighlightRows, pushEvents],
   );
@@ -564,14 +556,6 @@ const EventForm = ({
         setShowEventLockDialog(true);
         setLockDialogError(""); // Clear any previous errors
       } else {
-        dataToBeSubmitted.anticipated_date = Moment(
-          dataToBeSubmitted.anticipated_date,
-        ).format();
-        if (!!dataToBeSubmitted.actual_date) {
-          dataToBeSubmitted.actual_date = Moment(
-            dataToBeSubmitted.actual_date,
-          ).format();
-        }
         await saveEvent(dataToBeSubmitted, pushEventConfirmed);
         const remainingPhasesToComplete = workPhases?.some(
           (phase) =>
@@ -586,8 +570,9 @@ const EventForm = ({
       const message = getErrorMessage(e);
       // If it's an UnprocessableEventError or UnprocessableEndEventError and the lock dialog is open, show error in dialog
       if (
-        (e.response.data.code === "UnprocessableEventError" ||
-          e.response.data.code === "UnprocessableEndEventError") &&
+        isApiError(e) &&
+        (e.code === "UnprocessableEventError" ||
+          e.code === "UnprocessableEndEventError") &&
         showEventLockDialog
       ) {
         setLockDialogError(message);

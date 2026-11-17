@@ -6,8 +6,12 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { CalendarEvent, MilestoneEvent } from "models/event";
-import { eventService } from "services/eventService/eventService";
+import {
+  CalendarEvent,
+  CalendarSearchOptions,
+  MilestoneEvent,
+} from "models/event";
+import { eventsApi } from "api/events";
 import { taskEventService } from "services/taskEventService/taskEventService";
 import { EVENT_TYPE } from "../workPlan/phase/type";
 import dateUtils from "utils/dateUtils";
@@ -17,17 +21,6 @@ import { TaskEvent } from "models/taskEvent";
 import { Work, WorkPhase } from "models/work";
 import { workPhasesApi } from "api/workPhases";
 import { worksApi } from "api/works";
-
-export interface CalendarSearchOptions {
-  event_types: string[];
-  project_types: string[];
-  regions: string[];
-  staff_id: number | null;
-  work_ids: number[];
-  work_types: string[];
-  year: number;
-  teams: string[];
-}
 
 interface EventCalendarContextType {
   events: CalendarEvent[];
@@ -148,7 +141,7 @@ export const EventCalendarProvider = ({
         (t) => t !== "include_tasks:true",
       );
 
-      const eventPromise = eventService.getCalendarEvents({
+      const eventPromise = eventsApi.listCalendar({
         ...searchOptions,
         event_types: filteredEventTypes,
       });
@@ -162,17 +155,16 @@ export const EventCalendarProvider = ({
         });
       }
 
-      const [eventResult, taskResult] = await Promise.all([
+      const [eventItems, taskResult] = await Promise.all([
         eventPromise,
         taskPromise ?? Promise.resolve({ data: { items: [] } }),
       ]);
 
-      const eventItems = (eventResult?.data?.items || []) as any[];
       const taskItems = (taskResult?.data?.items || []) as any[];
 
       const mappedEvents = eventItems.map((element) => ({
         event: {
-          ...element.event,
+          ...(element.event as any),
           start_date:
             element.event.actual_date || element.event.anticipated_date,
           end_date: dateUtils
@@ -187,7 +179,7 @@ export const EventCalendarProvider = ({
         phase_name: element.phase_name,
         phase_id: element.phase_id,
         work_name: element.work_name,
-        work_id: element.event.work_id,
+        work_id: element.work_id,
       }));
       const mappedTasks = taskItems.map((element) => ({
         event: {
@@ -250,23 +242,28 @@ export const EventCalendarProvider = ({
           : Promise.resolve(null);
 
       // fetch event details (milestone or task)
-      const eventPromise =
+      const milestonePromise =
         event.type === EVENT_TYPE.MILESTONE
-          ? eventService.getById(event.id)
-          : taskEventService.getById(event.id);
+          ? eventsApi.get(event.id)
+          : Promise.resolve(null);
+      const taskPromise =
+        event.type === EVENT_TYPE.TASK
+          ? taskEventService.getById(event.id)
+          : Promise.resolve(null);
 
-      const [workRes, phaseRes, eventRes] = await Promise.all([
+      const [workRes, phaseRes, milestoneRes, eventRes] = await Promise.all([
         workPromise,
         phasePromise,
-        eventPromise,
+        milestonePromise,
+        taskPromise,
       ]);
 
       setWork(workRes);
       if (phaseRes) setWorkPhase(phaseRes);
 
-      if (event.type === EVENT_TYPE.MILESTONE && eventRes.status === 200) {
-        setMilestoneEvent(eventRes.data as MilestoneEvent);
-      } else if (event.type === EVENT_TYPE.TASK && eventRes.status === 200) {
+      if (milestoneRes) {
+        setMilestoneEvent(milestoneRes);
+      } else if (eventRes && eventRes.status === 200) {
         const taskEvent = eventRes.data as TaskEvent;
         taskEvent.assignee_ids = (eventRes.data as any)["assignees"].map(
           (p: any) => p["assignee_id"],

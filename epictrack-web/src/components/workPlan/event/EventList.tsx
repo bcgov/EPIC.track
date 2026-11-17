@@ -23,7 +23,7 @@ import { EVENT_STATUS, statusOptions, TaskEvent } from "models/taskEvent";
 import { TemplateStatus } from "models/work";
 import { ListType } from "models/code";
 import { setLoadingState } from "services/loadingService";
-import { eventService } from "services/eventService/eventService";
+import { eventsApi } from "api/events";
 import { responsibilityService } from "services/responsibilityService/responsibilityService";
 import { taskEventService } from "services/taskEventService/taskEventService";
 import { worksApi } from "api/works";
@@ -195,26 +195,24 @@ const EventList = () => {
     async (phaseId: number): Promise<EventsGridModel[]> => {
       let result: EventsGridModel[] = [];
       try {
-        const milestoneResult = await eventService.getMilestoneEvents(phaseId);
-        if (milestoneResult.status === 200) {
-          result = (milestoneResult.data as any[]).map((element) => {
-            element.type = EVENT_TYPE.MILESTONE;
-            element.start_date =
-              element.actual_date || element.anticipated_date;
-            element.is_complete = !!element.actual_date;
-            const actualToTodayDiff = Moment(element.start_date).diff(
-              Moment(),
-              "days",
-            );
-            element.status = element.is_complete
-              ? EVENT_STATUS.COMPLETED
-              : actualToTodayDiff <= 0
-                ? EVENT_STATUS.INPROGRESS
-                : EVENT_STATUS.NOT_STARTED;
-            element.visibility = element.event_configuration.visibility;
-            return element;
-          });
-        }
+        const milestones = await eventsApi.listForPhase(phaseId);
+        result = milestones.map((milestone) => {
+          const element: any = { ...milestone };
+          element.type = EVENT_TYPE.MILESTONE;
+          element.start_date = element.actual_date || element.anticipated_date;
+          element.is_complete = !!element.actual_date;
+          const actualToTodayDiff = Moment(element.start_date).diff(
+            Moment(),
+            "days",
+          );
+          element.status = element.is_complete
+            ? EVENT_STATUS.COMPLETED
+            : actualToTodayDiff <= 0
+              ? EVENT_STATUS.INPROGRESS
+              : EVENT_STATUS.NOT_STARTED;
+          element.visibility = element.event_configuration.visibility;
+          return element;
+        });
       } catch (e) {
         // Error handling deferred to getCombinedEvents to avoid
         // premature setLoading(false) while parallel requests are in-flight
@@ -531,11 +529,7 @@ const EventList = () => {
 
   const getMilestoneEvent = async (eventId: number) => {
     try {
-      const result = await eventService.getById(eventId);
-      if (result.status === 200) {
-        const event = result.data as MilestoneEvent;
-        setMilestoneEvent(event);
-      }
+      setMilestoneEvent(await eventsApi.get(eventId));
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
         type: "error",
@@ -788,16 +782,14 @@ const EventList = () => {
   };
 
   const deleteMilestone = async () => {
-    const response = await eventService.deleteMilestone(milestoneEvent?.id);
     try {
-      if (response.status === 200) {
-        showNotification("Deleted successfully", {
-          type: "success",
-        });
-        setShowDeleteDialog(false);
-        getCombinedEvents();
-        onSaveHandler();
-      }
+      await eventsApi.remove(Number(milestoneEvent?.id));
+      showNotification("Deleted successfully", {
+        type: "success",
+      });
+      setShowDeleteDialog(false);
+      getCombinedEvents();
+      onSaveHandler();
     } catch (e) {}
   };
 

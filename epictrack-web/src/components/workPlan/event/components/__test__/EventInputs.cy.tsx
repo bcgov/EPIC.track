@@ -11,8 +11,7 @@ import {
   WorkplanContext,
   initialWorkPlanContext,
 } from "../../../WorkPlanContext";
-import { outcomeConfigurationService } from "../../../../../services/outcomeConfigurationService/outcomeConfigurationService";
-import { actSectionService } from "../../../../../services/actSectionService/actSectionService";
+import { eventsApi } from "api/events";
 
 const FormWrapper = ({ children }: { children: React.ReactNode }) => {
   const methods = useForm({
@@ -37,19 +36,13 @@ const FormWrapper = ({ children }: { children: React.ReactNode }) => {
 
 describe("Event extension and decision inputs", () => {
   beforeEach(() => {
-    cy.stub(outcomeConfigurationService, "getOutcomeConfigurations")
+    cy.stub(eventsApi, "listOutcomes")
       .as("getOutcomeConfigurations")
-      .resolves({
-        status: 200,
-        data: [{ id: 7, name: "Approved" }],
-      } as any);
+      .resolves([{ id: 7, name: "Approved" }]);
 
-    cy.stub(actSectionService, "getActSectionsByEaAct")
+    cy.stub(eventsApi, "listActSections")
       .as("getActSectionsByEaAct")
-      .resolves({
-        status: 200,
-        data: [{ id: 2, name: "Section 25" }],
-      } as any);
+      .resolves([{ id: 2, name: "Section 25" }]);
   });
 
   it("updates end date when number of days changes", () => {
