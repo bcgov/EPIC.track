@@ -1,3 +1,6 @@
+import { AppConfig } from "config";
+import { store } from "store";
+import { projectsQueryApi } from "api/projects";
 import { ReferralSchedule } from "../ReferralSchedule";
 import {
   WorkplanContext,
@@ -5,6 +8,17 @@ import {
 } from "../../../../WorkPlanContext";
 
 describe("Status ReferralSchedule", () => {
+  beforeEach(() => {
+    store.dispatch(projectsQueryApi.util.resetApiState());
+    cy.intercept("GET", `${AppConfig.apiUrl}projects/7`, {
+      body: {
+        id: 7,
+        name: "River Project",
+        description: "Project description",
+      },
+    });
+  });
+
   it("renders fallback status text when no approved statuses", () => {
     cy.mount(
       <WorkplanContext.Provider
@@ -14,10 +28,8 @@ describe("Status ReferralSchedule", () => {
             id: 101,
             current_work_phase_id: 2,
             report_description: "Work summary text",
-            project: {
-              name: "River Project",
-              description: "Project description",
-            },
+            project_id: 7,
+            project: { id: 7, name: "River Project" },
           } as any,
           workPhases: [
             {
@@ -35,6 +47,7 @@ describe("Status ReferralSchedule", () => {
     cy.contains("Referral Schedule").should("exist");
     cy.contains("Project Description (Auto-System Generated)").should("exist");
     cy.contains("River Project is in In Review").should("exist");
+    cy.contains("Project description").should("exist");
     cy.contains("Your Statuses will appear here.").should("exist");
     cy.contains("Issue (").should("not.exist");
   });
@@ -48,10 +61,8 @@ describe("Status ReferralSchedule", () => {
             id: 101,
             current_work_phase_id: 2,
             report_description: "Work summary text",
-            project: {
-              name: "River Project",
-              description: "Project description",
-            },
+            project_id: 7,
+            project: { id: 7, name: "River Project" },
           } as any,
           workPhases: [
             {

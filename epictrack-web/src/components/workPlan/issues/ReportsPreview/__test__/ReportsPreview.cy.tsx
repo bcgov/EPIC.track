@@ -11,10 +11,7 @@ const baseContext = {
     id: 101,
     current_work_phase_id: 2,
     report_description: "Work description",
-    project: {
-      name: "River Project",
-      description: "Project description",
-    },
+    project: { id: 7, name: "River Project" },
   } as any,
   workPhases: [
     {

@@ -28,7 +28,50 @@ export interface Project {
   region_flnro: Region;
   fte_positions_construction: number;
   fte_positions_operation: number;
+  eac_signed?: string | null;
+  eac_expires?: string | null;
   created_at: string;
+}
+
+export interface ProjectRef {
+  id: number;
+  name: string;
+}
+
+/** The details a work plan shows. */
+export interface ProjectSummary extends ProjectRef {
+  description: string;
+  abbreviation: string;
+  address: string;
+  created_at: string;
+  type: { name: string };
+  sub_type: { name: string };
+  proponent: { name: string };
+  region_env: { name: string };
+  region_flnro: { name: string };
+}
+
+export interface ProjectInput {
+  name?: string;
+  latitude?: string | number;
+  longitude?: string | number;
+  capital_investment?: string | number | null;
+  epic_guid?: string | null;
+  ea_certificate?: string | null;
+  abbreviation?: string | null;
+  description?: string;
+  address?: string;
+  proponent_id?: string | number;
+  type_id?: string | number;
+  sub_type_id?: string | number;
+  region_id_env?: string | number;
+  region_id_flnro?: string | number;
+  fte_positions_construction?: string | number | null;
+  fte_positions_operation?: string | number | null;
+  eac_signed?: string | Date | null;
+  eac_expires?: string | Date | null;
+  is_active?: boolean;
+  is_project_closed?: boolean;
 }
 
 export const defaultProject = {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import TrackDialog from "components/shared/TrackDialog";
-import { Project } from "models/project";
-import { projectService } from "services/projectService/projectService";
+import { Project, ProjectInput } from "models/project";
+import { projectsApi, useUpdateProject } from "api/projects";
 import { showNotification } from "components/shared/notificationProvider";
 import ProjectForm from "../ProjectForm";
 import { useAppSelector } from "hooks";
@@ -24,13 +24,13 @@ export const ProjectDialog = ({
   const [project, setProject] = useState<Project | null>(null);
   const [disableSave, setDisableSave] = useState(false);
   const { roles } = useAppSelector((state) => state.user.userDetail);
+  const [updateProject] = useUpdateProject();
   const canEdit = roles.includes(ROLES.EDIT);
 
   const fetchProject = useCallback(async () => {
     if (!projectId) return;
     try {
-      const response = await projectService.getById(String(projectId));
-      setProject(response.data);
+      setProject(await projectsApi.get(projectId));
     } catch (error) {
       showNotification("Could not load Project", {
         type: "error",
@@ -38,9 +38,9 @@ export const ProjectDialog = ({
     }
   }, [projectId]);
 
-  const createProject = async (data: any) => {
+  const createProject = async (data: ProjectInput) => {
     try {
-      await projectService.create(data);
+      await projectsApi.create(data);
       showNotification("Project created successfully", {
         type: "success",
       });
@@ -52,9 +52,9 @@ export const ProjectDialog = ({
     }
   };
 
-  const editProject = async (data: any) => {
+  const editProject = async (id: number, data: ProjectInput) => {
     try {
-      await projectService.update(data, String(projectId));
+      await updateProject({ id, input: data }).unwrap();
       showNotification("Project updated successfully", {
         type: "success",
       });
@@ -66,15 +66,9 @@ export const ProjectDialog = ({
     }
   };
 
-  const saveProject = async (data: any) => {
-    if (data.eac_signed) {
-      data.eac_signed = new Date(data.eac_signed).toISOString().split("T")[0];
-    }
-    if (data.eac_expires) {
-      data.eac_expires = new Date(data.eac_expires).toISOString().split("T")[0];
-    }
+  const saveProject = async (data: ProjectInput) => {
     if (projectId) {
-      await editProject(data);
+      await editProject(projectId, data);
     } else {
       await createProject(data);
     }

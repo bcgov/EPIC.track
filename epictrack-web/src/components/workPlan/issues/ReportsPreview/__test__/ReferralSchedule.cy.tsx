@@ -1,3 +1,6 @@
+import { AppConfig } from "config";
+import { store } from "store";
+import { projectsQueryApi } from "api/projects";
 import { ReferralSchedule } from "../ReferralSchedule";
 import {
   WorkplanContext,
@@ -5,6 +8,17 @@ import {
 } from "../../../WorkPlanContext";
 
 describe("Issues ReferralSchedule", () => {
+  beforeEach(() => {
+    store.dispatch(projectsQueryApi.util.resetApiState());
+    cy.intercept("GET", `${AppConfig.apiUrl}projects/7`, {
+      body: {
+        id: 7,
+        name: "River Project",
+        description: "Project description",
+      },
+    });
+  });
+
   it("renders fallback issues text when there are no active approved issues", () => {
     cy.mount(
       <WorkplanContext.Provider
@@ -14,10 +28,8 @@ describe("Issues ReferralSchedule", () => {
             id: 101,
             current_work_phase_id: 2,
             report_description: "Work description",
-            project: {
-              name: "River Project",
-              description: "Project description",
-            },
+            project_id: 7,
+            project: { id: 7, name: "River Project" },
           } as any,
           workPhases: [
             {
@@ -34,6 +46,7 @@ describe("Issues ReferralSchedule", () => {
 
     cy.contains("Referral Schedule").should("exist");
     cy.contains("Work Description").should("exist");
+    cy.contains("Project description").should("exist");
     cy.contains("Your Issues will appear here.").should("exist");
     cy.contains("Status (").should("not.exist");
   });
@@ -47,10 +60,8 @@ describe("Issues ReferralSchedule", () => {
             id: 101,
             current_work_phase_id: 2,
             report_description: "Work description",
-            project: {
-              name: "River Project",
-              description: "Project description",
-            },
+            project_id: 7,
+            project: { id: 7, name: "River Project" },
           } as any,
           workPhases: [
             {

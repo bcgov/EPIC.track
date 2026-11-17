@@ -7,10 +7,16 @@ import { BrowserRouter } from "react-router-dom";
 import { Work } from "models/work";
 
 import ProjectDetails from "..";
-import { generateMockWork } from "../../../../../../../cypress/support/mocks";
+import {
+  generateMockListType,
+  generateMockProjectSummary,
+  generateMockWork,
+} from "../../../../../../../cypress/support/mocks";
 import dayjs from "dayjs";
 import { MONTH_DAY_YEAR } from "constants/application-constant";
 import { AppConfig } from "config";
+import { store } from "store";
+import { projectsQueryApi } from "api/projects";
 import {
   Endpoint,
   setupIntercepts,
@@ -21,6 +27,11 @@ const mockWork: Work = {
   is_deleted: false,
   is_active: true,
 };
+const mockProject = {
+  ...generateMockProjectSummary(),
+  id: mockWork.project_id,
+};
+const projectUrl = `${AppConfig.apiUrl}projects/${mockWork.project_id}`;
 
 // The project dialog loads these on open. Without mocks the requests reach
 // the dev server, 404, and the unhandled rejections fail whichever test or
@@ -30,31 +41,31 @@ const projectDialogEndpoints: Endpoint[] = [
     name: "getProject",
     method: "GET",
     url: `${AppConfig.apiUrl}projects/*`,
-    response: { body: mockWork.project },
+    response: { body: mockProject },
   },
   {
     name: "getRegions",
     method: "GET",
     url: `${AppConfig.apiUrl}regions*`,
-    response: { body: [mockWork.project.region_env] },
+    response: { body: [generateMockListType()] },
   },
   {
     name: "getTypes",
     method: "GET",
     url: `${AppConfig.apiUrl}types`,
-    response: { body: [mockWork.project.type] },
+    response: { body: [generateMockListType()] },
   },
   {
     name: "getProponents",
     method: "GET",
     url: `${AppConfig.apiUrl}proponents`,
-    response: { body: [mockWork.project.proponent] },
+    response: { body: [generateMockListType()] },
   },
   {
     name: "getSubTypes",
     method: "GET",
     url: `${AppConfig.apiUrl}sub-types*`,
-    response: { body: [mockWork.project.sub_type] },
+    response: { body: [generateMockListType()] },
   },
 ];
 
@@ -80,6 +91,8 @@ const initContextWrapper = () => {
 describe("About Project", () => {
   const [ContextWrapper] = initContextWrapper();
   beforeEach(() => {
+    store.dispatch(projectsQueryApi.util.resetApiState());
+    cy.intercept("GET", projectUrl, { body: mockProject }).as("project");
     cy.mount(
       <ContextWrapper>
         <ProjectDetails />
@@ -88,18 +101,28 @@ describe("About Project", () => {
   });
 
   it("Project Details are displayed", () => {
-    cy.get("p").contains(mockWork.project.proponent.name).should("be.visible");
-    cy.get("p").contains(mockWork.project.description).should("be.visible");
-    cy.get("p").contains(mockWork.project.type.name).should("be.visible");
-    cy.get("p").contains(mockWork.project.address).should("be.visible");
-    cy.get("p").contains(mockWork.project.region_env.name).should("be.visible");
+    cy.wait("@project");
+    cy.get("p").contains(mockProject.proponent.name).should("be.visible");
+    cy.get("p").contains(mockProject.description).should("be.visible");
+    cy.get("p").contains(mockProject.type.name).should("be.visible");
+    cy.get("p").contains(mockProject.address).should("be.visible");
+    cy.get("p").contains(mockProject.region_env.name).should("be.visible");
+    cy.get("p").contains(mockProject.region_flnro.name).should("be.visible");
+    cy.get("p").contains(mockProject.abbreviation).should("be.visible");
     cy.get("p")
-      .contains(mockWork.project.region_flnro.name)
+      .contains(dayjs(mockProject.created_at).format(MONTH_DAY_YEAR))
       .should("be.visible");
-    cy.get("p").contains(mockWork.project.abbreviation).should("be.visible");
-    cy.get("p")
-      .contains(dayjs(mockWork.project.created_at).format(MONTH_DAY_YEAR))
-      .should("be.visible");
+  });
+
+  it("tells the user when the project can't be loaded", () => {
+    store.dispatch(projectsQueryApi.util.resetApiState());
+    cy.intercept("GET", projectUrl, { statusCode: 500, body: {} });
+    cy.mount(
+      <ContextWrapper>
+        <ProjectDetails />
+      </ContextWrapper>,
+    );
+    cy.contains("Couldn't load project details").should("exist");
   });
 
   it("opens project dialog when edit is clicked", () => {
