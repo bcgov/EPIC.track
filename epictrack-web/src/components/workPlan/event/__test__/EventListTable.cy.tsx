@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { MemoryRouter as Router } from "react-router-dom";
 import EventListTable from "../EventListTable";
 import { EventProvider } from "../EventContext";
@@ -46,7 +47,57 @@ const events = [
   },
 ] as any;
 
+// Events arrive after mount, as when a work plan phase loads.
+const EventsArrive = () => {
+  const [shown, setShown] = useState<any[]>([]);
+  const noop = () => {
+    return;
+  };
+  return (
+    <Router>
+      <EventProvider>
+        <button onClick={() => setShown(events)}>load events</button>
+        <EventListTable
+          events={shown}
+          loading={false}
+          rowSelection={{}}
+          setRowSelection={noop}
+          onRowClick={noop}
+          templateAvailable={
+            { template_available: false, task_added: false } as any
+          }
+          userIsActiveTeamMember={true}
+          onAddTask={noop}
+          onAddMilestone={noop}
+          handleExportToSheet={noop}
+          handleTaskFileUpload={noop}
+          setShowTemplateForm={noop}
+          setShowDeleteDialog={noop}
+        />
+      </EventProvider>
+    </Router>
+  );
+};
+
 describe("EventListTable", () => {
+  it("shows every event once they arrive, without an out-of-range page size", () => {
+    // Below 720px MRT renders a native select, which never warns.
+    cy.viewport(1280, 800);
+    cy.window().then((win) => cy.spy(win.console, "warn").as("warn"));
+    cy.mount(<EventsArrive />);
+
+    cy.contains("button", "load events").click();
+    cy.contains("Task A").should("exist");
+    cy.contains("Milestone B").should("exist");
+    cy.contains("label", "Rows per page")
+      .parent()
+      .should("contain.text", "All");
+    cy.get("@warn").should(
+      "not.have.been.calledWithMatch",
+      /out-of-range value/,
+    );
+  });
+
   it("renders table rows and action buttons", () => {
     const onAddTask = cy.stub().as("onAddTask");
     const onAddMilestone = cy.stub().as("onAddMilestone");
