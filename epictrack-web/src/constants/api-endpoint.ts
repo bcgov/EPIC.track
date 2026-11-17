@@ -74,10 +74,6 @@ const Endpoints = {
   Templates: {
     TEMPLATES: "task-templates",
   },
-  Events: {
-    MILESTONE_EVENTS: "milestones",
-    CALENDAR_EVENTS: "milestones/calendar",
-  },
   TaskEvents: {
     EVENTS: "tasks/events",
     TASKS: "tasks",
@@ -85,17 +81,8 @@ const Endpoints = {
     IMPORT_TASKS: "tasks/work_phase/:work_phase_id/sheet",
     CALENDAR_TASKS: "tasks/calendar",
   },
-  Configurations: {
-    CONFIGURATIONS: "/event-configurations",
-  },
   Responsibilities: {
     RESPONSIBILITIES: "/responsibilities",
-  },
-  OutcomeConfigurations: {
-    CONFIGURATIONS: "/outcome-configurations",
-  },
-  ActSections: {
-    ACT_SECTIONS: "/act-sections",
   },
   EAO_TEAMS: {
     GET_ALL: "/eao-teams",

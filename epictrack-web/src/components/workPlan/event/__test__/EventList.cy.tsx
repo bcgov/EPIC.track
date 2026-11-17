@@ -5,7 +5,7 @@ import { WorkplanContext, initialWorkPlanContext } from "../../WorkPlanContext";
 import { EVENT_TYPE } from "../../phase/type";
 import { EVENT_STATUS } from "../../../../models/taskEvent";
 import { taskEventService } from "../../../../services/taskEventService/taskEventService";
-import { eventService } from "../../../../services/eventService/eventService";
+import { eventsApi } from "api/events";
 import { workService } from "../../../../services/workService/workService";
 import { workPhasesApi } from "api/workPhases";
 import { responsibilityService } from "../../../../services/responsibilityService/responsibilityService";
@@ -46,23 +46,20 @@ describe("EventList", { retries: 2 }, () => {
         ],
       } as any);
 
-    cy.stub(eventService, "getMilestoneEvents")
+    cy.stub(eventsApi, "listForPhase")
       .as("getMilestones")
-      .resolves({
-        status: 200,
-        data: [
-          {
-            id: 202,
-            name: "Start",
-            anticipated_date: "2026-03-01T00:00:00.000Z",
-            actual_date: "2026-03-01T00:00:00.000Z",
-            event_configuration: {
-              visibility: "MANDATORY",
-              event_position: "START",
-            },
+      .resolves([
+        {
+          id: 202,
+          name: "Start",
+          anticipated_date: "2026-03-01T00:00:00.000Z",
+          actual_date: "2026-03-01T00:00:00.000Z",
+          event_configuration: {
+            visibility: "MANDATORY",
+            event_position: "START",
           },
-        ],
-      } as any);
+        },
+      ] as any);
 
     cy.stub(workPhasesApi, "getTemplateUploadStatus")
       .as("checkTemplateUploadStatus")
@@ -147,31 +144,28 @@ describe("EventList", { retries: 2 }, () => {
   });
 
   it("shows phase end warning when an END milestone occurs before mandatory milestones", () => {
-    (eventService.getMilestoneEvents as any).resolves({
-      status: 200,
-      data: [
-        {
-          id: 301,
-          name: "Phase End",
-          anticipated_date: "2026-03-01T00:00:00.000Z",
-          actual_date: null,
-          event_configuration: {
-            visibility: "MANDATORY",
-            event_position: "END",
-          },
+    (eventsApi.listForPhase as any).resolves([
+      {
+        id: 301,
+        name: "Phase End",
+        anticipated_date: "2026-03-01T00:00:00.000Z",
+        actual_date: null,
+        event_configuration: {
+          visibility: "MANDATORY",
+          event_position: "END",
         },
-        {
-          id: 302,
-          name: "Required Milestone",
-          anticipated_date: "2026-03-10T00:00:00.000Z",
-          actual_date: null,
-          event_configuration: {
-            visibility: "MANDATORY",
-            event_position: "INTERMEDIATE",
-          },
+      },
+      {
+        id: 302,
+        name: "Required Milestone",
+        anticipated_date: "2026-03-10T00:00:00.000Z",
+        actual_date: null,
+        event_configuration: {
+          visibility: "MANDATORY",
+          event_position: "INTERMEDIATE",
         },
-      ],
-    } as any);
+      },
+    ]);
 
     cy.mount(
       <Router>
@@ -351,41 +345,38 @@ describe("EventList", { retries: 2 }, () => {
   });
 
   it("does not show phase end warning when END milestone is last", () => {
-    (eventService.getMilestoneEvents as any).resolves({
-      status: 200,
-      data: [
-        {
-          id: 401,
-          name: "Start",
-          anticipated_date: "2026-03-01T00:00:00.000Z",
-          actual_date: null,
-          event_configuration: {
-            visibility: "MANDATORY",
-            event_position: "START",
-          },
+    (eventsApi.listForPhase as any).resolves([
+      {
+        id: 401,
+        name: "Start",
+        anticipated_date: "2026-03-01T00:00:00.000Z",
+        actual_date: null,
+        event_configuration: {
+          visibility: "MANDATORY",
+          event_position: "START",
         },
-        {
-          id: 402,
-          name: "Intermediate Mandatory",
-          anticipated_date: "2026-03-05T00:00:00.000Z",
-          actual_date: null,
-          event_configuration: {
-            visibility: "MANDATORY",
-            event_position: "INTERMEDIATE",
-          },
+      },
+      {
+        id: 402,
+        name: "Intermediate Mandatory",
+        anticipated_date: "2026-03-05T00:00:00.000Z",
+        actual_date: null,
+        event_configuration: {
+          visibility: "MANDATORY",
+          event_position: "INTERMEDIATE",
         },
-        {
-          id: 403,
-          name: "Phase End",
-          anticipated_date: "2026-03-10T00:00:00.000Z",
-          actual_date: null,
-          event_configuration: {
-            visibility: "MANDATORY",
-            event_position: "END",
-          },
+      },
+      {
+        id: 403,
+        name: "Phase End",
+        anticipated_date: "2026-03-10T00:00:00.000Z",
+        actual_date: null,
+        event_configuration: {
+          visibility: "MANDATORY",
+          event_position: "END",
         },
-      ],
-    } as any);
+      },
+    ]);
 
     cy.mount(
       <Router>
@@ -426,31 +417,28 @@ describe("EventList", { retries: 2 }, () => {
       },
     } as any;
 
-    (eventService.getMilestoneEvents as any).resolves({
-      status: 200,
-      data: [
-        {
-          id: 501,
-          name: "Phase End",
-          anticipated_date: "2026-03-01T00:00:00.000Z",
-          actual_date: null,
-          event_configuration: {
-            visibility: "MANDATORY",
-            event_position: "END",
-          },
+    (eventsApi.listForPhase as any).resolves([
+      {
+        id: 501,
+        name: "Phase End",
+        anticipated_date: "2026-03-01T00:00:00.000Z",
+        actual_date: null,
+        event_configuration: {
+          visibility: "MANDATORY",
+          event_position: "END",
         },
-        {
-          id: 502,
-          name: "Required Milestone",
-          anticipated_date: "2026-03-10T00:00:00.000Z",
-          actual_date: null,
-          event_configuration: {
-            visibility: "MANDATORY",
-            event_position: "INTERMEDIATE",
-          },
+      },
+      {
+        id: 502,
+        name: "Required Milestone",
+        anticipated_date: "2026-03-10T00:00:00.000Z",
+        actual_date: null,
+        event_configuration: {
+          visibility: "MANDATORY",
+          event_position: "INTERMEDIATE",
         },
-      ],
-    } as any);
+      },
+    ]);
 
     cy.mount(
       <Router>
@@ -919,25 +907,20 @@ describe("EventList", { retries: 2 }, () => {
   });
 
   it("shows an error notification when milestone details fail to load", () => {
-    (eventService.getMilestoneEvents as any).resolves({
-      status: 200,
-      data: [
-        {
-          id: 808,
-          name: "Optional Milestone",
-          anticipated_date: "2026-03-12T00:00:00.000Z",
-          actual_date: null,
-          event_configuration: {
-            visibility: "OPTIONAL",
-            event_position: "INTERMEDIATE",
-          },
+    (eventsApi.listForPhase as any).resolves([
+      {
+        id: 808,
+        name: "Optional Milestone",
+        anticipated_date: "2026-03-12T00:00:00.000Z",
+        actual_date: null,
+        event_configuration: {
+          visibility: "OPTIONAL",
+          event_position: "INTERMEDIATE",
         },
-      ],
-    } as any);
+      },
+    ]);
 
-    cy.stub(eventService, "getById")
-      .as("getMilestoneById")
-      .rejects(new Error("boom"));
+    cy.stub(eventsApi, "get").as("getMilestoneById").rejects(new Error("boom"));
 
     const userEmail = store.getState().user.userDetail.email;
 
