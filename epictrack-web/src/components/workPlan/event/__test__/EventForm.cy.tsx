@@ -614,6 +614,11 @@ describe("EventForm", () => {
     cy.contains('[role="dialog"] button', "Yes").click();
 
     cy.get("@update").should("have.been.calledOnce");
-    cy.contains("The milestone date is outside the phase.").should("exist");
+    // In the dialog, not just the snackbar the other error branch uses.
+    cy.contains('[role="dialog"]', "Lock this Milestone?").should(
+      "contain.text",
+      "The milestone date is outside the phase.",
+    );
+    cy.contains('[role="dialog"] button', "Go Back").should("exist");
   });
 });
