@@ -10,8 +10,12 @@ import { getDaysLeft } from "./util";
 import WorkplanGanttTooltip from "./WorkplanGanttTooltip";
 
 export const MyWorkplanGantt = () => {
-  const { workplans, setLoadingMoreWorkplans, totalWorkplans } =
-    useContext(MyWorkplansContext);
+  const {
+    workplans,
+    lazyLoadMoreWorkplans,
+    loadingMoreWorkplans,
+    totalWorkplans,
+  } = useContext(MyWorkplansContext);
   const navigate = useNavigate();
 
   const tasks = workplans.map((workplan) => {
@@ -68,7 +72,8 @@ export const MyWorkplanGantt = () => {
     <Gantt
       rows={tasks}
       enableLazyLoading
-      onLazyLoad={() => setLoadingMoreWorkplans(true)}
+      onLazyLoad={lazyLoadMoreWorkplans}
+      isLoadingMore={loadingMoreWorkplans}
       totalRows={totalWorkplans}
       CustomTaskBarTooltip={WorkplanGanttTooltip}
     />

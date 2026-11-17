@@ -12,6 +12,7 @@ type GanttProps = {
   enableLazyLoading?: false;
   totalRows?: undefined;
   onLazyLoad?: undefined;
+  isLoadingMore?: undefined;
   CustomTaskBarTooltip?: React.FC<TaskBarTooltipProps>;
 };
 type GanttLazyLoadedProps = {
@@ -19,6 +20,7 @@ type GanttLazyLoadedProps = {
   enableLazyLoading: true;
   totalRows: number;
   onLazyLoad: () => void;
+  isLoadingMore?: boolean;
   CustomTaskBarTooltip?: React.FC<TaskBarTooltipProps>;
 };
 export const Gantt = ({
@@ -26,6 +28,7 @@ export const Gantt = ({
   enableLazyLoading,
   totalRows,
   onLazyLoad,
+  isLoadingMore,
   CustomTaskBarTooltip,
 }: GanttProps | GanttLazyLoadedProps) => {
   return (
@@ -34,6 +37,7 @@ export const Gantt = ({
       enableLazyLoading={enableLazyLoading}
       totalRows={totalRows}
       onLazyLoad={onLazyLoad}
+      isLoadingMore={isLoadingMore}
       CustomTaskBarTooltip={CustomTaskBarTooltip}
     >
       <Main />

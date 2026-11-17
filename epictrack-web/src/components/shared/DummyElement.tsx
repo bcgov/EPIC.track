@@ -15,7 +15,9 @@ const TriggerOnViewed = ({ callbackFn }: TriggerOnViewedProps) => {
     }
   }, [callbackFn, isVisible]);
 
-  return <div style={{ width: "100%" }} ref={ref} />;
+  return (
+    <div data-cy="load-more-trigger" style={{ width: "100%" }} ref={ref} />
+  );
 };
 
 export default TriggerOnViewed;
