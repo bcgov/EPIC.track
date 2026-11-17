@@ -9,13 +9,12 @@ import { defaultWork, Work } from "models/work";
 import { ListType } from "models/code";
 import { Ministry } from "models/ministry";
 import { POSITION_ENUM } from "models/position";
-import { Project } from "models/project";
 import { Staff } from "models/staff";
 import { eaActService } from "services/eaActService";
 import EAOTeamService from "services/eao_team";
 import { federalInvolvementService } from "services/federalInvolvementService";
 import { ministryService } from "services/ministryService";
-import { projectService } from "services/projectService/projectService";
+import { projectsApi } from "api/projects";
 import staffService from "services/staffService/staffService";
 import { substitutionActService } from "services/substitutionActService";
 import { workService } from "services/workService/workService";
@@ -245,19 +244,7 @@ export default function WorkForm({
   }, [staffBuckets]);
 
   const getProjects = async () => {
-    const projectResult = await projectService.getAll("list_type");
-    if (projectResult.status === 200) {
-      let projects = projectResult.data as ListType[];
-      projects = sort(projects, "name");
-      setProjects(projects);
-    }
-  };
-
-  const getProject = async (id: string) => {
-    const projectResult = await projectService.getById(id);
-    if (projectResult.status === 200) {
-      return projectResult.data as Project;
-    }
+    setProjects(sort(await projectsApi.listOptions(), "name"));
   };
 
   const getMinistries = async () => {
@@ -374,8 +361,8 @@ export default function WorkForm({
       const selectedProject: any = projects.filter((project) => {
         return project.id.toString() === id;
       });
-      const project = await getProject(selectedProject[0].id);
-      setValue("epic_description", String(project?.description));
+      const project = await projectsApi.getSummary(selectedProject[0].id);
+      setValue("epic_description", String(project.description));
     }
   };
 

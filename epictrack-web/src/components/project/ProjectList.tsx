@@ -4,7 +4,7 @@ import { Button, Grid } from "@mui/material";
 import { Project } from "../../models/project";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
-import { projectService } from "../../services/projectService/projectService";
+import { projectsApi } from "api/projects";
 import { ETChip } from "../shared/chip/ETChip";
 import { TableFilter } from "../shared/filterSelect/TableFilter";
 import {
@@ -38,8 +38,7 @@ const ProjectList = () => {
   const fetchProjects = async () => {
     setLoadingProjects(true);
     try {
-      const response = await projectService.getAll();
-      setProjects(response.data || []);
+      setProjects(await projectsApi.list());
       setLoadingProjects(false);
     } catch (error) {
       showNotification("Could not load Projects", { type: "error" });

@@ -1,5 +1,5 @@
 import { Button, Divider, Grid } from "@mui/material";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { WorkplanContext } from "../../../WorkPlanContext";
 import { ETCaption1, ETParagraph, GrayBox } from "../../../../shared";
 import { Palette } from "../../../../../styles/theme";
@@ -14,6 +14,7 @@ import { showNotification } from "components/shared/notificationProvider";
 import ProjectDetailsSkeleton from "./Skeleton";
 import { ProjectDialog } from "components/project/Dialog";
 import { Restricted } from "components/shared/restricted";
+import { useProjectSummary } from "api/projects";
 
 const ProjectDetails = () => {
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
@@ -22,6 +23,17 @@ const ProjectDetails = () => {
 
   const [loadingWork, setLoadingWork] = useState(false);
   const [openProjectDialog, setOpenProjectDialog] = useState(false);
+  const {
+    data: project,
+    isLoading: loadingProject,
+    isError: projectFailed,
+  } = useProjectSummary(work?.project_id);
+
+  useEffect(() => {
+    if (projectFailed) {
+      showNotification("Couldn't load project details", { type: "error" });
+    }
+  }, [projectFailed]);
 
   const handleReloadWork = async () => {
     try {
@@ -36,7 +48,7 @@ const ProjectDetails = () => {
 
   if (!work) return null;
 
-  if (loadingWork) return <ProjectDetailsSkeleton />;
+  if (loadingWork || loadingProject) return <ProjectDetailsSkeleton />;
 
   return (
     <>
@@ -57,7 +69,7 @@ const ProjectDetails = () => {
               </Grid>
               <Grid item xs={12}>
                 <ETParagraph color={Palette.neutral.dark}>
-                  {dayjs(work?.project?.created_at).format(MONTH_DAY_YEAR)}
+                  {project && dayjs(project.created_at).format(MONTH_DAY_YEAR)}
                 </ETParagraph>
               </Grid>
             </Grid>
@@ -93,7 +105,7 @@ const ProjectDetails = () => {
           </Grid>
           <Grid item xs={12}>
             <ETParagraph color={Palette.neutral.dark}>
-              {work?.project?.proponent?.name}
+              {project?.proponent?.name}
             </ETParagraph>
           </Grid>
           <Grid item xs={12}>
@@ -103,7 +115,7 @@ const ProjectDetails = () => {
           </Grid>
           <Grid item xs={12}>
             <ETParagraph color={Palette.neutral.dark}>
-              {work?.project?.description}
+              {project?.description}
             </ETParagraph>
           </Grid>
           <Grid item xs={6}>
@@ -118,12 +130,12 @@ const ProjectDetails = () => {
           </Grid>
           <Grid item xs={6}>
             <ETParagraph color={Palette.neutral.dark}>
-              {work?.project?.type?.name}
+              {project?.type?.name}
             </ETParagraph>
           </Grid>
           <Grid item xs={6}>
             <ETParagraph color={Palette.neutral.dark}>
-              {work?.project?.sub_type?.name}
+              {project?.sub_type?.name}
             </ETParagraph>
           </Grid>
           <Grid item xs={12}>
@@ -133,7 +145,7 @@ const ProjectDetails = () => {
           </Grid>
           <Grid item xs={12}>
             <ETParagraph color={Palette.neutral.dark}>
-              {work?.project?.address}
+              {project?.address}
             </ETParagraph>
           </Grid>
           <Grid item xs={6}>
@@ -148,12 +160,12 @@ const ProjectDetails = () => {
           </Grid>
           <Grid item xs={6}>
             <ETParagraph color={Palette.neutral.dark}>
-              {work?.project?.region_env?.name}
+              {project?.region_env?.name}
             </ETParagraph>
           </Grid>
           <Grid item xs={6}>
             <ETParagraph color={Palette.neutral.dark}>
-              {work?.project?.region_flnro?.name}
+              {project?.region_flnro?.name}
             </ETParagraph>
           </Grid>
           <Grid item xs={12}>
@@ -163,7 +175,7 @@ const ProjectDetails = () => {
           </Grid>
           <Grid item xs={12}>
             <ETParagraph color={Palette.neutral.dark}>
-              {work?.project?.abbreviation}
+              {project?.abbreviation}
             </ETParagraph>
           </Grid>
         </Grid>

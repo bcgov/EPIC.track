@@ -11,11 +11,13 @@ import { Palette } from "../../../../../styles/theme";
 import { WorkplanContext } from "../../../WorkPlanContext";
 import { Else, If, Then, When } from "react-if";
 import moment from "moment";
+import { useProjectSummary } from "api/projects";
 import { MONTH_DAY_YEAR } from "../../../../../constants/application-constant";
 
 export const ThirtySixtyNinety = () => {
   const { work, workPhases, issues, statuses } =
     React.useContext(WorkplanContext);
+  const { data: project } = useProjectSummary(work?.project_id);
 
   const approvedStatuses = statuses.filter((status) => status.is_approved);
   const currentStatus = approvedStatuses[0];
@@ -64,7 +66,7 @@ export const ThirtySixtyNinety = () => {
             <ETCaption2 bold color={Palette.neutral.light}>
               Project Description (Auto-System Generated)
             </ETCaption2>
-            <ETPreviewText>{work?.project.description}</ETPreviewText>
+            <ETPreviewText>{project?.description}</ETPreviewText>
           </Stack>
         </Grid>
 

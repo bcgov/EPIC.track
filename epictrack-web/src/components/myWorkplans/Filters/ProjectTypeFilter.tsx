@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useState } from "react";
-import { projectService } from "../../../services/projectService/projectService";
+import { projectsApi } from "api/projects";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import { OptionType } from "../../shared/filterSelect/type";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
@@ -23,8 +23,8 @@ export const ProjectTypeFilter = ({
   const fetchOptions = async () => {
     setLoading(true);
     try {
-      const response = await projectService.getProjectTypes();
-      const types = response.data.map((type) => ({
+      const projectTypes = await projectsApi.listTypes();
+      const types = projectTypes.map((type) => ({
         label: type.name,
         value: type.id.toString(),
       }));

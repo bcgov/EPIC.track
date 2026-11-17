@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { ListType } from "models/code";
 import { Ministry } from "models/ministry";
+import { ProjectSummary } from "models/project";
 import { Staff } from "models/staff";
 import { Work, WorkPhase, WorkPhaseAdditionalInfo } from "models/work";
 
@@ -21,21 +22,17 @@ export const generateMockStaff = (): Staff => ({
   idir_user_id: ""
 });
 
-export const generateMockProject = () => ({
+export const generateMockProjectSummary = (): ProjectSummary => ({
   id: faker.number.int(),
   created_at: faker.date.recent().toISOString(),
   description: faker.lorem.sentence(),
   address: faker.location.streetAddress(),
   abbreviation: faker.lorem.word().toUpperCase(),
-  type: {
-    id: faker.number.int(),
-    name: faker.lorem.word(),
-    type: faker.lorem.word(),
-  },
-  sub_type: { id: faker.number.int(), name: faker.lorem.word() },
-  proponent: { id: faker.number.int(), name: faker.lorem.word() },
-  region_env: { id: faker.number.int(), name: faker.lorem.word() },
-  region_flnro: { id: faker.number.int(), name: faker.lorem.word() },
+  type: { name: faker.lorem.word() },
+  sub_type: { name: faker.lorem.word() },
+  proponent: { name: faker.lorem.word() },
+  region_env: { name: faker.lorem.word() },
+  region_flnro: { name: faker.lorem.word() },
   name: faker.lorem.word(),
 });
 
@@ -107,7 +104,7 @@ export const generateMockWork = (): Work => ({
   decision_maker_position_id: faker.number.int(),
   start_date_locked: faker.datatype.boolean(),
   created_at: faker.date.recent().toISOString(),
-  project: generateMockProject(),
+  project: { id: faker.number.int(), name: faker.lorem.word() },
   ministry: generateMockMinistry(),
   ea_act: generateMockListType(),
   eao_team: generateMockListType(),
