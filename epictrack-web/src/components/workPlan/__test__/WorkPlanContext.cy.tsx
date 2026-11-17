@@ -4,6 +4,7 @@ import { Button } from "@mui/material";
 import { WorkplanContext, WorkplanProvider } from "../WorkPlanContext";
 import { workService } from "../../../services/workService/workService";
 import { worksApi } from "api/works";
+import { workPhasesApi } from "api/workPhases";
 import { statusService } from "../../../services/statusService/statusService";
 import { issueService } from "../../../services/issueService";
 import stalenessSettingsService from "../../../services/stalenessSettingsService";
@@ -50,16 +51,9 @@ describe("WorkPlanContext", () => {
         ],
       } as any);
 
-    cy.stub(workService, "getWorkPhases")
+    cy.stub(workPhasesApi, "listForWork")
       .as("getWorkPhases")
-      .resolves({
-        status: 200,
-        data: [
-          {
-            work_phase: { id: 2, name: "In Review" },
-          },
-        ],
-      } as any);
+      .resolves([{ work_phase: { id: 2, name: "In Review" } }] as any);
 
     cy.stub(workService, "getWorkFirstNations")
       .as("getWorkFirstNations")
@@ -130,7 +124,7 @@ describe("WorkPlanContext", () => {
 
     cy.get("@getById").should("have.been.calledWith", 101);
     cy.get("@getWorkTeamMembers").should("have.been.calledWith", 101);
-    cy.get("@getWorkPhases").should("have.been.calledWith", "101");
+    cy.get("@getWorkPhases").should("have.been.calledWith", 101);
     cy.get("@getWorkFirstNations").should("have.been.calledWith", 101);
     cy.get("@getAllbyWorkId").should("have.been.calledWith", 101);
     cy.get("@getIssueStaleness").should("have.been.called");

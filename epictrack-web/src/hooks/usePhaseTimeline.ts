@@ -77,6 +77,9 @@ export const usePhaseTimeline = ({
       return 0;
     }
     const endMilestone = finalPhase.end_milestone;
+    if (!endMilestone) {
+      return 0;
+    }
     const endMilestoneDate =
       endMilestone.actual_date || endMilestone.anticipated_date;
 
@@ -108,8 +111,7 @@ export const usePhaseTimeline = ({
     if (!finalPhase) {
       return false;
     }
-    const endMilestone = finalPhase.end_milestone;
-    return endMilestone.actual_date != null;
+    return finalPhase.end_milestone?.actual_date != null;
   }, [workPhases]);
 
   return {

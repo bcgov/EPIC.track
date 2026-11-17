@@ -161,6 +161,48 @@ describe("PhaseContainer", () => {
     cy.contains("submit a Data Fix request").should("exist");
   });
 
+  it("renders a current final phase that has no end milestone", () => {
+    cy.mount(
+      <Router>
+        <WorkplanContext.Provider
+          value={{
+            ...initialWorkPlanContext,
+            loading: false,
+            work: {
+              id: 101,
+              title: "Test Work",
+              current_work_phase_id: 3,
+              is_completed: true,
+            } as any,
+            workPhases: [
+              buildPhase({
+                is_last_phase: true,
+                end_milestone: null,
+                work_phase: {
+                  ...buildPhase().work_phase,
+                  id: 3,
+                  name: "Final Review",
+                  is_completed: false,
+                },
+              }),
+            ] as any,
+            selectedWorkPhase: {
+              work_phase: {
+                id: 999,
+                name: "Other",
+              },
+            } as any,
+          }}
+        >
+          <PhaseContainer />
+        </WorkplanContext.Provider>
+      </Router>,
+    );
+
+    cy.contains("Final Review").should("exist");
+    cy.contains("Date Miscalculation").should("not.exist");
+  });
+
   it("toggles completed phases visibility while keeping current and future phases visible", () => {
     const completedPhase = buildPhase({
       work_phase: {

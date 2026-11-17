@@ -3,15 +3,6 @@ import http from "../../apiManager/http-request-handler";
 
 // Track-owned calls under /projects; project data goes through api/projects.
 class ProjectService {
-  async getWorkTypes(projectId: number, workId: number) {
-    return await http.GetRequest(
-      Endpoints.Projects.WORK_TYPES.replace(
-        ":project_id",
-        projectId.toString(),
-      ) + `?work_id=${workId}`,
-    );
-  }
-
   async getFirstNations(
     projectId: number,
     work_id: number,

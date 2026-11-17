@@ -4,7 +4,7 @@ import {
   MyWorkplansContext,
   MyWorkplansProvider,
 } from "components/myWorkplans/MyWorkPlanContext";
-import { workplanService } from "services/workplanService";
+import { workplansApi } from "api/workplans";
 import stalenessSettingsService from "services/stalenessSettingsService";
 
 const makeStore = () => {
@@ -54,21 +54,11 @@ describe("MyWorkplansProvider", () => {
       data: { id: "status" },
     } as any);
 
-    cy.stub(workplanService, "getAll")
+    cy.stub(workplansApi, "list")
       .onFirstCall()
-      .resolves({
-        data: {
-          items: [{ id: 1, title: "WP 1" }],
-          total: 2,
-        },
-      } as any)
+      .resolves({ items: [{ id: 1, title: "WP 1" }], total: 2 } as any)
       .onSecondCall()
-      .resolves({
-        data: {
-          items: [{ id: 2, title: "WP 2" }],
-          total: 2,
-        },
-      } as any);
+      .resolves({ items: [{ id: 2, title: "WP 2" }], total: 2 } as any);
 
     cy.mount(
       <MyWorkplansProvider>
@@ -83,25 +73,11 @@ describe("MyWorkplansProvider", () => {
     cy.get("[data-cy='load-more']").click();
 
     cy.get("[data-cy='count']").contains("2");
-    cy.wrap(workplanService.getAll).should("have.been.calledWith", 2, 12);
-  });
-
-  it("shows notification when workplan response has no data", () => {
-    cy.stub(stalenessSettingsService, "getStatusStaleness").resolves({
-      data: { id: "status" },
-    } as any);
-
-    cy.stub(workplanService, "getAll").resolves(undefined as any);
-    cy.mount(
-      <MyWorkplansProvider>
-        <Harness />
-      </MyWorkplansProvider>,
-      { reduxStore: makeStore() },
-    );
-
-    cy.get("[data-cy='count']").contains("0");
-    cy.get("[data-cy='total']").contains("0");
-    cy.get("[data-cy='loading']").contains("false");
+    cy.wrap(workplansApi.list).should("have.been.calledWithMatch", {
+      page: 2,
+      size: 12,
+      search: { staff_id: 99 },
+    });
   });
 
   it("stops loading when loading workplans throws", () => {
@@ -109,7 +85,7 @@ describe("MyWorkplansProvider", () => {
       data: { id: "status" },
     } as any);
 
-    cy.stub(workplanService, "getAll").rejects(new Error("boom"));
+    cy.stub(workplansApi, "list").rejects(new Error("boom"));
     cy.mount(
       <MyWorkplansProvider>
         <Harness />
@@ -119,5 +95,6 @@ describe("MyWorkplansProvider", () => {
 
     cy.get("[data-cy='loading']").contains("false");
     cy.get("[data-cy='count']").contains("0");
+    cy.get("[data-cy='total']").contains("0");
   });
 });

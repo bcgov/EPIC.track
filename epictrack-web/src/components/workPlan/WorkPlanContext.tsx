@@ -10,6 +10,7 @@ import {
 import { useSearchParams } from "../../hooks/useSearchParams";
 import { workService } from "../../services/workService/workService";
 import { worksApi } from "api/works";
+import { workPhasesApi } from "api/workPhases";
 import { Work, WorkPhaseAdditionalInfo } from "../../models/work";
 import { StaffWorkRole } from "../../models/staff";
 import { ACTIVE_STATUS } from "../../constants/application-constant";
@@ -136,9 +137,7 @@ export const WorkplanProvider = ({
 
   const getWorkPhases = useCallback(async () => {
     if (workId) {
-      const workPhasesResult = await workService.getWorkPhases(String(workId));
-      const workPhases = workPhasesResult.data as WorkPhaseAdditionalInfo[];
-      setWorkPhases(workPhases);
+      setWorkPhases(await workPhasesApi.listForWork(Number(workId)));
     }
   }, [workId]);
 

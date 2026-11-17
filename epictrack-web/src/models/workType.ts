@@ -2,6 +2,7 @@ export interface WorkType {
   id: number;
   is_active: boolean;
   name: string;
+  sort_order: number;
 }
 
 export enum WorkTypeEnum {

@@ -85,7 +85,13 @@ const endpoints: Endpoint[] = [
     url: `${AppConfig.apiUrl}works/work-phases/11`,
     response: {
       statusCode: 200,
-      body: { work_phase: { id: 11, name: "Phase Alpha" } },
+      body: {
+        work_phase: {
+          id: 11,
+          name: "Phase Alpha",
+          phase: { id: 1, name: "Phase Alpha" },
+        },
+      },
     },
   },
   {
@@ -276,6 +282,21 @@ describe("EventCalendarContext", () => {
     cy.contains("button", "cancel").click();
     cy.get('[data-cy="modal-open"]').should("have.text", "false");
     cy.get('[data-cy="milestone-name"]').should("have.text", "");
+  });
+
+  it("loads milestone details when the work phase fails to load", () => {
+    cy.intercept(
+      { method: "GET", url: `${AppConfig.apiUrl}works/work-phases/11` },
+      { statusCode: 500, body: { message: "boom" } },
+    ).as("getWorkPhaseFails");
+
+    cy.contains("button", "open-milestone").click();
+
+    cy.wait("@getWorkPhaseFails");
+    cy.get('[data-cy="modal-open"]').should("have.text", "true");
+    cy.get('[data-cy="milestone-name"]').should("have.text", "Milestone One");
+    cy.get('[data-cy="work-title"]').should("have.text", "Work Alpha");
+    cy.get('[data-cy="work-phase-id"]').should("have.text", "");
   });
 
   it("loads task details with mapped assignees and refetches on save", () => {

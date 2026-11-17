@@ -35,7 +35,7 @@ import { EVENT_TYPE } from "../phase/type";
 import { OUTCOME_ID } from "./constants";
 import { POSITION_ENUM } from "models/position";
 import { eventService } from "services/eventService/eventService";
-import { workService } from "services/workService/workService";
+import { workPhasesApi } from "api/workPhases";
 import staffService from "services/staffService/staffService";
 import { configurationService } from "services/configurationService/configurationService";
 import { getErrorMessage } from "../../../utils/axiosUtils";
@@ -174,14 +174,11 @@ const EventForm = ({
     const fetchAdditionalInfo = async () => {
       try {
         if (work?.id && selectedWorkPhase?.id) {
-          const result = await workService.getWorkPhaseAdditionalInfo(
+          const info = await workPhasesApi.getInfo(
             work.id,
             selectedWorkPhase.id,
           );
-          if (result.status === 200) {
-            const [first] = result.data;
-            setWorkPhaseAdditionalInfo(first as WorkPhaseAdditionalInfo);
-          }
+          setWorkPhaseAdditionalInfo(info ?? null);
         }
       } catch {
         console.error(`Failed to fetch work phase additional info`);

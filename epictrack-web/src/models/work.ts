@@ -99,20 +99,18 @@ export interface WorkInput {
   is_cac_recommended?: boolean;
 }
 
-export interface WorkPhase extends MasterBase {
-  end_date: string;
-  start_date: string;
+export interface WorkPhase {
+  id: number;
   name: string;
+  start_date: string;
+  end_date: string;
   phase: ListType;
-  milestone_progress: number;
-  next_milestone: string;
   is_completed: boolean;
   is_suspended: boolean;
   legislated: boolean;
-  suspended_date: string;
-  id: number;
-  number_of_days: string;
-  responsibility_notes?: string;
+  suspended_date: string | null;
+  number_of_days: number;
+  responsibility_notes?: string | null;
 }
 
 export interface EndEvent {
@@ -125,7 +123,7 @@ export interface WorkPhaseAdditionalInfo {
   current_milestone: string;
   days_left: number;
   days_taken: number;
-  end_milestone: EndEvent;
+  end_milestone: EndEvent | null;
   is_last_phase: boolean;
   milestone_progress: number;
   next_milestone: string;
@@ -134,7 +132,7 @@ export interface WorkPhaseAdditionalInfo {
   overage_responsibility?: PhaseOverageResponsibility[];
 }
 
-export interface TemplateStatus extends MasterBase {
+export interface TemplateStatus {
   template_available: boolean;
   task_added: boolean;
 }

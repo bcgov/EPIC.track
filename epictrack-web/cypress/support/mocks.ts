@@ -121,14 +121,12 @@ export const generateMockWorkPhase = (): WorkPhase => ({
   start_date: faker.date.recent().toISOString(),
   name: faker.lorem.word(),
   phase: generateMockListType(),
-  milestone_progress: faker.number.int(),
-  next_milestone: faker.lorem.sentence(),
   is_completed: faker.datatype.boolean(),
   is_suspended: faker.datatype.boolean(),
   legislated: faker.datatype.boolean(),
   suspended_date: faker.date.future().toISOString(),
   id: faker.number.int(),
-  number_of_days: String(faker.number.int()),
+  number_of_days: faker.number.int(),
 });
 
 export const generateMockWorkPhaseAdditionalInfo =

@@ -1,17 +1,12 @@
 import Moment from "moment";
 import { trackClient } from "apiManager/clients";
+import { TrackWorkPhaseDto, TrackWorkPhaseInfoDto } from "api/workPhases/dto";
+import { toWorkPhase, toWorkPhaseAdditionalInfo } from "api/workPhases/mapper";
 import { ListType } from "models/code";
 import { FederalInvolvement } from "models/federalInvolvement";
 import { Ministry } from "models/ministry";
 import { Staff } from "models/staff";
-import {
-  Work,
-  WorkInput,
-  WorkListItem,
-  WorkOption,
-  WorkPhase,
-  WorkPhaseAdditionalInfo,
-} from "models/work";
+import { Work, WorkInput, WorkListItem, WorkOption } from "models/work";
 import { WorksSource } from "./types";
 
 interface TrackNamedDto {
@@ -63,13 +58,13 @@ export interface TrackWorkDto {
   responsible_epd: Staff;
   work_lead: Staff;
   work_type: ListType;
-  current_work_phase: WorkPhase | null;
+  current_work_phase: TrackWorkPhaseDto | null;
   substitution_act: ListType;
   eac_decision_by: Staff;
   decision_by: Staff;
   indigenous_works?: TrackNamedDto[];
   rel_staff?: Staff[];
-  work_phase_status?: WorkPhaseAdditionalInfo[];
+  work_phase_status?: TrackWorkPhaseInfoDto[];
 }
 
 // WorkBodyParameterSchema's fields; anything else is dropped.
@@ -143,13 +138,14 @@ export const toWork = (dto: TrackWorkDto): Work => ({
   responsible_epd: dto.responsible_epd,
   work_lead: dto.work_lead,
   work_type: dto.work_type,
-  current_work_phase: dto.current_work_phase,
+  current_work_phase:
+    dto.current_work_phase && toWorkPhase(dto.current_work_phase),
   substitution_act: dto.substitution_act,
   eac_decision_by: dto.eac_decision_by,
   decision_by: dto.decision_by,
   indigenous_works: dto.indigenous_works,
   rel_staff: dto.rel_staff,
-  work_phase_status: dto.work_phase_status,
+  work_phase_status: dto.work_phase_status?.map(toWorkPhaseAdditionalInfo),
 });
 
 export const toWorkListItem = (dto: TrackWorkDto): WorkListItem => ({

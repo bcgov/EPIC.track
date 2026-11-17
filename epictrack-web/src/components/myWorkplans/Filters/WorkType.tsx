@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import { OptionType } from "../../shared/filterSelect/type";
-import { workService } from "../../../services/workService/workService";
+import { workTypesApi } from "api/workTypes";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
 import { sort } from "utils";
 
@@ -24,8 +24,7 @@ export const WorkTypeFilter = ({
   const fetchOptions = async () => {
     setLoading(true);
     try {
-      const response = await workService.getWorkTypes();
-      const sortedResponse = sort(response.data, "sort_order");
+      const sortedResponse = sort(await workTypesApi.list(), "sort_order");
       const types = sortedResponse.map((type) => ({
         label: type.name,
         value: type.id.toString(),

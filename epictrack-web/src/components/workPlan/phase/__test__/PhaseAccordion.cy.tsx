@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import PhaseAccordion from "../PhaseAccordion";
 import { WorkplanContext, initialWorkPlanContext } from "../../WorkPlanContext";
-import phaseOverageResponsibilityService from "services/phaseOverageResponsibilityService";
+import { workPhasesApi } from "api/workPhases";
 
 const makeStore = () => {
   const state = {
@@ -156,18 +156,11 @@ describe("PhaseAccordion", () => {
   });
 
   it("renders existing overage responsibilities when loaded", () => {
-    cy.stub(phaseOverageResponsibilityService, "getAllByPhaseId")
+    cy.stub(workPhasesApi, "listOverageResponsibilities")
       .as("getAllByPhaseId")
-      .resolves({
-        status: 200,
-        data: [
-          {
-            id: 1,
-            work_phase_id: 12,
-            responsibility: "EAO",
-          },
-        ],
-      } as any);
+      .resolves([
+        { id: 1, work_phase_id: 12, responsibility: "EAO", is_active: true },
+      ] as any);
 
     const phaseWithProgress = {
       ...basePhase,
@@ -205,14 +198,14 @@ describe("PhaseAccordion", () => {
       { reduxStore: makeStore() },
     );
 
-    cy.get("@getAllByPhaseId").should("have.been.calledWith", "12");
+    cy.get("@getAllByPhaseId").should("have.been.calledWith", 12);
     cy.contains("Overage Responsibility").should("exist");
     cy.contains("EAO").should("exist");
     cy.contains("select option(s)").should("not.exist");
   });
 
   it("shows notification when overage responsibilities fail to load", () => {
-    cy.stub(phaseOverageResponsibilityService, "getAllByPhaseId").rejects(
+    cy.stub(workPhasesApi, "listOverageResponsibilities").rejects(
       new Error("load failed"),
     );
 
@@ -355,16 +348,9 @@ describe("PhaseAccordion", () => {
   });
 
   it("opens overage responsibility dialog from edit icon when responsibilities exist", () => {
-    cy.stub(phaseOverageResponsibilityService, "getAllByPhaseId").resolves({
-      status: 200,
-      data: [
-        {
-          id: 1,
-          work_phase_id: 12,
-          responsibility: "EAO",
-        },
-      ],
-    } as any);
+    cy.stub(workPhasesApi, "listOverageResponsibilities").resolves([
+      { id: 1, work_phase_id: 12, responsibility: "EAO", is_active: true },
+    ] as any);
 
     const phaseWithProgress = {
       ...basePhase,
@@ -410,5 +396,70 @@ describe("PhaseAccordion", () => {
       .first()
       .click({ force: true });
     cy.contains('[role="dialog"]', "Overage Responsibility").should("exist");
+  });
+  it("saves overage responsibilities by enum value, with the work id", () => {
+    cy.stub(workPhasesApi, "listOverageResponsibilities").resolves([
+      { id: 1, work_phase_id: 12, responsibility: "EAO", is_active: true },
+    ] as any);
+    cy.stub(workPhasesApi, "saveOverageNotes").as("saveNotes").resolves();
+    cy.stub(workPhasesApi, "addOverageResponsibility").as("add").resolves();
+    cy.stub(workPhasesApi, "removeOverageResponsibility")
+      .as("remove")
+      .resolves();
+
+    const phaseWithProgress = {
+      ...basePhase,
+      milestone_progress: 25,
+      days_left: -1,
+      days_taken: 11,
+      total_number_of_days: 10,
+      work_phase: {
+        ...basePhase.work_phase,
+        is_completed: false,
+      },
+    };
+
+    cy.mount(
+      <WorkplanContext.Provider
+        value={{
+          ...initialWorkPlanContext,
+          work: { id: 101, work_type_id: 1 } as any,
+          selectedWorkPhase: {
+            work_phase: { id: 99 },
+          } as any,
+          setSelectedWorkPhase: cy.stub(),
+          getWorkPhases: cy.stub(),
+        }}
+      >
+        <PhaseAccordion
+          phase={phaseWithProgress as any}
+          expanded={false}
+          onExpandHandler={cy.stub()}
+          showAnticipated={true}
+          showActual={false}
+          isCurrentPhase={false}
+        />
+      </WorkplanContext.Provider>,
+      { reduxStore: makeStore() },
+    );
+
+    cy.contains("EAO")
+      .parents("div")
+      .first()
+      .find("button")
+      .first()
+      .click({ force: true });
+    cy.get('[role="dialog"] [aria-label="Remove EAO"]').click({ force: true });
+    cy.get('[role="dialog"] input[role="combobox"]').click({ force: true });
+    cy.findByText("Proponent").click();
+    cy.contains('[role="dialog"] button', "Save").click();
+
+    cy.get("@saveNotes").should("have.been.calledWith", 99);
+    cy.get("@add").should("have.been.calledOnceWith", {
+      work_phase_id: 99,
+      responsibility: "Proponent",
+      work_id: 101,
+    });
+    cy.get("@remove").should("have.been.calledOnceWith", 1, 101);
   });
 });
