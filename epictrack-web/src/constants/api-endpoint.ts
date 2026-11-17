@@ -15,7 +15,6 @@ const Endpoints = {
   },
   Projects: {
     PROJECTS: "projects",
-    WORK_TYPES: "projects/:project_id/work-types",
     FIRST_NATIONS: "projects/:project_id/first-nations",
     FIRST_NATION_AVAILABLE: "projects/:project_id/first-nation-available",
     PROJECT_ABBREVIATION: "projects/abbreviation",
@@ -41,12 +40,8 @@ const Endpoints = {
     WORKS_BY_STAFF: "works/by-staff/:staff_id",
     WORK_RESOURCES: "works/resources",
     WORK_RESOURCES_ACTIVE: "works/resources?is_active=true",
-    WORK_PHASE_ADDITIONAL_INFO: "works/:work_id/phase/:phase_id/additionalinfo",
-    DOWNLOAD_WORK_PLAN: "works/workplan/download",
     WORK_TEAM_MEMBERS: "works/:work_id/staff-roles",
     WORK_TEAM_MEMBER: "works/staff-roles/:work_staff_id",
-    CHECK_TEMPLATE_UPLOAD_STATUS:
-      "works/work-phases/:work_phase_id/template-upload-status",
     WORK_FIRST_NATION_NOTES: "works/:work_id/first-nation-notes",
     WORK_NOTES: "works/:work_id/notes",
     WORK_FIRST_NATIONS: "works/:work_id/first-nations",
@@ -54,14 +49,6 @@ const Endpoints = {
     WORK_FIRST_NATION: "works/first-nations/:work_first_nation_id",
     WORK_IMPORT_FIRST_NATIONS: "works/:work_id/first-nations/import",
     GET_ALL_WORK_TYPES: "works/types",
-    GET_WORK_PHASE_BY_ID: "works/work-phases/:work_phase_id",
-    WORK_PHASE_RESPONSIBILITY_NOTES:
-      "works/work-phases/:work_phase_id/overage-responsibility-notes",
-    GET_OVERAGE_RESPONSIBILITY_BY_PHASE_ID:
-      "works/work-phases/:work_phase_id/overage-responsibilities",
-  },
-  WorkTypes: {
-    GET_ALL: "work-types",
   },
   WorkIssues: {
     GET_ALL: "work-issues/dashboard",
@@ -76,14 +63,8 @@ const Endpoints = {
     WORK_STATUSES: "work/:work_id/statuses",
     GET_ALL: "work-statuses/dashboard",
   },
-  PhaseOverageResponsibilities: {
-    OVERAGE_RESPONSIBILITIES: "overage-responsibilities",
-  },
   SubTypes: {
     SUB_TYPES: "sub-types",
-  },
-  Phases: {
-    PHASES: "phases",
   },
   Users: {
     USERS: "users",
@@ -115,9 +96,6 @@ const Endpoints = {
   },
   ActSections: {
     ACT_SECTIONS: "/act-sections",
-  },
-  Workplan: {
-    GET_ALL: "/works/dashboard",
   },
   EAO_TEAMS: {
     GET_ALL: "/eao-teams",
