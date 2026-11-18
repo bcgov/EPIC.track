@@ -18,6 +18,10 @@ from unittest.mock import MagicMock, patch
 from flask import g
 from pytz import utc
 
+from api.models import Event, EventConfiguration, EventTemplate, PhaseCode, WorkPhase
+from api.models.event_category import EventCategoryEnum
+from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
+from api.models.event_type import EventTypeEnum
 from api.reports.thirty_sixty_ninety_report import ThirtySixtyNinetyReport
 from api.utils.constants import CANADA_TIMEZONE
 from tests.utilities.factory_scenarios import TestJwtClaims, TestWorkIssueUpdatesInfo, TestWorkIssuesInfo
@@ -427,6 +431,19 @@ class TestThirtySixtyNinetyReportCategorizeEvent:
 
             assert result == "work_issue"
 
+    def test_categorize_event_other(self, app, db):
+        """Test an event that is not a decision, referral or PCP is categorized as other."""
+        with app.app_context():
+            g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
+
+            report = ThirtySixtyNinetyReport(filters=None, color_intensity=50)
+            report.decision_configuration_ids = []
+            report.pecp_configuration_ids = []
+
+            result = report._categorize_event({"event_configuration_id": 300, "event_type_id": 1})
+
+            assert result == "other"
+
 
 class TestThirtySixtyNinetyReportFormatNotes:
     """Test _format_notes method."""
@@ -522,6 +539,28 @@ class TestThirtySixtyNinetyReportResolveMultipleEvents:
             result = report._resolve_multiple_events(data)
 
             assert len(result) == 1
+
+    def test_resolve_multiple_events_keeps_other_event(self, app, db):
+        """Test a work's only event is kept when it is not a decision, referral or PCP."""
+        with app.app_context():
+            g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
+
+            report = ThirtySixtyNinetyReport(filters=None, color_intensity=50)
+            report.report_date = datetime(2024, 6, 15, tzinfo=utc)
+            report.high_profile_work_issue_work_ids = []
+            report.decision_configuration_ids = []
+            report.pecp_configuration_ids = []
+
+            data = [
+                {"group": 1, "items": [{"work_id": 1, "event_id": 100, "event_configuration_id": 300,
+                                        "event_type_id": 1, "event_date": datetime(2024, 6, 20, tzinfo=utc)}]}
+            ]
+
+            result = report._resolve_multiple_events(data)
+
+            assert len(result) == 1
+            assert [item["event_id"] for item in result[0]["items"]] == [100]
+            assert result[0]["items"][0]["event_type"] == "other"
 
 
 class TestThirtySixtyNinetyReportHandleWorkIssueItems:
@@ -624,3 +663,62 @@ class TestThirtySixtyNinetyReportGetEventDateSource:
             result = report._get_event_date_source(data)
 
             assert result == "Referral"
+
+
+def _add_event(work, work_phase, event_type_id, category_id, anticipated_date, actual_date=None):
+    """Add an event, with a configuration of its own, to the work phase."""
+    configuration = EventConfiguration(
+        name=f"Event type {event_type_id}",
+        template_id=EventTemplate.query.first().id,
+        event_type_id=event_type_id,
+        event_category_id=category_id,
+        event_position=EventPositionEnum.INTERMEDIATE.value,
+        visibility=EventTemplateVisibilityEnum.MANDATORY.value,
+        work_phase_id=work_phase.id,
+        sort_order=1,
+    ).flush()
+    return Event(
+        name=configuration.name,
+        anticipated_date=anticipated_date,
+        actual_date=actual_date,
+        work_id=work.id,
+        event_configuration_id=configuration.id,
+    ).flush()
+
+
+class TestThirtySixtyNinetyReportValidEventIds:
+    """Test _get_valid_event_ids."""
+
+    def test_pending_decision_kept_and_overdue_order_excluded(self, app, db):
+        """A passed decision with its referral made is kept; an overdue milestone is not."""
+        with app.app_context():
+            g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
+            report_date = datetime(2025, 12, 15, tzinfo=utc)
+            work = factory_work_model()
+            work_phase = WorkPhase(
+                work_id=work.id,
+                phase_id=PhaseCode.query.first().id,
+                name="Decision",
+                start_date=report_date - timedelta(days=200),
+                end_date=report_date + timedelta(days=200),
+                sort_order=1,
+            ).flush()
+            _add_event(
+                work, work_phase, EventTypeEnum.REFERRAL.value, EventCategoryEnum.MILESTONE.value,
+                report_date - timedelta(days=40), actual_date=report_date - timedelta(days=40),
+            )
+            decision = _add_event(
+                work, work_phase, EventTypeEnum.CEAO_DECISION.value, EventCategoryEnum.DECISION.value,
+                report_date - timedelta(days=10),
+            )
+            order_type_id = 4  # The Milestone category's "Order" type
+            order = _add_event(
+                work, work_phase, order_type_id, EventCategoryEnum.MILESTONE.value,
+                report_date - timedelta(days=10),
+            )
+
+            report = ThirtySixtyNinetyReport(filters=None, color_intensity=50)
+            valid_event_ids = report._get_valid_event_ids(report_date, include_first_phase=True)
+
+            assert decision.id in valid_event_ids
+            assert order.id not in valid_event_ids
