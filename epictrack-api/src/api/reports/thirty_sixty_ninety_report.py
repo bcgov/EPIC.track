@@ -498,7 +498,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
         )
 
         decision_pending_referral_made = and_(
-            EventConfiguration.event_type_id == EventCategoryEnum.DECISION.value,
+            Event.event_configuration_id.in_(self.decision_configuration_ids),
             Event.actual_date.is_(None),
             Event.anticipated_date.isnot(None),
             Event.anticipated_date.between(
