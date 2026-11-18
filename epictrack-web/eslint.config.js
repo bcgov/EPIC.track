@@ -40,7 +40,6 @@ module.exports = [
       // Insights move to Centre; this code is left as is until it's deleted.
       "src/components/insights/**",
       "src/services/rtkQuery/**",
-      "src/services/insightService/**",
     ],
   },
   {

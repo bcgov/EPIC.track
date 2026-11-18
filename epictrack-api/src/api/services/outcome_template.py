@@ -12,27 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Outcome."""
-from flask import current_app
-
 from api.models import OutcomeTemplate
 
 
-class OutcomeTemplateService:
+class OutcomeTemplateService:  # pylint: disable=too-few-public-methods
     """Service to manage outcome related operations"""
-
-    @classmethod
-    def find_by_milestone_id(cls, milestone_id: int):
-        """Find outcomes by milestone_id"""
-        current_app.logger.debug(f"Find outcomes by milestone_id {milestone_id}")
-        outcomes = OutcomeTemplate.find_by_milestone_id(milestone_id)
-        return outcomes
-
-    @classmethod
-    def find_all_active_milestones(cls):
-        """Find all active outcomes"""
-        current_app.logger.debug("Find all active outcomes")
-        outcomes = OutcomeTemplate.find_all()
-        return outcomes
 
     @classmethod
     def find_all_outcomes(cls, params: dict) -> [OutcomeTemplate]:

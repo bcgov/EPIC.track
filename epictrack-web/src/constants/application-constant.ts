@@ -152,10 +152,6 @@ export const SPECIAL_FIELD_TYPES = Object.freeze({
   BOOLEAN: "BOOLEAN",
 });
 
-export const MILESTONE_TYPES = Object.freeze({
-  REFERRAL: 5,
-});
-
 export enum StalenessEnum {
   CRITICAL = "CRITICAL",
   WARN = "WARN",
