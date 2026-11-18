@@ -28,8 +28,9 @@ from api.actions.add_phase import AddPhase
 from api.actions.set_events_status import SetEventsStatus
 from api.actions.set_phases_status import SetPhasesStatus
 from api.actions.set_project_status import SetProjectStatus
-from api.models import Event, EventConfiguration, Project, Work, WorkPhase
+from api.models import Event, EventConfiguration, Project, Work, WorkPhase, db
 from api.models.special_field import EntityEnum
+from api.services import demi_payload, demi_push
 from api.services.project import ProjectService
 from api.services.special_field import SpecialFieldService
 from api.services.sync_form_data import SyncFormDataService
@@ -526,3 +527,14 @@ def test_assigning_the_same_value_marks_none(app, session):
         session.commit()
 
         assert not committed_marks()
+
+
+def test_demi_names_existing_tables_and_columns():
+    """Every table and column the DEMI push names as a string exists, since a missing one only logs."""
+    tables = db.metadata.tables
+    for table, columns in demi_marks.MIRRORED_COLUMNS.items():
+        assert table in tables, table
+        missing = sorted(columns - set(tables[table].columns.keys()))
+        assert not missing, f"{table}: {missing}"
+    for table in {*demi_payload.RECORD_TABLES, *demi_payload._RECORDS, *demi_push._KINDS}:
+        assert table in tables, table
