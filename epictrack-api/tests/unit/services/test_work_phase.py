@@ -9,35 +9,6 @@ from api.models.event_type import EventTypeEnum
 from api.models.event_category import EventCategoryEnum
 
 
-class TestCreateBulkWorkPhases:
-    """Tests for create_bulk_work_phases method."""
-
-    @patch("api.services.work_phase.WorkPhase")
-    @patch("api.services.work_phase.WorkPhaseSchema")
-    def test_creates_multiple_work_phases(self, mock_schema, mock_model):
-        """Test bulk creating work phases."""
-        work_phases_data = [
-            {"work_id": 1, "phase_id": 1},
-            {"work_id": 1, "phase_id": 2},
-        ]
-
-        mock_schema_instance = MagicMock()
-        mock_schema.return_value = mock_schema_instance
-        mock_schema_instance.load.return_value = work_phases_data
-
-        mock_instance1 = MagicMock()
-        mock_instance2 = MagicMock()
-        mock_model.side_effect = [mock_instance1, mock_instance2]
-
-        WorkPhaseService.create_bulk_work_phases(work_phases_data)
-
-        mock_schema_instance.load.assert_called_once_with(work_phases_data)
-        assert mock_model.call_count == 2
-        mock_instance1.flush.assert_called_once()
-        mock_instance2.flush.assert_called_once()
-        mock_model.commit.assert_called_once()
-
-
 class TestFindByWorkId:
     """Tests for find_by_work_id method."""
 

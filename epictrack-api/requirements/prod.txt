@@ -17,7 +17,6 @@ Werkzeug==3.1.9
 cryptography
 sqlalchemy_utils
 sqlalchemy==2.0.55
-Inflector
 XlsxWriter==3.0.6
 python-dateutil==2.8.2
 reportlab==4.4.10

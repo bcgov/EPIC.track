@@ -3,24 +3,6 @@ export const DISPLAY_DATE_FORMAT = "DD MMM YYYY";
 export const MONTH_DAY_YEAR = "MMM.DD YYYY";
 export const EARLIEST_WORK_DATE = "2019-12-16";
 export const MIN_WORK_START_DATE = "1995-06-30";
-export const REPORT_TYPES = [
-  {
-    Text: "Anticipated EA Referral Schedule",
-    Value: "ea_anticipated_schedule",
-  },
-  {
-    Text: "Resource Forecast",
-    Value: "ea_resource_forecast",
-  },
-  {
-    Text: "30-60-90",
-    Value: "30-60-90",
-  },
-  {
-    Text: "Event Calendar",
-    Value: "event_calendar",
-  },
-];
 export const RESULT_STATUS = {
   LOADING: "loading",
   NO_RECORD: "no_record",
@@ -150,10 +132,6 @@ export const SPECIAL_FIELD_TYPES = Object.freeze({
   STRING: "STRING",
   INTEGER: "INTEGER",
   BOOLEAN: "BOOLEAN",
-});
-
-export const MILESTONE_TYPES = Object.freeze({
-  REFERRAL: 5,
 });
 
 export enum StalenessEnum {

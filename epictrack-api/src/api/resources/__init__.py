@@ -39,11 +39,9 @@ from .indigenous_consultation_level import API as INDIGENOUS_CONSULTATION_LEVEL_
 from .indigenous_nation import API as INDIGENOUS_NATION_API
 from .insights import API as INSIGHTS_API
 from .inspection import API as INSPECTION_API
-from .lookup_data_generator import API as LOOKUP_API
 from .meta import API as META_API
 from .ministry import API as MINISTRY_API
 from .ops import API as OPS_API
-from .outcome import API as OUTCOME_API
 from .outcome_configuration import API as OUTCOME_CONFIGURATION_API
 from .phase import API as PHASE_API
 from .phase_overage_responsibility import API as PHASE_OVERAGE_RESPONSIBILITY_API
@@ -63,7 +61,6 @@ from .staff import API as STAFF_API
 from .staleness_settings import API as STALENESS_SETTINGS_API
 from .sub_types import API as SUB_TYPES_API
 from .substitution_act import API as SUBSTITUTION_ACTS_API
-from .sync_form_data import API as SYNC_FORM_DATA_API
 from .task import API as TASK_API
 from .task_template import API as TASK_TEMPLATE_API
 from .types import API as TYPES_API
@@ -123,18 +120,15 @@ API.add_namespace(META_API, path="/meta")
 API.add_namespace(CODES_API, path="/codes")
 API.add_namespace(PROJECTS_API, path="/projects")
 API.add_namespace(PROJECT_TYPES_API, path="/project-types")
-API.add_namespace(SYNC_FORM_DATA_API, path="/sync-form-data")
 API.add_namespace(PHASE_API, path="/phases")
 API.add_namespace(PHASE_OVERAGE_RESPONSIBILITY_API, path="/overage-responsibilities")
 API.add_namespace(STAFF_API, path="/staffs")
 API.add_namespace(STALENESS_SETTINGS_API, path="/staleness-settings")
 API.add_namespace(ELEVATED_ROLE_API, path='/elevated-roles')
 API.add_namespace(STAFF_ELEVATED_ROLE_API, path="/staff-elevated-roles")
-API.add_namespace(OUTCOME_API, path="/outcomes")
 API.add_namespace(SUB_TYPES_API, path="/sub-types")
 API.add_namespace(INSPECTION_API, path="/inspections")
 API.add_namespace(WORK_API, path="/works")
-API.add_namespace(LOOKUP_API, path="/lookups")
 API.add_namespace(REPORTS_API, path="/reports")
 API.add_namespace(INDIGENOUS_NATION_API, path="/indigenous-nations")
 API.add_namespace(PROPONENT_API, path="/proponents")

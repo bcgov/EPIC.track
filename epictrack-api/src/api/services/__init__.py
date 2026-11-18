@@ -14,7 +14,6 @@
 """Exposes all of the Services used in the API."""
 
 from .act_section import ActSectionService
-from .action_template import ActionTemplateService
 from .code import CodeService
 from .eao_team_service import EAOTeamService
 from .elevated_role import ElevatedRoleService
@@ -24,7 +23,6 @@ from .event_template import EventTemplateService
 from .indigenous_consultation_level_service import IndigenousConsultationLevelService
 from .indigenous_nation import IndigenousNationService
 from .inspection import InspectionService
-from .lookups import LookupService
 from .outcome_template import OutcomeTemplateService
 from .phaseservice import PhaseService
 from .phase_overage_responsibility_service import PhaseOverageResponsibilityService

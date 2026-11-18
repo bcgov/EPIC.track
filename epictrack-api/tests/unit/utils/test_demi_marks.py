@@ -17,7 +17,6 @@ from enum import Enum
 from http import HTTPStatus
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
 from urllib.parse import urljoin
 
 import pytest
@@ -28,11 +27,11 @@ from api.actions.add_phase import AddPhase
 from api.actions.set_events_status import SetEventsStatus
 from api.actions.set_phases_status import SetPhasesStatus
 from api.actions.set_project_status import SetProjectStatus
-from api.models import Event, EventConfiguration, Project, Work, WorkPhase
+from api.models import Event, EventConfiguration, Project, Work, WorkPhase, db
 from api.models.special_field import EntityEnum
+from api.services import demi_payload, demi_push
 from api.services.project import ProjectService
 from api.services.special_field import SpecialFieldService
-from api.services.sync_form_data import SyncFormDataService
 from api.utils import demi_marks
 from api.utils.demi_marks import DemiMarks, committed_marks, mark_rows
 from tests.unit.apis.test_event_actions_auth import _complete_event, _work_with_pending_create_work_decision
@@ -430,47 +429,6 @@ def test_requests_do_not_share_marks(client, auth_header, seen):
     assert set(seen[-1].rows) == {("projects", second.id)}
 
 
-def test_sync_form_data_delete_marks_delete(client, auth_header, seen):
-    """Setting projects.is_deleted through sync-form-data marks a DELETE."""
-    project = factory_project_model()
-
-    # Project.as_dict raises on its dynamic relationships, which is outside what marks cover.
-    with patch.object(Project, "as_dict", return_value={"id": project.id}):
-        response = client.post(
-            urljoin(API_BASE_URL, "sync-form-data"),
-            headers=auth_header,
-            json={"projects": {"id": project.id, "is_deleted": True}},
-        )
-
-    assert response.status_code == HTTPStatus.OK, response.json
-    assert _op(seen[-1], "projects", project.id) == "delete"
-
-
-def test_sync_deletions_marks_each_row_delete(app, client, auth_header, session):
-    """Sync-form-data deletions go through Query.update, which only the helper can see."""
-    work = _created_work(client, auth_header, session)
-    phase = session.query(WorkPhase).filter(WorkPhase.work_id == work.id).first()
-
-    with app.test_request_context():
-        SyncFormDataService._sync_deletions("work_phases", [0], {"work_id": work.id})  # pylint: disable=protected-access
-        session.commit()
-
-        assert _op(committed_marks(), "work_phases", phase.id) == "delete"
-
-
-def test_sync_deletions_marks_no_project(app, session):
-    """Sync-form-data never sends a bulk project delete; a project leaves DEMI only through an ORM flip."""
-    project = factory_project_model()
-
-    with app.test_request_context():
-        SyncFormDataService._sync_deletions(  # pylint: disable=protected-access
-            "projects", [0], {"proponent_id": project.proponent_id}
-        )
-        session.commit()
-
-        assert ("projects", project.id) not in committed_marks().rows
-
-
 @pytest.mark.parametrize("setting", ["DEMI_PUSH_URL", "DEMI_PUSH_KEY"])
 def test_push_config_missing_marks_none(app, client, auth_header, monkeypatch, seen, setting):
     """Without both the DEMI push URL and its key nothing is marked."""
@@ -526,3 +484,14 @@ def test_assigning_the_same_value_marks_none(app, session):
         session.commit()
 
         assert not committed_marks()
+
+
+def test_demi_names_existing_tables_and_columns():
+    """Every table and column the DEMI push names as a string exists, since a missing one only logs."""
+    tables = db.metadata.tables
+    for table, columns in demi_marks.MIRRORED_COLUMNS.items():
+        assert table in tables, table
+        missing = sorted(columns - set(tables[table].columns.keys()))
+        assert not missing, f"{table}: {missing}"
+    for table in {*demi_payload.RECORD_TABLES, *demi_payload._RECORDS, *demi_push._KINDS}:
+        assert table in tables, table
