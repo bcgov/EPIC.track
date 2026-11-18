@@ -12,11 +12,6 @@ from api.models.staff import Staff
 from api.models.work import Work
 
 
-SCHEMA_MAPS = {
-    "work": "api.schemas.work.WorksFormSchema",
-    "_": "api.schemas.default.DefaultSchema"
-}
-
 CACHE_DEFAULT_TIMEOUT = 300
 
 CACHE_DAY_TIMEOUT = int(os.getenv('CACHE_DAY_TIMEOUT', str(CACHE_DEFAULT_TIMEOUT)))

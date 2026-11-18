@@ -61,7 +61,6 @@ from .staff import API as STAFF_API
 from .staleness_settings import API as STALENESS_SETTINGS_API
 from .sub_types import API as SUB_TYPES_API
 from .substitution_act import API as SUBSTITUTION_ACTS_API
-from .sync_form_data import API as SYNC_FORM_DATA_API
 from .task import API as TASK_API
 from .task_template import API as TASK_TEMPLATE_API
 from .types import API as TYPES_API
@@ -121,7 +120,6 @@ API.add_namespace(META_API, path="/meta")
 API.add_namespace(CODES_API, path="/codes")
 API.add_namespace(PROJECTS_API, path="/projects")
 API.add_namespace(PROJECT_TYPES_API, path="/project-types")
-API.add_namespace(SYNC_FORM_DATA_API, path="/sync-form-data")
 API.add_namespace(PHASE_API, path="/phases")
 API.add_namespace(PHASE_OVERAGE_RESPONSIBILITY_API, path="/overage-responsibilities")
 API.add_namespace(STAFF_API, path="/staffs")

@@ -26,7 +26,6 @@ from api.models import PhaseCode, WorkPhase, PRIMARY_CATEGORIES, db
 from api.models.event_type import EventTypeEnum
 from api.models.event_category import EventCategoryEnum
 from api.models.staff_work_role import StaffWorkRole
-from api.schemas.work import WorkPhaseSchema
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.event_template import EventPositionEnum
 from api.services.task_template import TaskTemplateService
@@ -42,16 +41,6 @@ from sqlalchemy import func, and_
 
 class WorkPhaseService:  # pylint: disable=too-few-public-methods
     """Service to manage work phase related operations."""
-
-    @classmethod
-    def create_bulk_work_phases(cls, work_phases):
-        """Bulk create work phases from given list of dicts"""
-        work_phases_schema = WorkPhaseSchema(many=True)
-        work_phases = work_phases_schema.load(work_phases)
-        for work_phase in work_phases:
-            instance = WorkPhase(**work_phase)
-            instance.flush()
-        WorkPhase.commit()
 
     @classmethod
     def find_by_work_id(cls, work_id: int):
