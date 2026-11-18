@@ -151,7 +151,9 @@ const doLogin = () => {
   }
 };
 
-const updateLastActiveTime = async (userId: number) => {
+export const updateLastActiveTime = async (userId: number) => {
+  // staffId is 0 when the user has no staff profile.
+  if (!userId) return;
   try {
     await http.PatchRequest(
       `${Endpoints.Staffs.STAFFS}/${userId}/last_active_at`,

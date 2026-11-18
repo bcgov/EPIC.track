@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { EVENT_TYPE } from "../phase/type";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import Icons from "../../icons";
@@ -55,6 +55,11 @@ interface EventListTableProps {
   setShowTemplateForm: (show: boolean) => void;
   setShowDeleteDialog: (show: boolean) => void;
 }
+const allRowsPageSize = (events: EventsGridModel[]) => {
+  const options = rowsPerPageOptions(events.length);
+  return options[options.length - 1].value;
+};
+
 const EventListTable = ({
   loading,
   events,
@@ -74,18 +79,17 @@ const EventListTable = ({
     hasPermission({ roles, allowed: [ROLES.EDIT] }) || userIsActiveTeamMember;
   const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
 
-  const [pagination, setPagination] = useState({
+  const [pagination, setPagination] = useState(() => ({
     pageIndex: 0,
-    pageSize: 15, //customize the default page size
-  });
+    pageSize: allRowsPageSize(events),
+  }));
 
-  useEffect(() => {
-    const options = rowsPerPageOptions(events.length);
-    setPagination((prev) => ({
-      ...prev,
-      pageSize: options[options.length - 1].value,
-    }));
-  }, [events]);
+  // Reset to "All" while rendering; an effect commits one stale page size first.
+  const [paginatedEvents, setPaginatedEvents] = useState(events);
+  if (events !== paginatedEvents) {
+    setPaginatedEvents(events);
+    setPagination((prev) => ({ ...prev, pageSize: allRowsPageSize(events) }));
+  }
 
   const typeFilterOptions = getSelectFilterOptions(events, "type");
   const startDateFilterOptions = getSelectFilterOptions(

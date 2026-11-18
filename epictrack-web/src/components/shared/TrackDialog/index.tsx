@@ -23,20 +23,64 @@ export type TrackDialogProps = {
   headingBackgroundColor?: string;
 } & DialogProps;
 
-const TrackDialog: FC<TrackDialogProps> = ({ open, ...props }) => {
+const TrackDialog: FC<TrackDialogProps> = ({
+  open,
+  onCancel,
+  onOk,
+  cancelButtonText,
+  okButtonText,
+  dialogTitle,
+  dialogContentText,
+  isActionsRequired,
+  isOkRequired,
+  isCancelRequired,
+  additionalActions,
+  formId,
+  externalSubmitButtonUsed,
+  saveButtonProps,
+  subHeading,
+  heading,
+  variant,
+  dialogTitleIcon,
+  headingBackgroundColor,
+  children,
+  ...dialogProps
+}) => {
   const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
     setOpenDialog(open);
   }, [open]);
 
+  // MUI's Dialog passes unknown props to a DOM div, so only its own go there.
   return (
     <Dialog
       open={openDialog}
       PaperProps={{ sx: { maxHeight: "80vh" } }}
-      {...props}
+      {...dialogProps}
     >
-      <TrackDialogContent {...props} />
+      <TrackDialogContent
+        onCancel={onCancel}
+        onOk={onOk}
+        cancelButtonText={cancelButtonText}
+        okButtonText={okButtonText}
+        dialogTitle={dialogTitle}
+        dialogContentText={dialogContentText}
+        isActionsRequired={isActionsRequired}
+        isOkRequired={isOkRequired}
+        isCancelRequired={isCancelRequired}
+        additionalActions={additionalActions}
+        formId={formId}
+        externalSubmitButtonUsed={externalSubmitButtonUsed}
+        saveButtonProps={saveButtonProps}
+        subHeading={subHeading}
+        heading={heading}
+        variant={variant}
+        dialogTitleIcon={dialogTitleIcon}
+        headingBackgroundColor={headingBackgroundColor}
+      >
+        {children}
+      </TrackDialogContent>
     </Dialog>
   );
 };
