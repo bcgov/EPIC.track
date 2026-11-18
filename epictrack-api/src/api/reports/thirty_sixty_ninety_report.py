@@ -739,7 +739,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
             return "decision_referral"
         if event.get("event_configuration_id") in self.pecp_configuration_ids:
             return "pcp"
-        if event.get("event_configuraiton_id", None):
+        if event.get("event_configuration_id", None):
             return "other"
         return "work_issue"
 

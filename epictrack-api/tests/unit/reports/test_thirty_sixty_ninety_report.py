@@ -431,6 +431,19 @@ class TestThirtySixtyNinetyReportCategorizeEvent:
 
             assert result == "work_issue"
 
+    def test_categorize_event_other(self, app, db):
+        """Test an event that is not a decision, referral or PCP is categorized as other."""
+        with app.app_context():
+            g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
+
+            report = ThirtySixtyNinetyReport(filters=None, color_intensity=50)
+            report.decision_configuration_ids = []
+            report.pecp_configuration_ids = []
+
+            result = report._categorize_event({"event_configuration_id": 300, "event_type_id": 1})
+
+            assert result == "other"
+
 
 class TestThirtySixtyNinetyReportFormatNotes:
     """Test _format_notes method."""
@@ -526,6 +539,28 @@ class TestThirtySixtyNinetyReportResolveMultipleEvents:
             result = report._resolve_multiple_events(data)
 
             assert len(result) == 1
+
+    def test_resolve_multiple_events_keeps_other_event(self, app, db):
+        """Test a work's only event is kept when it is not a decision, referral or PCP."""
+        with app.app_context():
+            g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
+
+            report = ThirtySixtyNinetyReport(filters=None, color_intensity=50)
+            report.report_date = datetime(2024, 6, 15, tzinfo=utc)
+            report.high_profile_work_issue_work_ids = []
+            report.decision_configuration_ids = []
+            report.pecp_configuration_ids = []
+
+            data = [
+                {"group": 1, "items": [{"work_id": 1, "event_id": 100, "event_configuration_id": 300,
+                                        "event_type_id": 1, "event_date": datetime(2024, 6, 20, tzinfo=utc)}]}
+            ]
+
+            result = report._resolve_multiple_events(data)
+
+            assert len(result) == 1
+            assert [item["event_id"] for item in result[0]["items"]] == [100]
+            assert result[0]["items"][0]["event_type"] == "other"
 
 
 class TestThirtySixtyNinetyReportHandleWorkIssueItems:
