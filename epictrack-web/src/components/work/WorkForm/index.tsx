@@ -16,7 +16,8 @@ import { ministryService } from "services/ministryService";
 import { projectsApi } from "api/projects";
 import staffService from "services/staffService/staffService";
 import { substitutionActService } from "services/substitutionActService";
-import { defaultReportDescription, workTypesApi } from "api/workTypes";
+import { workTypesApi } from "api/workTypes";
+import { WorkType } from "models/workType";
 import { worksApi } from "api/works";
 import { isApiError } from "apiManager/apiError";
 import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
@@ -93,7 +94,7 @@ export default function WorkForm({
   setDisableDialogSave,
 }: WorkFormProps) {
   const [eaActs, setEAActs] = useState<ListType[]>([]);
-  const [workTypes, setWorkTypes] = useState<ListType[]>([]);
+  const [workTypes, setWorkTypes] = useState<WorkType[]>([]);
   const [projects, setProjects] = useState<ListType[]>([]);
   const [ministries, setMinistries] = useState<ListType[]>([]);
   const [federalInvolvements, setFederalInvolvements] = useState<ListType[]>(
@@ -165,12 +166,12 @@ export default function WorkForm({
     if (work?.id || !workTypeId) return;
 
     // Get template based on work type, otherwise use default work description
+    const workType = workTypes.find((type) => type.id === Number(workTypeId));
     const template =
-      defaultReportDescription(Number(workTypeId)) ||
-      defaultWork.report_description;
+      workType?.default_report_description || defaultWork.report_description;
 
     setValue("report_description", template);
-  }, [workTypeId, setValue, work?.id]);
+  }, [workTypeId, workTypes, setValue, work?.id]);
 
   useEffect(() => {
     const noneFederalInvolvement = federalInvolvements.find(

@@ -12,7 +12,9 @@ Work phases stay in Track after projects and works move to DEMI.
 | `dto.ts`           | Track response and request shapes                                                                                          |
 | `mapper.ts`        | DTO to frontend type, field by field                                                                                       |
 | `workPhasesApi.ts` | The calls: phases of a work, phase details, template status, the work plan download, phase codes, overage responsibilities |
-| `rules.ts`         | When a phase's overage needs a responsibility                                                                              |
+
+Whether a phase's overage needs a responsibility comes from the backend as
+`WorkPhase.requires_overage_responsibility`; screens read that field.
 
 ## When the phase rewrite lands
 

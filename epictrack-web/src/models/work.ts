@@ -111,6 +111,8 @@ export interface WorkPhase {
   suspended_date: string | null;
   number_of_days: number;
   responsibility_notes?: string | null;
+  /** An overage in this phase needs a responsibility before the phase can complete. */
+  requires_overage_responsibility: boolean;
 }
 
 export interface EndEvent {
