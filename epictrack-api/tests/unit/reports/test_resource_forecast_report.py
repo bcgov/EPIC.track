@@ -764,7 +764,7 @@ class TestEAResourceForeCastReportHandleMonths:
 class TestEAResourceForeCastReportSortData:
     """Test _sort_data method."""
 
-    def test_sort_data_multiple_types(self, app):
+    def test_sort_data_multiple_types(self, app, db):  # pylint: disable=unused-argument
         """Test sorting data with multiple work types."""
         with app.app_context():
             from api.models.work_type import WorkTypeEnum
@@ -784,6 +784,43 @@ class TestEAResourceForeCastReportSortData:
             assert len(result) == 3
             # Assessments should come first
             assert result[0]["work_type_id"] == WorkTypeEnum.ASSESSMENT.value
+
+    def test_sort_data_keeps_the_report_order(self, app, db):  # pylint: disable=unused-argument
+        """Work types keep the report's existing order."""
+        with app.app_context():
+            from api.models.work_type import WorkTypeEnum
+            report = EAResourceForeCastReport(filters=None, color_intensity=50)
+            order = [
+                WorkTypeEnum.ASSESSMENT, WorkTypeEnum.EXEMPTION_ORDER, WorkTypeEnum.AMENDMENT,
+                WorkTypeEnum.JOINT_COMPLEX_AMENDMENT, WorkTypeEnum.EAC_ORDER_TRANSFER,
+                WorkTypeEnum.MINISTERS_DESIGNATION, WorkTypeEnum.CEAOS_DESIGNATION,
+                WorkTypeEnum.PROJECT_NOTIFICATION, WorkTypeEnum.EAC_EXTENSION,
+                WorkTypeEnum.SUBSTANTIAL_START_DECISION, WorkTypeEnum.EAC_ORDER_SUSPENSION,
+                WorkTypeEnum.EAC_ORDER_CANCELLATION, WorkTypeEnum.MATERIAL_ALTERATION, WorkTypeEnum.OTHER,
+            ]
+            data = [
+                {"work_id": index, "work_type_id": work_type.value, "work_title": f"Work {index}"}
+                for index, work_type in enumerate(reversed(order))
+            ]
+
+            with patch.object(report, '_find_work_second_phase', return_value={"actual_date": None}):
+                result = report._sort_data(data, [])
+
+            assert [x["work_type_id"] for x in result] == [work_type.value for work_type in order]
+
+    def test_sort_data_lists_a_type_without_a_report_order_last(self, app, db):  # pylint: disable=unused-argument
+        """A work type with no report order is listed last."""
+        with app.app_context():
+            from api.models.work_type import WorkTypeEnum
+            report = EAResourceForeCastReport(filters=None, color_intensity=50)
+            data = [
+                {"work_id": 1, "work_type_id": WorkTypeEnum.INTAKE_PRE_EA.value, "work_title": "Intake 1"},
+                {"work_id": 2, "work_type_id": WorkTypeEnum.EXEMPTION_ORDER.value, "work_title": "Exemption 1"},
+            ]
+
+            result = report._sort_data(data, [])
+
+            assert [x["work_id"] for x in result] == [2, 1]
 
 
 class TestEAResourceForeCastReportGetStyles:

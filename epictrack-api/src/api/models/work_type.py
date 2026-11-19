@@ -15,7 +15,8 @@
 
 import enum
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Boolean, Column, Integer, String, Text
+from sqlalchemy.sql import expression
 
 from .code_table import CodeTableVersioned
 from .db import db
@@ -51,10 +52,20 @@ class WorkType(db.Model, CodeTableVersioned):
     id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent TRACK-532
     sort_order = Column(Integer())
     report_title = Column(String())
+    # Legislated phases always need one; this extends it to every phase of the work type.
+    all_phases_require_overage_responsibility = Column(
+        Boolean(), nullable=False, default=False, server_default=expression.false()
+    )
+    default_report_description = Column(Text())
+    # Position in the resource forecast; types without one are listed last.
+    report_sort_order = Column(Integer())
 
     def as_dict(self):
         """Return Json representation."""
         result = CodeTableVersioned.as_dict(self)
         result['sort_order'] = self.sort_order
         result['report_title'] = self.report_title
+        result['all_phases_require_overage_responsibility'] = self.all_phases_require_overage_responsibility
+        result['default_report_description'] = self.default_report_description
+        result['report_sort_order'] = self.report_sort_order
         return result
