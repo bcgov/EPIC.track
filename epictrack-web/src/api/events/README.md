@@ -4,7 +4,9 @@ The only frontend code that knows the Track wire format for milestones (events)
 and their templates. Screens call `eventsApi` and get the types in
 `models/event.ts` and `models/eventConfiguration.ts`.
 
-Events stay in Track after projects and works move to DEMI.
+Track's backend runs the date rules for milestones. Milestones may later be
+stored in DEMI: reads can then move behind a source seam, as in `api/projects`,
+while saves, date pushes and outcomes keep going through Track's API.
 
 | File           | Purpose                                                                                            |
 | -------------- | -------------------------------------------------------------------------------------------------- |

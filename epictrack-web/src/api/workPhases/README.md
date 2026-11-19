@@ -5,7 +5,9 @@ call `workPhasesApi` and get the types in `models/work.ts` (`WorkPhase`,
 `WorkPhaseAdditionalInfo`, `TemplateStatus`) and
 `models/phaseOverageResponsibilities.ts`.
 
-Work phases stay in Track after projects and works move to DEMI.
+Track's backend runs the date rules for work phases. The phase records may
+later be stored in DEMI: reads can then move behind a source seam, as in
+`api/projects`, while changes keep going through Track's API.
 
 | File               | Purpose                                                                                                                    |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------- |

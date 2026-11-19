@@ -16,7 +16,9 @@ under `src/models`, or an `ApiError`.
 | `index.ts`       | What screens may use: the api object, rules and public types |
 
 Projects and works are moving to DEMI, so their folders pick a source instead of
-calling a client directly; see `projects/README.md` and `works/README.md`.
+calling a client directly; see `projects/README.md` and `works/README.md`. Work
+phases and events may follow, with Track still running their date rules; see
+`workPhases/README.md` and `events/README.md`.
 
 ## What may import what
 
