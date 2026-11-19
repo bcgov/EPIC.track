@@ -63,6 +63,17 @@ const WorkList = () => {
     );
   }, [workStaffs]);
 
+  const epds = useMemo(() => {
+    return Array.from(
+      new Set(
+        (workStaffs ?? [])
+          .map((workStaff) => workStaff.responsible_epd?.full_name)
+          .filter((name): name is string => Boolean(name))
+          .sort(),
+      ),
+    );
+  }, [workStaffs]);
+
   const columns = React.useMemo<MRT_ColumnDef<WorkStaff>[]>(() => {
     return [
       {
@@ -104,6 +115,37 @@ const WorkList = () => {
           if (
             !filterValue.length ||
             filterValue.length > teams.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
+      },
+      {
+        accessorFn: (row) => row.responsible_epd?.full_name ?? "",
+        id: "responsible_epd.full_name",
+        header: "EPD",
+        size: 100,
+        filterVariant: "multi-select",
+        filterSelectOptions: epds,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > epds.length // select all is selected
           ) {
             return true;
           }
@@ -174,7 +216,7 @@ const WorkList = () => {
         },
       },
     ];
-  }, [workLeads, teams]);
+  }, [workLeads, teams, epds]);
 
   return (
     <MasterTrackTable

@@ -16,7 +16,7 @@
 from http import HTTPStatus
 from urllib.parse import urljoin
 
-from tests.utilities.factory_scenarios import TestWorkInfo
+from tests.utilities.factory_scenarios import TestStaffInfo, TestWorkInfo
 from tests.utilities.factory_utils import (
     factory_project_model,
     factory_staff_model,
@@ -58,6 +58,54 @@ def test_get_works_by_lead(client, auth_header):
     lead_insight = result.json[0]
     assert lead_insight["work_lead_id"] == work_response_json["work_lead_id"]
     assert lead_insight["count"] == 1
+
+
+def test_get_works_filtered_by_responsible_epd(client, auth_header):
+    """Test the EPD table filter narrows work insights to that EPD's works."""
+    lead = factory_staff_model()
+    epd_one, epd_two = (
+        factory_staff_model({
+            **TestStaffInfo.staff1.value,
+            "first_name": first_name,
+            "last_name": "Director",
+            "email": f"{first_name.lower()}.director@example.com",
+        })
+        for first_name in ("Erin", "Pat")
+    )
+    works_url = urljoin(API_BASE_URL, "works")
+    for epd in (epd_one, epd_two):
+        work_data = {
+            **TestWorkInfo.assessment_work.value,
+            # the work title is generated from the simple title and must be unique
+            "simple_title": f"EPD {epd.id}",
+            "project_id": factory_project_model().id,
+            "responsible_epd_id": epd.id,
+            "work_lead_id": lead.id,
+            "decision_by_id": lead.id,
+        }
+        assert client.post(works_url, json=work_data, headers=auth_header).status_code == HTTPStatus.CREATED
+
+    url = urljoin(API_BASE_URL, "insights/works")
+    unfiltered = client.post(url, json={"group_by": "lead"}, headers=auth_header)
+    assert unfiltered.status_code == HTTPStatus.OK
+    assert [row["count"] for row in unfiltered.json] == [2]
+
+    for group_by in ("lead", "team"):
+        payload = {
+            "group_by": group_by,
+            "filters": [{"id": "responsible_epd.full_name", "value": [epd_one.full_name]}],
+        }
+        result = client.post(url, json=payload, headers=auth_header)
+        assert result.status_code == HTTPStatus.OK
+        assert sum(row["count"] for row in result.json) == 1
+
+    payload = {
+        "group_by": "lead",
+        "filters": [{"id": "responsible_epd.full_name", "value": ["Nobody, At All"]}],
+    }
+    result = client.post(url, json=payload, headers=auth_header)
+    assert result.status_code == HTTPStatus.OK
+    assert result.json == []
 
 
 def test_get_works_by_staff(client, auth_header):
