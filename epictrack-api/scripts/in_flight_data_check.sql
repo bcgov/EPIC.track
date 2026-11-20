@@ -1,5 +1,6 @@
 -- Running works whose phase and milestone dates don't fit the proposed work plan rules,
 -- one row per issue, sorted by work Lead. Read-only: the transaction rolls back.
+-- End milestones that differ from the phase end aren't listed: the milestone is right, and the team fixes those.
 --
 --   psql -X --csv -d <database> -f scripts/in_flight_data_check.sql > in_flight_data_check.csv
 --
@@ -84,16 +85,6 @@ issues AS (
     FROM milestones m
     JOIN phases ph ON ph.id = m.work_phase_id
     WHERE m.day < ph.start_day OR m.day > ph.end_day
-
-    UNION ALL
-
-    SELECT
-        m.work_id, ph.id, 'End milestone differs from phase end', m.name, m.day, m.date_type,
-        format('The phase end is recorded as %s. Proposed: the end milestone''s date is the phase end, so check it.',
-               ph.end_day)
-    FROM milestones m
-    JOIN phases ph ON ph.id = m.work_phase_id
-    WHERE m.event_position = 'END' AND m.day <> ph.end_day
 
     UNION ALL
 
