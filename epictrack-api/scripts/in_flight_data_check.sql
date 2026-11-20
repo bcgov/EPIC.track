@@ -1,6 +1,6 @@
 -- Running works whose phase and milestone dates don't fit the proposed work plan rules,
 -- one row per issue, sorted by work Lead. Read-only: the transaction rolls back.
--- End milestones that differ from the phase end aren't listed: the milestone is right, and the team fixes those.
+-- A phase ends on its end milestone's date: the team corrects recorded phase ends that differ.
 --
 --   psql -X --csv -d <database> -f scripts/in_flight_data_check.sql > in_flight_data_check.csv
 --
@@ -23,23 +23,6 @@ WITH running_works AS (
     WHERE w.work_state IN ('IN_PROGRESS', 'SUSPENDED')
       AND NOT w.is_deleted
 ),
-phases AS (
-    SELECT
-        wp.id,
-        wp.work_id,
-        wp.name,
-        row_number() OVER (PARTITION BY wp.work_id ORDER BY wp.sort_order, wp.id) AS phase_order,
-        (wp.start_date AT TIME ZONE 'America/Vancouver')::date AS start_day,
-        (wp.end_date AT TIME ZONE 'America/Vancouver')::date AS end_day,
-        lag(wp.name) OVER (PARTITION BY wp.work_id ORDER BY wp.sort_order, wp.id) AS previous_name,
-        (lag(wp.end_date) OVER (PARTITION BY wp.work_id ORDER BY wp.sort_order, wp.id)
-            AT TIME ZONE 'America/Vancouver')::date AS previous_end_day
-    FROM work_phases wp
-    WHERE wp.work_id IN (SELECT id FROM running_works)
-      AND wp.is_active
-      AND NOT wp.is_deleted
-      AND wp.visibility = 'REGULAR'
-),
 milestones AS (
     SELECT
         e.id,
@@ -58,6 +41,30 @@ milestones AS (
       AND ec.is_active
       AND NOT ec.is_deleted
       AND ec.event_category_id <> 6  -- Calendar
+),
+phase_days AS (
+    SELECT
+        wp.id,
+        wp.work_id,
+        wp.name,
+        wp.sort_order,
+        (wp.start_date AT TIME ZONE 'America/Vancouver')::date AS start_day,
+        coalesce(
+            (SELECT max(m.day) FROM milestones m WHERE m.work_phase_id = wp.id AND m.event_position = 'END'),
+            (wp.end_date AT TIME ZONE 'America/Vancouver')::date
+        ) AS end_day
+    FROM work_phases wp
+    WHERE wp.work_id IN (SELECT id FROM running_works)
+      AND wp.is_active
+      AND NOT wp.is_deleted
+      AND wp.visibility = 'REGULAR'
+),
+phases AS (
+    SELECT
+        pd.*,
+        lag(pd.name) OVER (PARTITION BY pd.work_id ORDER BY pd.sort_order, pd.id) AS previous_name,
+        lag(pd.end_day) OVER (PARTITION BY pd.work_id ORDER BY pd.sort_order, pd.id) AS previous_end_day
+    FROM phase_days pd
 ),
 issues AS (
     SELECT
