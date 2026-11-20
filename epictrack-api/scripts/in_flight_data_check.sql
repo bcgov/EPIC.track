@@ -46,6 +46,7 @@ milestones AS (
         ec.work_phase_id,
         e.name,
         ec.event_position,
+        ec.template_id,
         (coalesce(e.actual_date, e.anticipated_date) AT TIME ZONE 'America/Vancouver')::date AS day,
         CASE WHEN e.actual_date IS NULL THEN 'planned' ELSE 'actual' END AS date_type
     FROM events e
@@ -53,6 +54,8 @@ milestones AS (
     WHERE e.work_id IN (SELECT id FROM running_works)
       AND e.is_active
       AND NOT e.is_deleted
+      AND ec.is_active
+      AND NOT ec.is_deleted
       AND ec.event_category_id <> 6  -- Calendar
 ),
 issues AS (
@@ -106,16 +109,12 @@ issues AS (
     UNION ALL
 
     SELECT
-        wp.work_id, wp.id, 'Milestones from retired template steps', NULL, NULL, NULL,
-        format('%s milestone(s) in this phase come from template steps no longer in the template.', count(*))
-    FROM event_configurations ec
-    JOIN event_templates et ON et.id = ec.template_id
-    JOIN work_phases wp ON wp.id = ec.work_phase_id
+        m.work_id, ph.id, 'Milestone from a retired template step', m.name, m.day, m.date_type,
+        'Its template step is no longer in the template. Check the milestone is still needed.'
+    FROM milestones m
+    JOIN phases ph ON ph.id = m.work_phase_id
+    JOIN event_templates et ON et.id = m.template_id
     WHERE NOT et.is_active
-      AND NOT ec.is_deleted
-      AND NOT wp.is_deleted
-      AND wp.work_id IN (SELECT id FROM running_works)
-    GROUP BY wp.work_id, wp.id
 )
 SELECT
     coalesce(rw.work_lead, '(no Lead)') AS work_lead,
