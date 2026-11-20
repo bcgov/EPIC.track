@@ -577,63 +577,22 @@ class EAResourceForeCastReport(ReportFactory):
         self.month_labels.append(", ".join(q2_month_labels))
 
     def _sort_data(self, data, second_phases) -> List:
-        """Sort the data based on priority of work types"""
-        assessments = self._sort_data_by_work_type(
-            data, WorkTypeEnum.ASSESSMENT.value, second_phases
+        """Sort the data by each work type's report order, then within the type"""
+        report_order = {
+            work_type.id: work_type.report_sort_order
+            for work_type in WorkType.query.all()
+        }
+        work_type_ids = sorted(
+            {x["work_type_id"] for x in data},
+            key=lambda work_type_id: (
+                report_order.get(work_type_id) is None,
+                report_order.get(work_type_id) or 0,
+                work_type_id,
+            ),
         )
-        exemption_orders = self._sort_data_by_work_type(
-            data, WorkTypeEnum.EXEMPTION_ORDER.value
-        )
-        amendments = self._sort_data_by_work_type(
-            data, WorkTypeEnum.AMENDMENT.value, second_phases
-        )
-        joint_complex_amendments = self._sort_data_by_work_type(
-            data, WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value, second_phases
-        )
-        order_transfers = self._sort_data_by_work_type(
-            data, WorkTypeEnum.EAC_ORDER_TRANSFER.value
-        )
-        minister_designations = self._sort_data_by_work_type(
-            data, WorkTypeEnum.MINISTERS_DESIGNATION.value
-        )
-        ceao_designations = self._sort_data_by_work_type(
-            data, WorkTypeEnum.CEAOS_DESIGNATION.value
-        )
-        project_notifications = self._sort_data_by_work_type(
-            data, WorkTypeEnum.PROJECT_NOTIFICATION.value
-        )
-        extensions = self._sort_data_by_work_type(
-            data, WorkTypeEnum.EAC_EXTENSION.value
-        )
-        substantial_start_decisions = self._sort_data_by_work_type(
-            data, WorkTypeEnum.SUBSTANTIAL_START_DECISION.value
-        )
-        order_suspensions = self._sort_data_by_work_type(
-            data, WorkTypeEnum.EAC_ORDER_SUSPENSION.value
-        )
-        order_cancellations = self._sort_data_by_work_type(
-            data, WorkTypeEnum.EAC_ORDER_CANCELLATION.value
-        )
-        material_alterations = self._sort_data_by_work_type(
-            data, WorkTypeEnum.MATERIAL_ALTERATION.value
-        )
-        others = self._sort_data_by_work_type(data, WorkTypeEnum.OTHER.value)
-
-        sorted_data = (
-            assessments
-            + exemption_orders
-            + amendments
-            + joint_complex_amendments
-            + order_transfers
-            + minister_designations
-        )
-        sorted_data += (
-            ceao_designations
-            + project_notifications
-            + extensions
-            + substantial_start_decisions
-        )
-        sorted_data += order_suspensions + order_cancellations + material_alterations + others
+        sorted_data = []
+        for work_type_id in work_type_ids:
+            sorted_data += self._sort_data_by_work_type(data, work_type_id, second_phases)
         return sorted_data
 
     def _fetch_second_phases(self, events, work_ids) -> List[WorkPhase]:

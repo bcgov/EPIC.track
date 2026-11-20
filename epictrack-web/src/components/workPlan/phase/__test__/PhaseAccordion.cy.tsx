@@ -39,11 +39,47 @@ const basePhase = {
       name: "Readiness",
     },
     legislated: true,
+    requires_overage_responsibility: true,
     is_completed: true,
     is_suspended: false,
     start_date: "2026-03-01T00:00:00.000Z",
   },
 } as any;
+
+const mountOverPhase = (workPhase: Record<string, unknown>) =>
+  cy.mount(
+    <WorkplanContext.Provider
+      value={{
+        ...initialWorkPlanContext,
+        work: { id: 101, work_type_id: 1 } as any,
+        selectedWorkPhase: {
+          work_phase: { id: 99 },
+        } as any,
+        setSelectedWorkPhase: cy.stub(),
+        getWorkPhases: cy.stub(),
+      }}
+    >
+      <PhaseAccordion
+        phase={{
+          ...basePhase,
+          days_left: -4,
+          days_taken: 14,
+          total_number_of_days: 10,
+          work_phase: {
+            ...basePhase.work_phase,
+            is_completed: false,
+            ...workPhase,
+          },
+        }}
+        expanded={false}
+        onExpandHandler={cy.stub()}
+        showAnticipated={true}
+        showActual={false}
+        isCurrentPhase={false}
+      />
+    </WorkplanContext.Provider>,
+    { reduxStore: makeStore() },
+  );
 
 describe("PhaseAccordion", () => {
   it("syncs selected phase when accordion is expanded", () => {
@@ -153,6 +189,27 @@ describe("PhaseAccordion", () => {
     cy.contains("select option(s)").should("exist");
     cy.contains("(4 days over)").should("exist");
     cy.contains("Upcoming Legislated Phase").should("exist");
+  });
+
+  it("requires a responsibility in a non-legislated phase when the phase says so", () => {
+    mountOverPhase({
+      legislated: false,
+      requires_overage_responsibility: true,
+    });
+
+    cy.contains("(4 days over)").should("exist");
+    cy.contains("Overage Responsibility").find("span").should("have.text", "*");
+  });
+
+  it("doesn't require a responsibility when the phase says it isn't needed", () => {
+    mountOverPhase({
+      legislated: false,
+      requires_overage_responsibility: false,
+    });
+
+    cy.contains("Overage Responsibility").should("exist");
+    cy.contains("(4 days over)").should("not.exist");
+    cy.contains("Overage Responsibility").find("span").should("not.exist");
   });
 
   it("renders existing overage responsibilities when loaded", () => {

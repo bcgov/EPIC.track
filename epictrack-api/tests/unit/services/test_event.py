@@ -409,6 +409,41 @@ class TestEventServiceUpdateEvent:
 
                             assert "inactive" in str(exc_info.value)
 
+    @pytest.mark.parametrize("requires_responsibility", [True, False])
+    def test_end_date_over_time_needs_responsibility_when_phase_requires_one(
+        self, app, db, requires_responsibility
+    ):  # pylint: disable=unused-argument
+        """An END date on a non-legislated phase over its time is refused only when the phase requires one."""
+        with app.app_context():
+            g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
+            start = datetime(2026, 1, 1, tzinfo=pytz.utc)
+
+            phase = MagicMock(
+                id=1, work_id=1, legislated=False, number_of_days=10,
+                requires_overage_responsibility=requires_responsibility,
+            )
+            start_event = MagicMock(event_position=EventPositionEnum.START.value, actual_date=start)
+            end_event = MagicMock(
+                is_active=True, event_position=EventPositionEnum.END.value, actual_date=None, number_of_days=0
+            )
+            end_event.as_dict_snapshot.return_value = {}
+            end_event.update.side_effect = RuntimeError("past the overage check")
+            for event in (start_event, end_event):
+                event.event_configuration.work_phase_id = 1
+                event.event_configuration.event_type_id = 0
+
+            with patch.object(Event, 'find_by_id', return_value=end_event), \
+                    patch.object(WorkPhase, 'find_by_id', return_value=phase), \
+                    patch.object(EventService, 'find_events', return_value=[start_event, end_event]), \
+                    patch('api.services.event.authorisation.check_auth', return_value=True), \
+                    patch('api.services.event.PhaseOverageResponsibilityService.find_by_work_phase_id',
+                          return_value=[]):
+                expected = UnprocessableEntityError if requires_responsibility else RuntimeError
+                with pytest.raises(expected):
+                    EventService.update_event(
+                        {"actual_date": start + timedelta(days=20)}, 1, push_events=False
+                    )
+
 
 class TestEventServiceFindAllCalendarEvents:
     """Test find_all_calendar_events method."""

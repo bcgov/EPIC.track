@@ -37,6 +37,7 @@ const mockWorkType = {
   name: faker.lorem.word(),
   report_title: faker.lorem.lines(1),
   sort_order: faker.number.int(),
+  default_report_description: "On [date], [initiator] entered the process.",
 };
 
 const mockProject = {
@@ -237,5 +238,31 @@ describe("WorkForm", { retries: 2 }, () => {
     cy.get("p")
       .contains(`${mockProject.name} - ${mockWorkType.name} -`)
       .should("be.visible");
+  });
+
+  it("starts the report description from the chosen work type's text", () => {
+    cy.mount(
+      <Provider store={store}>
+        <WorkForm work={null} fetchWork={cy.stub()} saveWork={cy.stub()} />
+      </Provider>,
+    );
+    cy.wait("@getWorkTypes").its("response.statusCode").should("eq", 200);
+
+    cy.get("label")
+      .contains("Worktype")
+      .parent()
+      .find("input")
+      .first()
+      .should("be.visible")
+      .click({ force: true });
+    cy.get("div")
+      .contains(mockWorkType.name)
+      .should("be.visible")
+      .click({ force: true });
+
+    cy.get('textarea[name="report_description"]').should(
+      "have.value",
+      mockWorkType.default_report_description,
+    );
   });
 });

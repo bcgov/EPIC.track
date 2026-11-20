@@ -47,7 +47,7 @@ describe("OverageResponsibilityForm", () => {
           overageResponsibilities={[]}
           daysAhead={10}
           hasOverage={true}
-          isLegislated={true}
+          isRequired={true}
           daysTakenText="days taken"
           {...props}
         />
@@ -90,6 +90,34 @@ describe("OverageResponsibilityForm", () => {
     cy.get("@onSave").should("have.been.calledWithMatch", {
       responsibility: [OverageResponsibilityEnum.PROPONENT],
       notes: "New notes",
+    });
+  });
+
+  it("blocks saving without a responsibility when the phase requires one", () => {
+    mountForm();
+
+    cy.get('button[type="submit"]').click();
+    cy.contains("At least one overage responsibility is required").should(
+      "exist",
+    );
+    cy.get("@onSave").should("not.have.been.called");
+  });
+
+  it("saves without a responsibility when the phase doesn't require one", () => {
+    mountForm({ isRequired: false });
+
+    cy.get('button[type="submit"]').click();
+    cy.get("@onSave").should("have.been.calledWithMatch", {
+      responsibility: [],
+    });
+  });
+
+  it("saves without a responsibility when there is no overage", () => {
+    mountForm({ hasOverage: false });
+
+    cy.get('button[type="submit"]').click();
+    cy.get("@onSave").should("have.been.calledWithMatch", {
+      responsibility: [],
     });
   });
 

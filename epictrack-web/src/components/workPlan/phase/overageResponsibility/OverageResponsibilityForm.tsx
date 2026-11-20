@@ -22,9 +22,9 @@ const schema = yup.object().shape({
   responsibility: yup
     .array()
     .of(yup.string().oneOf(Object.values(OverageResponsibilityEnum)))
-    .when(["isLegislated", "hasOverage"], {
-      is: (isLegislated: boolean, hasOverage: boolean) =>
-        isLegislated && hasOverage,
+    .when(["$isRequired", "$hasOverage"], {
+      is: (isRequired: boolean, hasOverage: boolean) =>
+        isRequired && hasOverage,
       then: (schema) =>
         schema.min(1, "At least one overage responsibility is required"),
       otherwise: (schema) => schema.notRequired(),
@@ -62,9 +62,8 @@ const OverageResponsibilityForm = ({
       responsibility:
         overageResponsibilities?.map((r) => r.responsibility) ?? [],
       notes: selectedWorkPhase?.work_phase.responsibility_notes ?? "",
-      isRequired,
-      hasOverage,
     },
+    context: { isRequired, hasOverage },
     mode: "onBlur",
   });
 

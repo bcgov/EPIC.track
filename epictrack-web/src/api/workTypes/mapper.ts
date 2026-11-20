@@ -6,4 +6,5 @@ export const toWorkType = (dto: TrackWorkTypeDto): WorkType => ({
   name: dto.name,
   is_active: dto.is_active,
   sort_order: dto.sort_order,
+  default_report_description: dto.default_report_description,
 });

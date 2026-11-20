@@ -29,6 +29,7 @@ const buildPhase = (overrides?: any) => ({
     is_completed: true,
     is_suspended: false,
     legislated: true,
+    requires_overage_responsibility: true,
     suspended_date: "",
     number_of_days: "10",
     responsibility_notes: "",

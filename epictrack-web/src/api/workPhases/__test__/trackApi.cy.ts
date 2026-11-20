@@ -40,6 +40,7 @@ const trackWorkPhase = {
   sort_order: 2,
   visibility: "REGULAR",
   responsibility_notes: "Proponent was late",
+  requires_overage_responsibility: true,
   is_active: true,
   phase: trackPhase,
 };
@@ -85,6 +86,7 @@ const workPhase = {
   suspended_date: null,
   number_of_days: 90,
   responsibility_notes: "Proponent was late",
+  requires_overage_responsibility: true,
 };
 
 const overage = {
