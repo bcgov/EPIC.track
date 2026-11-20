@@ -15,7 +15,7 @@
 
 import copy
 from datetime import date
-from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, and_, cast, func, literal_column, or_
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, and_, cast, func, literal_column, not_, or_
 from sqlalchemy.orm import relationship, aliased
 
 from flask import current_app
@@ -25,7 +25,6 @@ from api.models.dashboard_search_options import EventCalendarSearchOptions
 from api.models.event_category import EventCategory, PRIMARY_CATEGORIES
 from api.models.event_configuration import EventConfiguration
 from api.models.work_phase import WorkPhase
-from api.utils.work_phases import FIRST_WORK_PHASES
 
 from .base_model import BaseModelVersioned
 
@@ -166,7 +165,7 @@ class Event(BaseModelVersioned):
         )
 
         if not include_phase_zero:
-            query = query.filter(WorkPhase.name.notin_(FIRST_WORK_PHASES))
+            query = query.filter(not_(WorkPhase.is_intake))
 
         return query
 

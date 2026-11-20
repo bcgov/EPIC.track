@@ -19,7 +19,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import NextPageTemplate, Paragraph, Table, TableStyle
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.platypus.frames import Frame
-from sqlalchemy import and_, case, func, INTEGER, or_
+from sqlalchemy import and_, case, func, INTEGER, not_, or_
 from sqlalchemy.dialects.postgresql import DATERANGE
 from sqlalchemy.orm import aliased
 
@@ -38,7 +38,6 @@ from api.services.staff import StaffService
 from api.services.work_phase import WorkPhaseService
 from api.utils.color_utils import color_with_opacity
 from api.utils.constants import CANADA_TIMEZONE
-from api.utils.work_phases import FIRST_WORK_PHASES
 
 
 from .report_factory import ReportFactory
@@ -212,7 +211,7 @@ class EAResourceForeCastReport(ReportFactory):
         current_app.logger.info(f"Greater than report date query: {greater_than_report_date_query}")
         work_phase_filters = [WorkPhase.id == Work.current_work_phase_id]
         if not include_first_phase:
-            work_phase_filters.append(WorkPhase.name.notin_(FIRST_WORK_PHASES))
+            work_phase_filters.append(not_(WorkPhase.is_intake))
         works = (
             Project.query.filter(
                 Project.is_project_closed.is_(False),

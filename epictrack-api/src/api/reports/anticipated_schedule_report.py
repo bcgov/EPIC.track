@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 
 from flask import jsonify, current_app
-from sqlalchemy import and_, case, cast, func, Integer, or_, select
+from sqlalchemy import and_, case, cast, func, Integer, not_, or_, select
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
 
@@ -29,10 +29,10 @@ from api.models.substitution_acts import SubstitutionAct
 from api.models.work import Work, WorkStateEnum
 from api.models.work_phase import WorkPhase
 from api.utils.constants import CANADA_TIMEZONE
-from api.utils.work_phases import FIRST_WORK_PHASES
 from api.utils.enums import StalenessEnum
 from collections import namedtuple
 from .cdog_client import CDOGClient
+from .event_rules import anticipated_schedule_referrals_and_decisions
 from .report_factory import ReportFactory
 from api.utils.util import process_data
 import json
@@ -288,9 +288,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         exclude_phase_names = []
         if self.filters and "exclude" in self.filters:
             exclude_phase_names = self.filters["exclude"]
-        if not include_first_phase:
-            exclude_phase_names += FIRST_WORK_PHASES
-        return [
+        filters = [
             Work.is_active.is_(True),
             Event.anticipated_date.between(start, end),
 
@@ -301,61 +299,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             ),
 
             # Include relevant event configurations based on work type
-            or_(
-                and_(
-                    EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                    EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value
-                ),
-                and_(
-                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                    EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value
-                ),
-                and_(
-                    Work.work_type_id == WorkTypeEnum.EXEMPTION_ORDER.value,
-                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                    EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
-                    EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
-                ),
-                and_(
-                    Work.work_type_id == WorkTypeEnum.ASSESSMENT.value,
-                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                    EventConfiguration.name.notin_([
-                        "IPD/EP Approval Decision (Day Zero)",
-                        "Revised EAC Application Acceptance Decision (Day Zero)"
-                    ]),
-                    EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
-                ),
-                and_(
-                    or_(Work.work_type_id == WorkTypeEnum.AMENDMENT.value,
-                        Work.work_type_id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value),
-                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                    EventConfiguration.name != "Delegation of Amendment Decision",
-                    EventConfiguration.event_type_id.in_([
-                        EventTypeEnum.CEAO_DECISION.value,
-                        EventTypeEnum.ADM.value
-                    ])
-                ),
-                and_(
-                    Work.work_type_id == WorkTypeEnum.EAC_EXTENSION.value,
-                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                    EventConfiguration.event_type_id == EventTypeEnum.ADM.value
-                ),
-                and_(
-                    Work.work_type_id == WorkTypeEnum.SUBSTANTIAL_START_DECISION.value,
-                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                    EventConfiguration.name != "Delegation of SubStart Decision to Minister",
-                    EventConfiguration.event_type_id == EventTypeEnum.ADM.value
-                ),
-                and_(
-                    Work.work_type_id == WorkTypeEnum.EAC_ORDER_TRANSFER.value,
-                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                    EventConfiguration.name != "Delegation of Transfer Decision to Minister",
-                    EventConfiguration.event_type_id.in_([
-                        EventTypeEnum.CEAO_DECISION.value,
-                        EventTypeEnum.ADM.value
-                    ])
-                )
-            ),
+            anticipated_schedule_referrals_and_decisions(),
 
             Work.is_deleted.is_(False),
             Event.is_active.is_(True),
@@ -367,6 +311,9 @@ class EAAnticipatedScheduleReport(ReportFactory):
 
             ~WorkPhase.name.in_(exclude_phase_names)
         ]
+        if not include_first_phase:
+            filters.append(not_(WorkPhase.is_intake))
+        return filters
 
     def _get_formatted_columns(self) -> dict:
         """Retrieves a dictionary of formatted column expressions."""
