@@ -1,7 +1,7 @@
 """Flag intake phases on the phase code
 
 Revision ID: d600856ef5d0
-Revises: 8ef7aa13abdd
+Revises: b2bd2c763a74
 Create Date: 2026-11-20 12:00:00.000000
 
 """
@@ -11,7 +11,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = 'd600856ef5d0'
-down_revision = '8ef7aa13abdd'
+down_revision = 'b2bd2c763a74'
 branch_labels = None
 depends_on = None
 
