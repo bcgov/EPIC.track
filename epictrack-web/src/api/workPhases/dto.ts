@@ -31,6 +31,7 @@ export interface TrackWorkPhaseDto {
   sort_order: number;
   visibility: string;
   responsibility_notes: string | null;
+  requires_overage_responsibility: boolean;
   is_active: boolean;
   phase: TrackPhaseDto;
 }

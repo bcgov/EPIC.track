@@ -39,7 +39,6 @@ from api.models import (
     WorkCalendarEvent,
     WorkPhase,
     WorkStateEnum,
-    WorkTypeEnum,
     db,
 )
 from api.models.action import Action, ActionEnum
@@ -180,8 +179,7 @@ class EventService:
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
 
-        # If a phase has an overage, check a responsibility is set if this is the end event in legislated phase
-        # or a phase in an Amendment.
+        # An END date on a phase over its time needs a responsibility when the phase requires one.
         if (event.event_position == EventPositionEnum.END.value
                 and event.actual_date is None
                 and data.get("actual_date")):
@@ -195,7 +193,6 @@ class EventService:
                         )
             if phase_start_event and phase_start_event.actual_date:
                 days_taken = (data.get("actual_date").date() - phase_start_event.actual_date.date()).days
-                work: Work = Work.find_by_id(work_id)
                 #  Find extension events to calculate total number of days
                 extension_events = [
                     e for e in current_phase_events
@@ -207,8 +204,7 @@ class EventService:
                     total_days = current_work_phase.number_of_days + extension_days
                 else:
                     total_days = (current_work_phase.end_date.date() - current_work_phase.start_date.date()).days
-                if (current_work_phase.legislated or work.work_type_id == WorkTypeEnum.AMENDMENT.value or work.work_type_id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value) \
-                        and (total_days - days_taken < 0):
+                if current_work_phase.requires_overage_responsibility and (total_days - days_taken < 0):
                     responsibilities = PhaseOverageResponsibilityService.find_by_work_phase_id(
                         current_work_phase.id, is_deleted=False
                     )

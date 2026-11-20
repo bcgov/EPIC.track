@@ -48,3 +48,8 @@ class WorkPhase(BaseModelVersioned):
 
     work = relationship("Work", foreign_keys=[work_id], lazy="select")
     phase = relationship("PhaseCode", foreign_keys=[phase_id], lazy="select")
+
+    @property
+    def requires_overage_responsibility(self) -> bool:
+        """Return whether an overage in this phase needs a responsibility before the phase can complete."""
+        return bool(self.legislated or self.work.work_type.all_phases_require_overage_responsibility)

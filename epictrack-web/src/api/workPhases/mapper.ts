@@ -36,6 +36,7 @@ export const toWorkPhase = (dto: TrackWorkPhaseDto): WorkPhase => ({
   suspended_date: dto.suspended_date,
   number_of_days: dto.number_of_days,
   responsibility_notes: dto.responsibility_notes,
+  requires_overage_responsibility: dto.requires_overage_responsibility,
 });
 
 export const toOverageResponsibility = (

@@ -37,6 +37,8 @@ class WorkPhaseResponseSchema(
 
     visibility = fields.Method("get_visibility")
 
+    requires_overage_responsibility = fields.Boolean(dump_only=True)
+
     def get_visibility(self, obj: WorkPhase) -> str:
         """Return value for the visibility"""
         return obj.visibility if isinstance(obj.visibility, str) else obj.visibility.value
