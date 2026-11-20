@@ -88,12 +88,14 @@ EVENTS = {
         (DECISION, MINISTER, "Delegation of SubStart Decision to Minister", False, True),  # gap
         (DECISION, CEAO, "SubStart Determination Decision", False, False),  # gap
         (DECISION, ADM, "ADM decision", False, True),
+        (DECISION, ADM, "Delegation of SubStart Decision to Minister", False, False),
     ],
     11: [
         (MILESTONE, REFERRAL, "Transfer Decision Package referred to Decision Maker", False, True),  # gap
         (DECISION, MINISTER, "Delegation of Transfer Decision to Minister", False, True),  # gap
         (DECISION, CEAO, "Decision Maker's Transfer Decision", False, True),
         (DECISION, ADM, "ADM decision", False, True),
+        (DECISION, ADM, "Delegation of Transfer Decision to Minister", False, False),
     ],
     15: [
         (MILESTONE, REFERRAL, "CMA Decision Package Referred to Ministers", False, True),  # gap
@@ -141,7 +143,7 @@ def _event(work, configuration, anticipated_date):
     ).flush()
 
 
-def _selected_names(work, rule):
+def _selected(work, rule):
     rows = (
         EventConfiguration.query
         .join(WorkPhase, EventConfiguration.work_phase_id == WorkPhase.id)
@@ -149,7 +151,7 @@ def _selected_names(work, rule):
         .filter(Work.id == work.id, rule)
         .all()
     )
-    return {row.name for row in rows}
+    return {(row.event_type_id, row.name) for row in rows}
 
 
 @pytest.mark.parametrize("work_type_id", sorted(EVENTS))
@@ -160,11 +162,11 @@ def test_report_rules_select_todays_events(db, work_type_id):  # pylint: disable
     for category_id, type_id, name, _, _ in EVENTS[work_type_id]:
         _configuration(work_phase, category_id, type_id, name)
 
-    assert _selected_names(work, thirty_sixty_ninety_referrals()) == {
-        name for _, _, name, in_thirty_sixty_ninety, _ in EVENTS[work_type_id] if in_thirty_sixty_ninety
+    assert _selected(work, thirty_sixty_ninety_referrals()) == {
+        (type_id, name) for _, type_id, name, in_thirty_sixty_ninety, _ in EVENTS[work_type_id] if in_thirty_sixty_ninety
     }
-    assert _selected_names(work, anticipated_schedule_referrals_and_decisions()) == {
-        name for _, _, name, _, in_schedule in EVENTS[work_type_id] if in_schedule
+    assert _selected(work, anticipated_schedule_referrals_and_decisions()) == {
+        (type_id, name) for _, type_id, name, _, in_schedule in EVENTS[work_type_id] if in_schedule
     }
 
 
