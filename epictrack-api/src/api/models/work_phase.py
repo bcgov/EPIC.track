@@ -14,6 +14,7 @@
 """Model to handle all operations related to WorkPhase."""
 
 from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
@@ -48,3 +49,13 @@ class WorkPhase(BaseModelVersioned):
 
     work = relationship("Work", foreign_keys=[work_id], lazy="select")
     phase = relationship("PhaseCode", foreign_keys=[phase_id], lazy="select")
+
+    @hybrid_property
+    def is_intake(self) -> bool:
+        """Return whether the phase code is an intake phase."""
+        return self.phase.is_intake
+
+    @is_intake.expression
+    def is_intake(self):
+        """SQL expression for is_intake."""
+        return self.phase.has(is_intake=True)

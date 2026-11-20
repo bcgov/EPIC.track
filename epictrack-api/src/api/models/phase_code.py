@@ -16,6 +16,7 @@ import enum
 
 from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import expression
 
 from .code_table import CodeTableVersioned
 from .db import db
@@ -44,6 +45,8 @@ class PhaseCode(db.Model, CodeTableVersioned):
     sort_order = Column(Integer())
     color = Column(String(15))
     visibility = Column(Enum(PhaseVisibilityEnum), default=PhaseVisibilityEnum.REGULAR)
+    # Reports leave intake phases out unless the first phase is included.
+    is_intake = Column(Boolean(), nullable=False, default=False, server_default=expression.false())
 
     work_type = relationship("WorkType", foreign_keys=[work_type_id], lazy="select")
     ea_act = relationship("EAAct", foreign_keys=[ea_act_id], lazy="select")

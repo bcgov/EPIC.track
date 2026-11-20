@@ -40,6 +40,20 @@ from api.services.phaseservice import PhaseService
 from api.utils.roles import Role as KeycloakRole
 from api.utils.str import escape_characters
 
+# A phase code the import creates is intake when it has one of these names.
+INTAKE_PHASE_NAMES = (
+    "CEAO's Designation Intake",
+    "Extension Pre-Submission",
+    "Minister's Designation Intake",
+    "Notification Intake",
+    "Pre-Application (Exemption Request)",
+    "Pre-Application",
+    "Pre-Assessment",
+    "Pre-EA (EAC Assessment)",
+    "SubStart Pre-Assessment",
+    "Transfer Pre-Application",
+)
+
 
 class EventTemplateService:
     # pylint: disable=too-many-locals,
@@ -121,6 +135,7 @@ class EventTemplateService:
                     if selected_phase:
                         phase_result = selected_phase.update(phase_obj, commit=False)
                     else:
+                        phase_obj["is_intake"] = phase_obj["name"] in INTAKE_PHASE_NAMES
                         phase_result = PhaseCode(**phase_obj).flush()
                     phase_result_copy = res.PhaseResponseSchema().dump(phase_result)
                     phase_result_copy["events"] = []
