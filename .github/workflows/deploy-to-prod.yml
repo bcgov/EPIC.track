@@ -2,6 +2,16 @@ name: Deploy to Prod
 
 on:
   workflow_dispatch:
+    inputs:
+      component:
+        description: "What to promote"
+        required: true
+        default: both
+        type: choice
+        options:
+          - both
+          - api
+          - web
 
 permissions:
   contents: read
@@ -18,6 +28,17 @@ jobs:
       name: prod
     steps:
       - uses: actions/checkout@v6
+
+      - name: Choose components
+        id: components
+        env:
+          COMPONENT: ${{ inputs.component }}
+        run: |
+          case "$COMPONENT" in
+            both) echo "apps=api web" >> "$GITHUB_OUTPUT" ;;
+            api|web) echo "apps=$COMPONENT" >> "$GITHUB_OUTPUT" ;;
+            *) echo "Unknown component: $COMPONENT"; exit 1 ;;
+          esac
 
       - name: Install OpenShift CLI
         run: |
@@ -37,25 +58,35 @@ jobs:
 
       - name: Backup Current Prod
         shell: bash
+        env:
+          APPS: ${{ steps.components.outputs.apps }}
         run: |
           oc project ${{ secrets.OPENSHIFT_REPOSITORY }}-tools
           TIMESTAMP=${{ steps.timestamp.outputs.ts }}
-          oc tag epictrack-api:prod epictrack-api:prod-backup-${TIMESTAMP}
-          oc tag epictrack-web:prod epictrack-web:prod-backup-${TIMESTAMP}
+          for app in $APPS; do
+            oc tag epictrack-$app:prod epictrack-$app:prod-backup-${TIMESTAMP}
+          done
 
       - name: Tag Images and Rollout
         shell: bash
+        env:
+          APPS: ${{ steps.components.outputs.apps }}
         run: |
           oc project ${{ secrets.OPENSHIFT_REPOSITORY }}-tools
-          oc tag epictrack-api:test epictrack-api:prod
-          oc tag epictrack-web:test epictrack-web:prod
-          
-          oc rollout restart deployment/epictrack-api -n ${{ secrets.OPENSHIFT_REPOSITORY }}-prod
-          oc rollout restart deployment/epictrack-web -n ${{ secrets.OPENSHIFT_REPOSITORY }}-prod
-          oc rollout status deployment/epictrack-api -n ${{ secrets.OPENSHIFT_REPOSITORY }}-prod --timeout=5m
+          for app in $APPS; do
+            oc tag epictrack-$app:test epictrack-$app:prod
+          done
+
+          for app in $APPS; do
+            oc rollout restart deployment/epictrack-$app -n ${{ secrets.OPENSHIFT_REPOSITORY }}-prod
+          done
+          for app in $APPS; do
+            oc rollout status deployment/epictrack-$app -n ${{ secrets.OPENSHIFT_REPOSITORY }}-prod --timeout=5m
+          done
 
   update_event_templates:
     needs: deployment
+    if: inputs.component != 'web'
     uses: ./.github/workflows/deploy-event-templates.yml
     with:
       environment: "prod"

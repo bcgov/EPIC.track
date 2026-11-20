@@ -22,8 +22,8 @@ A work's project details come from `useProjectSummary(work.project_id)` in
 
 ## What is not here
 
-Calls under `/works` whose data Track owns stay on the Track client, and will
-stay in Track after the move:
+Calls under `/works` that aren't part of the work record stay on the Track
+client:
 
 - phases, the work plan download and overage responsibilities, in
   `api/workPhases`
@@ -34,7 +34,8 @@ stay in Track after the move:
   (`works/by-staff/:id`), which reads the team
 - first nations, resources and notes
 
-The last three are still in `services/workService` and its siblings.
+The last three are still in `services/workService` and its siblings. Phases and
+events may later be stored in DEMI too; their READMEs say how.
 
 ## Switching to DEMI
 

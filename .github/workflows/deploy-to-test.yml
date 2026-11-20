@@ -2,6 +2,16 @@ name: Deploy to Test
 
 on:
   workflow_dispatch:
+    inputs:
+      component:
+        description: "What to promote"
+        required: true
+        default: both
+        type: choice
+        options:
+          - both
+          - api
+          - web
 
 permissions:
   contents: read
@@ -19,6 +29,17 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Choose components
+        id: components
+        env:
+          COMPONENT: ${{ inputs.component }}
+        run: |
+          case "$COMPONENT" in
+            both) echo "apps=api web" >> "$GITHUB_OUTPUT" ;;
+            api|web) echo "apps=$COMPONENT" >> "$GITHUB_OUTPUT" ;;
+            *) echo "Unknown component: $COMPONENT"; exit 1 ;;
+          esac
+
       - name: Install OpenShift CLI
         run: |
           curl -LO "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz"
@@ -33,17 +54,24 @@ jobs:
 
       - name: Tag Images and Rollout
         shell: bash
+        env:
+          APPS: ${{ steps.components.outputs.apps }}
         run: |
           oc project ${{ secrets.OPENSHIFT_REPOSITORY }}-tools
-          oc tag epictrack-api:latest epictrack-api:test
-          oc tag epictrack-web:latest epictrack-web:test
-          
-          oc rollout restart deployment/epictrack-api -n ${{ secrets.OPENSHIFT_REPOSITORY }}-test
-          oc rollout restart deployment/epictrack-web -n ${{ secrets.OPENSHIFT_REPOSITORY }}-test
-          oc rollout status deployment/epictrack-api -n ${{ secrets.OPENSHIFT_REPOSITORY }}-test --timeout=5m
+          for app in $APPS; do
+            oc tag epictrack-$app:latest epictrack-$app:test
+          done
+
+          for app in $APPS; do
+            oc rollout restart deployment/epictrack-$app -n ${{ secrets.OPENSHIFT_REPOSITORY }}-test
+          done
+          for app in $APPS; do
+            oc rollout status deployment/epictrack-$app -n ${{ secrets.OPENSHIFT_REPOSITORY }}-test --timeout=5m
+          done
 
   update_event_templates:
     needs: deployment
+    if: inputs.component != 'web'
     uses: ./.github/workflows/deploy-event-templates.yml
     with:
       environment: "test"
