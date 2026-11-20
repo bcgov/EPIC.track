@@ -30,6 +30,7 @@ work_table_filter_map = {
     "work_type.name": lambda v: Work.work_type.has(WorkType.name.in_(v)),
     "current_work_phase.name": lambda v: Work.current_work_phase.has(WorkPhase.name.in_(v)),
     "eao_team.name": lambda v: Work.eao_team.has(EAOTeam.name.in_(v)),
+    "responsible_epd.full_name": lambda v: Work.responsible_epd.has(Staff.full_name.in_(v)),
     "work_lead.full_name": lambda v: Work.work_lead.has(Staff.full_name.in_(v)),
     "staff": lambda v: Staff.full_name.ilike(f"%{v}%"),
     "ministry.name": lambda v: Work.ministry.has(Ministry.name.in_(v)),
