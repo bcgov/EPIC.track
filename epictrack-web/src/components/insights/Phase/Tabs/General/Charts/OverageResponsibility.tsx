@@ -42,7 +42,7 @@ const OverageResponsibilityChart = () => {
       staffId: isUserInsights ? staffId : undefined,
       isUnderageToggled,
     },
-    { skip: columnFilters.length === 0 || isUnderageToggled },
+    { skip: isUnderageToggled },
   );
 
   if (error) {

@@ -51,13 +51,10 @@ const WorkByNationChart = () => {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByNationQuery(
-    {
-      columnFilters,
-      staffId: isUserInsights ? staffId : undefined,
-    },
-    { skip: columnFilters.length === 0 },
-  );
+  } = useGetWorksByNationQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   const formatData = (data?: WorkByNation[]) => {
     if (!data) return [];

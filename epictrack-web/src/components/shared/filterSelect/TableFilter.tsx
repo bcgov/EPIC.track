@@ -50,8 +50,9 @@ const makeTableFilter =
     }, [column]);
 
     useEffect(() => {
-      // Ensure initial value is set in correct format
-      if (!Array.isArray(column.getFilterValue())) {
+      // Ensure a set initial value is in correct format; leave unset filters alone
+      const filterValue = column.getFilterValue();
+      if (filterValue !== undefined && !Array.isArray(filterValue)) {
         column.setFilterValue([]);
       }
     }, [column]);

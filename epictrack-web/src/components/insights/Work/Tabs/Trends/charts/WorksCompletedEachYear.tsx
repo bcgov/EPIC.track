@@ -25,13 +25,10 @@ const WorksCompletedEachYear = () => {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByYearCompletedQuery(
-    {
-      columnFilters,
-      staffId: isUserInsights ? staffId : undefined,
-    },
-    { skip: columnFilters.length === 0 },
-  );
+  } = useGetWorksByYearCompletedQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   if (error) {
     showNotification("Could not load Works completed each year", {

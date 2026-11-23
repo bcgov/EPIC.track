@@ -25,13 +25,10 @@ const WorksCreatedEachYear = () => {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByYearOpenedQuery(
-    {
-      columnFilters,
-      staffId: isUserInsights ? staffId : undefined,
-    },
-    { skip: columnFilters.length === 0 },
-  );
+  } = useGetWorksByYearOpenedQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   if (error) {
     showNotification("Could not load Works created each year", {

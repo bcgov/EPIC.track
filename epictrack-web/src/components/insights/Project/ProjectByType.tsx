@@ -35,7 +35,7 @@ const ProjectByTypeChart = () => {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetProjectByTypeQuery(queryArgs, { skip: columnFilters.length === 0 });
+  } = useGetProjectByTypeQuery(queryArgs);
 
   if (isChartLoading || !chartData) {
     return <PieChartSkeleton loading={isChartLoading} />;

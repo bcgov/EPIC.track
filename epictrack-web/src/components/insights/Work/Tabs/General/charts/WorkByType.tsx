@@ -27,13 +27,10 @@ const WorkByTypeChart = () => {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByTypeQuery(
-    {
-      columnFilters,
-      staffId: isUserInsights ? staffId : undefined,
-    },
-    { skip: columnFilters.length === 0 },
-  );
+  } = useGetWorksByTypeQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   if (error) {
     showNotification("Could not load Works by Type data", {
