@@ -33,7 +33,6 @@ const WorkByREL = () => {
       staffId: isUserInsights ? staffId : undefined,
     },
     {
-      skip: columnFilters.length === 0,
       refetchOnMountOrArgChange: true,
     },
   );

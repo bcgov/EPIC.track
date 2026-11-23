@@ -75,11 +75,12 @@ describe("General insights accordion", () => {
     );
   });
 
-  // The charts skip their request while the shared columnFilters is empty
-  it("loads the charts beside the listing", () => {
+  // The listing leaves unset filters out of the shared columnFilters, so the
+  // charts must load without waiting for any of them to be set
+  it("loads the charts beside the listing with no filters set", () => {
     cy.wait("@getChartData")
       .its("request.body.filters")
-      .should("have.length.greaterThan", 0);
+      .should("have.length", 0);
 
     cy.contains("WORK BY TYPE").should("exist");
   });

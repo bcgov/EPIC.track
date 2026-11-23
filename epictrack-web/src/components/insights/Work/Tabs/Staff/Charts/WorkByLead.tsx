@@ -25,13 +25,10 @@ const WorkByLeadChart = () => {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByLeadQuery(
-    {
-      columnFilters,
-      staffId: isUserInsights ? staffId : undefined,
-    },
-    { skip: columnFilters.length === 0 },
-  );
+  } = useGetWorksByLeadQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   if (error) {
     showNotification("Could not load Works by Lead data", {

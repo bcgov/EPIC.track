@@ -61,14 +61,11 @@ const MedianPhaseOverageByWorktypeChart = () => {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetMedianPhaseOverageByWorktypeQuery(
-    {
-      columnFilters,
-      staffId: isUserInsights ? staffId : undefined,
-      isUnderageToggled,
-    },
-    { skip: columnFilters.length === 0 },
-  );
+  } = useGetMedianPhaseOverageByWorktypeQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+    isUnderageToggled,
+  });
 
   if (error) {
     showNotification("Could not load WorkPhases by Median Phase Overage data", {
