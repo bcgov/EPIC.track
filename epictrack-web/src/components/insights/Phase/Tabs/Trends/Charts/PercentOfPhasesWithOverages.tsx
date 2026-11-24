@@ -77,14 +77,11 @@ const PercentOfPhasesWithOveragesChart = () => {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetPercentOfPhasesWithOveragesQuery(
-    {
-      columnFilters,
-      staffId: isUserInsights ? staffId : undefined,
-      isUnderageToggled,
-    },
-    { skip: columnFilters.length === 0 },
-  );
+  } = useGetPercentOfPhasesWithOveragesQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+    isUnderageToggled,
+  });
 
   if (error) {
     showNotification(

@@ -95,9 +95,25 @@ describe("PercentOfPhasesWithOveragesChart", () => {
     cy.get(".recharts-rectangle").should("have.length.at.least", 1);
   });
 
-  it("shows skeleton when filters are empty and query is skipped", () => {
+  // Unset table filters are not a reason to hold the chart back
+  it("loads the chart when no filters are set", () => {
+    cy.intercept("POST", "**/insights/phases", (req) => {
+      if (req.body?.group_by === "percent_of_phases_with_overages") {
+        req.reply([
+          {
+            phase: "Review",
+            percent_overage: 60,
+            overage_count: 6,
+            total_count: 10,
+          },
+        ]);
+      }
+    }).as("getPercentOverage");
+
     mountChart(false, []);
 
-    cy.get(".MuiSkeleton-root").should("have.length", 3);
+    // No cy.wait: the unfiltered result may already be cached by an earlier test
+    cy.contains("% OF PHASES WITH OVERAGE").should("exist");
+    cy.get(".recharts-rectangle").should("have.length.at.least", 1);
   });
 });

@@ -26,13 +26,10 @@ const WorksClosedYearlyBreakdown = () => {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorkClosureBreakdownQuery(
-    {
-      columnFilters,
-      staffId: isUserInsights ? staffId : undefined,
-    },
-    { skip: columnFilters.length === 0 },
-  );
+  } = useGetWorkClosureBreakdownQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   if (error) {
     showNotification("Could not load yearly closed Works data", {
