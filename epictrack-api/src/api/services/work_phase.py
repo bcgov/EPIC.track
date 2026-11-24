@@ -179,7 +179,8 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
                     work_phase_events,
                 ),
             )
-            result_item["total_number_of_days"] = total_days - suspended_days
+            # A suspension pauses the clock: the time allowed stays, and the days taken leave it out.
+            result_item["total_number_of_days"] = total_days
 
             milestone_info = cls._get_milestone_information(work_phase_events)
             result_item = {**result_item, **milestone_info}
@@ -311,9 +312,9 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             and work_phase.is_completed is False
         ):
             days_passed = cls._get_days_taken(work_phase, events, suspended_days)
-            days_left = (total_days - suspended_days) - days_passed
+            days_left = total_days - days_passed
         else:
-            days_left = total_days - suspended_days
+            days_left = total_days
         return days_left
 
     @classmethod

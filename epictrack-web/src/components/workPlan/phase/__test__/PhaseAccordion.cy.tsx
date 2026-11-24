@@ -201,6 +201,67 @@ describe("PhaseAccordion", () => {
     cy.contains("Overage Responsibility").find("span").should("have.text", "*");
   });
 
+  it("tells a legislated phase over its limit to add an extension before it can complete", () => {
+    mountOverPhase({
+      legislated: true,
+      requires_overage_responsibility: true,
+    });
+
+    cy.contains("You've exceeded the legislated timeline in Readiness.").should(
+      "exist",
+    );
+    cy.contains(
+      "You must add a Time Limit Extension of at least 4 days before you can complete this phase.",
+    ).should("exist");
+    cy.contains("You must add an Overage Responsibility").should("not.exist");
+  });
+
+  it("asks for a one-day extension in the singular", () => {
+    cy.mount(
+      <WorkplanContext.Provider
+        value={{
+          ...initialWorkPlanContext,
+          work: { id: 101, work_type_id: 1 } as any,
+          selectedWorkPhase: { work_phase: { id: 99 } } as any,
+          setSelectedWorkPhase: cy.stub(),
+          getWorkPhases: cy.stub(),
+        }}
+      >
+        <PhaseAccordion
+          phase={{
+            ...basePhase,
+            days_taken: 11,
+            total_number_of_days: 10,
+            work_phase: { ...basePhase.work_phase, is_completed: false },
+          }}
+          expanded={false}
+          onExpandHandler={cy.stub()}
+          showAnticipated={true}
+          showActual={false}
+          isCurrentPhase={false}
+        />
+      </WorkplanContext.Provider>,
+      { reduxStore: makeStore() },
+    );
+
+    cy.contains(
+      "You must add a Time Limit Extension of at least 1 day before you can complete this phase.",
+    ).should("exist");
+  });
+
+  it("tells a non-legislated phase that requires one to add a responsibility", () => {
+    mountOverPhase({
+      legislated: false,
+      requires_overage_responsibility: true,
+    });
+
+    cy.contains("You've exceeded the timeline in Readiness.").should("exist");
+    cy.contains(
+      "You must add an Overage Responsibility before you can complete this phase.",
+    ).should("exist");
+    cy.contains("Time Limit Extension").should("not.exist");
+  });
+
   it("doesn't require a responsibility when the phase says it isn't needed", () => {
     mountOverPhase({
       legislated: false,
