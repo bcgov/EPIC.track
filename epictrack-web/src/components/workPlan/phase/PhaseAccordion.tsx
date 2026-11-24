@@ -125,6 +125,14 @@ const PhaseAccordion = ({
     : `Upcoming ${isLegislated ? "Legislated " : ""}Phase`;
   const daysAhead = phase.total_number_of_days - phase.days_taken;
   const hasOverage = daysAhead < 0;
+  const overageDays = Math.abs(daysAhead);
+  // By law a legislated phase can't close over its time limit, so it needs an extension instead.
+  const needsExtensionToComplete = hasOverage && isLegislated;
+  const needsResponsibilityToComplete =
+    hasOverage &&
+    !isLegislated &&
+    isOverageResponsibilityRequired &&
+    overageResponsibilities?.length <= 0;
   const isNextEventEndEvent =
     phase.next_milestone === phase.end_milestone?.name;
 
@@ -514,10 +522,8 @@ const PhaseAccordion = ({
             }}
           >
             {expanded && <EventGrid />}
-            {hasOverage &&
-              isOverageResponsibilityRequired &&
-              overageResponsibilities?.length <= 0 &&
-              isNextEventEndEvent && (
+            {isNextEventEndEvent &&
+              (needsExtensionToComplete || needsResponsibilityToComplete) && (
                 <Box
                   sx={{
                     display: "flex",
@@ -527,12 +533,20 @@ const PhaseAccordion = ({
                   }}
                 >
                   <WarningBox
-                    title={`You've exceeded the ${isLegislated ? "legislated" : ""} timeline in ${phase.work_phase.name}.`}
+                    title={`You've exceeded the ${isLegislated ? "legislated " : ""}timeline in ${phase.work_phase.name}.`}
                     subTitle={
-                      <>
-                        You must add an <b>Overage Responsibility</b> before you
-                        can to complete this phase.
-                      </>
+                      needsExtensionToComplete ? (
+                        <>
+                          You must add a <b>Time Limit Extension</b> of at least{" "}
+                          {overageDays} day{overageDays !== 1 ? "s" : ""} before
+                          you can complete this phase.
+                        </>
+                      ) : (
+                        <>
+                          You must add an <b>Overage Responsibility</b> before
+                          you can complete this phase.
+                        </>
+                      )
                     }
                     isTitleBold={true}
                   />
