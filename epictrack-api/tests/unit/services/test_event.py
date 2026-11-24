@@ -446,18 +446,23 @@ class TestEventServiceUpdateEvent:
                     )
 
     @pytest.mark.parametrize(
-        "extension_days, has_responsibility, message",
+        "end_day, extension_days, suspended_days, has_responsibility, message",
         [
-            (0, False, "at least 10 days"),
-            (0, True, "at least 10 days"),
-            (9, True, "at least 1 day first"),
-            (10, False, None),
+            (20, 0, 0, False, "at least 10 days"),
+            (20, 0, 0, True, "at least 10 days"),
+            (20, 9, 0, True, "at least 1 day first"),
+            (20, 10, 0, False, None),
+            (25, 0, 15, False, None),
+            (27, 0, 15, False, "at least 2 days"),
         ],
     )
     def test_end_date_over_time_limit_needs_an_extension_in_a_legislated_phase(
-        self, app, db, extension_days, has_responsibility, message
-    ):  # pylint: disable=unused-argument
-        """A legislated phase 10 days over can't be completed until extensions cover it; a responsibility isn't enough."""
+        self, app, db, end_day, extension_days, suspended_days, has_responsibility, message
+    ):  # pylint: disable=unused-argument,too-many-arguments,too-many-locals
+        """A legislated phase over its 10 days, not counting suspended time, needs extensions covering it.
+
+        A responsibility isn't enough.
+        """
         with app.app_context():
             g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
             start = datetime(2026, 1, 1, tzinfo=pytz.utc)
@@ -467,26 +472,32 @@ class TestEventServiceUpdateEvent:
             )
             start_event = MagicMock(event_position=EventPositionEnum.START.value, actual_date=start)
             extension = MagicMock(event_position=EventPositionEnum.INTERMEDIATE.value, number_of_days=extension_days)
+            resumption = MagicMock(
+                event_position=EventPositionEnum.INTERMEDIATE.value, number_of_days=suspended_days,
+                actual_date=start + timedelta(days=3 + suspended_days),
+            )
             end_event = MagicMock(
                 is_active=True, event_position=EventPositionEnum.END.value, actual_date=None, number_of_days=0
             )
             end_event.as_dict_snapshot.return_value = {}
             end_event.update.side_effect = RuntimeError("past the overage check")
-            for event in (start_event, extension, end_event):
+            for event in (start_event, extension, resumption, end_event):
                 event.event_configuration.work_phase_id = 1
                 event.event_configuration.event_type_id = 0
             extension.event_configuration.event_type_id = EventTypeEnum.TIME_LIMIT_EXTENSION.value
+            resumption.event_configuration.event_type_id = EventTypeEnum.TIME_LIMIT_RESUMPTION.value
 
             with patch.object(Event, 'find_by_id', return_value=end_event), \
                     patch.object(WorkPhase, 'find_by_id', return_value=phase), \
-                    patch.object(EventService, 'find_events', return_value=[start_event, extension, end_event]), \
+                    patch.object(EventService, 'find_events',
+                                 return_value=[start_event, extension, resumption, end_event]), \
                     patch('api.services.event.authorisation.check_auth', return_value=True), \
                     patch('api.services.event.PhaseOverageResponsibilityService.find_by_work_phase_id',
                           return_value=[MagicMock()] if has_responsibility else []):
                 expected = UnprocessableEntityError if message else RuntimeError
                 with pytest.raises(expected) as exc_info:
                     EventService.update_event(
-                        {"actual_date": start + timedelta(days=20)}, 1, push_events=False
+                        {"actual_date": start + timedelta(days=end_day)}, 1, push_events=False
                     )
                 if message:
                     assert message in str(exc_info.value)

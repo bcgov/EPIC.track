@@ -192,7 +192,13 @@ class EventService:
                             None,
                         )
             if phase_start_event and phase_start_event.actual_date:
-                days_taken = (data.get("actual_date").date() - phase_start_event.actual_date.date()).days
+                # Suspended time pauses the clock, so it isn't overage.
+                suspended_days = sum(
+                    e.number_of_days for e in current_phase_events
+                    if e.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+                    and e.actual_date is not None
+                )
+                days_taken = (data.get("actual_date").date() - phase_start_event.actual_date.date()).days - suspended_days
                 #  Find extension events to calculate total number of days
                 extension_events = [
                     e for e in current_phase_events
