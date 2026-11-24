@@ -446,20 +446,21 @@ class TestEventServiceUpdateEvent:
                     )
 
     @pytest.mark.parametrize(
-        "end_day, extension_days, suspended_days, has_responsibility, message",
+        "end_day, extension_days, suspended_days, resumed, has_responsibility, message",
         [
-            (20, 0, 0, False, "at least 10 days"),
-            (20, 0, 0, True, "at least 10 days"),
-            (20, 9, 0, True, "at least 1 day first"),
-            (20, 10, 0, False, None),
-            (25, 0, 15, False, None),
-            (27, 0, 15, False, "at least 2 days"),
+            (20, 0, 0, True, False, "at least 10 days"),
+            (20, 0, 0, True, True, "at least 10 days"),
+            (20, 9, 0, True, True, "at least 1 day first"),
+            (20, 10, 0, True, False, None),
+            (25, 0, 15, True, False, None),
+            (27, 0, 15, True, False, "at least 2 days"),
+            (25, 0, 15, False, False, "at least 15 days"),
         ],
     )
     def test_end_date_over_time_limit_needs_an_extension_in_a_legislated_phase(
-        self, app, db, end_day, extension_days, suspended_days, has_responsibility, message
+        self, app, db, end_day, extension_days, suspended_days, resumed, has_responsibility, message
     ):  # pylint: disable=unused-argument,too-many-arguments,too-many-locals
-        """A legislated phase over its 10 days, not counting suspended time, needs extensions covering it.
+        """A legislated phase over its 10 days, not counting resumed suspensions, needs extensions covering it.
 
         A responsibility isn't enough.
         """
@@ -474,7 +475,7 @@ class TestEventServiceUpdateEvent:
             extension = MagicMock(event_position=EventPositionEnum.INTERMEDIATE.value, number_of_days=extension_days)
             resumption = MagicMock(
                 event_position=EventPositionEnum.INTERMEDIATE.value, number_of_days=suspended_days,
-                actual_date=start + timedelta(days=3 + suspended_days),
+                actual_date=start + timedelta(days=3 + suspended_days) if resumed else None,
             )
             end_event = MagicMock(
                 is_active=True, event_position=EventPositionEnum.END.value, actual_date=None, number_of_days=0
