@@ -179,7 +179,7 @@ class EventService:
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
 
-        # An END date on a phase over its time needs a responsibility when the phase requires one.
+        # Over its time, a legislated phase needs an extension covering it (the law); others may need a responsibility.
         if (event.event_position == EventPositionEnum.END.value
                 and event.actual_date is None
                 and data.get("actual_date")):
@@ -204,13 +204,21 @@ class EventService:
                     total_days = current_work_phase.number_of_days + extension_days
                 else:
                     total_days = (current_work_phase.end_date.date() - current_work_phase.start_date.date()).days
-                if current_work_phase.requires_overage_responsibility and (total_days - days_taken < 0):
+                overage_days = days_taken - total_days
+                if overage_days > 0 and current_work_phase.legislated:
+                    raise UnprocessableEntityError(
+                        "A legislated phase can't be completed over its time limit. Add a Time Limit Extension of "
+                        f"at least {overage_days} day{'s' if overage_days != 1 else ''} first. "
+                        "It can have the same date as the end."
+                    )
+                if overage_days > 0 and current_work_phase.requires_overage_responsibility:
                     responsibilities = PhaseOverageResponsibilityService.find_by_work_phase_id(
                         current_work_phase.id, is_deleted=False
                     )
                     if not responsibilities:
                         raise UnprocessableEntityError(
-                            "Cannot complete a legislated phase without an Overage Responsibility. Select a responsibility first."
+                            "Cannot complete this phase over its time without an Overage Responsibility. "
+                            "Select a responsibility first."
                         )
             else:
                 current_app.logger.info("No start event found in the phase. Cannot calculate days taken or check overage responsibility.")
