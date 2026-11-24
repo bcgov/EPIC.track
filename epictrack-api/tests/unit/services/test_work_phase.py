@@ -293,7 +293,39 @@ class TestFindWorkPhaseStatus:
             work_id, None, work_phases, mock_event_service
         )
 
-        assert result[0]["total_number_of_days"] == 85  # 100 - 15 suspended
+        assert result[0]["total_number_of_days"] == 100  # a suspension doesn't shrink the time allowed
+
+    @patch("api.services.work_phase.PhaseOverageResponsibilityService")
+    @patch("api.services.work_phase.WorkPhaseService._get_milestone_information")
+    @patch("api.services.work_phase.WorkPhaseService._filter_sort_events")
+    def test_suspended_days_are_not_overage(self, mock_filter, mock_milestone_info, mock_responsibility_service):
+        """A 10-day phase 25 days in, with 15 of them suspended, has taken its 10 days and isn't over."""
+        mock_phase = MagicMock(
+            id=5,
+            work=MagicMock(current_work_phase_id=5),
+            number_of_days=10,
+            is_completed=False,
+            is_suspended=False,
+            start_date=datetime.datetime.now(timezone.utc) - datetime.timedelta(days=25),
+        )
+        start = MagicMock(actual_date=mock_phase.start_date)
+        start.event_configuration.event_position.name = "START"
+        start.event_configuration.event_type_id = 0
+        end = MagicMock(actual_date=None)
+        end.event_configuration.event_position.name = "END"
+        end.event_configuration.event_type_id = 0
+        resumption = MagicMock(number_of_days=15, actual_date=mock_phase.start_date + datetime.timedelta(days=18))
+        resumption.event_configuration.event_position.name = "INTERMEDIATE"
+        resumption.event_configuration.event_type_id = EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+        mock_filter.return_value = [start, resumption, end]
+        mock_milestone_info.return_value = {}
+        mock_responsibility_service.find_by_work_phase_id.return_value = []
+
+        result = WorkPhaseService.find_work_phase_status(10, None, [mock_phase], MagicMock())
+
+        assert result[0]["total_number_of_days"] == 10
+        assert result[0]["days_taken"] == 10
+        assert result[0]["days_left"] == 0
 
 
 class TestGetMilestoneInformation:
@@ -506,11 +538,11 @@ class TestGetDaysLeft:
 
         result = WorkPhaseService._get_days_left(suspended_days, total_days, work_phase, events)
 
-        # (100 - 10) - 30 = 60
-        assert result == 60
+        # 100 - 30: the days taken already leave out the suspended days
+        assert result == 70
 
-    def test_returns_total_minus_suspended_for_completed_phase(self):
-        """Test returns total days minus suspended for non-current phase."""
+    def test_returns_total_for_completed_phase(self):
+        """Test returns the time allowed for a non-current phase; a suspension doesn't shrink it."""
         mock_work = MagicMock(current_work_phase_id=10)
         work_phase = MagicMock(id=5, work=mock_work, is_completed=True)
         total_days = 100
@@ -519,7 +551,7 @@ class TestGetDaysLeft:
 
         result = WorkPhaseService._get_days_left(suspended_days, total_days, work_phase, events)
 
-        assert result == 90  # 100 - 10
+        assert result == 100
 
 
 class TestGetDaysTaken:
