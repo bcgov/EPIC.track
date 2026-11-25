@@ -183,51 +183,24 @@ class EventService:
         if (event.event_position == EventPositionEnum.END.value
                 and event.actual_date is None
                 and data.get("actual_date")):
-            phase_start_event = next(
-                            (
-                                e
-                                for e in current_phase_events
-                                if e.event_position == EventPositionEnum.START.value
-                            ),
-                            None,
-                        )
-            if phase_start_event and phase_start_event.actual_date:
-                # Suspended time pauses the clock, so it isn't overage.
-                suspended_days = sum(
-                    e.number_of_days for e in current_phase_events
-                    if e.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
-                    and e.actual_date is not None
-                )
-                days_taken = (data.get("actual_date").date() - phase_start_event.actual_date.date()).days - suspended_days
-                #  Find extension events to calculate total number of days
-                extension_events = [
-                    e for e in current_phase_events
-                    if e.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_EXTENSION.value
-                ]
-                extension_days = sum(e.number_of_days for e in extension_events)
-                total_days = 0
-                if current_work_phase.number_of_days:
-                    total_days = current_work_phase.number_of_days + extension_days
-                else:
-                    total_days = (current_work_phase.end_date.date() - current_work_phase.start_date.date()).days
-                overage_days = days_taken - total_days
-                if overage_days > 0 and current_work_phase.legislated:
-                    raise UnprocessableEntityError(
-                        "A legislated phase can't be completed over its time limit. Add a Time Limit Extension of "
-                        f"at least {overage_days} day{'s' if overage_days != 1 else ''} first. "
-                        "It can have the same date as the end."
-                    )
-                if overage_days > 0 and current_work_phase.requires_overage_responsibility:
-                    responsibilities = PhaseOverageResponsibilityService.find_by_work_phase_id(
-                        current_work_phase.id, is_deleted=False
-                    )
-                    if not responsibilities:
-                        raise UnprocessableEntityError(
-                            "Cannot complete this phase over its time without an Overage Responsibility. "
-                            "Select a responsibility first."
-                        )
-            else:
+            overage_days = cls._overage_days_if_ended(current_work_phase, current_phase_events, data.get("actual_date"))
+            if overage_days is None:
                 current_app.logger.info("No start event found in the phase. Cannot calculate days taken or check overage responsibility.")
+            elif overage_days > 0 and current_work_phase.legislated:
+                raise UnprocessableEntityError(
+                    "A legislated phase can't be completed over its time limit. Add a Time Limit Extension of "
+                    f"at least {overage_days} day{'s' if overage_days != 1 else ''} first. "
+                    "It can have the same date as the end."
+                )
+            elif overage_days > 0 and current_work_phase.requires_overage_responsibility:
+                responsibilities = PhaseOverageResponsibilityService.find_by_work_phase_id(
+                    current_work_phase.id, is_deleted=False
+                )
+                if not responsibilities:
+                    raise UnprocessableEntityError(
+                        "Cannot complete this phase over its time without an Overage Responsibility. "
+                        "Select a responsibility first."
+                    )
 
         event = event.update(data, commit=False)
 
@@ -265,6 +238,7 @@ class EventService:
             "subsequent_event_push_required": False,
             "phase_end_push_required": False,
             "days_pushed": 0,
+            "extension_days_required": 0,
         }
         if current_app.config["SKIP_EVENT_LOGIC"]:
             return result
@@ -299,7 +273,50 @@ class EventService:
             )
             result["subsequent_event_push_required"] = True
             result["days_pushed"] = number_of_days_to_be_pushed
+        result["extension_days_required"] = cls._extension_days_required(
+            event_to_check, event_old_data, data.get("actual_date"), current_work_phase
+        )
         return result
+
+    @classmethod
+    def _extension_days_required(cls, event: Event, event_old_data: dict, actual_date, current_work_phase: WorkPhase) -> int:
+        """Days of Time Limit Extension a legislated phase needs before its END can take this actual date."""
+        if (not current_work_phase.legislated
+                or event.event_position != EventPositionEnum.END.value
+                or (event_old_data or {}).get("actual_date")
+                or not actual_date):
+            return 0
+        current_phase_events = [
+            e for e in cls.find_events(current_work_phase.work_id, None, PRIMARY_CATEGORIES)
+            if e.event_configuration.work_phase_id == current_work_phase.id
+        ]
+        overage_days = cls._overage_days_if_ended(current_work_phase, current_phase_events, actual_date)
+        return max(overage_days or 0, 0)
+
+    @staticmethod
+    def _overage_days_if_ended(current_work_phase: WorkPhase, current_phase_events: List[Event], end_date):
+        """Days over its time the phase would be if it ended on end_date, or None until its START has happened."""
+        phase_start_event = next(
+            (e for e in current_phase_events if e.event_position == EventPositionEnum.START.value), None
+        )
+        if not phase_start_event or not phase_start_event.actual_date:
+            return None
+        # Suspended time pauses the clock, so it isn't overage.
+        suspended_days = sum(
+            e.number_of_days for e in current_phase_events
+            if e.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+            and e.actual_date is not None
+        )
+        days_taken = (end_date.date() - phase_start_event.actual_date.date()).days - suspended_days
+        extension_days = sum(
+            e.number_of_days for e in current_phase_events
+            if e.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_EXTENSION.value
+        )
+        if current_work_phase.number_of_days:
+            total_days = current_work_phase.number_of_days + extension_days
+        else:
+            total_days = (current_work_phase.end_date.date() - current_work_phase.start_date.date()).days
+        return days_taken - total_days
 
     @classmethod
     def _validate_event_effect_on_dates(

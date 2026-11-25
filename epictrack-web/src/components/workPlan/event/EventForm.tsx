@@ -38,7 +38,10 @@ import {
   defaultAnticipatedDate,
   eventInputs,
   eventsApi,
+  extensionDaysRequired,
+  extensionForOverage,
   findResumptionConfiguration,
+  findTimeLimitExtensionConfiguration,
   isAnticipatedDateLocked,
   isPushPreconfirmed,
   isPushRequired,
@@ -69,6 +72,7 @@ import SingleDayPCPInput from "./components/SingleDayPCPInput";
 import DecisionInput from "./components/DecisionInput";
 import ExtensionInput from "./components/ExtensionInput";
 import ExtensionSuspensionInput from "./components/ExtensionSuspensionInput";
+import ExtensionForOverageInput from "./components/ExtensionForOverageInput";
 import EventDatePushConfirmForm from "./components/EventDatePushConfirmForm";
 import { Work, WorkPhase } from "models/work";
 
@@ -103,6 +107,8 @@ const EventForm = ({
   const [showEventLockDialog, setShowEventLockDialog] =
     useState<boolean>(false);
   const [lockDialogError, setLockDialogError] = useState<string>("");
+  const [overageActSectionId, setOverageActSectionId] = useState<number>();
+  const [overageReason, setOverageReason] = useState("");
   const [selectedConfiguration, setSelectedConfiguration] =
     useState<EventConfiguration>();
   const anticipatedDateRef = useRef();
@@ -205,6 +211,11 @@ const EventForm = ({
   const pushRequired = useMemo(
     () => isPushRequired(dateCheckStatus, event),
     [dateCheckStatus, event],
+  );
+
+  const extensionDays = useMemo(
+    () => extensionDaysRequired(dateCheckStatus),
+    [dateCheckStatus],
   );
 
   const getDecisionMakers = useCallback(async () => {
@@ -505,6 +516,44 @@ const EventForm = ({
     [event, createEvent, updateEvent],
   );
 
+  /** Adds the extension the END needs, then returns the END's planned date, which the extension pushed. */
+  const addExtensionForOverage = async (end: MilestoneEvent) => {
+    const workPhaseId = Number(selectedWorkPhase?.id);
+    const configuration = findTimeLimitExtensionConfiguration(
+      await eventsApi.listConfigurations(workPhaseId, [
+        EventTemplateVisibility.MANDATORY,
+        EventTemplateVisibility.OPTIONAL,
+        EventTemplateVisibility.SUGGESTED,
+      ]),
+    );
+    if (!configuration) {
+      setLockDialogError(
+        "This phase has no Time Limit Extension milestone to add.",
+      );
+      return undefined;
+    }
+    await eventsApi.create(
+      workPhaseId,
+      extensionForOverage(
+        configuration,
+        String(end.actual_date),
+        extensionDays,
+        Number(overageActSectionId),
+        overageReason,
+      ),
+      true,
+    );
+    // So a retry after a failed END save doesn't add the extension again.
+    setDateCheckStatus(
+      (check) => check && { ...check, extension_days_required: 0 },
+    );
+    const pushedEndDate = (await eventsApi.get(Number(event?.id)))
+      .anticipated_date;
+    // A retry builds the END from the form, so it must hold the pushed date too.
+    setValue("anticipated_date", pushedEndDate);
+    return pushedEndDate;
+  };
+
   const handleSaveEvent = async (
     data?: MilestoneEvent,
     pushEventConfirmed = false,
@@ -521,6 +570,11 @@ const EventForm = ({
         setShowEventLockDialog(true);
         setLockDialogError(""); // Clear any previous errors
       } else {
+        if (extensionDays > 0) {
+          const pushedEndDate = await addExtensionForOverage(dataToBeSubmitted);
+          if (!pushedEndDate) return;
+          dataToBeSubmitted.anticipated_date = pushedEndDate;
+        }
         await saveEvent(dataToBeSubmitted, pushEventConfirmed);
         const remainingPhasesToComplete = workPhases?.some(
           (phase) =>
@@ -823,12 +877,19 @@ const EventForm = ({
         </Grid>
         <TrackDialog
           open={showEventLockDialog}
-          dialogTitle="Lock this Milestone?"
+          dialogTitle={
+            extensionDays > 0
+              ? "Add the extension and lock this Milestone?"
+              : "Lock this Milestone?"
+          }
           dialogContentText="Entering an actual date will lock this Milestone. Once locked, you will only be able to edit the description and notes field."
           disableEscapeKeyDown
           fullWidth
           isOkRequired={!lockDialogError}
-          okButtonText="Yes"
+          okButtonText={extensionDays > 0 ? "Add extension and lock" : "Yes"}
+          saveButtonProps={{
+            disabled: extensionDays > 0 && !overageActSectionId,
+          }}
           cancelButtonText={lockDialogError ? "Go Back" : "No"}
           onOk={() => handleSaveEvent(undefined, pushEvents, true)}
           onCancel={() => {
@@ -837,6 +898,17 @@ const EventForm = ({
           }}
           isActionsRequired
         >
+          {extensionDays > 0 && (
+            <ExtensionForOverageInput
+              days={extensionDays}
+              endDate={getValues("actual_date") ?? undefined}
+              eaActId={work?.ea_act_id}
+              actSectionId={overageActSectionId}
+              onActSectionChange={setOverageActSectionId}
+              reason={overageReason}
+              onReasonChange={setOverageReason}
+            />
+          )}
           {lockDialogError && (
             <Grid
               sx={{

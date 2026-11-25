@@ -58,6 +58,8 @@ export interface TrackDateCheckDto {
   phase_end_push_required: boolean;
   subsequent_event_push_required: boolean;
   days_pushed: number;
+  /** Missing from an API that predates it. */
+  extension_days_required?: number;
 }
 
 /** OutcomeConfigurationResponseSchema and ActSectionResponseSchema. */

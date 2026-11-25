@@ -52,3 +52,7 @@ class EventDateChangePosibilityCheckResponseSchema(Schema):
     days_pushed = fields.Number(
         metadata={"description": "Number of days to be pushed/pulled"}
     )
+
+    extension_days_required = fields.Int(
+        metadata={"description": "Days of Time Limit Extension a legislated phase needs before this END date can be saved"}
+    )
