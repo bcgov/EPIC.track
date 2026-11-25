@@ -79,3 +79,7 @@ from .indigenous_consultation_levels import IndigenousConsultationLevel
 from .linked_work import LinkedWork
 from .project_state import ProjectState
 from .work_resource import WorkResource
+from .work_template import WorkTemplate, WorkTemplateVersion, WorkTemplateVersionStatus
+from .template_phase import BoundarySide, DayBasis, TemplatePhase, TimeLimitKind
+from .template_event import AnchorPoint, TemplateEvent
+from .template_outcome import TemplateOutcome, TemplateOutcomeEffect

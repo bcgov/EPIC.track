@@ -59,6 +59,10 @@ class WorkType(db.Model, CodeTableVersioned):
     default_report_description = Column(Text())
     # Position in the resource forecast; types without one are listed last.
     report_sort_order = Column(Integer())
+    # Whose rules this work type's works follow: the core engine is shared, the rule set is a business area's.
+    rule_set = Column(String(50), nullable=False, default="EAO", server_default="EAO")
+    # The Total Allotted Days aimed for; empty when the work type isn't tracked.
+    total_allotted_days_target = Column(Integer())
 
     def as_dict(self):
         """Return Json representation."""
