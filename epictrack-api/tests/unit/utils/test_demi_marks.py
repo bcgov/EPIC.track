@@ -28,7 +28,6 @@ from api.actions.set_events_status import SetEventsStatus
 from api.actions.set_phases_status import SetPhasesStatus
 from api.actions.set_project_status import SetProjectStatus
 from api.models import Event, EventConfiguration, Project, Work, WorkPhase, db
-from api.models.event_template import EventPositionEnum
 from api.models.special_field import EntityEnum
 from api.services import demi_payload, demi_push
 from api.services.project import ProjectService
@@ -38,7 +37,7 @@ from api.utils.demi_marks import DemiMarks, committed_marks, mark_rows
 from tests.unit.apis.test_event_actions_auth import _complete_event, _work_with_pending_create_work_decision
 from tests.utilities.factory_scenarios import TestJwtClaims, TestProjectInfo, TestWorkInfo
 from tests.utilities.factory_utils import factory_project_model, factory_work_model
-from tests.utilities.helpers import prepare_work_payload
+from tests.utilities.helpers import add_optional_milestone, prepare_work_payload
 
 API_BASE_URL = "/api/v1/"
 PROJECTS_FILE = Path("./src/api/templates/master_templates/Projects.xlsx").resolve()
@@ -285,16 +284,7 @@ def test_action_marks_the_rows_it_updates(app, client, auth_header, session, run
 def test_delete_event_marks_it_and_linked_events_delete(client, auth_header, session, seen):
     """Deleting a milestone goes through Query.update, linked events included."""
     work = _created_work(client, auth_header, session)
-    event = (
-        session.query(Event)
-        .join(EventConfiguration, Event.event_configuration_id == EventConfiguration.id)
-        .filter(
-            Event.work_id == work.id,
-            Event.actual_date.is_(None),
-            EventConfiguration.event_position == EventPositionEnum.INTERMEDIATE,
-        )
-        .first()
-    )
+    event = add_optional_milestone(client, auth_header, work.id)
     linked = Event(
         name="Linked",
         work_id=work.id,

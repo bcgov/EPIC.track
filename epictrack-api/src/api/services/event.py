@@ -1366,7 +1366,7 @@ class EventService:
                     one_of_roles=one_of_roles, work_id=event.work_id
                 )
                 checked_work_ids.add(event.work_id)
-        cls._check_no_phase_start_or_end(events_query)
+        cls._check_no_required_milestones(events_query)
 
         for event in events:
             event.is_active = False
@@ -1390,7 +1390,7 @@ class EventService:
         events = db.session.query(Event).filter(
             or_(Event.id == event_id, Event.source_event_id == event_id)
         )
-        cls._check_no_phase_start_or_end(events)
+        cls._check_no_required_milestones(events)
         if event.actual_date:
             raise UnprocessableEntityError("Locked events cannot be deleted")
         demi_marks.mark_rows(events, demi_marks.DELETE)
@@ -1399,14 +1399,19 @@ class EventService:
         return "Deleted successfully"
 
     @staticmethod
-    def _check_no_phase_start_or_end(events_query):
-        """Refuse a delete that would remove a phase's start or end milestone; they hold the phase's dates."""
+    def _check_no_required_milestones(events_query):
+        """Refuse a delete that would remove a phase's start or end milestone, or one its template makes mandatory."""
         if (
             events_query.join(EventConfiguration, EventConfiguration.id == Event.event_configuration_id)
-            .filter(EventConfiguration.event_position.in_([EventPositionEnum.START, EventPositionEnum.END]))
+            .filter(
+                or_(
+                    EventConfiguration.event_position.in_([EventPositionEnum.START, EventPositionEnum.END]),
+                    EventConfiguration.visibility == EventTemplateVisibilityEnum.MANDATORY,
+                )
+            )
             .first()
         ):
-            raise UnprocessableEntityError("A phase's start and end milestones can't be deleted.")
+            raise UnprocessableEntityError("A phase's start, end and required milestones can't be deleted.")
 
     @classmethod
     def _process_actions(cls, event: Event, outcome_id: int = None) -> None:

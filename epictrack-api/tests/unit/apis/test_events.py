@@ -28,6 +28,7 @@ from tests.utilities.factory_utils import (
     factory_staff_model,
 )
 from tests.utilities.factory_scenarios import TestWorkInfo
+from tests.utilities.helpers import add_optional_milestone
 from api.services.event import EventService
 from api.services.work_phase import WorkPhase
 from api.models import Event, EventConfiguration
@@ -239,22 +240,30 @@ def _change_event_anticipated_date(
             assert (refreshed_phase.end_date.date() - work_phase_end_date.date()).days == NUMBER_OF_DAYS_TO_BE_PUSHED
 
 
-@pytest.mark.parametrize("position", [EventPositionEnum.START, EventPositionEnum.END])
+@pytest.mark.parametrize(
+    "position, visibility",
+    [
+        (EventPositionEnum.START, None),
+        (EventPositionEnum.END, None),
+        (EventPositionEnum.INTERMEDIATE, EventTemplateVisibilityEnum.MANDATORY),
+    ],
+    ids=["start", "end", "mandatory"],
+)
 @pytest.mark.parametrize("bulk", [False, True], ids=["one", "bulk"])
-def test_phase_start_or_end_milestone_cannot_be_deleted(client, jwt, position, bulk):
-    """A phase's start and end milestones hold its dates, so neither delete endpoint removes them."""
+def test_required_milestone_cannot_be_deleted(client, jwt, position, visibility, bulk):
+    """Neither delete endpoint removes a phase's start or end milestone, or one its template makes mandatory."""
     headers = _set_admin_user(jwt=jwt)
     work_id = _created_work_id(client, headers)
-    boundary = _work_milestone(work_id, position)
-    intermediate = _work_milestone(work_id, EventPositionEnum.INTERMEDIATE)
+    required = _work_milestone(work_id, position, visibility)
+    optional = add_optional_milestone(client, headers, work_id)
 
-    response = _delete_milestones(client, headers, [intermediate.id, boundary.id] if bulk else [boundary.id], bulk)
+    response = _delete_milestones(client, headers, [optional.id, required.id] if bulk else [required.id], bulk)
 
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-    assert "start and end milestones can't be deleted" in response.get_data(as_text=True)
+    assert "start, end and required milestones can't be deleted" in response.get_data(as_text=True)
     _db.session.expire_all()
-    assert not boundary.is_deleted
-    assert not intermediate.is_deleted
+    assert not required.is_deleted
+    assert not optional.is_deleted
 
 
 @pytest.mark.parametrize("made_phase_end", [False, True], ids=["optional", "made_phase_end"])
@@ -263,7 +272,7 @@ def test_optional_milestone_is_deletable_until_it_is_the_phase_end(client, jwt, 
     """An optional milestone such as Project Withdrawn can be deleted until its outcome makes it the phase's end."""
     headers = _set_admin_user(jwt=jwt)
     work_id = _created_work_id(client, headers)
-    optional = _added_optional_milestone(client, headers, work_id)
+    optional = add_optional_milestone(client, headers, work_id)
     if made_phase_end:
         # What the change-phase-end outcome action does once the milestone has an actual date.
         optional.event_configuration.event_position = EventPositionEnum.END
@@ -283,15 +292,15 @@ def test_milestone_linked_to_a_phase_end_cannot_be_deleted(client, jwt, bulk):
     headers = _set_admin_user(jwt=jwt)
     work_id = _created_work_id(client, headers)
     end = _work_milestone(work_id, EventPositionEnum.END)
-    intermediate = _work_milestone(work_id, EventPositionEnum.INTERMEDIATE)
-    end.source_event_id = intermediate.id
+    optional = add_optional_milestone(client, headers, work_id)
+    end.source_event_id = optional.id
     _db.session.commit()
 
-    response = _delete_milestones(client, headers, [intermediate.id], bulk)
+    response = _delete_milestones(client, headers, [optional.id], bulk)
 
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
     _db.session.expire_all()
-    assert not intermediate.is_deleted
+    assert not optional.is_deleted
     assert not end.is_deleted
 
 
@@ -301,9 +310,9 @@ def _created_work_id(client, headers):
     return response.json["id"]
 
 
-def _work_milestone(work_id, position):
+def _work_milestone(work_id, position, visibility=None):
     """The work's first milestone at this position that hasn't happened yet."""
-    milestone = (
+    query = (
         _db.session.query(Event)
         .join(EventConfiguration, Event.event_configuration_id == EventConfiguration.id)
         .join(WorkPhase, EventConfiguration.work_phase_id == WorkPhase.id)
@@ -312,40 +321,12 @@ def _work_milestone(work_id, position):
             Event.actual_date.is_(None),
             EventConfiguration.event_position == position,
         )
-        .order_by(WorkPhase.sort_order, EventConfiguration.sort_order)
-        .first()
     )
+    if visibility:
+        query = query.filter(EventConfiguration.visibility == visibility)
+    milestone = query.order_by(WorkPhase.sort_order, EventConfiguration.sort_order).first()
     assert milestone is not None
     return milestone
-
-
-def _added_optional_milestone(client, headers, work_id):
-    """Add an optional milestone to the work's first phase, as a user does from the work plan."""
-    configuration = (
-        _db.session.query(EventConfiguration)
-        .join(WorkPhase, EventConfiguration.work_phase_id == WorkPhase.id)
-        .filter(
-            WorkPhase.work_id == work_id,
-            EventConfiguration.event_position == EventPositionEnum.INTERMEDIATE,
-            EventConfiguration.visibility == EventTemplateVisibilityEnum.OPTIONAL,
-            EventConfiguration.multiple_days.is_(False),
-            EventConfiguration.is_active.is_(True),
-        )
-        .order_by(WorkPhase.sort_order, EventConfiguration.sort_order)
-        .first()
-    )
-    phase = configuration.work_phase
-    response = client.post(
-        urljoin(API_BASE_URL, f"milestones/workphases/{phase.id}/events"),
-        json={
-            "name": configuration.name,
-            "event_configuration_id": configuration.id,
-            "anticipated_date": (phase.start_date + timedelta(days=1)).isoformat(),
-        },
-        headers=headers,
-    )
-    assert response.status_code == HTTPStatus.CREATED, response.get_data(as_text=True)
-    return _db.session.get(Event, response.json["id"])
 
 
 def _delete_milestones(client, headers, event_ids, bulk):
