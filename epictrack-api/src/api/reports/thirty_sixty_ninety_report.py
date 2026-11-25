@@ -20,7 +20,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import NextPageTemplate, Paragraph, Table, TableStyle
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.platypus.frames import Frame
-from sqlalchemy import and_, BooleanClauseList, Exists, func, or_, select
+from sqlalchemy import and_, Exists, func, not_, or_, select
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
 
@@ -35,16 +35,15 @@ from api.models.work import WorkStateEnum
 from api.models.work_issues import WorkIssues
 from api.models.work_issue_updates import WorkIssueUpdates
 from api.models.work_phase import WorkPhase
-from api.models.work_type import WorkTypeEnum
 from api.services.special_field import SpecialFieldService
 from api.services.work_issues import WorkIssuesService
 from api.schemas import response as res
 from api.utils.constants import CANADA_TIMEZONE
-from api.utils.work_phases import FIRST_WORK_PHASES
 from api.utils.enums import StalenessEnum
 from api.utils.util import process_data
 from api.utils.draftjs_extractor import draftjs_extractor
 
+from .event_rules import thirty_sixty_ninety_referrals
 from .report_factory import ReportFactory
 
 
@@ -440,41 +439,6 @@ class ThirtySixtyNinetyReport(ReportFactory):
         )
         return [wid for (wid,) in work_ids.distinct().all()] or [-1]
 
-    def _get_work_type_specific_events(self) -> BooleanClauseList:
-        """Returns an OR caluse for work type specific events"""
-        return or_(
-            and_(
-                Work.work_type_id == WorkTypeEnum.PROJECT_NOTIFICATION.value,
-                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                EventConfiguration.name == "Project Notification Report referred to Decision Maker",
-            ),
-            and_(
-                Work.work_type_id == WorkTypeEnum.MINISTERS_DESIGNATION.value,
-                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                EventConfiguration.name != "Minister's Designation Report referred to Decision Maker",
-            ),
-            and_(
-                Work.work_type_id == WorkTypeEnum.EXEMPTION_ORDER.value,
-                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                EventConfiguration.name != "Exemption Request Package Referred to Minister",
-            ),
-            and_(
-                Work.work_type_id == WorkTypeEnum.ASSESSMENT.value,
-                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                EventConfiguration.name.in_(["EAC Referral Package sent to Ministers", "Termination Package Referred to Minister"])
-            ),
-            and_(
-                or_(Work.work_type_id == WorkTypeEnum.AMENDMENT.value, Work.work_type_id == WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value),
-                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                EventConfiguration.name == "Amendment Decision Package Referred to Decision Maker"
-            ),
-        )
-
     def _get_referral_exists_subquery(self) -> Exists:
         """Subquery to get referral events that have an anticipated date, but no actual (eg. Referral has not yet been made)"""
         return db.session.query(Event.id).filter(
@@ -526,13 +490,13 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     Event.high_priority.is_(True),
                     EventConfiguration.event_category_id.not_in([EventCategoryEnum.CALENDAR.value, EventCategoryEnum.FINANCE.value])
                 ),
-                self._get_work_type_specific_events()
+                thirty_sixty_ninety_referrals()
             )
         )
 
         work_phase_filters = [EventConfiguration.work_phase_id == WorkPhase.id, WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value]
         if not include_first_phase:
-            work_phase_filters.append(WorkPhase.name.notin_(FIRST_WORK_PHASES))
+            work_phase_filters.append(not_(WorkPhase.is_intake))
 
         valid_events = (
             db.session.query(Event.id)
