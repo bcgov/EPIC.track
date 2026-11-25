@@ -81,6 +81,7 @@ class SpecialField(Resource):
         """Update and return a special field entry."""
         req.SpecialFieldIdPathParameterSchema().load(request.view_args)
         request_json = req.SpecialFieldBodyParameterSchema().load(API.payload)
+        request_json = SpecialFieldService.keep_start_on_unchanged_day(special_field_id, request_json)
         special_field_entry = SpecialFieldService.update_special_field_entry(special_field_id, request_json)
         return res.SpecialFieldResponseSchema().dump(special_field_entry), HTTPStatus.OK
 

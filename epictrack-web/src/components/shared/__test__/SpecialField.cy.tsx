@@ -20,14 +20,17 @@ const endpoints: Endpoint[] = [
     method: "GET",
     url: `${AppConfig.apiUrl}special-fields?entity=PROJECT&entity_id=1&field_name=name`,
     response: {
-      body: {
-        id: faker.number.int(),
-        entity: SpecialFieldEntityEnum.PROJECT,
-        entity_id: 1,
-        field_name: SPECIAL_FIELDS.PROJECT.NAME,
-        field_label: "Name",
-        active_from: faker.date.recent(),
-      },
+      // the list endpoint always answers with an array
+      body: [
+        {
+          id: faker.number.int(),
+          entity: SpecialFieldEntityEnum.PROJECT,
+          entity_id: 1,
+          field_name: SPECIAL_FIELDS.PROJECT.NAME,
+          field_label: "Name",
+          active_from: faker.date.recent(),
+        },
+      ],
     },
   },
 ];

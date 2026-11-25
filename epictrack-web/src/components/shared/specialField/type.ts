@@ -36,4 +36,7 @@ export interface SpecialField {
   field_value: string;
   active_from: string;
   active_to: string;
+  // The days the API reports for the dates above, YYYY-MM-DD
+  active_from_day?: string | null;
+  active_to_day?: string | null;
 }
