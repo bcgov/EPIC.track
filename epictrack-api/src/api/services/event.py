@@ -1360,16 +1360,13 @@ class EventService:
         Enforces the same DELETE/TEAM_MEMBER check that delete_event applies,
         once per unique work to avoid per-row overhead.
         """
-        events = (
-            db.session.query(Event)
-            .filter(
-                or_(
-                    Event.id.in_(milestone_ids),
-                    Event.source_event_id.in_(milestone_ids),
-                )
+        events_query = db.session.query(Event).filter(
+            or_(
+                Event.id.in_(milestone_ids),
+                Event.source_event_id.in_(milestone_ids),
             )
-            .all()
         )
+        events = events_query.all()
         one_of_roles = (
             Membership.TEAM_MEMBER.value,
             KeycloakRole.DELETE.value,
@@ -1381,6 +1378,7 @@ class EventService:
                     one_of_roles=one_of_roles, work_id=event.work_id
                 )
                 checked_work_ids.add(event.work_id)
+        cls._check_no_phase_start_or_end(events_query)
 
         for event in events:
             event.is_active = False
@@ -1401,15 +1399,26 @@ class EventService:
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=event.work_id)
 
-        if event.actual_date:
-            raise UnprocessableEntityError("Locked events cannot be deleted")
         events = db.session.query(Event).filter(
             or_(Event.id == event_id, Event.source_event_id == event_id)
         )
+        cls._check_no_phase_start_or_end(events)
+        if event.actual_date:
+            raise UnprocessableEntityError("Locked events cannot be deleted")
         demi_marks.mark_rows(events, demi_marks.DELETE)
         events.update({"is_active": False, "is_deleted": True})
         db.session.commit()
         return "Deleted successfully"
+
+    @staticmethod
+    def _check_no_phase_start_or_end(events_query):
+        """Refuse a delete that would remove a phase's start or end milestone; they hold the phase's dates."""
+        if (
+            events_query.join(EventConfiguration, EventConfiguration.id == Event.event_configuration_id)
+            .filter(EventConfiguration.event_position.in_([EventPositionEnum.START, EventPositionEnum.END]))
+            .first()
+        ):
+            raise UnprocessableEntityError("A phase's start and end milestones can't be deleted.")
 
     @classmethod
     def _process_actions(cls, event: Event, outcome_id: int = None) -> None:

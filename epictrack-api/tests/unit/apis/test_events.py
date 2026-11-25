@@ -17,6 +17,7 @@ from datetime import timedelta
 from http import HTTPStatus
 from urllib.parse import urljoin
 
+import pytest
 from faker import Faker
 from flask import g
 
@@ -29,6 +30,7 @@ from tests.utilities.factory_utils import (
 from tests.utilities.factory_scenarios import TestWorkInfo
 from api.services.event import EventService
 from api.services.work_phase import WorkPhase
+from api.models import Event, EventConfiguration
 from api.models import db as _db
 from api.models.event_category import PRIMARY_CATEGORIES
 from api.models.event_configuration import EventPositionEnum
@@ -236,6 +238,84 @@ def _change_event_anticipated_date(
         assert (refreshed_phase.start_date.date() - work_phase_start_date.date()).days == NUMBER_OF_DAYS_TO_BE_PUSHED
         if legislated or push_events:
             assert (refreshed_phase.end_date.date() - work_phase_end_date.date()).days == NUMBER_OF_DAYS_TO_BE_PUSHED
+
+
+@pytest.mark.parametrize("position", [EventPositionEnum.START, EventPositionEnum.END])
+@pytest.mark.parametrize("bulk", [False, True], ids=["one", "bulk"])
+def test_phase_start_or_end_milestone_cannot_be_deleted(client, jwt, position, bulk):
+    """A phase's start and end milestones hold its dates, so neither delete endpoint removes them."""
+    headers = _set_admin_user(jwt=jwt)
+    work_id = _created_work_id(client, headers)
+    boundary = _work_milestone(work_id, position)
+    intermediate = _work_milestone(work_id, EventPositionEnum.INTERMEDIATE)
+
+    response = _delete_milestones(client, headers, [intermediate.id, boundary.id] if bulk else [boundary.id], bulk)
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+    assert "start and end milestones can't be deleted" in response.get_data(as_text=True)
+    _db.session.expire_all()
+    assert not boundary.is_deleted
+    assert not intermediate.is_deleted
+
+
+@pytest.mark.parametrize("bulk", [False, True], ids=["one", "bulk"])
+def test_intermediate_milestone_can_be_deleted(client, jwt, bulk):
+    """Other milestones that haven't happened yet can still be deleted."""
+    headers = _set_admin_user(jwt=jwt)
+    work_id = _created_work_id(client, headers)
+    intermediate = _work_milestone(work_id, EventPositionEnum.INTERMEDIATE)
+
+    response = _delete_milestones(client, headers, [intermediate.id], bulk)
+
+    assert response.status_code == HTTPStatus.OK, response.get_data(as_text=True)
+    _db.session.expire_all()
+    assert intermediate.is_deleted
+
+
+def test_milestone_linked_to_a_phase_end_cannot_be_deleted(client, jwt):
+    """Deleting a milestone also deletes the events linked to it, so a linked phase end blocks the delete."""
+    headers = _set_admin_user(jwt=jwt)
+    work_id = _created_work_id(client, headers)
+    end = _work_milestone(work_id, EventPositionEnum.END)
+    intermediate = _work_milestone(work_id, EventPositionEnum.INTERMEDIATE)
+    end.source_event_id = intermediate.id
+    _db.session.commit()
+
+    response = _delete_milestones(client, headers, [intermediate.id], bulk=False)
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+    _db.session.expire_all()
+    assert not intermediate.is_deleted
+    assert not end.is_deleted
+
+
+def _created_work_id(client, headers):
+    response = client.post(urljoin(API_BASE_URL, "works"), json=_set_up_work_object(), headers=headers)
+    assert response.status_code == HTTPStatus.CREATED, response.json
+    return response.json["id"]
+
+
+def _work_milestone(work_id, position):
+    """The work's first milestone at this position that hasn't happened yet."""
+    return (
+        _db.session.query(Event)
+        .join(EventConfiguration, Event.event_configuration_id == EventConfiguration.id)
+        .join(WorkPhase, EventConfiguration.work_phase_id == WorkPhase.id)
+        .filter(
+            Event.work_id == work_id,
+            Event.actual_date.is_(None),
+            EventConfiguration.event_position == position,
+        )
+        .order_by(WorkPhase.sort_order, EventConfiguration.sort_order)
+        .first()
+    )
+
+
+def _delete_milestones(client, headers, event_ids, bulk):
+    if bulk:
+        ids = ",".join(str(event_id) for event_id in event_ids)
+        return client.delete(urljoin(API_BASE_URL, f"milestones/events?milestone_ids={ids}"), headers=headers)
+    return client.delete(urljoin(API_BASE_URL, f"milestones/events/{event_ids[0]}"), headers=headers)
 
 
 def _set_up_work_object():
