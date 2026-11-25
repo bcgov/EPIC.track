@@ -271,9 +271,11 @@ export const isEndEventOutOfOrder = (rows: EventsGridModel[]) => {
   );
 };
 
+/** A phase's start and end milestones hold its dates, so they're never deletable, even when optional. */
 export const canDeleteRow = (row: EventsGridModel) =>
   (row.type === EVENT_TYPE.MILESTONE || row.type === EVENT_TYPE.TASK) &&
-  !isMandatory(row.visibility);
+  !isMandatory(row.visibility) &&
+  !isStartOrEndEvent(row.event_configuration);
 
 // --- Errors and calendar ---
 
