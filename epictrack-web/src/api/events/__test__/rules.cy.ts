@@ -18,7 +18,10 @@ import {
   dateLabels,
   defaultAnticipatedDate,
   eventInputs,
+  extensionDaysRequired,
+  extensionForOverage,
   findResumptionConfiguration,
+  findTimeLimitExtensionConfiguration,
   isAnticipatedDateLocked,
   isDecisionCategory,
   isEndEventOutOfOrder,
@@ -177,6 +180,7 @@ describe("event rules", () => {
       phase_end_push_required: true,
       subsequent_event_push_required: true,
       days_pushed: 3,
+      extension_days_required: 0,
     };
     expect(isPushRequired(pushes, milestone(config()))).to.equal(true);
     expect(isPushRequired(pushes, undefined)).to.equal(true);
@@ -190,6 +194,45 @@ describe("event rules", () => {
     expect(isPushPreconfirmed(milestone(extension))).to.equal(true);
     expect(isPushPreconfirmed(milestone(config()))).to.equal(false);
     expect(isPushPreconfirmed(undefined)).to.equal(false);
+  });
+
+  it("builds the extension a legislated END needs, dated with the END", () => {
+    const timeLimitExtension = config({
+      id: 7,
+      name: "s.38 Extension of Time Limit",
+      event_category_id: EventCategory.EXTENSION,
+      event_type_id: EventType.TIME_LIMIT_EXTENSION,
+    });
+    const check = {
+      phase_end_push_required: false,
+      subsequent_event_push_required: true,
+      days_pushed: 5,
+      extension_days_required: 5,
+    };
+
+    expect(extensionDaysRequired(check)).to.equal(5);
+    expect(extensionDaysRequired(undefined)).to.equal(0);
+    expect(
+      findTimeLimitExtensionConfiguration([config(), timeLimitExtension]),
+    ).to.equal(timeLimitExtension);
+    expect(findTimeLimitExtensionConfiguration([config()])).to.equal(undefined);
+    expect(
+      extensionForOverage(
+        timeLimitExtension,
+        "2026-07-05T00:00:00.000Z",
+        5,
+        1,
+        "",
+      ),
+    ).to.deep.equal({
+      name: "s.38 Extension of Time Limit",
+      event_configuration_id: 7,
+      anticipated_date: "2026-07-05T00:00:00.000Z",
+      actual_date: "2026-07-05T00:00:00.000Z",
+      number_of_days: 5,
+      act_section_id: 1,
+      reason: undefined,
+    });
   });
 
   it("lists the decision maker positions and the report's decision category", () => {

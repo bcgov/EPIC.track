@@ -150,6 +150,7 @@ describe("Track events api", () => {
         phase_end_push_required: true,
         subsequent_event_push_required: false,
         days_pushed: 3,
+        extension_days_required: 2,
       },
     ).as("check");
     cy.intercept(
@@ -253,6 +254,7 @@ describe("Track events api", () => {
         phase_end_push_required: true,
         subsequent_event_push_required: false,
         days_pushed: 3,
+        extension_days_required: 2,
       },
     );
     cy.wait("@check").then(({ request }) => {

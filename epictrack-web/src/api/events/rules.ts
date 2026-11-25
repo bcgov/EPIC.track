@@ -7,6 +7,7 @@ import {
   EventTemplateVisibility,
   MilestoneEvent,
   MilestoneEventDateCheck,
+  MilestoneEventInput,
 } from "models/event";
 import EventConfiguration from "models/eventConfiguration";
 import { POSITION_ENUM } from "models/position";
@@ -89,6 +90,31 @@ export const dateLabels = (config: Config) => {
   return { anticipated: "Anticipated Date", actual: "Actual Date" };
 };
 
+/** The milestone type that extends a legislated phase's time limit. */
+export const findTimeLimitExtensionConfiguration = (
+  configs: EventConfiguration[],
+) =>
+  configs.find(
+    (config) => config.event_type_id === EventType.TIME_LIMIT_EXTENSION,
+  );
+
+/** The extension covering a legislated phase's overage, dated with the END it lets close. */
+export const extensionForOverage = (
+  config: EventConfiguration,
+  endDate: string,
+  days: number,
+  actSectionId: number,
+  reason: string,
+): MilestoneEventInput => ({
+  name: config.name,
+  event_configuration_id: config.id,
+  anticipated_date: endDate,
+  actual_date: endDate,
+  number_of_days: days,
+  act_section_id: actSectionId,
+  reason: reason || undefined,
+});
+
 /** The milestone type a suspended phase must add next. */
 export const findResumptionConfiguration = (configs: EventConfiguration[]) =>
   configs.find(
@@ -138,6 +164,10 @@ export const showsDatePushWarning = (
 ) =>
   Boolean(dateCheck?.phase_end_push_required && phaseLegislated) &&
   !isExtension(config);
+
+export const extensionDaysRequired = (
+  dateCheck: MilestoneEventDateCheck | undefined,
+) => dateCheck?.extension_days_required ?? 0;
 
 /** Extensions push later events without asking. */
 export const isPushPreconfirmed = (event: MilestoneEvent | undefined) =>

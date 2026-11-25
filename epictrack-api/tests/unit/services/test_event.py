@@ -504,6 +504,78 @@ class TestEventServiceUpdateEvent:
                     assert message in str(exc_info.value)
 
 
+PHASE_START = datetime(2026, 1, 1, tzinfo=pytz.utc)
+
+
+def _legislated_phase(extension_days, suspended_days, resumed):
+    """A 10-day legislated phase started on PHASE_START, with an extension, a suspension and an END."""
+    phase = MagicMock(id=1, work_id=1, legislated=True, number_of_days=10)
+    start_event = MagicMock(event_position=EventPositionEnum.START.value, actual_date=PHASE_START)
+    extension = MagicMock(event_position=EventPositionEnum.INTERMEDIATE.value, number_of_days=extension_days)
+    resumption = MagicMock(
+        event_position=EventPositionEnum.INTERMEDIATE.value, number_of_days=suspended_days,
+        actual_date=PHASE_START + timedelta(days=3 + suspended_days) if resumed else None,
+    )
+    end_event = MagicMock(event_position=EventPositionEnum.END.value, actual_date=None)
+    events = [start_event, extension, resumption, end_event]
+    for event in events:
+        event.event_configuration.work_phase_id = 1
+        event.event_configuration.event_type_id = 0
+    extension.event_configuration.event_type_id = EventTypeEnum.TIME_LIMIT_EXTENSION.value
+    resumption.event_configuration.event_type_id = EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+    return phase, end_event, events
+
+
+class TestEventServiceExtensionDaysRequired:
+    """Test the date check's extension_days_required."""
+
+    @pytest.mark.parametrize(
+        "end_day, extension_days, suspended_days, resumed, expected",
+        [
+            (5, 0, 0, True, 0),
+            (20, 0, 0, True, 10),
+            (20, 9, 0, True, 1),
+            (20, 10, 0, True, 0),
+            (25, 0, 15, True, 0),
+            (27, 0, 15, True, 2),
+            (25, 0, 15, False, 15),
+        ],
+    )
+    def test_gives_the_days_the_end_date_gate_asks_for(
+        self, app, end_day, extension_days, suspended_days, resumed, expected
+    ):  # pylint: disable=too-many-arguments
+        """The same cases as the legislated END gate, which names these days in its refusal."""
+        with app.app_context():
+            phase, end_event, events = _legislated_phase(extension_days, suspended_days, resumed)
+            with patch.object(EventService, 'find_events', return_value=events):
+                assert EventService._extension_days_required(  # pylint: disable=protected-access
+                    end_event, {}, PHASE_START + timedelta(days=end_day), phase
+                ) == expected
+
+    @pytest.mark.parametrize(
+        "legislated, position, old_actual, new_actual",
+        [
+            (False, EventPositionEnum.END, None, True),
+            (True, EventPositionEnum.INTERMEDIATE, None, True),
+            (True, EventPositionEnum.END, PHASE_START, True),
+            (True, EventPositionEnum.END, None, False),
+        ],
+        ids=["not legislated", "not the end", "end already happened", "no actual date"],
+    )
+    def test_asks_for_nothing_unless_a_legislated_end_is_being_completed(
+        self, app, legislated, position, old_actual, new_actual
+    ):  # pylint: disable=too-many-arguments
+        """Only an END getting its first actual date can need an extension."""
+        with app.app_context():
+            phase, end_event, events = _legislated_phase(0, 0, True)
+            phase.legislated = legislated
+            end_event.event_position = position.value
+            with patch.object(EventService, 'find_events', return_value=events):
+                assert EventService._extension_days_required(  # pylint: disable=protected-access
+                    end_event, {"actual_date": old_actual}, PHASE_START + timedelta(days=20) if new_actual else None, phase
+                ) == 0
+
+
 class TestEventServiceFindAllCalendarEvents:
     """Test find_all_calendar_events method."""
 

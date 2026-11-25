@@ -112,6 +112,7 @@ export const toDateCheck = (
   phase_end_push_required: dto.phase_end_push_required,
   subsequent_event_push_required: dto.subsequent_event_push_required,
   days_pushed: dto.days_pushed,
+  extension_days_required: dto.extension_days_required ?? 0,
 });
 
 export const toNamedOption = (dto: TrackNamedOptionDto): ListType => ({

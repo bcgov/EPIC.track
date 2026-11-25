@@ -128,6 +128,8 @@ export interface MilestoneEventDateCheck {
   phase_end_push_required: boolean;
   subsequent_event_push_required: boolean;
   days_pushed: number;
+  /** Extension days a legislated END needs before it can be saved. */
+  extension_days_required: number;
 }
 
 export enum EventPosition {

@@ -14,6 +14,7 @@ export enum EventCategory {
 export enum EventType {
   OPEN_HOUSE = 23,
   VIRTUAL_OPEN_HOUSE = 24,
+  TIME_LIMIT_EXTENSION = 10,
   TIME_LIMIT_SUSPENSION = 12,
   TIME_LIMIT_RESUMPTION = 38,
   SUBMISSION = 9,
