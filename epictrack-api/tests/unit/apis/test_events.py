@@ -34,6 +34,7 @@ from api.models import Event, EventConfiguration
 from api.models import db as _db
 from api.models.event_category import PRIMARY_CATEGORIES
 from api.models.event_configuration import EventPositionEnum
+from api.models.event_template import EventTemplateVisibilityEnum
 from api.schemas.response import EventResponseSchema
 
 API_BASE_URL = "/api/v1/"
@@ -258,21 +259,28 @@ def test_phase_start_or_end_milestone_cannot_be_deleted(client, jwt, position, b
     assert not intermediate.is_deleted
 
 
+@pytest.mark.parametrize("made_phase_end", [False, True], ids=["optional", "made_phase_end"])
 @pytest.mark.parametrize("bulk", [False, True], ids=["one", "bulk"])
-def test_intermediate_milestone_can_be_deleted(client, jwt, bulk):
-    """Other milestones that haven't happened yet can still be deleted."""
+def test_optional_milestone_is_deletable_until_it_is_the_phase_end(client, jwt, bulk, made_phase_end):
+    """An optional milestone such as Project Withdrawn can be deleted until its outcome makes it the phase's end."""
     headers = _set_admin_user(jwt=jwt)
     work_id = _created_work_id(client, headers)
-    intermediate = _work_milestone(work_id, EventPositionEnum.INTERMEDIATE)
+    optional = _added_optional_milestone(client, headers, work_id)
+    if made_phase_end:
+        # What the change-phase-end outcome action does once the milestone has an actual date.
+        optional.event_configuration.event_position = EventPositionEnum.END
+        _db.session.commit()
 
-    response = _delete_milestones(client, headers, [intermediate.id], bulk)
+    response = _delete_milestones(client, headers, [optional.id], bulk)
 
-    assert response.status_code == HTTPStatus.OK, response.get_data(as_text=True)
+    expected = HTTPStatus.UNPROCESSABLE_ENTITY if made_phase_end else HTTPStatus.OK
+    assert response.status_code == expected, response.get_data(as_text=True)
     _db.session.expire_all()
-    assert intermediate.is_deleted
+    assert optional.is_deleted is not made_phase_end
 
 
-def test_milestone_linked_to_a_phase_end_cannot_be_deleted(client, jwt):
+@pytest.mark.parametrize("bulk", [False, True], ids=["one", "bulk"])
+def test_milestone_linked_to_a_phase_end_cannot_be_deleted(client, jwt, bulk):
     """Deleting a milestone also deletes the events linked to it, so a linked phase end blocks the delete."""
     headers = _set_admin_user(jwt=jwt)
     work_id = _created_work_id(client, headers)
@@ -281,7 +289,7 @@ def test_milestone_linked_to_a_phase_end_cannot_be_deleted(client, jwt):
     end.source_event_id = intermediate.id
     _db.session.commit()
 
-    response = _delete_milestones(client, headers, [intermediate.id], bulk=False)
+    response = _delete_milestones(client, headers, [intermediate.id], bulk)
 
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
     _db.session.expire_all()
@@ -297,7 +305,7 @@ def _created_work_id(client, headers):
 
 def _work_milestone(work_id, position):
     """The work's first milestone at this position that hasn't happened yet."""
-    return (
+    milestone = (
         _db.session.query(Event)
         .join(EventConfiguration, Event.event_configuration_id == EventConfiguration.id)
         .join(WorkPhase, EventConfiguration.work_phase_id == WorkPhase.id)
@@ -309,6 +317,37 @@ def _work_milestone(work_id, position):
         .order_by(WorkPhase.sort_order, EventConfiguration.sort_order)
         .first()
     )
+    assert milestone is not None
+    return milestone
+
+
+def _added_optional_milestone(client, headers, work_id):
+    """Add an optional milestone to the work's first phase, as a user does from the work plan."""
+    configuration = (
+        _db.session.query(EventConfiguration)
+        .join(WorkPhase, EventConfiguration.work_phase_id == WorkPhase.id)
+        .filter(
+            WorkPhase.work_id == work_id,
+            EventConfiguration.event_position == EventPositionEnum.INTERMEDIATE,
+            EventConfiguration.visibility == EventTemplateVisibilityEnum.OPTIONAL,
+            EventConfiguration.multiple_days.is_(False),
+            EventConfiguration.is_active.is_(True),
+        )
+        .order_by(WorkPhase.sort_order, EventConfiguration.sort_order)
+        .first()
+    )
+    phase = configuration.work_phase
+    response = client.post(
+        urljoin(API_BASE_URL, f"milestones/workphases/{phase.id}/events"),
+        json={
+            "name": configuration.name,
+            "event_configuration_id": configuration.id,
+            "anticipated_date": (phase.start_date + timedelta(days=1)).isoformat(),
+        },
+        headers=headers,
+    )
+    assert response.status_code == HTTPStatus.CREATED, response.get_data(as_text=True)
+    return _db.session.get(Event, response.json["id"])
 
 
 def _delete_milestones(client, headers, event_ids, bulk):
