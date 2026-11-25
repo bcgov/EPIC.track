@@ -18,6 +18,7 @@ from marshmallow import EXCLUDE, fields
 
 from api.models import SpecialField
 from api.schemas.base import AutoSchemaBase
+from api.utils.constants import CANADA_TIMEZONE
 
 
 class SpecialFieldResponseSchema(
@@ -36,6 +37,8 @@ class SpecialFieldResponseSchema(
     entity = fields.Method("get_entity")
     active_from = fields.Method("get_active_from")
     active_to = fields.Method("get_active_to")
+    active_from_day = fields.Method("get_active_from_day")
+    active_to_day = fields.Method("get_active_to_day")
     field_type = fields.Method("get_field_type")
 
     def get_entity(self, obj: SpecialField) -> str:
@@ -49,6 +52,19 @@ class SpecialFieldResponseSchema(
     def get_active_to(self, obj: SpecialField) -> datetime:
         """Get the active to date"""
         return obj.time_range.upper.isoformat() if obj.time_range.upper else None
+
+    def get_active_from_day(self, obj: SpecialField) -> str:
+        """Get the Pacific day the entry starts on, so clients need no timezone arithmetic"""
+        return self._pacific_day(obj.time_range.lower)
+
+    def get_active_to_day(self, obj: SpecialField) -> str:
+        """Get the Pacific day of the entry's end"""
+        return self._pacific_day(obj.time_range.upper)
+
+    @staticmethod
+    def _pacific_day(instant: datetime) -> str:
+        """Return the Pacific calendar day of an instant as YYYY-MM-DD, or None"""
+        return instant.astimezone(CANADA_TIMEZONE).date().isoformat() if instant else None
 
     def get_field_type(self, obj: SpecialField) -> str:
         """Get the field type"""

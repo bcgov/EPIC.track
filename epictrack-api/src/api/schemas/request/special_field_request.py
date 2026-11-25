@@ -12,11 +12,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Special field resource's input validations"""
+from datetime import date, datetime, time
+
 from marshmallow import EXCLUDE, fields, validate, validates_schema, ValidationError
 
 from api.models.special_field import EntityEnum, FieldTypeEnum
+from api.utils.constants import CANADA_TIMEZONE
 
 from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
+
+
+class SpecialHistoryStart(fields.Field):
+    """The start of a history entry: Pacific midnight of the day the client sent.
+
+    The server decides the instant, so the browser's timezone and time of day are never
+    stored. A plain YYYY-MM-DD is that day. A datetime with an offset, as older clients
+    send, is read as the Pacific day it falls on.
+    """
+
+    default_error_messages = {"invalid": "Not a valid date. Use YYYY-MM-DD."}
+
+    def _deserialize(self, value, attr, data, **kwargs) -> datetime:
+        """Return Pacific midnight of the day the value stands for."""
+        if not isinstance(value, str):
+            raise self.make_error("invalid")
+        try:
+            if len(value) == 10:
+                day = date.fromisoformat(value)
+            else:
+                instant = datetime.fromisoformat(value)
+                if instant.tzinfo is None:
+                    raise self.make_error("invalid")
+                day = instant.astimezone(CANADA_TIMEZONE).date()
+        except (ValueError, OverflowError) as error:
+            raise self.make_error("invalid") from error
+        return CANADA_TIMEZONE.localize(datetime.combine(day, time.min))
 
 
 class SpecialFieldQueryParamSchema(RequestQueryParameterSchema):
@@ -80,8 +110,8 @@ class SpecialFieldBodyParameterSchema(RequestBodyParameterSchema):
         required=True,
     )
 
-    active_from = fields.DateTime(
-        metadata={"description": "Lower bound for time range"}, required=True
+    active_from = SpecialHistoryStart(
+        metadata={"description": "First day the entry applies, YYYY-MM-DD"}, required=True
     )
 
     field_type = fields.Str(

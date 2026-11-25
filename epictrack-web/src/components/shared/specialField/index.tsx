@@ -14,8 +14,8 @@ import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
 import { SpecialField, SpecialFieldProps } from "./type";
 import specialFieldService from "../../../services/specialFieldService";
-import { dateUtils } from "../../../utils";
 import { InLineDatePicker } from "./components/InLineDatePicker";
+import { toHistoryDay, withHistoryDays } from "./historyDay";
 import TrackSelect from "../TrackSelect";
 import {
   DATE_FORMAT,
@@ -87,7 +87,9 @@ export const SpecialFieldGrid = ({
       fieldName,
     );
     if (specialFieldEntries.status === 200) {
-      setEntries(specialFieldEntries.data as SpecialField[]);
+      setEntries(
+        (specialFieldEntries.data as SpecialField[]).map(withHistoryDays),
+      );
     }
     setLoading(false);
   }, [entity, entity_id, fieldName]);
@@ -137,7 +139,7 @@ export const SpecialFieldGrid = ({
           }
           const onBlur = (newValue: any) => {
             const value =
-              fieldType === "select" ? newValue.value : newValue.target.value;
+              fieldType === "select" ? newValue?.value : newValue.target.value;
             row._valuesCache[column.id] = value;
             setErrors({
               ...errors,
@@ -217,7 +219,7 @@ export const SpecialFieldGrid = ({
         },
         Cell: ({ cell }) => {
           const value = cell.getValue<string>();
-          return <span>{dateUtils.formatDate(value)}</span>;
+          return <span>{toHistoryDay(value)}</span>;
         },
       },
       {
@@ -227,7 +229,7 @@ export const SpecialFieldGrid = ({
         enableEditing: false,
         Cell: ({ cell }) => {
           const value = cell.getValue<string>();
-          return <span>{value ? dateUtils.formatDate(value) : "Today"}</span>;
+          return <span>{value ? toHistoryDay(value) : "Today"}</span>;
         },
       },
     ],
@@ -290,6 +292,8 @@ export const SpecialFieldGrid = ({
   ) => {
     const data = {
       ...payload,
+      // Send the day only; the server decides the instant, so the browser's timezone is not stored.
+      active_from: toHistoryDay(payload.active_from),
       entity,
       entity_id,
       field_name: fieldName,

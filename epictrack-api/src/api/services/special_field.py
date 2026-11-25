@@ -25,7 +25,7 @@ from api.models import SpecialField, db
 from api.models.role import RoleEnum
 from api.models.special_field import EntityEnum
 from api.utils import demi_marks
-from api.utils.constants import SPECIAL_FIELD_ENTITY_MODEL_MAPS
+from api.utils.constants import CANADA_TIMEZONE, SPECIAL_FIELD_ENTITY_MODEL_MAPS
 from api.utils.roles import Membership, Role as KeycloakRole
 from api.services import authorisation
 
@@ -83,6 +83,23 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         return special_field
 
     @classmethod
+    def keep_start_on_unchanged_day(cls, special_field_id: int, payload: dict) -> dict:
+        """Keep an entry's stored start when an update leaves it on the same Pacific day.
+
+        Clients send the day only. An entry written with a time of day, as the API itself
+        does when a record is created, must not move to midnight when only its value is
+        edited: that could put it before another entry on the same day.
+        """
+        special_field = SpecialField.find_by_id(special_field_id)
+        if special_field and special_field.time_range.lower:
+            stored_start = special_field.time_range.lower
+            if stored_start.astimezone(CANADA_TIMEZONE).date() == payload["active_from"].astimezone(
+                CANADA_TIMEZONE
+            ).date():
+                payload = {**payload, "active_from": stored_start}
+        return payload
+
+    @classmethod
     def delete_special_field_entry(cls, special_field_id: int):
         """Delete a special field entry and shift adjacent history as needed."""
         to_delete = SpecialField.find_by_id(special_field_id)
@@ -120,13 +137,9 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
 
         # Delete middle entry
         elif to_delete.time_range.upper and next_entry:
-            if previous_entry:
-                new_lower = previous_entry.time_range.upper + timedelta(days=1)
-            else:
-                new_lower = to_delete.time_range.lower
-
+            # the next entry takes over the deleted entry's start
             next_entry.time_range = DateTimeTZRange(
-                new_lower,
+                to_delete.time_range.lower,
                 next_entry.time_range.upper,
                 bounds='[)' if next_entry.time_range.upper else '[)'
             )
@@ -161,13 +174,27 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
             if i != len(matching_special_fields) - 1:
                 # get the start date of the next entry
                 next_start_date = matching_special_fields[i + 1].time_range.lower
+                if special_field.time_range.lower is None or next_start_date is None:
+                    # an entry stored with an empty range has no dates to work from
+                    continue
                 # set the end date of the current entry to be a day before the start date of the next entry
                 special_field.time_range = DateTimeTZRange(
                     special_field.time_range.lower,
-                    next_start_date - timedelta(days=1),
+                    cls._end_before(special_field.time_range.lower, next_start_date),
                     bounds="[)",
                 )
         db.session.commit()
+
+    @staticmethod
+    def _end_before(start: datetime, next_start: datetime) -> datetime:
+        """Return the end of an entry that starts at start and is followed by one at next_start.
+
+        An entry ends a day before the next one starts. An entry that starts within that
+        last day would be left with an empty or backwards range, which cannot be read back,
+        so it runs up to the next entry's start instead.
+        """
+        end = next_start - timedelta(days=1)
+        return end if end > start else next_start
 
     @classmethod
     def _get_upper_limit(
@@ -189,18 +216,13 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         upper_limit = None
         if existing_entry:
             if existing_entry.time_range.lower > payload["active_from"]:
-                upper_limit = existing_entry.time_range.lower - timedelta(days=1)
+                upper_limit = cls._end_before(payload["active_from"], existing_entry.time_range.lower)
             else:
                 upper_limit = existing_entry.time_range.upper
 
-                if payload["active_from"] - timedelta(days=1) < existing_entry.time_range.lower:
-                    new_range_upper = payload["active_from"]
-                else:
-                    new_range_upper = payload["active_from"] - timedelta(days=1)
-
                 new_range = DateTimeTZRange(
                     existing_entry.time_range.lower,
-                    new_range_upper,
+                    cls._end_before(existing_entry.time_range.lower, payload["active_from"]),
                     "[)",
                 )
 
