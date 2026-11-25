@@ -294,6 +294,13 @@ describe("event rules", () => {
     expect(
       canDeleteRow(row({ type: EVENT_TYPE.TASK, visibility: undefined })),
     ).to.equal(true);
+    // An outcome can make an optional milestone the phase's end.
+    expect(canDeleteRow(row({ event_configuration: endEvent }))).to.equal(
+      false,
+    );
+    expect(canDeleteRow(row({ event_configuration: startEvent }))).to.equal(
+      false,
+    );
 
     expect(isStartOrEndEvent(startEvent)).to.equal(true);
     expect(isStartOrEndEvent(endEvent)).to.equal(true);

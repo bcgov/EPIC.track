@@ -28,6 +28,7 @@ from api.actions.set_events_status import SetEventsStatus
 from api.actions.set_phases_status import SetPhasesStatus
 from api.actions.set_project_status import SetProjectStatus
 from api.models import Event, EventConfiguration, Project, Work, WorkPhase, db
+from api.models.event_template import EventPositionEnum
 from api.models.special_field import EntityEnum
 from api.services import demi_payload, demi_push
 from api.services.project import ProjectService
@@ -284,7 +285,16 @@ def test_action_marks_the_rows_it_updates(app, client, auth_header, session, run
 def test_delete_event_marks_it_and_linked_events_delete(client, auth_header, session, seen):
     """Deleting a milestone goes through Query.update, linked events included."""
     work = _created_work(client, auth_header, session)
-    event = session.query(Event).filter(Event.work_id == work.id, Event.actual_date.is_(None)).first()
+    event = (
+        session.query(Event)
+        .join(EventConfiguration, Event.event_configuration_id == EventConfiguration.id)
+        .filter(
+            Event.work_id == work.id,
+            Event.actual_date.is_(None),
+            EventConfiguration.event_position == EventPositionEnum.INTERMEDIATE,
+        )
+        .first()
+    )
     linked = Event(
         name="Linked",
         work_id=work.id,
