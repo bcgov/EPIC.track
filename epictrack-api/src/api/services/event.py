@@ -81,7 +81,7 @@ class EventService:
         )
 
         all_work_events = cls.find_events(
-            current_work_phase.work_id, None, PRIMARY_CATEGORIES, True
+            current_work_phase.work_id, None, PRIMARY_CATEGORIES
         )
         data["work_id"] = current_work_phase.work_id
         event = Event(**data)
@@ -168,7 +168,7 @@ class EventService:
             one_of_roles=one_of_roles, work_id=work_id
         )
         all_work_events = cls.find_events(
-            work_id, None, PRIMARY_CATEGORIES, scoped=False
+            work_id, None, PRIMARY_CATEGORIES
         )
         current_phase_events = list(
             filter(
@@ -1235,7 +1235,6 @@ class EventService:
         work_id: int,
         work_phase_id: int = None,
         event_categories: List[EventCategoryEnum] = [],
-        scoped: bool = False,
     ) -> List[Event]:
         # pylint: disable=dangerous-default-value
         """Find all events by work"""
@@ -1263,18 +1262,7 @@ class EventService:
             events_query = events_query.filter(
                 EventConfiguration.work_phase_id == work_phase_id
             )
-        results = events_query.all()
-        # sometimes, we need copy of list of events not attached to the current
-        # database session
-        if scoped:
-            results_scoped = []
-            for result in results:
-                event_configuration = result.event_configuration
-                result_copy = copy.copy(result)
-                result_copy.event_configuration = copy.copy(event_configuration)
-                results_scoped.append(result_copy)
-            return results_scoped
-        return results
+        return events_query.all()
 
     @classmethod
     def _find_start_at_value(cls, start_at: str, number_of_days: int) -> int:

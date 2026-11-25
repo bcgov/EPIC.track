@@ -131,12 +131,11 @@ def _change_event_anticipated_date(
     # Save original phase dates
     work_phase_start_date = work_phase_to_test.start_date
     work_phase_end_date = work_phase_to_test.end_date
-    # Load events fresh from DB (scoped=False ensures we get real tracked objects)
     work_events = EventService.find_events(
-        work_id=work_id, work_phase_id=None, event_categories=PRIMARY_CATEGORIES, scoped=False
+        work_id=work_id, work_phase_id=None, event_categories=PRIMARY_CATEGORIES
     )
     work_phase_to_test_events = EventService.find_events(
-        work_id=work_id, work_phase_id=work_phase_to_test.id, event_categories=PRIMARY_CATEGORIES, scoped=False
+        work_id=work_id, work_phase_id=work_phase_to_test.id, event_categories=PRIMARY_CATEGORIES
     )
     # Store original anticipated dates
     original_dates = {e.id: e.anticipated_date for e in work_events}
@@ -179,7 +178,7 @@ def _change_event_anticipated_date(
 
     for phase in all_phases:
         all_events.extend(
-            EventService.find_events(work_id=work_id, work_phase_id=phase.id, event_categories=PRIMARY_CATEGORIES, scoped=False)
+            EventService.find_events(work_id=work_id, work_phase_id=phase.id, event_categories=PRIMARY_CATEGORIES)
         )
 
     new_dates = {e.id: e.anticipated_date for e in all_events}
@@ -192,7 +191,7 @@ def _change_event_anticipated_date(
         start_phase_index = next(
             i for i, phase in enumerate(all_phases)
             if any(e.id == event_to_update.id for e in EventService.find_events(
-                work_id=work_id, work_phase_id=phase.id, scoped=False
+                work_id=work_id, work_phase_id=phase.id
             ))
         )
         # Iterate only from the triggering phase onward
@@ -200,8 +199,7 @@ def _change_event_anticipated_date(
             phase_events = EventService.find_events(
                 work_id=work_id,
                 work_phase_id=phase.id,
-                event_categories=PRIMARY_CATEGORIES,
-                scoped=False
+                event_categories=PRIMARY_CATEGORIES
             )
             # Ensure triggering event is included in the starting phase
             if phase.id == work_phase_to_test.id and event_to_update.id not in [e.id for e in phase_events]:
