@@ -111,6 +111,8 @@ class Work(BaseModelVersioned):
     start_date_locked = Column(Boolean(), default=False)
     decision_maker_position_id = Column(ForeignKey('positions.id'), nullable=True)
     work_state = Column(Enum(WorkStateEnum), default=WorkStateEnum.IN_PROGRESS)
+    template_version_id = Column(ForeignKey('work_template_versions.id'), nullable=True)
+    official_start_date = Column(DateTime(timezone=True))
 
     project = relationship('Project', foreign_keys=[project_id], lazy='select')
     ministry = relationship('Ministry', foreign_keys=[ministry_id], lazy='select')

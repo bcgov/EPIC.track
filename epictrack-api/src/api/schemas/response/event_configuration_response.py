@@ -33,6 +33,12 @@ class EventConfigurationResponseSchema(
 
     visibility = fields.Method("get_visibility")
 
+    anchor_point = fields.Method("get_anchor_point")
+
+    def get_anchor_point(self, obj: EventConfiguration) -> str:
+        """Return the anchor point's name."""
+        return obj.anchor_point.value if obj.anchor_point else None
+
     def get_visibility(self, obj: EventConfiguration) -> str:
         """Return value for the visibility"""
         return obj.visibility if isinstance(obj.visibility, str) else obj.visibility.value

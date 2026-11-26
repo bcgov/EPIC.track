@@ -17,6 +17,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
 from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
+from api.models.template_event import AnchorPoint
 
 from .base_model import BaseModelVersioned
 from .db import db
@@ -41,6 +42,16 @@ class EventConfiguration(BaseModelVersioned):
     work_phase_id = sa.Column(sa.ForeignKey('work_phases.id'), nullable=True)
     visibility = sa.Column(sa.Enum(EventTemplateVisibilityEnum), nullable=False)
     repeat_count = sa.Column(sa.Integer, nullable=False, default=0)
+    template_event_id = sa.Column(sa.ForeignKey('template_events.id'), nullable=True)
+    role = sa.Column(sa.String(50))
+    anchor_configuration_id = sa.Column(sa.ForeignKey('event_configurations.id'), nullable=True)
+    anchor_point = sa.Column(
+        sa.Enum(AnchorPoint, name='anchor_point_enum'), nullable=False, default=AnchorPoint.START
+    )
+    offset_days = sa.Column(sa.Integer, nullable=False, default=0)
+    repeatable = sa.Column(sa.Boolean, nullable=False, default=False)
+    sets_work_start = sa.Column(sa.Boolean, nullable=False, default=False)
+    sets_official_start = sa.Column(sa.Boolean, nullable=False, default=False)
 
     event_type = relationship('EventType', foreign_keys=[event_type_id], lazy='select')
     event_category = relationship('EventCategory', foreign_keys=[event_category_id], lazy='select')

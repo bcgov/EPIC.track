@@ -30,7 +30,7 @@ from api.workplan.core.registry import RuleSet
 # The same legacy event template gives its milestone the same key in every version built from it.
 _KEY_NAMESPACE = uuid.uuid5(uuid.NAMESPACE_URL, "epictrack:event_templates")
 
-_ROLES_BY_EVENT_TYPE = {10: "TIME_LIMIT_EXTENSION", 12: "TIME_LIMIT_SUSPENSION", 38: "TIME_LIMIT_RESUMPTION"}
+ROLES_BY_EVENT_TYPE = {10: "TIME_LIMIT_EXTENSION", 12: "TIME_LIMIT_SUSPENSION", 38: "TIME_LIMIT_RESUMPTION"}
 
 _INT = re.compile(r"^\s*-?\d+\s*$")
 _FROM_END = re.compile(r"^\s*number_of_days\s*(?:([+-])\s*(\d+))?\s*$")
@@ -60,6 +60,26 @@ class LegacyConversionError(Exception):
         """Keep every miss."""
         super().__init__("\n".join(misses))
         self.misses = misses
+
+
+EMPTY_START_AT = "empty_start_at"
+UNPARSED_START_AT = "unparsed_start_at"
+
+
+def anchor_from_start_at(start_at: Optional[str], has_parent: bool) -> Tuple[str, int, Optional[str]]:
+    """Return the anchor point and offset a legacy start_at gives, and the problem if it gives neither.
+
+    A whole number counts from the anchor's start. With a parent, `number_of_days` and `number_of_days-N`
+    count from the parent's end, since number_of_days is the parent's length. Anything else counts as 0.
+    """
+    start_at = (start_at or "").strip()
+    if _INT.match(start_at):
+        return tpl.START, int(start_at), None
+    from_end = _FROM_END.match(start_at)
+    if has_parent and from_end:
+        sign, days = from_end.groups()
+        return tpl.END, -int(days) if sign == "-" else int(days or 0), None
+    return tpl.START, 0, EMPTY_START_AT if not start_at else UNPARSED_START_AT
 
 
 def load_legacy_sets(connection) -> List[LegacyTemplateSet]:
@@ -196,7 +216,7 @@ class _Builder:  # pylint: disable=too-many-instance-attributes, too-few-public-
                     key=uuid.uuid5(_KEY_NAMESPACE, str(row["id"])), name=row["name"],
                     event_type_id=row["event_type_id"], event_category_id=row["event_category_id"],
                     visibility=row["visibility"], event_position=row["event_position"] or tpl.INTERMEDIATE,
-                    role=_ROLES_BY_EVENT_TYPE.get(row["event_type_id"]), number_of_days=row["number_of_days"] or 0,
+                    role=ROLES_BY_EVENT_TYPE.get(row["event_type_id"]), number_of_days=row["number_of_days"] or 0,
                     multiple_days=bool(row["multiple_days"]), legacy_event_template_id=row["id"],
                 )
                 phase.events.append(event)
@@ -207,28 +227,21 @@ class _Builder:  # pylint: disable=too-many-instance-attributes, too-few-public-
 
     def _set_anchor(self, phase, row):
         event = self.events[row["id"]]
-        start_at = (row["start_at"] or "").strip()
         label = f"{self.legacy.name}: {phase.name} / {event.name}"
+        if row["parent_id"] is not None:
+            parent = self.events.get(row["parent_id"])
+            if parent is None:
+                self.misses.append(f"{label}: its parent milestone {row['parent_id']} isn't active")
+                return
+            event.anchor_key = parent.key
+        event.anchor_point, event.offset_days, problem = anchor_from_start_at(
+            row["start_at"], row["parent_id"] is not None)
+        if problem is None:
+            return
+        start_at = (row["start_at"] or "").strip()
         if row["parent_id"] is None:
-            if _INT.match(start_at):
-                event.offset_days = int(start_at)
-            else:
-                self.notes.append(f"{label}: start_at {start_at!r} is counted as 0 days from the phase start")
-            return
-        parent = self.events.get(row["parent_id"])
-        if parent is None:
-            self.misses.append(f"{label}: its parent milestone {row['parent_id']} isn't active")
-            return
-        event.anchor_key = parent.key
-        from_end = _FROM_END.match(start_at)
-        if _INT.match(start_at):
-            event.offset_days = int(start_at)
-        elif from_end:
-            # number_of_days is the parent's length, so this counts from the parent's end.
-            sign, days = from_end.groups()
-            event.anchor_point = tpl.END
-            event.offset_days = -int(days) if sign == "-" else int(days or 0)
-        elif not start_at:
+            self.notes.append(f"{label}: start_at {start_at!r} is counted as 0 days from the phase start")
+        elif problem == EMPTY_START_AT:
             self.notes.append(f"{label}: an empty start_at is counted as 0 days from its parent")
         else:
             self.misses.append(f"{label}: can't convert start_at {start_at!r}")

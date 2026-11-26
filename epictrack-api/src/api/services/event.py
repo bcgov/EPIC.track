@@ -52,6 +52,7 @@ from api.services.outcome_configuration import OutcomeConfigurationService
 from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
 from api.services.work_phase import WorkPhaseService
 from api.utils import demi_marks, util
+from api.workplan.work_backfill import backfill_work_settings
 from api.application_constants import MIN_WORK_START_DATE
 
 from ..utils.roles import Membership
@@ -1434,6 +1435,12 @@ class EventService:
     def _process_actions(cls, event: Event, outcome_id: int = None) -> None:
         if event.actual_date is None:
             return
+        cls._run_actions(event, outcome_id)
+        # Keeps the work's template settings current while this engine runs.
+        backfill_work_settings(event.work_id)
+
+    @classmethod
+    def _run_actions(cls, event: Event, outcome_id: int = None) -> None:
         if outcome_id is None:
             outcomes = OutcomeConfigurationService.find_by_configuration_id(
                 event.event_configuration_id

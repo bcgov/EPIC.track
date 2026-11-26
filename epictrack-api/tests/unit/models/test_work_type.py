@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for the work type behaviour stored as data."""
-import pytest
-
-from api.models.work import Work
 from api.models.work_phase import WorkPhase
 from api.models.work_type import WorkType, WorkTypeEnum
 from api.schemas.response.work_response import WorkPhaseResponseSchema
@@ -23,23 +20,10 @@ from api.schemas.response.work_response import WorkPhaseResponseSchema
 AMENDMENT_TYPES = {WorkTypeEnum.AMENDMENT.value, WorkTypeEnum.JOINT_COMPLEX_AMENDMENT.value}
 
 
-def _phase(legislated, all_phases_require_overage_responsibility):
-    work_type = WorkType(all_phases_require_overage_responsibility=all_phases_require_overage_responsibility)
-    return WorkPhase(legislated=legislated, work=Work(work_type=work_type))
-
-
-@pytest.mark.parametrize(
-    "legislated, all_phases_require, expected",
-    [(True, False, True), (False, True, True), (True, True, True), (False, False, False)],
-)
-def test_phase_requires_overage_responsibility(legislated, all_phases_require, expected):
-    """A legislated phase, or any phase of a work type that says so, needs a responsibility."""
-    assert _phase(legislated, all_phases_require).requires_overage_responsibility is expected
-
-
 def test_phase_response_includes_requires_overage_responsibility():
     """The work phase response carries the flag the web reads."""
-    dumped = WorkPhaseResponseSchema(only=("requires_overage_responsibility",)).dump(_phase(False, True))
+    dumped = WorkPhaseResponseSchema(only=("requires_overage_responsibility",)).dump(
+        WorkPhase(requires_overage_responsibility=True))
     assert dumped == {"requires_overage_responsibility": True}
 
 

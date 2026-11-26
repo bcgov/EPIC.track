@@ -28,6 +28,7 @@ class OutcomeConfiguration(BaseModelVersioned):
     name = Column(String, nullable=False)
     event_configuration_id = Column(ForeignKey('event_configurations.id'), nullable=False)
     outcome_template_id = Column(ForeignKey('outcome_templates.id'), nullable=True)
+    template_outcome_id = Column(ForeignKey('template_outcomes.id'), nullable=True)
     sort_order = Column(Integer, nullable=False)
 
     event_configuration = relationship('EventConfiguration', foreign_keys=[event_configuration_id], lazy='select')

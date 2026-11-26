@@ -55,6 +55,9 @@ class Event(BaseModelVersioned):
     number_of_attendees = Column(Integer, nullable=True)
     number_of_responses = Column(Integer, nullable=True)
     topic = Column(String, nullable=True)
+    interruption_kind_id = Column(ForeignKey("interruption_kinds.id"), nullable=True)
+    # Set once the outcome's effects have run, so correcting the date doesn't run them again.
+    effects_applied_at = Column(DateTime(timezone=True), nullable=True)
 
     outcome = relationship("OutcomeConfiguration", foreign_keys=[outcome_id], lazy="select")
     act_section = relationship("ActSection", foreign_keys=[act_section_id], lazy="select")
