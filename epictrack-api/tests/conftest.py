@@ -27,6 +27,7 @@ from api.models import db as _db
 from api.services import EventTemplateService
 from tests.utilities.factory_scenarios import TestJwtClaims
 from tests.utilities.factory_utils import factory_auth_header
+from tests.utilities.migrations import load_migration
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -87,6 +88,9 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         upgrade()
 
         _load_templates()
+        # The migration ran on an empty database, so build version 1 now, as it does where templates exist.
+        load_migration("8013265c32c4_build_work_template_version_one.py").build_version_one(sess.connection())
+        sess.commit()
 
         return _db
 
