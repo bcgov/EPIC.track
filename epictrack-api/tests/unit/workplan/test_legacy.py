@@ -12,16 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Tests for building version 1 of a work template from the legacy template tables."""
-import importlib.util
 import os
 
 import pytest
 
-from api.models import ActionEnum, ActionTemplate, WorkTemplate, WorkTemplateVersionStatus
+from api.models import (
+    ActionEnum, ActionTemplate, TemplateEvent, TemplateOutcome, TemplateOutcomeEffect, TemplatePhase, WorkTemplate,
+    WorkTemplateVersion, WorkTemplateVersionStatus)
 from api.workplan.core import template as tpl
 from api.workplan.core.validation import validate_version
 from api.workplan.legacy import LegacyConversionError, LegacyTemplateSet, build_version_from_legacy, load_legacy_sets
 from api.workplan.rules import get_rule_set
+from tests.utilities.migrations import load_migration
 
 EAO = get_rule_set("EAO")
 INTAKE, REVIEW, REVISION = 1, 2, 3
@@ -277,6 +279,16 @@ def test_every_uploaded_template_builds_a_valid_version(session):
         assert validate_version(version, EAO) == [], legacy.name
 
 
+@pytest.fixture(name="no_templates")
+def no_templates_fixture(session):
+    """The database as the migration finds it, before any version 1."""
+    for model in (TemplateOutcomeEffect, TemplateOutcome, TemplateEvent, TemplatePhase, WorkTemplateVersion,
+                  WorkTemplate):
+        session.query(model).delete()
+    session.flush()
+
+
+@pytest.mark.usefixtures("no_templates")
 def test_the_migration_publishes_version_one_of_each_template(session):
     """The migration saves each built version, with its anchors and effect targets pointing at its own rows."""
     connection = session.connection()
@@ -302,6 +314,7 @@ def test_the_migration_publishes_version_one_of_each_template(session):
         ]
 
 
+@pytest.mark.usefixtures("no_templates")
 def test_the_migration_publishes_nothing_when_a_template_misses(session):
     """One action that can't be converted stops every template's version 1, not just its own."""
     connection = session.connection()
@@ -319,16 +332,10 @@ def test_the_migration_publishes_nothing_when_a_template_misses(session):
 
 
 _TEMPLATES = os.path.join(os.path.dirname(__file__), "../../../src/api/templates/event_templates")
-_MIGRATION = os.path.join(
-    os.path.dirname(__file__), "../../../migrations/versions/8013265c32c4_build_work_template_version_one.py"
-)
 
 
 def _migration():
-    spec = importlib.util.spec_from_file_location("build_work_template_version_one", _MIGRATION)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+    return load_migration("8013265c32c4_build_work_template_version_one.py")
 
 
 def _event_key(saved, event_id):

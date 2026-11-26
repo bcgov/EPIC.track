@@ -18,7 +18,7 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 
 from api.models import (
-    AnchorPoint, BoundarySide, DayBasis, EventTemplate, PhaseCode, TemplateEvent, TemplateOutcome,
+    AnchorPoint, BoundarySide, DayBasis, EAAct, EventTemplate, PhaseCode, TemplateEvent, TemplateOutcome,
     TemplateOutcomeEffect, TemplatePhase, TimeLimitKind, WorkTemplate, WorkTemplateVersion, WorkTemplateVersionStatus,
     WorkType)
 from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
@@ -32,7 +32,9 @@ def legacy_fixture():
 
 def _template(session, legacy):
     phase_code = session.get(PhaseCode, legacy.phase_id)
-    template = WorkTemplate(work_type_id=phase_code.work_type_id, ea_act_id=phase_code.ea_act_id, name="Template")
+    # Version 1 already gives each uploaded work type and Act a template, so use an Act that has none.
+    ea_act = EAAct.query.filter(EAAct.id != phase_code.ea_act_id).first()
+    template = WorkTemplate(work_type_id=phase_code.work_type_id, ea_act_id=ea_act.id, name="Template")
     session.add(template)
     session.flush()
     return template

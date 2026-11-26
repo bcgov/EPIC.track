@@ -70,6 +70,7 @@ from .work_issues import WORK_ISSUES_API
 from .work_status import WORK_STATUS_API
 from .work_status import STATUS_DASHBOARD_API as WORK_STATUS_DASHBOARD_API
 from .work_type import API as WORK_TYPES_API
+from .work_template import API as WORK_TEMPLATES_API
 from .project_state import API as PROJECT_STATE_API
 from .work_resource import API as WORK_RESOURCE_API
 from .work_phases import API as WORK_PHASES_API
@@ -143,6 +144,7 @@ API.add_namespace(ACT_SECTION_API, path="/act-sections")
 API.add_namespace(WORK_STATUS_API, path='/work/<int:work_id>/statuses')
 API.add_namespace(WORK_STATUS_DASHBOARD_API, path='/work-statuses')
 API.add_namespace(WORK_TYPES_API, path='/work-types')
+API.add_namespace(WORK_TEMPLATES_API, path='/work-templates')
 API.add_namespace(WORK_ISSUES_API, path='/work/<int:work_id>/issues')
 API.add_namespace(ISSUES_DASHBOARD_API, path='/work-issues')
 API.add_namespace(SPECIAL_FIELD_API, path='/special-fields')
