@@ -33,7 +33,6 @@ from .eao_team import API as EAO_TEAM_API
 from .elevated_role import API as ELEVATED_ROLE_API
 from .event import API as EVENT_API
 from .event_configuration import API as EVENT_CONFIGURATION_API
-from .event_template import API as EVENT_TEMPLATE_API
 from .federal_involvement import API as FEDERAL_INVOLVEMENT_API
 from .indigenous_consultation_level import API as INDIGENOUS_CONSULTATION_LEVEL_API
 from .indigenous_nation import API as INDIGENOUS_NATION_API
@@ -135,7 +134,6 @@ API.add_namespace(PROPONENT_API, path="/proponents")
 API.add_namespace(REMINDER_CONFIGURATION_API, path="/reminder-configurations")
 API.add_namespace(USER_API, path='/users')
 API.add_namespace(TASK_TEMPLATE_API, path="/task-templates")
-API.add_namespace(EVENT_TEMPLATE_API, path="/event-templates")
 API.add_namespace(TASK_API, path="/tasks")
 API.add_namespace(EVENT_API, path="/milestones")
 API.add_namespace(EVENT_CONFIGURATION_API, path="/event-configurations")

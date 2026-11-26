@@ -68,7 +68,10 @@ class EventTemplateService:
 
     @classmethod
     def import_events_template(cls, configuration_file):
-        """Import event configurations in to database"""
+        """Import event configurations in to database.
+
+        Only the test setup calls this: the upload is retired, and templates change in the builder.
+        """
         cls._check_auth()
 
         def _process(excel_dict: dict, app_context):
