@@ -83,11 +83,3 @@ jobs:
           for app in $APPS; do
             oc rollout status deployment/epictrack-$app -n ${{ secrets.OPENSHIFT_REPOSITORY }}-prod --timeout=5m
           done
-
-  update_event_templates:
-    needs: deployment
-    if: inputs.component != 'web'
-    uses: ./.github/workflows/deploy-event-templates.yml
-    with:
-      environment: "prod"
-    secrets: inherit
