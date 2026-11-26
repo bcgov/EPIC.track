@@ -100,7 +100,9 @@ def _load_templates():
     g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
     g.token_info = TestJwtClaims.staff_admin_role
     for root, dirs, files in os.walk(templates_folder):
-        for file_name in files:
+        # Oldest first, as the environments got them, so each template ends on its latest file.
+        dirs.sort()
+        for file_name in sorted(files):
             file_path = os.path.join(root, file_name)
             thread = EventTemplateService.import_events_template(file_path)
             thread.join()
