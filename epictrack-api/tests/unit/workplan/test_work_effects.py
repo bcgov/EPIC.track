@@ -19,7 +19,7 @@ import sqlalchemy as sa
 
 from api.models import (
     ActionConfiguration, Event, EventConfiguration, MigrationIssue, OutcomeConfiguration, OutcomeEffect,
-    TemplateOutcome, Work, WorkPhase, WorkTemplate)
+    TemplateEvent, TemplateOutcome, Work, WorkPhase, WorkTemplate)
 from api.models.action import ActionEnum
 from api.services.event import EventService
 from api.workplan import work_effects
@@ -317,6 +317,7 @@ def test_an_added_occurrence_gets_effects_and_becomes_the_target(client, auth_he
         assert OutcomeEffect.query.filter_by(outcome_configuration_id=outcome.id).count() or not actions
 
 
+@pytest.mark.usefixtures("history")
 def test_running_it_again_writes_nothing(client, auth_header, session):
     """A second run leaves every effect row as it was and writes no history."""
     work = _create_work(client, auth_header, session, 6, "Effects again")
@@ -328,7 +329,28 @@ def test_running_it_again_writes_nothing(client, auth_header, session):
     session.flush()
 
     assert _snapshot(session, work) == before
-    assert before[1]
+    assert before[1] and all(before[0][:2])
+
+
+@pytest.mark.usefixtures("history")
+def test_a_flag_the_work_s_own_actions_decide_isn_t_rewritten(client, auth_header, session):
+    """Where version 1 and the work's own actions disagree on a flag, a second run still writes no history."""
+    work = _create_work(client, auth_header, session, _template_with(session, "LockWorkStartDate"), "Own flags")
+    locks = ActionConfiguration.query.join(OutcomeConfiguration).join(EventConfiguration).join(WorkPhase).filter(
+        WorkPhase.work_id == work.id, ActionConfiguration.action_id == ActionEnum.LOCK_WORK_START_DATE.value).all()
+    for lock in locks:
+        lock.is_active = False
+    backfill_work(work.id)
+    session.flush()
+    before = _snapshot(session, work)
+
+    backfill_work(work.id)
+    session.flush()
+
+    assert _snapshot(session, work) == before
+    milestones = {lock.outcome_configuration.event_configuration for lock in locks}
+    assert milestones and before[0][1] and all(
+        not m.sets_work_start and session.get(TemplateEvent, m.template_event_id).sets_work_start for m in milestones)
 
 
 def _snapshot(session, work):

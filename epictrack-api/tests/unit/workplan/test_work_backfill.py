@@ -93,6 +93,7 @@ def test_a_new_work_takes_its_settings_from_version_one(client, auth_header, ses
             work_backfill.EMPTY_START_AT, work_backfill.UNPARSED_START_AT, work_effects.DROPPED_ACTION}, template.name
 
 
+@pytest.mark.usefixtures("history")
 def test_running_it_again_changes_nothing(client, auth_header, session):
     """A second run writes no history rows and keeps the same issues."""
     work = _create_work(client, auth_header, session, 1, "Again")
@@ -107,7 +108,7 @@ def test_running_it_again_changes_nothing(client, auth_header, session):
     session.flush()
 
     assert (_history_rows(session, work), [(i.table_name, i.row_id, i.issue) for i in _issues(work)]) == before
-    assert [issue for issue in before[1] if issue[2] in work_backfill.ISSUES] == []
+    assert [issue for issue in before[1] if issue[2] in work_backfill.ISSUES] == [] and all(before[0])
 
 
 def _history_rows(session, work):
