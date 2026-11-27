@@ -40,7 +40,7 @@ from .common_service import event_compare_func
 from sqlalchemy import func, and_
 
 
-# v1 plans every phase's END the Day Zero way, so it counts that way too until S5 plans and counts by each phase's basis.
+# Running works' ENDs were planned the Day Zero way, so they're counted that way until the cut-over re-plans them.
 V1_DAY_BASIS = tpl.DAY_ZERO
 
 

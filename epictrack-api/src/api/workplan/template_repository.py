@@ -15,10 +15,25 @@
 
 Only this module knows the tables, so another store, such as DEMI, can replace it.
 """
-from typing import Optional
+import uuid
+from dataclasses import dataclass, field
+from typing import Dict, Optional, Tuple
 
-from api.models import TemplateEvent, WorkTemplateVersion, WorkType, db
+from api.models import TemplateEvent, WorkTemplate, WorkTemplateVersion, WorkType, db
+from api.models.work_template import WorkTemplateVersionStatus
 from api.workplan.core import template as tpl
+
+
+@dataclass
+class Lineage:
+    """The template rows' ids that a work's rows point back to, by the version's own identities."""
+
+    # template_phases.id by phase code
+    phases: Dict[int, int] = field(default_factory=dict)
+    # template_events.id by milestone key
+    events: Dict[uuid.UUID, int] = field(default_factory=dict)
+    # template_outcomes.id by milestone key and the outcome's place, from 1
+    outcomes: Dict[Tuple[uuid.UUID, int], int] = field(default_factory=dict)
 
 
 class TemplateRepository:
@@ -28,6 +43,29 @@ class TemplateRepository:
     def find(template_id: int, version: int) -> Optional[WorkTemplateVersion]:
         """Return one version of a template."""
         return WorkTemplateVersion.query.filter_by(work_template_id=template_id, version=version).one_or_none()
+
+    @staticmethod
+    def find_latest_published(work_type_id: int, ea_act_id: int) -> Optional[WorkTemplateVersion]:
+        """Return the version new works of this type and Act start from."""
+        return (
+            WorkTemplateVersion.query.join(WorkTemplate)
+            .filter(WorkTemplate.work_type_id == work_type_id, WorkTemplate.ea_act_id == ea_act_id,
+                    WorkTemplateVersion.status == WorkTemplateVersionStatus.PUBLISHED)
+            .order_by(WorkTemplateVersion.version.desc())
+            .first()
+        )
+
+    @staticmethod
+    def lineage(record: WorkTemplateVersion) -> Lineage:
+        """Return the ids of a saved version's rows."""
+        lineage = Lineage()
+        for phase in record.phases:
+            lineage.phases[phase.phase_code_id] = phase.id
+            for event in phase.events:
+                lineage.events[event.key] = event.id
+                for place, outcome in enumerate(event.outcomes, start=1):
+                    lineage.outcomes[(event.key, place)] = outcome.id
+        return lineage
 
     @staticmethod
     def load(record: WorkTemplateVersion) -> tpl.Version:
