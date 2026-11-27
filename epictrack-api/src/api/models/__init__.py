@@ -85,3 +85,4 @@ from .template_event import AnchorPoint, TemplateEvent
 from .template_outcome import TemplateOutcome, TemplateOutcomeEffect
 from .interruption_kind import InterruptionKind
 from .migration_issue import MigrationIssue
+from .outcome_effect import OutcomeEffect

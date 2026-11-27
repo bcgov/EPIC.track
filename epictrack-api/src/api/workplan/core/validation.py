@@ -116,7 +116,7 @@ def _effect_problems(version, rule_set):
                     problems.append(f"{label} isn't an effect kind in the {rule_set.name} rule set")
                     continue
                 found = [f"{label} {problem}" for problem in _target_problems(effect, kind, version)]
-                found += [f"{label} {problem}" for problem in _param_problems(effect, kind)]
+                found += [f"{label} {problem}" for problem in param_problems(effect, kind)]
                 if not found and kind.check:
                     found = [f"{label} {problem}" for problem in kind.check(effect, phase, event, version)]
                 problems += found
@@ -134,7 +134,8 @@ def _target_problems(effect, kind, version):
     return [] if found else ["has a target that isn't in the version"]
 
 
-def _param_problems(effect, kind):
+def param_problems(effect, kind) -> List[str]:
+    """Return the problems with an effect's params for its kind."""
     problems = []
     allowed = {**kind.params, **kind.optional_params}
     for name in effect.params:

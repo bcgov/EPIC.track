@@ -13,10 +13,11 @@
 # limitations under the License.
 """Fills each work's template lineage and settings from its own legacy rows and version 1.
 
-The migration that adds the columns runs it for every work. The current engine runs it for a work after
-creating rows, so the columns stay current until the new engine takes over. Running it again changes nothing.
+The migration that adds the columns runs backfill_settings for every work. The current engine runs backfill_work
+for a work after creating rows, so the columns and its outcome effects stay current until the new engine takes
+over. Running either again changes nothing.
 
-Prod runs the whole feature branch in one upgrade, so this reads and writes only columns that exist at
+Prod runs the whole feature branch in one upgrade, so backfill_settings reads and writes only columns that exist at
 migration 5f07df4f6621. A later column gets a backfill of its own.
 """
 from collections import defaultdict
@@ -27,8 +28,10 @@ from typing import Any, Dict, Iterable, List, NamedTuple, Optional, Tuple
 import sqlalchemy as sa
 
 from api.models import Event, EventConfiguration, OutcomeConfiguration, Work, WorkPhase, db
+from api.workplan import work_effects
 from api.workplan.core import template as tpl
 from api.workplan.legacy import EMPTY_START_AT, ROLES_BY_EVENT_TYPE, UNPARSED_START_AT, anchor_from_start_at
+from api.workplan.migration_issues import Issue, replace_issues
 from api.workplan.rules import get_rule_set
 
 RETIRED_TEMPLATE_ROW = "retired_template_row"
@@ -43,16 +46,6 @@ _MODELS = {
 
 # {table: {row id: {column: value}}}
 Updates = Dict[str, Dict[int, Dict[str, Any]]]
-
-
-class Issue(NamedTuple):
-    """A row the backfill had to assume something for, or couldn't link to version 1."""
-
-    work_id: int
-    table_name: str
-    row_id: int
-    issue: str
-    detail: str
 
 
 @dataclass
@@ -247,18 +240,34 @@ def backfill_settings(connection, work_ids: Optional[Iterable[int]] = None) -> L
             sa.text(f"UPDATE {table} SET {', '.join(f'{c} = :{c}' for c in columns)} WHERE id = :id"),
             [{"id": row_id, **values} for row_id, values in rows.items()],
         )
-    _replace_issues(connection, [work.id for work in works], all_issues)
+    replace_issues(connection, [work.id for work in works], all_issues, ISSUES)
     return all_issues
 
 
-def backfill_work_settings(work_id: int) -> None:
-    """Bring one work's settings up to date through the session, so history records what changes."""
+def backfill_work(work_id: int) -> None:
+    """Bring one work's settings and outcome effects up to date through the session, so history records changes."""
     db.session.flush()
-    works, versions = load_work_rows(db.session.connection(), [work_id])
+    connection = db.session.connection()
+    works, versions = load_work_rows(connection, [work_id])
     if not works:
         return
     [work] = works
     updates, issues = plan_settings(work, versions.get((work.work_type_id, work.ea_act_id)), datetime.now(timezone.utc))
+    for row in updates.get("event_configurations", {}).values():
+        # The effects backfill decides these, from version 1 and the work's own actions.
+        del row["repeatable"], row["sets_work_start"]
+    _apply_updates(updates)
+    # The effects backfill reads the lineage just written.
+    db.session.flush()
+    [actions], lookups = work_effects.load_work_actions(connection, [work_id])
+    effects = work_effects.plan_effects(actions, lookups)
+    _apply_updates({"event_configurations": effects.flags})
+    work_effects.apply_effects(actions, effects)
+    replace_issues(connection, [work_id], issues, ISSUES)
+    replace_issues(connection, [work_id], effects.issues, work_effects.ISSUES)
+
+
+def _apply_updates(updates: Updates):
     for table, rows in updates.items():
         model = _MODELS[table]
         for record in db.session.query(model).filter(model.id.in_(list(rows))):
@@ -266,24 +275,8 @@ def backfill_work_settings(work_id: int) -> None:
                 value = _python_value(model, column, value)
                 if getattr(record, column) != value:
                     setattr(record, column, value)
-    _replace_issues(db.session.connection(), [work_id], issues)
 
 
 def _python_value(model, column: str, value):
     enum_class = getattr(model.__table__.c[column].type, "enum_class", None)
     return enum_class(value) if enum_class is not None and value is not None else value
-
-
-def _replace_issues(connection, work_ids: List[int], issues: List[Issue]):
-    if not work_ids:
-        return
-    connection.execute(
-        sa.text("DELETE FROM migration_issues WHERE work_id = ANY(:ids) AND issue = ANY(:codes)"),
-        {"ids": work_ids, "codes": list(ISSUES)},
-    )
-    if issues:
-        connection.execute(
-            sa.text("INSERT INTO migration_issues (work_id, table_name, row_id, issue, detail)"
-                    " VALUES (:work_id, :table_name, :row_id, :issue, :detail)"),
-            [issue._asdict() for issue in issues],
-        )

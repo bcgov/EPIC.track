@@ -93,7 +93,7 @@ from api.services.work_phase import WorkPhaseService
 from api.utils import util
 from api.utils.roles import Membership
 from api.utils.roles import Role as KeycloakRole
-from api.workplan.work_backfill import backfill_work_settings
+from api.workplan.work_backfill import backfill_work
 
 
 # pylint:disable=not-callable, too-many-lines
@@ -541,7 +541,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 work.current_work_phase_id = work_phase.id
             sort_order = sort_order + 1
         # dev-note: find_code_values_by_type - we should use RoleService instead of the "code" way
-        backfill_work_settings(work.id)
+        backfill_work(work.id)
 
         if commit:
             db.session.commit()
