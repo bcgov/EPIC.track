@@ -14,11 +14,11 @@
 """Model to handle all operations related to WorkPhase."""
 
 from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String
-from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
 from .phase_code import PhaseVisibilityEnum
+from .template_phase import DayBasis, TimeLimitKind
 
 
 class WorkPhase(BaseModelVersioned):
@@ -46,21 +46,13 @@ class WorkPhase(BaseModelVersioned):
     sort_order = Column(Integer, nullable=False)
     visibility = Column(Enum(PhaseVisibilityEnum), default=PhaseVisibilityEnum.REGULAR)
     responsibility_notes = Column(String(2000))
+    template_phase_id = Column(ForeignKey("template_phases.id"), nullable=True)
+    time_limit_kind = Column(
+        Enum(TimeLimitKind, name="time_limit_kind_enum"), nullable=False, default=TimeLimitKind.FREE
+    )
+    day_basis = Column(Enum(DayBasis, name="day_basis_enum"), nullable=False, default=DayBasis.ONE)
+    is_intake = Column(Boolean, nullable=False, default=False)
+    requires_overage_responsibility = Column(Boolean, nullable=False, default=False)
 
     work = relationship("Work", foreign_keys=[work_id], lazy="select")
     phase = relationship("PhaseCode", foreign_keys=[phase_id], lazy="select")
-
-    @property
-    def requires_overage_responsibility(self) -> bool:
-        """Return whether an overage in this phase needs a responsibility before the phase can complete."""
-        return bool(self.legislated or self.work.work_type.all_phases_require_overage_responsibility)
-
-    @hybrid_property
-    def is_intake(self) -> bool:
-        """Return whether the phase code is an intake phase."""
-        return self.phase.is_intake
-
-    @is_intake.expression
-    def is_intake(self):
-        """SQL expression for is_intake."""
-        return self.phase.has(is_intake=True)

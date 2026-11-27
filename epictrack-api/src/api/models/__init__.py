@@ -83,3 +83,5 @@ from .work_template import WorkTemplate, WorkTemplateVersion, WorkTemplateVersio
 from .template_phase import BoundarySide, DayBasis, TemplatePhase, TimeLimitKind
 from .template_event import AnchorPoint, TemplateEvent
 from .template_outcome import TemplateOutcome, TemplateOutcomeEffect
+from .interruption_kind import InterruptionKind
+from .migration_issue import MigrationIssue

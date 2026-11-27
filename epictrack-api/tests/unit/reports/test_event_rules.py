@@ -28,6 +28,7 @@ from api.reports.anticipated_schedule_report import EAAnticipatedScheduleReport
 from api.reports.event_rules import anticipated_schedule_referrals_and_decisions, thirty_sixty_ninety_referrals
 from api.reports.resource_forecast_report import EAResourceForeCastReport
 from api.reports.thirty_sixty_ninety_report import ThirtySixtyNinetyReport
+from api.workplan.work_backfill import backfill_work_settings
 from tests.utilities.factory_scenarios import TestJwtClaims, TestWorkInfo
 from tests.utilities.factory_utils import factory_work_model
 
@@ -110,7 +111,7 @@ EVENTS = {
 }
 
 
-def _work_phase(work, phase_code, start_date):
+def _work_phase(work, phase_code, start_date, **columns):
     return WorkPhase(
         work_id=work.id,
         phase_id=phase_code.id,
@@ -118,6 +119,7 @@ def _work_phase(work, phase_code, start_date):
         start_date=start_date,
         end_date=start_date + timedelta(days=400),
         sort_order=1,
+        **{"is_intake": phase_code.is_intake, **columns},
     ).flush()
 
 
@@ -184,10 +186,12 @@ def test_intake_phases_are_flagged(db):  # pylint: disable=unused-argument
 
 
 def test_work_phase_is_intake(db):  # pylint: disable=unused-argument
-    """A work phase is intake when its phase code is, in Python and in SQL."""
+    """A work phase is intake when its phase code is, once the work's settings are backfilled."""
     work = factory_work_model()
-    intake = _work_phase(work, PhaseCode.query.filter_by(is_intake=True).first(), datetime.now(utc))
-    other = _work_phase(work, PhaseCode.query.filter_by(is_intake=False).first(), datetime.now(utc))
+    intake = _work_phase(work, PhaseCode.query.filter_by(is_intake=True).first(), datetime.now(utc), is_intake=False)
+    other = _work_phase(work, PhaseCode.query.filter_by(is_intake=False).first(), datetime.now(utc), is_intake=True)
+
+    backfill_work_settings(work.id)
 
     assert intake.is_intake is True
     assert other.is_intake is False

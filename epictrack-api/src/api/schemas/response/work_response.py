@@ -39,9 +39,21 @@ class WorkPhaseResponseSchema(
 
     requires_overage_responsibility = fields.Boolean(dump_only=True)
 
+    time_limit_kind = fields.Method("get_time_limit_kind")
+
+    day_basis = fields.Method("get_day_basis")
+
     def get_visibility(self, obj: WorkPhase) -> str:
         """Return value for the visibility"""
         return obj.visibility if isinstance(obj.visibility, str) else obj.visibility.value
+
+    def get_time_limit_kind(self, obj: WorkPhase) -> str:
+        """Return the time limit kind's name."""
+        return obj.time_limit_kind.value if obj.time_limit_kind else None
+
+    def get_day_basis(self, obj: WorkPhase) -> str:
+        """Return the day basis's name."""
+        return obj.day_basis.value if obj.day_basis else None
 
 
 class IndigenousWorkResponseSchema(
