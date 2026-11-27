@@ -244,7 +244,7 @@ class EventService:
     def _update_event_from_plan(cls, event: Event, data: dict, push_events: bool, commit: bool) -> Event:
         """Save a milestone's dates through the v2 planner, with everything they move."""
         had_actual = event.actual_date is not None
-        changes = cls._plan_change(event, data, push_events)
+        changes = None if current_app.config["SKIP_EVENT_LOGIC"] else cls._plan_change(event, data, push_events)
         if changes is not None and changes.closed_phases:
             work_events = cls.find_events(event.work_id, None, PRIMARY_CATEGORIES)
             for phase_id, end_date in changes.closed_phases.items():

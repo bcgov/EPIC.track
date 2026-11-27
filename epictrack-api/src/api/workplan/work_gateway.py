@@ -24,11 +24,10 @@ class WorkGateway:  # pylint: disable=too-few-public-methods
 
     @staticmethod
     def apply(work_id: int, changes: Changeset) -> None:
-        """Set the work's current phase, state and start date as the change decided."""
+        """Set the work's current phase, completion and start date as the change decided."""
         work = db.session.get(Work, work_id)
         if changes.current_phase_id is not None:
             work.current_work_phase_id = changes.current_phase_id
-            work.work_state = WorkStateEnum.IN_PROGRESS
         if changes.work_completed:
             work.work_state = WorkStateEnum.COMPLETED
         if changes.work_start is not None:

@@ -135,6 +135,17 @@ def test_a_day_one_deadline_counts_the_start_day():
     assert _planned(_change(plan, 21, day=14))[23] == 42
 
 
+def test_a_legislated_end_planned_the_v1_way_still_follows_its_start():
+    """Until running works are re-planned, a Day One phase counts Day Zero, and an END on either deadline follows."""
+    plan = _work()
+    plan.phases[1].day_basis, plan.phases[1].count_basis = tpl.DAY_ONE, tpl.DAY_ZERO
+
+    changes = _change(plan, 21, day=14)
+    assert (_planned(changes)[23], changes.past_deadline) == (43, False)
+    plan.milestones[23].anticipated = _day(39)
+    assert _planned(_change(plan, 21, day=14))[23] == 42
+
+
 def test_recording_a_start_closes_the_phase_before_it():
     """Recording the next phase's start backdates the earlier phase's end and completes it."""
     changes = _change(_work(), 21, actual=11)
@@ -188,6 +199,15 @@ def test_only_new_problems_block_a_change():
         _change(plan, 32, day=72)
 
 
+def test_a_phase_already_ending_before_its_start_doesn_t_block_a_change():
+    """The phases can still move when one of them already ends before it starts."""
+    plan = _work()
+    plan.milestones[33].anticipated = _day(40)
+    plan.phases[2].end = _day(40)
+
+    assert _planned(_change(plan, 13, day=15))[33] == 45
+
+
 def test_the_last_end_completes_the_work():
     """With every phase done, the work is completed."""
     plan = _work()
@@ -199,6 +219,18 @@ def test_the_last_end_completes_the_work():
     changes = _change(plan, 33, actual=60)
 
     assert (changes.closed_phases, changes.current_phase_id, changes.work_completed) == ({3: _day(60)}, None, True)
+
+
+def test_editing_an_ended_work_leaves_its_state():
+    """A work whose phases are all complete isn't completed again when a planned date moves."""
+    plan = _work()
+    for phase in plan.phases:
+        phase.completed = True
+    plan.current_phase_id = 3
+
+    changes = _change(plan, 32, day=51)
+
+    assert (changes.current_phase_id, changes.work_completed) == (None, False)
 
 
 def test_the_first_start_sets_the_work_start():

@@ -109,7 +109,7 @@ class _Planner:  # pylint: disable=too-many-instance-attributes
         index = self.plan.phases.index(self.phase)
         old_date = milestone.date
         old_end = milestone.date + _days(milestone.number_of_days)
-        old_deadline = self._deadline(self.phase)
+        old_deadlines = {self._deadline(self.phase), self._deadline(self.phase, self.phase.day_basis)}
         later = self._later_in_phase(milestone) if milestone.in_cascade else []
         milestone.anticipated, milestone.actual = request.anticipated, request.actual
         milestone.number_of_days = request.number_of_days
@@ -121,7 +121,7 @@ class _Planner:  # pylint: disable=too-many-instance-attributes
         if position == tpl.END:
             self._end_set(index, (milestone.date - old_date).days)
         elif position == tpl.START:
-            self._start_set(index, (milestone.date - old_date).days, old_deadline, later)
+            self._start_set(index, (milestone.date - old_date).days, old_deadlines, later)
         elif request.push:
             self._push(later, self.days_moved)
         self._date_children()
@@ -143,7 +143,7 @@ class _Planner:  # pylint: disable=too-many-instance-attributes
             and _order(m) > _order(milestone) and not (m.position == tpl.END and self.phase.legislated)
         ]
 
-    def _deadline(self, phase: PlanPhase) -> Optional[date]:
+    def _deadline(self, phase: PlanPhase, day_basis: Optional[str] = None) -> Optional[date]:
         start = self.plan.boundary(phase, tpl.START)
         if not phase.legislated or start is None:
             return None
@@ -151,7 +151,7 @@ class _Planner:  # pylint: disable=too-many-instance-attributes
             Milestone(m.role, m.actual, m.number_of_days)
             for m in (self.plan.milestones[i] for i in phase.milestone_ids)
         ]
-        return deadline(start.date, phase.time_limit, phase.day_basis, milestones)
+        return deadline(start.date, phase.time_limit, day_basis or phase.count_basis or phase.day_basis, milestones)
 
     def _move(self, milestone: PlanMilestone, days: int):
         if days and milestone.actual is None:
@@ -200,7 +200,7 @@ class _Planner:  # pylint: disable=too-many-instance-attributes
                 if milestone.anchor_id is None and milestone.in_cascade:
                     self._move(milestone, shift)
 
-    def _start_set(self, index: int, days: int, old_deadline: Optional[date], later: List[PlanMilestone]):
+    def _start_set(self, index: int, days: int, old_deadlines: Set[date], later: List[PlanMilestone]):
         """The previous phase's end follows this start; a legislated END follows its deadline."""
         phase, start = self.phase, self.milestone
         self.reshaped.add(phase.id)
@@ -209,10 +209,10 @@ class _Planner:  # pylint: disable=too-many-instance-attributes
         else:
             self._set_previous_end(index - 1, start, days)
         end = self.plan.boundary(phase, tpl.END)
-        if phase.legislated and end is not None and end.actual is None and end.anticipated == old_deadline:
-            end_days = (self._deadline(phase) - end.anticipated).days
-            self._move(end, end_days)
-            self._end_set(index, end_days)
+        # An END on its deadline, counted either way, follows it.
+        if phase.legislated and end is not None and end.actual is None and end.anticipated in old_deadlines:
+            self._move(end, days)
+            self._end_set(index, days)
         if self.request.push:
             self._push(later, self.days_moved)
 
@@ -309,10 +309,12 @@ class _Planner:  # pylint: disable=too-many-instance-attributes
         for entry, old in zip(self.plan.calendar, before.calendar):
             if entry.anticipated != old.anticipated:
                 result.calendar[entry.id] = entry.anticipated
-        current = next((phase.id for phase in self.plan.phases if not phase.completed), None)
-        if current != before.current_phase_id:
-            result.current_phase_id = current
-        result.work_completed = current is None and before.current_phase_id is not None
+        # Only closing a phase moves the work on: an ended work keeps its current phase and state.
+        if result.closed_phases:
+            current = next((phase.id for phase in self.plan.phases if not phase.completed), None)
+            if current != before.current_phase_id:
+                result.current_phase_id = current
+            result.work_completed = current is None
         if self.plan.work_start != before.work_start:
             result.work_start = self.plan.work_start
         return result

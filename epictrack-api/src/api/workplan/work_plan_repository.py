@@ -38,6 +38,7 @@ from api.workplan.core import template as tpl
 from api.workplan.core.change import Changeset
 from api.workplan.core.new_work import PlannedPhase
 from api.workplan.core.work_plan import PlanCalendarEntry, PlanMilestone, PlanPhase, WorkPlan
+from api.workplan.engine import V1_DAY_BASIS
 from api.workplan.template_repository import Lineage, TemplateRepository
 from api.workplan.work_gateway import WorkGateway
 
@@ -65,7 +66,7 @@ class WorkPlanRepository:  # pylint: disable=too-few-public-methods
             phase.id: PlanPhase(
                 id=phase.id, time_limit=phase.number_of_days or 0, day_basis=phase.day_basis.value,
                 legislated=bool(phase.legislated), completed=bool(phase.is_completed),
-                start=phase.start_date.date(), end=phase.end_date.date(),
+                start=phase.start_date.date(), end=phase.end_date.date(), count_basis=V1_DAY_BASIS,
             )
             for phase in phases
         }

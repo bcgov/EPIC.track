@@ -67,6 +67,8 @@ class PlanPhase:  # pylint: disable=too-many-instance-attributes
     start: date
     end: date
     milestone_ids: List[int] = field(default_factory=list)
+    # The basis days are counted on, when it isn't the one the phase's END was planned on.
+    count_basis: Optional[str] = None
 
 
 @dataclass

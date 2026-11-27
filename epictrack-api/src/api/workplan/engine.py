@@ -18,8 +18,13 @@ setting, so each environment switches when it's ready and can switch back.
 """
 from flask import current_app
 
+from api.workplan.core import template as tpl
+
 V1 = "v1"
 V2 = "v2"
+
+# Running works' ENDs were planned the Day Zero way, so they're counted that way until the cut-over re-plans them.
+V1_DAY_BASIS = tpl.DAY_ZERO
 
 
 def runs_v2() -> bool:

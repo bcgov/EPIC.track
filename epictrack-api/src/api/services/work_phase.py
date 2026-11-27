@@ -33,15 +33,11 @@ from api.models.work import Work, WorkStateEnum
 from api.models.phase_code import PhaseCode as Phase
 from api.models.work_type import WorkType, WorkTypeEnum
 from api.models.project import Project
-from api.workplan.core import template as tpl
 from api.workplan.core.days import Milestone, PhaseDays, PhaseFacts, phase_days
+from api.workplan.engine import V1_DAY_BASIS
 
 from .common_service import event_compare_func
 from sqlalchemy import func, and_
-
-
-# Running works' ENDs were planned the Day Zero way, so they're counted that way until the cut-over re-plans them.
-V1_DAY_BASIS = tpl.DAY_ZERO
 
 
 def _actual_date(events: List[Event], position: EventPositionEnum) -> Optional[date]:
