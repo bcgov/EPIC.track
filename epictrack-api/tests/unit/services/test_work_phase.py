@@ -255,6 +255,25 @@ class TestFindWorkPhaseStatus:
     @patch("api.services.work_phase.PhaseOverageResponsibilityService")
     @patch("api.services.work_phase.WorkPhaseService._get_milestone_information")
     @patch("api.services.work_phase.WorkPhaseService._filter_sort_events")
+    def test_a_running_suspension_stops_the_clock(self, mock_filter, mock_milestone_info, mock_responsibility_service):
+        """A phase suspended 10 days in has taken 10 days, however long ago that was."""
+        phase = _current_phase(30, started_days_ago=25)
+        phase.is_suspended = True
+        phase.suspended_date = phase.start_date + datetime.timedelta(days=10)
+        mock_filter.return_value = [
+            _milestone(EventPositionEnum.START, actual_date=phase.start_date),
+            _milestone(EventPositionEnum.END),
+        ]
+        mock_milestone_info.return_value = {}
+        mock_responsibility_service.find_by_work_phase_id.return_value = []
+
+        [result] = WorkPhaseService.find_work_phase_status(10, None, [phase], MagicMock())
+
+        assert (result["total_number_of_days"], result["days_taken"], result["days_left"]) == (30, 10, 20)
+
+    @patch("api.services.work_phase.PhaseOverageResponsibilityService")
+    @patch("api.services.work_phase.WorkPhaseService._get_milestone_information")
+    @patch("api.services.work_phase.WorkPhaseService._filter_sort_events")
     def test_a_completed_phase_counts_from_its_start_to_its_end(
         self, mock_filter, mock_milestone_info, mock_responsibility_service
     ):
