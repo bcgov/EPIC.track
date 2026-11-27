@@ -21,9 +21,11 @@ import sqlalchemy as sa
 
 from api.models import (
     Event, EventConfiguration, OutcomeConfiguration, OutcomeEffect, TemplateEvent, TemplatePhase, Work,
-    WorkCalendarEvent, WorkPhase, WorkTemplate)
+    WorkCalendarEvent, WorkPhase, WorkTemplate, WorkTemplateVersion)
 from api.models.event_category import EventCategoryEnum
+from api.models.work_template import WorkTemplateVersionStatus
 from api.workplan import engine
+from api.workplan.template_repository import TemplateRepository
 from api.workplan.work_backfill import backfill_work
 from tests.utilities.helpers import prepare_work_payload
 
@@ -134,3 +136,17 @@ def _anchored_date(session, configuration, source_event_id):
     from_end = configuration.anchor_point.value == "END"
     return source.anticipated_date + timedelta(
         days=(source.number_of_days if from_end else 0) + configuration.offset_days)
+
+
+def test_new_works_start_from_the_latest_published_version(session):
+    """A draft is never used, and a later published version takes over from an earlier one."""
+    template = WorkTemplate.query.order_by(WorkTemplate.id).first()
+    [first] = template.versions
+    draft = WorkTemplateVersion(work_template_id=template.id, version=2, status=WorkTemplateVersionStatus.DRAFT)
+    session.add(draft)
+    session.flush()
+
+    assert TemplateRepository.find_latest_published(template.work_type_id, template.ea_act_id) == first
+    draft.status = WorkTemplateVersionStatus.PUBLISHED
+    session.flush()
+    assert TemplateRepository.find_latest_published(template.work_type_id, template.ea_act_id) == draft

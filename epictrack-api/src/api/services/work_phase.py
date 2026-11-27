@@ -35,13 +35,12 @@ from api.models.work_type import WorkType, WorkTypeEnum
 from api.models.project import Project
 from api.workplan.core import template as tpl
 from api.workplan.core.days import Milestone, PhaseDays, PhaseFacts, phase_days
-from api.workplan.engine import runs_v2
 
 from .common_service import event_compare_func
 from sqlalchemy import func, and_
 
 
-# v1 plans every phase's END the Day Zero way, so it counts that way too; v2 plans and counts by each phase's basis.
+# Running works' ENDs were planned the Day Zero way, so they're counted that way until the cut-over re-plans them.
 V1_DAY_BASIS = tpl.DAY_ZERO
 
 
@@ -317,7 +316,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         )
         facts = PhaseFacts(
             start=start, end=end, time_limit=work_phase.number_of_days, planned_days=planned_days,
-            day_basis=work_phase.day_basis.value if runs_v2() else V1_DAY_BASIS, is_current=is_current,
+            day_basis=V1_DAY_BASIS, is_current=is_current,
             suspended_since=work_phase.suspended_date.date() if work_phase.is_suspended else None,
             milestones=[
                 Milestone(e.event_configuration.role, e.actual_date.date() if e.actual_date else None, e.number_of_days)
