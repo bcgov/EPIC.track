@@ -14,6 +14,7 @@
 """Tests for editing milestone dates through the API, as the v2 engine plans them."""
 from datetime import timedelta
 from http import HTTPStatus
+from unittest.mock import patch
 
 import pytest
 
@@ -136,6 +137,24 @@ def test_recording_an_end_opens_the_next_phase(client, auth_header, session):
     assert session.get(Event, start_id).actual_date == end_date + timedelta(days=1)
     assert session.get(WorkPhase, first_id).is_completed
     assert session.get(Work, work_id).current_work_phase_id == second_id
+
+
+@pytest.mark.usefixtures("v2")
+def test_skipping_the_date_logic_saves_only_the_milestone(app, client, auth_header, session):
+    """With SKIP_EVENT_LOGIC set, moving an END leaves the next phase where it was."""
+    work = _create_work(client, auth_header, session, WorkTemplate.query.order_by(WorkTemplate.work_type_id).first()
+                        .work_type_id, "Skip the date logic")
+    first, second = _phases(work)[:2]
+    end, start = _boundary(first, EventPositionEnum.END), _boundary(second, EventPositionEnum.START)
+    end_id, end_date, start_id, start_date = end.id, end.anticipated_date, start.id, start.anticipated_date
+
+    with patch.dict(app.config, {"SKIP_EVENT_LOGIC": True}):
+        saved = _save(client, auth_header, session, end, anticipated=end_date + timedelta(days=5))
+
+    assert saved.status_code == HTTPStatus.OK, saved.json
+    session.expire_all()
+    assert session.get(Event, start_id).anticipated_date == start_date
+    assert session.get(Event, end_id).anticipated_date.date() == (end_date + timedelta(days=5)).date()
 
 
 @pytest.mark.usefixtures("v2")
