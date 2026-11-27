@@ -43,6 +43,9 @@ auth:
 python:
   pythonBuffered: 1
   connectTimeout: 60
+# The date engine: v1 (current) or v2 (template versions). v2 is switched on per environment.
+phaseEngine: v1
+
 demi:
   # APIM /machine base URL. Empty keeps the push off.
   pushUrl: ""

@@ -73,6 +73,9 @@ class _Config():  # pylint: disable=too-few-public-methods
     # much hurdles
     SKIP_EVENT_LOGIC = _get_config('SKIP_EVENT_LOGIC', default=False) == 'True'
 
+    # v1 runs the current date logic; v2 the template versions' (api/workplan/engine.py).
+    PHASE_ENGINE = _get_config('PHASE_ENGINE', default='v1')
+
     ALEMBIC_INI = 'migrations/alembic.ini'
 
     # POSTGRESQL

@@ -257,13 +257,19 @@ def backfill_work(work_id: int) -> None:
         # The effects backfill decides these, from version 1 and the work's own actions.
         del row["repeatable"], row["sets_work_start"]
     _apply_updates(updates)
-    # The effects backfill reads the lineage just written.
+    replace_issues(connection, [work_id], issues, ISSUES)
+    backfill_work_effects(work_id)
+
+
+def backfill_work_effects(work_id: int) -> None:
+    """Bring one work's outcome effects, and the milestone flags its actions decide, up to date through the session."""
+    # The effects backfill reads the lineage already written.
     db.session.flush()
+    connection = db.session.connection()
     [actions], lookups = work_effects.load_work_actions(connection, [work_id])
     effects = work_effects.plan_effects(actions, lookups)
     _apply_updates({"event_configurations": effects.flags})
     work_effects.apply_effects(actions, effects)
-    replace_issues(connection, [work_id], issues, ISSUES)
     replace_issues(connection, [work_id], effects.issues, work_effects.ISSUES)
 
 

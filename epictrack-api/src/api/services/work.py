@@ -93,7 +93,11 @@ from api.services.work_phase import WorkPhaseService
 from api.utils import util
 from api.utils.roles import Membership
 from api.utils.roles import Role as KeycloakRole
-from api.workplan.work_backfill import backfill_work
+from api.workplan.core.new_work import plan_new_work
+from api.workplan.engine import runs_v2
+from api.workplan.template_repository import TemplateRepository
+from api.workplan.work_backfill import backfill_work, backfill_work_effects
+from api.workplan.work_plan_repository import WorkPlanRepository
 
 
 # pylint:disable=not-callable, too-many-lines
@@ -500,6 +504,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
         cls._check_duplicate_title(payload)
         work = Work(**payload)
         work.work_state = WorkStateEnum.IN_PROGRESS
+        if runs_v2():
+            return cls._create_work_from_version(work, commit)
         phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(
             work.ea_act_id, work.work_type_id
         )
@@ -543,6 +549,24 @@ class WorkService:  # pylint: disable=too-many-public-methods
         # dev-note: find_code_values_by_type - we should use RoleService instead of the "code" way
         backfill_work(work.id)
 
+        if commit:
+            db.session.commit()
+        return work
+
+    @classmethod
+    def _create_work_from_version(cls, work: Work, commit: bool) -> Work:
+        """Create the work's phases, milestones and outcomes from the latest published version of its template."""
+        record = TemplateRepository.find_latest_published(work.work_type_id, work.ea_act_id)
+        if record is None:
+            raise UnprocessableEntityError("No configuration found")
+        work.template_version_id = record.id
+        work = work.flush()
+        cls.create_special_fields(work)
+        version = TemplateRepository.load(record)
+        work_phases = WorkPlanRepository.create(work, record, version, plan_new_work(version))
+        work.current_work_phase_id = work_phases[0].id
+        # Its effects come from its copied actions, as every work's do until the legacy tables go.
+        backfill_work_effects(work.id)
         if commit:
             db.session.commit()
         return work

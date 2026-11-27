@@ -185,6 +185,12 @@ spec:
                 name: {{ .Chart.Name }}
                 key: DEMI_PUSH_URL
                 optional: true
+          - name: PHASE_ENGINE
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Chart.Name }}
+                key: PHASE_ENGINE
+                optional: true
           - name: DEMI_PUSH_KEY
             valueFrom:
               secretKeyRef:

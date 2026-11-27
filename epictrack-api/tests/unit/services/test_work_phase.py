@@ -3,8 +3,11 @@ import datetime
 from datetime import timezone
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from api.services.work_phase import WorkPhaseService
 from api.models.event_template import EventPositionEnum
+from api.models.template_phase import DayBasis
 from api.models.event_category import EventCategoryEnum
 
 
@@ -290,6 +293,31 @@ class TestFindWorkPhaseStatus:
         [result] = WorkPhaseService.find_work_phase_status(10, None, [phase], MagicMock())
 
         assert (result["total_number_of_days"], result["days_taken"], result["days_left"]) == (100, 60, 100)
+
+    @pytest.mark.parametrize("phase_engine, days_taken", [("v1", 60), ("v2", 61)])
+    @patch("api.services.work_phase.PhaseOverageResponsibilityService")
+    @patch("api.services.work_phase.WorkPhaseService._get_milestone_information")
+    @patch("api.services.work_phase.WorkPhaseService._filter_sort_events")
+    def test_v2_counts_by_the_phase_s_day_basis(  # pylint: disable=too-many-arguments
+        self, mock_filter, mock_milestone_info, mock_responsibility_service, app, phase_engine, days_taken
+    ):
+        """A Day One phase counts its start day under v2, which plans its END that way; v1 counts from Day Zero."""
+        phase = _current_phase(100, started_days_ago=90)
+        phase.is_completed = True
+        phase.day_basis = DayBasis.ONE
+        mock_filter.return_value = [
+            _milestone(EventPositionEnum.START, actual_date=phase.start_date),
+            _milestone(EventPositionEnum.END, actual_date=phase.start_date + datetime.timedelta(days=60)),
+        ]
+        mock_milestone_info.return_value = {}
+        mock_responsibility_service.find_by_work_phase_id.return_value = []
+        app.config["PHASE_ENGINE"] = phase_engine
+        try:
+            [result] = WorkPhaseService.find_work_phase_status(10, None, [phase], MagicMock())
+        finally:
+            app.config["PHASE_ENGINE"] = "v1"
+
+        assert result["days_taken"] == days_taken
 
     @patch("api.services.work_phase.PhaseOverageResponsibilityService")
     @patch("api.services.work_phase.WorkPhaseService._get_milestone_information")
