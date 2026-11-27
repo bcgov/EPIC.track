@@ -273,11 +273,16 @@ class _Builder:  # pylint: disable=too-many-instance-attributes, too-few-public-
                             outcome.effects.append(effect)
                 event.outcomes.append(outcome)
 
-    def _phase_named(self, item, source, include_renamed=True) -> Optional[tpl.Phase]:
+    def _is_this_template(self, item, source) -> bool:
         for name, expected in (("work_type_id", self.legacy.work_type_id), ("ea_act_id", self.legacy.ea_act_id)):
             if item.get(name) is not None and item[name] != expected:
                 self.misses.append(f"{source.label}: {name} {item[name]} isn't this template's")
-                return None
+                return False
+        return True
+
+    def _phase_named(self, item, source, include_renamed=True) -> Optional[tpl.Phase]:
+        if not self._is_this_template(item, source):
+            return None
         name = item.get("phase_name")
         if not name:
             return source.phase
@@ -305,6 +310,18 @@ class _Builder:  # pylint: disable=too-many-instance-attributes, too-few-public-
         found = "is ambiguous" if matches else "not found"
         self.misses.append(f"{source.label}: milestone '{name}' in '{phase.name}' {found}")
         return None
+
+    def _occurrence_target(self, item, source) -> Optional[tpl.Event]:
+        # AddEvent mostly brings in hidden milestones, so a single hidden match wins a shared name.
+        return self._event_named(item, source, prefer_hidden=True)
+
+    def _default_start_at(self, target: tpl.Event) -> Optional[str]:
+        return self.start_at[target.legacy_event_template_id]
+
+    def _phase_code_named(self, item, source) -> Optional[int]:
+        # AddPhase finds the phase code by its own name, never by a new name.
+        phase = self._phase_named(item, source, include_renamed=False)
+        return phase.phase_code_id if phase else None
 
     def _set_work_state(self, params, _source):
         return [tpl.Effect("SET_WORK_STATE", params={"work_state": params.get("work_state")})]
@@ -359,11 +376,10 @@ class _Builder:  # pylint: disable=too-many-instance-attributes, too-few-public-
     def _add_event(self, params, source):
         effects = []
         for item in _as_list(params):
-            # AddEvent mostly brings in hidden milestones, so a single hidden match wins a shared name.
-            target = self._event_named(item, source, prefer_hidden=True)
+            target = self._occurrence_target(item, source)
             if target is None:
                 continue
-            offset = _to_int(item.get("start_at", self.start_at[target.legacy_event_template_id]))
+            offset = _to_int(item.get("start_at", self._default_start_at(target)))
             if offset is None:
                 self.misses.append(f"{source.label}: can't convert start_at for '{target.name}'")
                 continue
@@ -380,16 +396,15 @@ class _Builder:  # pylint: disable=too-many-instance-attributes, too-few-public-
     def _add_phase(self, params, source):
         effects = []
         for item in _as_list(params):
-            # AddPhase finds the phase code by its own name, never by a new name.
-            phase = self._phase_named(item, source, include_renamed=False)
-            if phase is None:
+            phase_code_id = self._phase_code_named(item, source)
+            if phase_code_id is None:
                 continue
             effect_params = {}
             if item.get("new_name"):
                 effect_params["name"] = item["new_name"]
             if item.get("legislated") is not None:
                 effect_params["time_limit_kind"] = tpl.LEGISLATED if item["legislated"] else tpl.FREE
-            effects.append(tpl.Effect("ADD_PHASES", target_phase_code_id=phase.phase_code_id, params=effect_params))
+            effects.append(tpl.Effect("ADD_PHASES", target_phase_code_id=phase_code_id, params=effect_params))
         return effects
 
     def _change_phase_end_event(self, params, source):

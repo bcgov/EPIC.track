@@ -23,8 +23,8 @@ from api.models import (
     TemplateOutcome, TemplatePhase, Work, WorkPhase, WorkTemplate, WorkTemplateVersion)
 from api.models.action import ActionEnum
 from api.services.event import EventService
-from api.workplan import work_backfill
-from api.workplan.work_backfill import VersionOne, WorkRows, backfill_work_settings, plan_settings
+from api.workplan import work_backfill, work_effects
+from api.workplan.work_backfill import VersionOne, WorkRows, backfill_work, plan_settings
 from tests.utilities.helpers import prepare_work_payload
 
 NOW = datetime(2026, 11, 26, tzinfo=timezone.utc)
@@ -88,9 +88,9 @@ def test_a_new_work_takes_its_settings_from_version_one(client, auth_header, ses
             template_outcome = session.get(TemplateOutcome, outcome.template_outcome_id)
             assert (template_outcome.name, template_outcome.template_event_id) == (
                 outcome.name, outcome.event_configuration.template_event_id), template.name
-        # A new work only carries the start_at assumptions its template makes, never a lineage issue.
+        # A new work only carries the assumptions and drops its template makes, never a lineage issue.
         assert {issue.issue for issue in _issues(work)} <= {
-            work_backfill.EMPTY_START_AT, work_backfill.UNPARSED_START_AT}, template.name
+            work_backfill.EMPTY_START_AT, work_backfill.UNPARSED_START_AT, work_effects.DROPPED_ACTION}, template.name
 
 
 def test_running_it_again_changes_nothing(client, auth_header, session):
@@ -99,15 +99,15 @@ def test_running_it_again_changes_nothing(client, auth_header, session):
     session.add(MigrationIssue(work_id=work.id, table_name="event_configurations", row_id=1,
                                issue=work_backfill.EMPTY_START_AT))
     session.flush()
-    backfill_work_settings(work.id)
+    backfill_work(work.id)
     session.flush()
     before = (_history_rows(session, work), [(i.table_name, i.row_id, i.issue) for i in _issues(work)])
 
-    backfill_work_settings(work.id)
+    backfill_work(work.id)
     session.flush()
 
     assert (_history_rows(session, work), [(i.table_name, i.row_id, i.issue) for i in _issues(work)]) == before
-    assert before[1] == []
+    assert [issue for issue in before[1] if issue[2] in work_backfill.ISSUES] == []
 
 
 def _history_rows(session, work):

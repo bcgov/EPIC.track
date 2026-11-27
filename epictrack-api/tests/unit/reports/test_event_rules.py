@@ -28,7 +28,7 @@ from api.reports.anticipated_schedule_report import EAAnticipatedScheduleReport
 from api.reports.event_rules import anticipated_schedule_referrals_and_decisions, thirty_sixty_ninety_referrals
 from api.reports.resource_forecast_report import EAResourceForeCastReport
 from api.reports.thirty_sixty_ninety_report import ThirtySixtyNinetyReport
-from api.workplan.work_backfill import backfill_work_settings
+from api.workplan.work_backfill import backfill_work
 from tests.utilities.factory_scenarios import TestJwtClaims, TestWorkInfo
 from tests.utilities.factory_utils import factory_work_model
 
@@ -191,7 +191,7 @@ def test_work_phase_is_intake(db):  # pylint: disable=unused-argument
     intake = _work_phase(work, PhaseCode.query.filter_by(is_intake=True).first(), datetime.now(utc), is_intake=False)
     other = _work_phase(work, PhaseCode.query.filter_by(is_intake=False).first(), datetime.now(utc), is_intake=True)
 
-    backfill_work_settings(work.id)
+    backfill_work(work.id)
 
     assert intake.is_intake is True
     assert other.is_intake is False
