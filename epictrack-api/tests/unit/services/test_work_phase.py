@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch
 
 from api.services.work_phase import WorkPhaseService
 from api.models.event_template import EventPositionEnum
-from api.models.event_type import EventTypeEnum
 from api.models.event_category import EventCategoryEnum
 
 
@@ -195,137 +194,117 @@ class TestSaveNotes:
         assert result == mock_phase
 
 
+def _milestone(position=EventPositionEnum.INTERMEDIATE, role=None, actual_date=None, number_of_days=0):
+    """A phase event as the day counts read it."""
+    event = MagicMock(actual_date=actual_date, number_of_days=number_of_days)
+    event.event_configuration.event_position = position
+    event.event_configuration.role = role
+    return event
+
+
+def _current_phase(number_of_days, started_days_ago):
+    start_date = datetime.datetime.now(timezone.utc) - datetime.timedelta(days=started_days_ago)
+    return MagicMock(
+        id=5, work=MagicMock(current_work_phase_id=5), number_of_days=number_of_days, is_completed=False,
+        is_suspended=False, start_date=start_date, end_date=start_date + datetime.timedelta(days=number_of_days),
+    )
+
+
 class TestFindWorkPhaseStatus:
     """Tests for find_work_phase_status method."""
 
     @patch("api.services.work_phase.PhaseOverageResponsibilityService")
-    @patch("api.services.work_phase.WorkPhaseService._get_days_taken")
-    @patch("api.services.work_phase.WorkPhaseService._get_days_left")
     @patch("api.services.work_phase.WorkPhaseService._get_milestone_information")
     @patch("api.services.work_phase.WorkPhaseService._filter_sort_events")
-    def test_calculates_phase_status_with_milestones(
-        self, mock_filter, mock_milestone_info, mock_days_left, mock_days_taken, mock_responsibility_service
-    ):
-        """Test calculating work phase status with events."""
-        work_id = 10
-        work_phase_id = None
-
-        mock_work = MagicMock(current_work_phase_id=5)
-        mock_phase = MagicMock(
-            id=5,
-            work=mock_work,
-            number_of_days=100,
-            start_date=datetime.datetime(2024, 1, 1, tzinfo=timezone.utc),
-            end_date=datetime.datetime(2024, 4, 10, tzinfo=timezone.utc),
-        )
-        work_phases = [mock_phase]
-
-        mock_event_config = MagicMock(event_type_id=EventTypeEnum.TIME_LIMIT_EXTENSION.value)
-        mock_extension_event = MagicMock(
-            number_of_days=10,
-            event_configuration=mock_event_config,
-            actual_date=None
-        )
-        mock_events = [mock_extension_event]
-
-        mock_event_service = MagicMock()
-        mock_event_service.find_events.return_value = mock_events
-
-        mock_filter.return_value = [mock_extension_event]
-        mock_milestone_info.return_value = {
-            "current_milestone": "Start",
-            "next_milestone": "Decision",
-            "decision": None
-        }
-        mock_days_left.return_value = 80
-        mock_days_taken.return_value = 30
+    def test_counts_only_dated_extensions(self, mock_filter, mock_milestone_info, mock_responsibility_service):
+        """A granted extension adds to the time allowed, and a planned one doesn't yet."""
+        phase = _current_phase(100, started_days_ago=30)
+        mock_filter.return_value = [
+            _milestone(EventPositionEnum.START, actual_date=phase.start_date),
+            _milestone(role="TIME_LIMIT_EXTENSION", actual_date=phase.start_date, number_of_days=10),
+            _milestone(role="TIME_LIMIT_EXTENSION", number_of_days=20),
+            _milestone(EventPositionEnum.END),
+        ]
+        mock_milestone_info.return_value = {"current_milestone": "Start"}
         mock_responsibility_service.find_by_work_phase_id.return_value = []
 
-        result = WorkPhaseService.find_work_phase_status(
-            work_id, work_phase_id, work_phases, mock_event_service
-        )
+        [result] = WorkPhaseService.find_work_phase_status(10, None, [phase], MagicMock())
 
-        assert len(result) == 1
-        assert result[0]["work_phase"] == mock_phase
-        assert result[0]["total_number_of_days"] == 110  # 100 + 10 extension
-        assert "current_milestone" in result[0]
-        assert "days_left" in result[0]
-        assert "days_taken" in result[0]
-
-    @patch("api.services.work_phase.PhaseOverageResponsibilityService")
-    @patch("api.services.work_phase.WorkPhaseService._get_days_taken")
-    @patch("api.services.work_phase.WorkPhaseService._get_days_left")
-    @patch("api.services.work_phase.WorkPhaseService._get_milestone_information")
-    @patch("api.services.work_phase.WorkPhaseService._filter_sort_events")
-    def test_handles_suspended_events(
-        self, mock_filter, mock_milestone_info, mock_days_left, mock_days_taken, mock_responsibility_service
-    ):
-        """Test phase status with suspended/resumed events."""
-        work_id = 10
-
-        mock_work = MagicMock(current_work_phase_id=5)
-        mock_phase = MagicMock(
-            id=5,
-            work=mock_work,
-            number_of_days=100,
-            start_date=datetime.datetime(2024, 1, 1, tzinfo=timezone.utc),
-            end_date=datetime.datetime(2024, 4, 10, tzinfo=timezone.utc),
-        )
-        work_phases = [mock_phase]
-
-        mock_suspend_config = MagicMock(event_type_id=EventTypeEnum.TIME_LIMIT_RESUMPTION.value)
-        mock_suspend_event = MagicMock(
-            number_of_days=15,
-            event_configuration=mock_suspend_config,
-            actual_date=datetime.datetime(2024, 2, 1, tzinfo=timezone.utc)
-        )
-
-        mock_event_service = MagicMock()
-        mock_event_service.find_events.return_value = [mock_suspend_event]
-
-        mock_filter.return_value = [mock_suspend_event]
-        mock_milestone_info.return_value = {}
-        mock_days_left.return_value = 70
-        mock_days_taken.return_value = 15
-        mock_responsibility_service.find_by_work_phase_id.return_value = []
-
-        result = WorkPhaseService.find_work_phase_status(
-            work_id, None, work_phases, mock_event_service
-        )
-
-        assert result[0]["total_number_of_days"] == 100  # a suspension doesn't shrink the time allowed
+        assert (result["total_number_of_days"], result["days_taken"], result["days_left"]) == (110, 30, 80)
+        assert result["current_milestone"] == "Start"
 
     @patch("api.services.work_phase.PhaseOverageResponsibilityService")
     @patch("api.services.work_phase.WorkPhaseService._get_milestone_information")
     @patch("api.services.work_phase.WorkPhaseService._filter_sort_events")
     def test_suspended_days_are_not_overage(self, mock_filter, mock_milestone_info, mock_responsibility_service):
         """A 10-day phase 25 days in, with 15 of them suspended, has taken its 10 days and isn't over."""
-        mock_phase = MagicMock(
-            id=5,
-            work=MagicMock(current_work_phase_id=5),
-            number_of_days=10,
-            is_completed=False,
-            is_suspended=False,
-            start_date=datetime.datetime.now(timezone.utc) - datetime.timedelta(days=25),
-        )
-        start = MagicMock(actual_date=mock_phase.start_date)
-        start.event_configuration.event_position.name = "START"
-        start.event_configuration.event_type_id = 0
-        end = MagicMock(actual_date=None)
-        end.event_configuration.event_position.name = "END"
-        end.event_configuration.event_type_id = 0
-        resumption = MagicMock(number_of_days=15, actual_date=mock_phase.start_date + datetime.timedelta(days=18))
-        resumption.event_configuration.event_position.name = "INTERMEDIATE"
-        resumption.event_configuration.event_type_id = EventTypeEnum.TIME_LIMIT_RESUMPTION.value
-        mock_filter.return_value = [start, resumption, end]
+        phase = _current_phase(10, started_days_ago=25)
+        mock_filter.return_value = [
+            _milestone(EventPositionEnum.START, actual_date=phase.start_date),
+            _milestone(role="TIME_LIMIT_RESUMPTION", actual_date=phase.start_date + datetime.timedelta(days=18),
+                       number_of_days=15),
+            _milestone(EventPositionEnum.END),
+        ]
         mock_milestone_info.return_value = {}
         mock_responsibility_service.find_by_work_phase_id.return_value = []
 
-        result = WorkPhaseService.find_work_phase_status(10, None, [mock_phase], MagicMock())
+        [result] = WorkPhaseService.find_work_phase_status(10, None, [phase], MagicMock())
 
-        assert result[0]["total_number_of_days"] == 10
-        assert result[0]["days_taken"] == 10
-        assert result[0]["days_left"] == 0
+        assert (result["total_number_of_days"], result["days_taken"], result["days_left"]) == (10, 10, 0)
+
+    @patch("api.services.work_phase.PhaseOverageResponsibilityService")
+    @patch("api.services.work_phase.WorkPhaseService._get_milestone_information")
+    @patch("api.services.work_phase.WorkPhaseService._filter_sort_events")
+    def test_a_running_suspension_stops_the_clock(self, mock_filter, mock_milestone_info, mock_responsibility_service):
+        """A phase suspended 10 days in has taken 10 days, however long ago that was."""
+        phase = _current_phase(30, started_days_ago=25)
+        phase.is_suspended = True
+        phase.suspended_date = phase.start_date + datetime.timedelta(days=10)
+        mock_filter.return_value = [
+            _milestone(EventPositionEnum.START, actual_date=phase.start_date),
+            _milestone(EventPositionEnum.END),
+        ]
+        mock_milestone_info.return_value = {}
+        mock_responsibility_service.find_by_work_phase_id.return_value = []
+
+        [result] = WorkPhaseService.find_work_phase_status(10, None, [phase], MagicMock())
+
+        assert (result["total_number_of_days"], result["days_taken"], result["days_left"]) == (30, 10, 20)
+
+    @patch("api.services.work_phase.PhaseOverageResponsibilityService")
+    @patch("api.services.work_phase.WorkPhaseService._get_milestone_information")
+    @patch("api.services.work_phase.WorkPhaseService._filter_sort_events")
+    def test_a_completed_phase_counts_from_its_start_to_its_end(
+        self, mock_filter, mock_milestone_info, mock_responsibility_service
+    ):
+        """A completed phase is counted between its START and END actual dates, and keeps its time as time left."""
+        phase = _current_phase(100, started_days_ago=90)
+        phase.is_completed = True
+        mock_filter.return_value = [
+            _milestone(EventPositionEnum.START, actual_date=phase.start_date),
+            _milestone(EventPositionEnum.END, actual_date=phase.start_date + datetime.timedelta(days=60)),
+        ]
+        mock_milestone_info.return_value = {}
+        mock_responsibility_service.find_by_work_phase_id.return_value = []
+
+        [result] = WorkPhaseService.find_work_phase_status(10, None, [phase], MagicMock())
+
+        assert (result["total_number_of_days"], result["days_taken"], result["days_left"]) == (100, 60, 100)
+
+    @patch("api.services.work_phase.PhaseOverageResponsibilityService")
+    @patch("api.services.work_phase.WorkPhaseService._get_milestone_information")
+    @patch("api.services.work_phase.WorkPhaseService._filter_sort_events")
+    def test_a_phase_without_milestones_has_its_time_left(
+        self, mock_filter, mock_milestone_info, mock_responsibility_service
+    ):
+        """A phase with no primary-category events counts no days taken."""
+        mock_filter.return_value = []
+        mock_milestone_info.return_value = {}
+        mock_responsibility_service.find_by_work_phase_id.return_value = []
+
+        [result] = WorkPhaseService.find_work_phase_status(10, None, [_current_phase(30, 5)], MagicMock())
+
+        assert (result["total_number_of_days"], result["days_taken"], result["days_left"]) == (30, 0, 30)
 
 
 class TestGetMilestoneInformation:
@@ -520,128 +499,3 @@ class TestFilterSortEvents:
 
         assert len(result) == 2
         assert event2 not in result
-
-
-class TestGetDaysLeft:
-    """Tests for _get_days_left private method."""
-
-    @patch("api.services.work_phase.WorkPhaseService._get_days_taken")
-    def test_calculates_days_left_for_current_phase(self, mock_days_taken):
-        """Test calculating days left for current incomplete phase."""
-        mock_work = MagicMock(current_work_phase_id=5)
-        work_phase = MagicMock(id=5, work=mock_work, is_completed=False)
-        total_days = 100
-        suspended_days = 10
-        events = []
-
-        mock_days_taken.return_value = 30
-
-        result = WorkPhaseService._get_days_left(suspended_days, total_days, work_phase, events)
-
-        # 100 - 30: the days taken already leave out the suspended days
-        assert result == 70
-
-    def test_returns_total_for_completed_phase(self):
-        """Test returns the time allowed for a non-current phase; a suspension doesn't shrink it."""
-        mock_work = MagicMock(current_work_phase_id=10)
-        work_phase = MagicMock(id=5, work=mock_work, is_completed=True)
-        total_days = 100
-        suspended_days = 10
-        events = []
-
-        result = WorkPhaseService._get_days_left(suspended_days, total_days, work_phase, events)
-
-        assert result == 100
-
-
-class TestGetDaysTaken:
-    """Tests for _get_days_taken private method."""
-
-    def test_calculates_days_for_current_active_phase(self):
-        """Test calculating days taken for current active phase."""
-        now = datetime.datetime(2024, 2, 1, tzinfo=timezone.utc)
-        start = datetime.datetime(2024, 1, 1, tzinfo=timezone.utc)
-
-        with patch("api.services.work_phase.datetime") as mock_datetime_module:
-            # Create a mock for the now() return value with working .date()
-            mock_now = MagicMock()
-            mock_now.date.return_value = now.date()
-            mock_datetime_module.datetime.now.return_value = mock_now
-
-            mock_work = MagicMock(current_work_phase_id=5)
-            work_phase = MagicMock(
-                id=5,
-                work=mock_work,
-                is_completed=False,
-                is_suspended=False,
-            )
-            # Set start_date explicitly so .date() method works
-            work_phase.start_date = start
-
-            # Add an incomplete event to ensure all_events_completed = False
-            mock_event = MagicMock(actual_date=None)
-            events = [mock_event]
-
-            result = WorkPhaseService._get_days_taken(work_phase, events, suspended_days=0)
-
-            assert result == 31  # Days from Jan 1 to Feb 1
-
-    def test_calculates_days_for_completed_phase(self):
-        """Test calculating days taken for completed phase."""
-        # Create proper mock objects with name attribute
-        mock_start_position = MagicMock()
-        mock_start_position.name = "START"
-        mock_end_position = MagicMock()
-        mock_end_position.name = "END"
-
-        mock_start_config = MagicMock()
-        mock_start_config.event_position = mock_start_position
-        mock_end_config = MagicMock()
-        mock_end_config.event_position = mock_end_position
-
-        start_event = MagicMock(
-            actual_date=datetime.datetime(2024, 1, 1, tzinfo=timezone.utc),
-            event_configuration=mock_start_config
-        )
-        end_event = MagicMock(
-            actual_date=datetime.datetime(2024, 3, 1, tzinfo=timezone.utc),
-            event_configuration=mock_end_config
-        )
-
-        mock_work = MagicMock(current_work_phase_id=5)
-        work_phase = MagicMock(id=5, work=mock_work, is_completed=True)
-        events = [start_event, end_event]
-
-        result = WorkPhaseService._get_days_taken(work_phase, events, suspended_days=0)
-
-        assert result == 60  # Days from Jan 1 to Mar 1
-
-    def test_subtracts_suspended_days(self):
-        """Test days taken subtracts suspended days."""
-        # Create proper mock objects with name attribute
-        mock_start_position = MagicMock()
-        mock_start_position.name = "START"
-        mock_end_position = MagicMock()
-        mock_end_position.name = "END"
-
-        mock_start_config = MagicMock()
-        mock_start_config.event_position = mock_start_position
-        mock_end_config = MagicMock()
-        mock_end_config.event_position = mock_end_position
-
-        start_event = MagicMock(
-            actual_date=datetime.datetime(2024, 1, 1, tzinfo=timezone.utc),
-            event_configuration=mock_start_config
-        )
-        end_event = MagicMock(
-            actual_date=datetime.datetime(2024, 3, 1, tzinfo=timezone.utc),
-            event_configuration=mock_end_config
-        )
-
-        mock_work = MagicMock(current_work_phase_id=5)
-        work_phase = MagicMock(id=5, work=mock_work, is_completed=True)
-        events = [start_event, end_event]
-
-        result = WorkPhaseService._get_days_taken(work_phase, events, suspended_days=10)
-
-        assert result == 50  # 60 - 10

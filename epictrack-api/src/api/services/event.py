@@ -297,27 +297,8 @@ class EventService:
     @staticmethod
     def _overage_days_if_ended(current_work_phase: WorkPhase, current_phase_events: List[Event], end_date):
         """Days over its time the phase would be if it ended on end_date, or None until its START has happened."""
-        phase_start_event = next(
-            (e for e in current_phase_events if e.event_position == EventPositionEnum.START.value), None
-        )
-        if not phase_start_event or not phase_start_event.actual_date:
-            return None
-        # Suspended time pauses the clock, so it isn't overage.
-        suspended_days = sum(
-            e.number_of_days for e in current_phase_events
-            if e.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
-            and e.actual_date is not None
-        )
-        days_taken = (end_date.date() - phase_start_event.actual_date.date()).days - suspended_days
-        extension_days = sum(
-            e.number_of_days for e in current_phase_events
-            if e.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_EXTENSION.value
-        )
-        if current_work_phase.number_of_days:
-            total_days = current_work_phase.number_of_days + extension_days
-        else:
-            total_days = (current_work_phase.end_date.date() - current_work_phase.start_date.date()).days
-        return days_taken - total_days
+        days = WorkPhaseService.phase_days(current_work_phase, current_phase_events, end_date)
+        return None if days is None else days.days_over
 
     @classmethod
     def _validate_event_effect_on_dates(
@@ -770,21 +751,19 @@ class EventService:
             return True
 
         total_overage_days = 0
-        current_phase_with_status = None
         work_phases_with_status = WorkPhaseService.find_work_phases_status(event.work_id, EventService())
         for phase_status in work_phases_with_status:
             wp = phase_status.get("work_phase")
             if wp.id == current_work_phase.id:
-                current_phase_with_status = phase_status
                 break
             if wp.legislated:
                 total_overage_days += phase_status["days_taken"] - phase_status["total_number_of_days"]
-        # find date difference between event actual and phase start date + phase total number of days
-        phase_end_date = (
-            current_work_phase.start_date.date()
-            + timedelta(days=current_phase_with_status["total_number_of_days"])
-        )
-        days_difference = (event.actual_date.date() - phase_end_date).days
+        current_phase_events = [
+            e for e in cls.find_events(event.work_id, None, PRIMARY_CATEGORIES)
+            if e.event_configuration.work_phase_id == current_work_phase.id
+        ]
+        # Nothing to count until the phase's START has happened.
+        days_difference = cls._overage_days_if_ended(current_work_phase, current_phase_events, event.actual_date) or 0
         if total_overage_days + days_difference <= 0:
             return True  # all good, no overage
         if throw_error:
