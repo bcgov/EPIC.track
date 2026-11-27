@@ -52,7 +52,11 @@ from api.services.outcome_configuration import OutcomeConfigurationService
 from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
 from api.services.work_phase import WorkPhaseService
 from api.utils import demi_marks, util
+from api.utils.constants import CANADA_TIMEZONE
+from api.workplan.core.change import ChangeRefusedError, ChangeRequest, Changeset, plan_change
+from api.workplan.engine import runs_v2
 from api.workplan.work_backfill import backfill_work
+from api.workplan.work_plan_repository import WorkPlanRepository
 from api.application_constants import MIN_WORK_START_DATE
 
 from ..utils.roles import Membership
@@ -179,29 +183,13 @@ class EventService:
         )
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
+        if runs_v2():
+            return cls._update_event_from_plan(event, data, push_events, commit)
 
-        # Over its time, a legislated phase needs an extension covering it (the law); others may need a responsibility.
         if (event.event_position == EventPositionEnum.END.value
                 and event.actual_date is None
                 and data.get("actual_date")):
-            overage_days = cls._overage_days_if_ended(current_work_phase, current_phase_events, data.get("actual_date"))
-            if overage_days is None:
-                current_app.logger.info("No start event found in the phase. Cannot calculate days taken or check overage responsibility.")
-            elif overage_days > 0 and current_work_phase.legislated:
-                raise UnprocessableEntityError(
-                    "A legislated phase can't be completed over its time limit. Add a Time Limit Extension of "
-                    f"at least {overage_days} day{'s' if overage_days != 1 else ''} first. "
-                    "It can have the same date as the end."
-                )
-            elif overage_days > 0 and current_work_phase.requires_overage_responsibility:
-                responsibilities = PhaseOverageResponsibilityService.find_by_work_phase_id(
-                    current_work_phase.id, is_deleted=False
-                )
-                if not responsibilities:
-                    raise UnprocessableEntityError(
-                        "Cannot complete this phase over its time without an Overage Responsibility. "
-                        "Select a responsibility first."
-                    )
+            cls._check_phase_can_close(current_work_phase, current_phase_events, data.get("actual_date"))
 
         event = event.update(data, commit=False)
 
@@ -233,6 +221,66 @@ class EventService:
         return event
 
     @classmethod
+    def _check_phase_can_close(cls, work_phase: WorkPhase, phase_events: List[Event], end_date: datetime) -> None:
+        """Over its time, a legislated phase needs an extension covering it (the law); others may need a responsibility."""
+        overage_days = cls._overage_days_if_ended(work_phase, phase_events, end_date)
+        if overage_days is None:
+            current_app.logger.info("No start event found in the phase. Cannot calculate days taken or check overage responsibility.")
+        elif overage_days > 0 and work_phase.legislated:
+            raise UnprocessableEntityError(
+                "A legislated phase can't be completed over its time limit. Add a Time Limit Extension of "
+                f"at least {overage_days} day{'s' if overage_days != 1 else ''} first. "
+                "It can have the same date as the end."
+            )
+        elif overage_days > 0 and work_phase.requires_overage_responsibility:
+            responsibilities = PhaseOverageResponsibilityService.find_by_work_phase_id(work_phase.id, is_deleted=False)
+            if not responsibilities:
+                raise UnprocessableEntityError(
+                    "Cannot complete this phase over its time without an Overage Responsibility. "
+                    "Select a responsibility first."
+                )
+
+    @classmethod
+    def _update_event_from_plan(cls, event: Event, data: dict, push_events: bool, commit: bool) -> Event:
+        """Save a milestone's dates through the v2 planner, with everything they move."""
+        had_actual = event.actual_date is not None
+        changes = None if current_app.config["SKIP_EVENT_LOGIC"] else cls._plan_change(event, data, push_events)
+        if changes is not None and changes.closed_phases:
+            work_events = cls.find_events(event.work_id, None, PRIMARY_CATEGORIES)
+            for phase_id, end_date in changes.closed_phases.items():
+                cls._check_phase_can_close(
+                    WorkPhase.find_by_id(phase_id),
+                    [e for e in work_events if e.event_configuration.work_phase_id == phase_id],
+                    datetime.combine(end_date, datetime.min.time()),
+                )
+        event = event.update(data, commit=False)
+        if changes is not None:
+            WorkPlanRepository.save(event.work_id, changes)
+        if event.actual_date and not had_actual:
+            cls._process_actions(event, data.get("outcome_id", None))
+            cls._post_process_actions(event, event.work_id)
+        if commit:
+            db.session.commit()
+        return event
+
+    @staticmethod
+    def _plan_change(event: Event, data: dict, push_events: bool) -> Changeset:
+        """Plan the change, or None for a milestone outside the work's sequence, which moves nothing else."""
+        plan = WorkPlanRepository.load(event.work_id)
+        if event.id not in plan.milestones:
+            return None
+        anticipated = data.get("anticipated_date") or event.anticipated_date or data.get("actual_date")
+        actual = data.get("actual_date") if "actual_date" in data else event.actual_date
+        request = ChangeRequest(
+            milestone_id=event.id, anticipated=anticipated.date(), actual=actual.date() if actual else None,
+            number_of_days=data.get("number_of_days", event.number_of_days) or 0, push=bool(push_events),
+        )
+        try:
+            return plan_change(plan, request, datetime.now(CANADA_TIMEZONE).date())
+        except ChangeRefusedError as error:
+            raise UnprocessableEntityError(error.message) from error
+
+    @classmethod
     def check_event(cls, data: dict, event_id: int = None):
         """Check to see if the event goes beyond the existing phase end dates"""
         result = {
@@ -261,7 +309,9 @@ class EventService:
         number_of_days_to_be_pushed = cls._get_number_of_days_to_be_pushed(
             event_to_check, event_old_data, current_work_phase
         )
-        if number_of_days_to_be_pushed != 0:
+        if runs_v2() and event_id:
+            result.update(cls._dry_run(event, data))
+        elif number_of_days_to_be_pushed != 0:
             all_work_events = cls.find_events(
                 current_work_phase.work_id, None, PRIMARY_CATEGORIES
             )
@@ -278,6 +328,21 @@ class EventService:
             event_to_check, event_old_data, data.get("actual_date"), current_work_phase
         )
         return result
+
+    @classmethod
+    def _dry_run(cls, event: Event, data: dict) -> dict:
+        """What saving with a push would do, from the same planner as the save. A refusal is left to the save."""
+        try:
+            changes = cls._plan_change(event, data, push_events=True)
+        except UnprocessableEntityError:
+            return {}
+        if changes is None:
+            return {}
+        return {
+            "subsequent_event_push_required": changes.asks_to_push,
+            "phase_end_push_required": changes.past_deadline,
+            "days_pushed": changes.days_moved,
+        }
 
     @classmethod
     def _extension_days_required(cls, event: Event, event_old_data: dict, actual_date, current_work_phase: WorkPhase) -> int:
