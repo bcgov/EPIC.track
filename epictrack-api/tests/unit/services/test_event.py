@@ -22,8 +22,8 @@ from flask import g
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from api.models import Event, WorkPhase
 from api.models.event_template import EventPositionEnum
-from api.models.event_type import EventTypeEnum
 from api.services.event import EventService
+from api.services.work_phase import WorkPhaseService
 from tests.utilities.factory_scenarios import TestJwtClaims
 
 
@@ -371,6 +371,19 @@ class TestEventServiceWillActionAddPhase:
             assert result is False
 
 
+PHASE_START = datetime(2026, 1, 1, tzinfo=pytz.utc)
+
+
+def _milestone(position=EventPositionEnum.INTERMEDIATE, role=None, actual_date=None, number_of_days=0, **columns):
+    """A phase event as the END-date checks read it."""
+    event = MagicMock(
+        event_position=position.value, actual_date=actual_date, number_of_days=number_of_days, **columns)
+    event.event_configuration.work_phase_id = 1
+    event.event_configuration.event_position = position
+    event.event_configuration.role = role
+    return event
+
+
 class TestEventServiceUpdateEvent:
     """Test update_event method."""
 
@@ -420,18 +433,13 @@ class TestEventServiceUpdateEvent:
             start = datetime(2026, 1, 1, tzinfo=pytz.utc)
 
             phase = MagicMock(
-                id=1, work_id=1, legislated=False, number_of_days=10,
+                id=1, work_id=1, legislated=False, number_of_days=10, is_completed=False, is_suspended=False,
                 requires_overage_responsibility=requires_responsibility,
             )
-            start_event = MagicMock(event_position=EventPositionEnum.START.value, actual_date=start)
-            end_event = MagicMock(
-                is_active=True, event_position=EventPositionEnum.END.value, actual_date=None, number_of_days=0
-            )
+            start_event = _milestone(EventPositionEnum.START, actual_date=start)
+            end_event = _milestone(EventPositionEnum.END, is_active=True)
             end_event.as_dict_snapshot.return_value = {}
             end_event.update.side_effect = RuntimeError("past the overage check")
-            for event in (start_event, end_event):
-                event.event_configuration.work_phase_id = 1
-                event.event_configuration.event_type_id = 0
 
             with patch.object(Event, 'find_by_id', return_value=end_event), \
                     patch.object(WorkPhase, 'find_by_id', return_value=phase), \
@@ -466,64 +474,39 @@ class TestEventServiceUpdateEvent:
         """
         with app.app_context():
             g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
-            start = datetime(2026, 1, 1, tzinfo=pytz.utc)
-
-            phase = MagicMock(
-                id=1, work_id=1, legislated=True, number_of_days=10, requires_overage_responsibility=True,
-            )
-            start_event = MagicMock(event_position=EventPositionEnum.START.value, actual_date=start)
-            extension = MagicMock(event_position=EventPositionEnum.INTERMEDIATE.value, number_of_days=extension_days)
-            resumption = MagicMock(
-                event_position=EventPositionEnum.INTERMEDIATE.value, number_of_days=suspended_days,
-                actual_date=start + timedelta(days=3 + suspended_days) if resumed else None,
-            )
-            end_event = MagicMock(
-                is_active=True, event_position=EventPositionEnum.END.value, actual_date=None, number_of_days=0
-            )
+            phase, end_event, events = _legislated_phase(extension_days, suspended_days, resumed)
+            phase.requires_overage_responsibility = True
+            end_event.is_active = True
             end_event.as_dict_snapshot.return_value = {}
             end_event.update.side_effect = RuntimeError("past the overage check")
-            for event in (start_event, extension, resumption, end_event):
-                event.event_configuration.work_phase_id = 1
-                event.event_configuration.event_type_id = 0
-            extension.event_configuration.event_type_id = EventTypeEnum.TIME_LIMIT_EXTENSION.value
-            resumption.event_configuration.event_type_id = EventTypeEnum.TIME_LIMIT_RESUMPTION.value
 
             with patch.object(Event, 'find_by_id', return_value=end_event), \
                     patch.object(WorkPhase, 'find_by_id', return_value=phase), \
-                    patch.object(EventService, 'find_events',
-                                 return_value=[start_event, extension, resumption, end_event]), \
+                    patch.object(EventService, 'find_events', return_value=events), \
                     patch('api.services.event.authorisation.check_auth', return_value=True), \
                     patch('api.services.event.PhaseOverageResponsibilityService.find_by_work_phase_id',
                           return_value=[MagicMock()] if has_responsibility else []):
                 expected = UnprocessableEntityError if message else RuntimeError
                 with pytest.raises(expected) as exc_info:
                     EventService.update_event(
-                        {"actual_date": start + timedelta(days=end_day)}, 1, push_events=False
+                        {"actual_date": PHASE_START + timedelta(days=end_day)}, 1, push_events=False
                     )
                 if message:
                     assert message in str(exc_info.value)
 
 
-PHASE_START = datetime(2026, 1, 1, tzinfo=pytz.utc)
-
-
-def _legislated_phase(extension_days, suspended_days, resumed):
+def _legislated_phase(extension_days, suspended_days, resumed, extension_dated=True):
     """A 10-day legislated phase started on PHASE_START, with an extension, a suspension and an END."""
-    phase = MagicMock(id=1, work_id=1, legislated=True, number_of_days=10)
-    start_event = MagicMock(event_position=EventPositionEnum.START.value, actual_date=PHASE_START)
-    extension = MagicMock(event_position=EventPositionEnum.INTERMEDIATE.value, number_of_days=extension_days)
-    resumption = MagicMock(
-        event_position=EventPositionEnum.INTERMEDIATE.value, number_of_days=suspended_days,
-        actual_date=PHASE_START + timedelta(days=3 + suspended_days) if resumed else None,
-    )
-    end_event = MagicMock(event_position=EventPositionEnum.END.value, actual_date=None)
-    events = [start_event, extension, resumption, end_event]
-    for event in events:
-        event.event_configuration.work_phase_id = 1
-        event.event_configuration.event_type_id = 0
-    extension.event_configuration.event_type_id = EventTypeEnum.TIME_LIMIT_EXTENSION.value
-    resumption.event_configuration.event_type_id = EventTypeEnum.TIME_LIMIT_RESUMPTION.value
-    return phase, end_event, events
+    phase = MagicMock(id=1, work_id=1, legislated=True, number_of_days=10, is_completed=False, is_suspended=False)
+    events = [
+        _milestone(EventPositionEnum.START, actual_date=PHASE_START),
+        _milestone(role="TIME_LIMIT_EXTENSION", number_of_days=extension_days,
+                   actual_date=PHASE_START + timedelta(days=2) if extension_dated else None),
+        _milestone(role="TIME_LIMIT_RESUMPTION", number_of_days=suspended_days,
+                   actual_date=PHASE_START + timedelta(days=3 + suspended_days) if resumed else None),
+        _milestone(EventPositionEnum.END),
+    ]
+    return phase, events[-1], events
 
 
 class TestEventServiceExtensionDaysRequired:
@@ -552,6 +535,15 @@ class TestEventServiceExtensionDaysRequired:
                     end_event, {}, PHASE_START + timedelta(days=end_day), phase
                 ) == expected
 
+    def test_a_planned_extension_doesn_t_count_until_it_s_dated(self, app):
+        """An extension with no actual date leaves the END needing the whole overage."""
+        with app.app_context():
+            phase, end_event, events = _legislated_phase(10, 0, True, extension_dated=False)
+            with patch.object(EventService, 'find_events', return_value=events):
+                assert EventService._extension_days_required(  # pylint: disable=protected-access
+                    end_event, {}, PHASE_START + timedelta(days=20), phase
+                ) == 10
+
     @pytest.mark.parametrize(
         "legislated, position, old_actual, new_actual",
         [
@@ -574,6 +566,23 @@ class TestEventServiceExtensionDaysRequired:
                 assert EventService._extension_days_required(  # pylint: disable=protected-access
                     end_event, {"actual_date": old_actual}, PHASE_START + timedelta(days=20) if new_actual else None, phase
                 ) == 0
+
+
+class TestEventServiceValidateNoExtensionRequiredToCompleteWork:
+    """Test the overage check when a work's last phase closes."""
+
+    @pytest.mark.parametrize("resumed, expected", [(True, True), (False, False)])
+    def test_the_last_phase_s_suspensions_aren_t_overage(self, app, resumed, expected):
+        """A 10-day last phase closed on day 25 isn't over when 15 of those days were a resumed suspension."""
+        with app.app_context():
+            phase, end_event, events = _legislated_phase(0, 15, resumed)
+            end_event.actual_date = PHASE_START + timedelta(days=25)
+            with patch.object(EventService, '_is_last_phase', return_value=True), \
+                    patch.object(EventService, '_will_action_add_a_phase', return_value=False), \
+                    patch.object(WorkPhaseService, 'find_work_phases_status', return_value=[{"work_phase": phase}]), \
+                    patch.object(EventService, 'find_events', return_value=events):
+                assert EventService._validate_no_extension_required_to_complete_work(  # pylint: disable=protected-access
+                    end_event, phase, [phase], throw_error=False) is expected
 
 
 class TestEventServiceFindAllCalendarEvents:

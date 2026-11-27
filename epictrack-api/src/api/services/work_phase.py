@@ -12,18 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Work phases."""
-import datetime
 import functools
 from collections import defaultdict
-from datetime import timezone
+from datetime import date, datetime, timezone
 from operator import or_
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Optional, Union
 
 from api.insights.utils import get_days_left_subquery, get_days_taken_subquery, get_extension_days_subquery, get_suspended_days_subquery, get_total_days_subquery, get_work_subquery
 from api.models.ea_act import EAAct
 from api.models.phase_overage_responsibility import PhaseOverageResponsibility
 from api.models import PhaseCode, WorkPhase, PRIMARY_CATEGORIES, db
-from api.models.event_type import EventTypeEnum
+from api.models.event import Event
 from api.models.event_category import EventCategoryEnum
 from api.models.staff_work_role import StaffWorkRole
 from api.models.phase_code import PhaseVisibilityEnum
@@ -34,9 +33,22 @@ from api.models.work import Work, WorkStateEnum
 from api.models.phase_code import PhaseCode as Phase
 from api.models.work_type import WorkType, WorkTypeEnum
 from api.models.project import Project
+from api.workplan.core import template as tpl
+from api.workplan.core.days import Milestone, PhaseDays, PhaseFacts, phase_days
 
 from .common_service import event_compare_func
 from sqlalchemy import func, and_
+
+
+# v1 plans every phase's END the Day Zero way, so it counts that way too until S5 plans and counts by each phase's basis.
+V1_DAY_BASIS = tpl.DAY_ZERO
+
+
+def _actual_date(events: List[Event], position: EventPositionEnum) -> Optional[date]:
+    """The actual date of the first milestone at this position that has one."""
+    found = next(
+        (e for e in events if e.event_configuration.event_position == position and e.actual_date is not None), None)
+    return found.actual_date.date() if found else None
 
 
 class WorkPhaseService:  # pylint: disable=too-few-public-methods
@@ -156,39 +168,14 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         for index, work_phase in enumerate(work_phases, start=1):
             result_item = {"work_phase": work_phase}
             work_phase_events = cls._filter_sort_events(events, work_phase)
-            extension_events = [
-                e for e in work_phase_events
-                if e.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_EXTENSION.value
-            ]
-            extension_days = sum(e.number_of_days for e in extension_events)
-            if work_phase.number_of_days:
-                total_days = work_phase.number_of_days + extension_days
-            else:
-                total_days = (work_phase.end_date.date() - work_phase.start_date.date()).days
-
-            suspended_days = functools.reduce(
-                lambda x, y: x + y,
-                map(
-                    lambda x: (
-                        x.number_of_days
-                        if x.event_configuration.event_type_id
-                        == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
-                        and x.actual_date is not None
-                        else 0
-                    ),
-                    work_phase_events,
-                ),
-            )
-            # A suspension pauses the clock: the time allowed stays, and the days taken leave it out.
-            result_item["total_number_of_days"] = total_days
+            days = cls.phase_days(work_phase, work_phase_events)
+            result_item["total_number_of_days"] = days.time_allowed
 
             milestone_info = cls._get_milestone_information(work_phase_events)
             result_item = {**result_item, **milestone_info}
 
-            days_left = cls._get_days_left(suspended_days, total_days, work_phase, work_phase_events)
-            result_item["days_left"] = days_left
-            days_taken = cls._get_days_taken(work_phase, work_phase_events, suspended_days)
-            result_item["days_taken"] = days_taken if days_taken else 0
+            result_item["days_left"] = days.days_left
+            result_item["days_taken"] = days.days_taken
             result_item["is_last_phase"] = index == len(work_phases)
             result_item["overage_responsibility"] = PhaseOverageResponsibilityService.find_by_work_phase_id(int(work_phase.id), is_deleted=False)
             result.append(result_item)
@@ -306,62 +293,37 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return work_phase_events
 
     @classmethod
-    def _get_days_left(cls, suspended_days, total_days, work_phase, events):
-        if (
-            work_phase.work.current_work_phase_id == work_phase.id
-            and work_phase.is_completed is False
-        ):
-            days_passed = cls._get_days_taken(work_phase, events, suspended_days)
-            days_left = total_days - days_passed
+    def phase_days(cls, work_phase: WorkPhase, events: List[Event], end_date: datetime = None) -> Optional[PhaseDays]:
+        """Count the phase's days from its primary-category events, or as if it ended on end_date.
+
+        With end_date, it's None until the phase's START has an actual date.
+        """
+        start = _actual_date(events, EventPositionEnum.START)
+        is_current = work_phase.work.current_work_phase_id == work_phase.id and work_phase.is_completed is False
+        if end_date is not None:
+            if start is None:
+                return None
+            end = end_date.date()
+        elif work_phase.is_completed or all(e.actual_date is not None for e in events):
+            end = _actual_date(events, EventPositionEnum.END)
+            # A completed phase without both dates has taken no days.
+            start = start if end is not None else None
         else:
-            days_left = total_days
-        return days_left
-
-    @classmethod
-    def _get_days_taken(cls, work_phase, events, suspended_days=0):
-        all_events_completed = all(
-            e.actual_date is not None for e in events
+            start, end = start or work_phase.start_date.date(), None
+        planned_days = (
+            (work_phase.end_date.date() - work_phase.start_date.date()).days
+            if work_phase.start_date and work_phase.end_date else 0
         )
-        days_taken = 0
-        # Completed phase
-        if work_phase.is_completed or all_events_completed:
-            start_event = next(
-                (
-                    e
-                    for e in events
-                    if e.event_configuration.event_position.name == "START"
-                    and e.actual_date is not None
-                ),
-                None,
-            )
-            end_event = next(
-                (
-                    e
-                    for e in events
-                    if e.event_configuration.event_position.name == "END"
-                    and e.actual_date is not None
-                ),
-                None,
-            )
-            if start_event and end_event:
-                days_taken = (end_event.actual_date.date() - start_event.actual_date.date()).days
-            else:
-                days_taken = 0
-        # Current phase uncompleted phase
-        elif work_phase.work.current_work_phase_id == work_phase.id:
-            if work_phase.is_suspended:
-                days_taken = (
-                    work_phase.suspended_date.date() - work_phase.start_date.date()
-                ).days
-            else:
-                days_taken = (
-                    datetime.datetime.now(timezone.utc).date()
-                    - work_phase.start_date.date()
-                ).days
-                days_taken = max(0, days_taken)
-
-        days_taken = max(0, days_taken - suspended_days)
-        return days_taken
+        facts = PhaseFacts(
+            start=start, end=end, time_limit=work_phase.number_of_days, planned_days=planned_days,
+            day_basis=V1_DAY_BASIS, is_current=is_current,
+            suspended_since=work_phase.suspended_date.date() if work_phase.is_suspended else None,
+            milestones=[
+                Milestone(e.event_configuration.role, e.actual_date.date() if e.actual_date else None, e.number_of_days)
+                for e in events
+            ],
+        )
+        return phase_days(facts, datetime.now(timezone.utc).date())
 
     @classmethod
     def find_all_work_phases_with_additional_info(cls, staff_id: int = None, view_underage: bool = False) -> List[WorkPhase]:
