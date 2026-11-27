@@ -19,12 +19,12 @@ engine can run the work if an environment switches back.
 """
 import uuid
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Dict, List
 
 from api.models import (
-    ActionConfiguration, CalendarEvent, Event, EventConfiguration, OutcomeConfiguration, Work, WorkCalendarEvent,
-    WorkPhase, WorkTemplateVersion, db)
+    PRIMARY_CATEGORIES, ActionConfiguration, CalendarEvent, Event, EventConfiguration, OutcomeConfiguration, Work,
+    WorkCalendarEvent, WorkPhase, WorkTemplateVersion, db)
 from api.models.action_template import ActionTemplate
 from api.models.event_category import EventCategoryEnum
 from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
@@ -35,8 +35,11 @@ from api.models.template_phase import DayBasis, TimeLimitKind
 from api.schemas.request import ActionConfigurationBodyParameterSchema
 from api.schemas.response import ActionTemplateResponseSchema
 from api.workplan.core import template as tpl
+from api.workplan.core.change import Changeset
 from api.workplan.core.new_work import PlannedPhase
+from api.workplan.core.work_plan import PlanCalendarEntry, PlanMilestone, PlanPhase, WorkPlan
 from api.workplan.template_repository import Lineage, TemplateRepository
+from api.workplan.work_gateway import WorkGateway
 
 
 class WorkPlanRepository:  # pylint: disable=too-few-public-methods
@@ -50,6 +53,80 @@ class WorkPlanRepository:  # pylint: disable=too-few-public-methods
             writer.phase(phase, planned, order)
             for order, (phase, planned) in enumerate(zip(version.phases, plan), start=1)
         ]
+
+    @staticmethod
+    def load(work_id: int) -> WorkPlan:
+        """Return the work's plan: its active regular phases, their milestones, and the calendar entries."""
+        work = db.session.get(Work, work_id)
+        phases = WorkPhase.query.filter_by(
+            work_id=work_id, is_active=True, is_deleted=False, visibility=PhaseVisibilityEnum.REGULAR,
+        ).order_by(WorkPhase.sort_order).all()
+        plan_phases = {
+            phase.id: PlanPhase(
+                id=phase.id, time_limit=phase.number_of_days or 0, day_basis=phase.day_basis.value,
+                legislated=bool(phase.legislated), completed=bool(phase.is_completed),
+                start=phase.start_date.date(), end=phase.end_date.date(),
+            )
+            for phase in phases
+        }
+        events = Event.query.join(EventConfiguration).filter(
+            Event.work_id == work_id, Event.is_active.is_(True), Event.is_deleted.is_(False),
+            EventConfiguration.is_active.is_(True), EventConfiguration.work_phase_id.in_(list(plan_phases)),
+        ).order_by(Event.id).all()
+        primary = {category.value for category in PRIMARY_CATEGORIES}
+        by_configuration = {}
+        for event in events:
+            by_configuration.setdefault(event.event_configuration_id, event.id)
+        milestones = {}
+        for event in events:
+            configuration = event.event_configuration
+            milestones[event.id] = PlanMilestone(
+                id=event.id, phase_id=configuration.work_phase_id, position=configuration.event_position.value,
+                name=event.name, anticipated=(event.anticipated_date or event.actual_date).date(),
+                actual=event.actual_date.date() if event.actual_date else None,
+                number_of_days=event.number_of_days or 0, role=configuration.role,
+                anchor_id=by_configuration.get(configuration.anchor_configuration_id),
+                anchor_point=configuration.anchor_point.value, offset_days=configuration.offset_days,
+                in_cascade=configuration.event_category_id in primary,
+            )
+            plan_phases[configuration.work_phase_id].milestone_ids.append(event.id)
+        calendar = [
+            PlanCalendarEntry(
+                id=entry.id, anchor_id=link.source_event_id, anchor_point=link.event_configuration.anchor_point.value,
+                offset_days=link.event_configuration.offset_days, anticipated=entry.anticipated_date.date(),
+            )
+            for link, entry in db.session.query(WorkCalendarEvent, CalendarEvent).join(
+                CalendarEvent, CalendarEvent.id == WorkCalendarEvent.calendar_event_id).filter(
+                WorkCalendarEvent.source_event_id.in_(list(milestones)), WorkCalendarEvent.is_active.is_(True),
+                CalendarEvent.is_active.is_(True)).order_by(CalendarEvent.id)
+        ]
+        return WorkPlan(
+            work_id=work_id, current_phase_id=work.current_work_phase_id, phases=list(plan_phases.values()),
+            milestones=milestones, calendar=calendar, work_start=work.start_date.date(),
+        )
+
+    @staticmethod
+    def save(work_id: int, changes: Changeset) -> None:
+        """Write what a change set or moved, keeping each stored time of day."""
+        events = {event.id: event for event in Event.query.filter(Event.id.in_(list(changes.milestones)))}
+        for event_id, change in changes.milestones.items():
+            event = events[event_id]
+            if "anticipated" in change:
+                event.anticipated_date = _on(change["anticipated"], event.anticipated_date or event.actual_date)
+            if "actual" in change:
+                event.actual_date = _on(change["actual"], event.actual_date or event.anticipated_date)
+        phases = {phase.id: phase for phase in WorkPhase.query.filter(WorkPhase.id.in_(list(changes.phases)))}
+        for phase_id, change in changes.phases.items():
+            phase = phases[phase_id]
+            if "start" in change:
+                phase.start_date = _on(change["start"], phase.start_date)
+            if "end" in change:
+                phase.end_date = _on(change["end"], phase.end_date)
+            if "completed" in change:
+                phase.is_completed = change["completed"]
+        for entry in CalendarEvent.query.filter(CalendarEvent.id.in_(list(changes.calendar))):
+            entry.anticipated_date = _on(changes.calendar[entry.id], entry.anticipated_date)
+        WorkGateway.apply(work_id, changes)
 
 
 class _Writer:  # pylint: disable=too-few-public-methods
@@ -171,3 +248,8 @@ def _legacy_start_at(event: tpl.Event) -> str:
     if event.anchor_point == tpl.END:
         return f"number_of_days{event.offset_days:+d}"
     return str(event.offset_days)
+
+
+def _on(day: date, like: datetime) -> datetime:
+    """The day, at the stored value's time of day."""
+    return like + timedelta(days=(day - like.date()).days)

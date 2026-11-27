@@ -13,7 +13,7 @@
 # limitations under the License.
 """A phase's day counts: the one definition every screen and check uses."""
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, timedelta
 from typing import List, NamedTuple, Optional
 
 from . import template as tpl
@@ -87,6 +87,12 @@ def phase_days(facts: PhaseFacts, today: date) -> PhaseDays:
     days_taken = max(0, elapsed - suspended_days)
     days_left = time_allowed - days_taken if facts.is_current else time_allowed
     return PhaseDays(time_allowed, extension_days, suspended_days, days_taken, days_left)
+
+
+def deadline(start: date, time_limit: int, day_basis: str, milestones: List[Milestone]) -> date:
+    """A legislated phase's END: its start plus the time allowed and the days suspended, less Day One's start day."""
+    days = time_limit + _dated_days(milestones, TIME_LIMIT_EXTENSION) + _dated_days(milestones, TIME_LIMIT_RESUMPTION)
+    return start + timedelta(days=days - (1 if day_basis == tpl.DAY_ONE else 0))
 
 
 def _dated_days(milestones: List[Milestone], role: str) -> int:
